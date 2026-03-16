@@ -60,16 +60,18 @@ const WorkoutChildParamSchema = z.object({
   id: z.string().uuid().describe('Child resource UUID'),
 })
 
+// Serialize a session row (with or without joined client) to match
+// SessionSummaryResponseSchema — converts Date objects to ISO strings.
 function serializeSession(s: any): any {
   return {
     ...s,
-    client:    s.client
+    client:       s.client
       ? { id: s.client.id, name: s.client.name, photoUrl: s.client.photoUrl ?? null }
       : null,
-    startTime: s.startTime instanceof Date ? s.startTime.toISOString() : (s.startTime ?? null),
-    endTime:   s.endTime   instanceof Date ? s.endTime.toISOString()   : (s.endTime   ?? null),
-    createdAt: s.createdAt instanceof Date ? s.createdAt.toISOString() : s.createdAt,
-    updatedAt: s.updatedAt instanceof Date ? s.updatedAt.toISOString() : s.updatedAt,
+    startTime:    s.startTime instanceof Date  ? s.startTime.toISOString()  : (s.startTime  ?? null),
+    endTime:      s.endTime   instanceof Date  ? s.endTime.toISOString()    : (s.endTime    ?? null),
+    createdAt:    s.createdAt instanceof Date  ? s.createdAt.toISOString()  : s.createdAt,
+    updatedAt:    s.updatedAt instanceof Date  ? s.updatedAt.toISOString()  : s.updatedAt,
   }
 }
 
@@ -105,10 +107,7 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
         orderBy: desc(sessions.date),
       })
 
-      return reply.send(result)
-    } catch (error) {
-      ;(app.log as any).error(error)
-      return reply.status(500).send({ error: 'Failed to fetch sessions' })
+      return reply.send(result.map(serializeSession))
     }
   })
 
@@ -165,9 +164,6 @@ This is the primary payload for the active workout view — loaded once when the
       }
 
       return reply.send(serializeSession(result))
-    } catch (error) {
-      ;(app.log as any).error(error)
-      return reply.status(500).send({ error: 'Failed to fetch session' })
     }
   })
 
@@ -200,22 +196,24 @@ This is the primary payload for the active workout view — loaded once when the
         .values({
           ...body,
           templateId: body.templateId ?? null,
-          trainerId: request.trainer.trainerId,
-          status: 'planned',
+          trainerId:  request.trainer.trainerId,
+          status:     'planned',
+          startTime:  body.startTime ? new Date(body.startTime) : null,
+          endTime:    body.endTime   ? new Date(body.endTime)   : null,
         })
         .returning()
 
+      if (!newSession) {
+        return reply.status(500).send({ error: 'Failed to create session' })
+      }
+
+      // Fetch the client for the response (schema requires it)
       const client = await db.query.clients.findFirst({
         where: eq(clients.id, newSession.clientId),
         columns: { id: true, name: true, photoUrl: true },
       }).catch(() => null)
-        
-        return reply.status(201).send(serializeSession({ ...newSession, client }))
 
-      // TODO Phase 3: if templateId provided, copy template workouts
-      // and template exercises into this session automatically
-
-      return reply.status(201).send(newSession)
+      return reply.status(201).send(serializeSession({ ...newSession, client }))
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to create session' })
@@ -247,7 +245,12 @@ This is the primary payload for the active workout view — loaded once when the
     try {
       const [updated] = await db
         .update(sessions)
-        .set({ ...body, updatedAt: new Date() })
+        .set({
+          ...body,
+          startTime:  body.startTime ? new Date(body.startTime) : undefined,
+          endTime:    body.endTime   ? new Date(body.endTime)   : undefined,
+          updatedAt:  new Date(),
+        })
         .where(
           and(
             eq(sessions.id, id),
@@ -264,7 +267,7 @@ This is the primary payload for the active workout view — loaded once when the
         where: eq(clients.id, updated.clientId),
         columns: { id: true, name: true, photoUrl: true },
       }).catch(() => null)
-      
+
       return reply.send(serializeSession({ ...updated, client }))
     } catch (error) {
       ;(app.log as any).error(error)

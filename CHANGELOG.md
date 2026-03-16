@@ -1,0 +1,188 @@
+# Changelog
+
+All notable changes to TrainerApp are documented here.
+Versions follow [Semantic Versioning](https://semver.org/).
+
+---
+
+## [v1.5.0] — Session Logging
+
+### Added
+- `SessionLauncherPage` (`/session/new`) — blank start or template picker, client selector for trainer mode
+- `LiveSessionPage` (`/session/:id`) — active workout screen with horizontal/vertical layout toggle
+- `SessionSummaryPage` (`/session/:id/summary`) — post-session stats, subjective scores, nav home
+- `SetRow` components — three accordion states: past (color-coded vs target), active (large inputs), future (placeholder)
+- `ExerciseBlock` — exercise with full set accordion. Defaults: 3 sets, 10/8/6 reps for blank sessions
+- `WorkoutBlock` — workout block container, supports both layout modes
+- `RestTimerBanner` — fixed top banner during rest. Depleting bar, number flip per tick, amber ≤10s, red pulse ≤3s, Skip button
+- `EndSessionModal` — 3 sliders (energy, mobility, stress 1–10) + optional session note
+- `useRestTimer` hook — countdown with `rest_tick` / `rest_complete` UX events, haptic vibration on mobile
+- `lib/queries/sessions.ts` — full session lifecycle query hooks
+- `lib/queries/templates.ts` — template list and detail hooks
+- `sessionLayout` preference (`horizontal` | `vertical`) — stored on trainer record, toggle in Preferences screen
+- Session layout toggle in Preferences → Dashboard section
+- `db:push` script — `pnpm db:push` for development schema changes without migration files
+- `release.sh` — one-command git commit + tag + push
+- Storybook stories for all session components
+
+### Fixed
+- `sessions.ts` — `POST /sessions` and `PATCH /sessions/:id` now serialize `Date` objects to ISO strings and include `client` object in response
+- `sessions.ts` — `startTime` / `endTime` properly converted to `Date` before Drizzle insert/update
+- `media.ts` — null guard added after `.returning()` on upload
+- `exercises.test.ts` — `makeExercise` factory now uses `new Date()` for `createdAt`/`updatedAt`
+- `PreferencesPage.tsx` — missing `<div>` wrapper around widget order section causing JSX parse error
+
+---
+
+## [v1.4.5] — Preferences Screen
+
+### Added
+- `PreferencesPage` (`/preferences`) — Profile, Training Mode, Dashboard, Alerts sections
+- CTA label picker — 8 options, saves immediately on select
+- Widget order — draggable list with hamburger handle, live reorder
+- Session layout toggle (horizontal / vertical)
+- Alert color scheme picker — amber, red, blue, green
+- Alert tone picker — clinical, motivating, firm
+- `useReorderList` hook — pointer-event drag-to-reorder, no external library
+- `alertColorScheme` and `alertTone` preference fields on trainer record
+- Preferences link in sidebar user badge area (desktop)
+- Gear icon in mobile bottom nav
+
+### Fixed
+- `auth.ts` — `preHandler: [authenticate]` added to `POST /auth/onboard` and `PATCH /auth/me`
+
+---
+
+## [v1.4.4] — UX Event System
+
+### Added
+- `lib/ux-events.ts` — 33-type `UXEventType` taxonomy, animation engine, side-effect registry, contextual guidance rules
+- `hooks/useUXEvent.ts` — `fire()` hook, `useUXEventRef()` helper
+- New keyframes: `flash-success`, `flash-warning`, `collapse-out`, `celebrate`, `field-confirm`, `pulse-sharp`, `lift`, `slide-out-left/right`
+- Storybook — `UXEvents.stories.tsx` with interactive demos
+
+### Wired
+- `AddClientCard` → `single_press`
+- `ClientDrawer` → `create` / `update` on success
+- `ClientProfilePage` GoalRow → `achieve`
+- `DashboardPage` → `page_enter` on mount
+
+---
+
+## [v1.4.3] — Storybook Pass
+
+### Added
+- Stories: `SilhouetteAvatar`, `ClientCard`, `AddClientCard`
+- Stories: all 5 dashboard widgets, full trainer and athlete stacks
+- Stories: `Interactions` — all animation classes and keyframes
+
+---
+
+## [v1.4.2] — Dashboard
+
+### Added
+- `DashboardPage` — branches on `trainerMode`, time-of-day greeting, staggered widget animation
+- `AtRiskWidget` — dismissable alert, 4 color schemes, 3 message tones
+- `SelfTrainingWidget` — self-client tile, CTA from preferences
+- `ActiveClientsWidget` — count with progression state bars
+- `GoalsWidget` — active goal count, achievements this month
+- `RecentSessionsWidget` — Phase 5 placeholder skeleton
+- `WidgetRenderer` — maps `WidgetId` → component
+
+---
+
+## [v1.4.1] — Preference Schema Patch
+
+### Added
+- Trainer schema: `cta_label`, `alerts_enabled`, `widget_progression`
+- `lib/widgets.ts` — widget registry, parse/serialize, default orders per mode, `CTA_LABEL_OPTIONS`
+- `hooks/usePreferences.ts` — clean preference access hook with `updatePreference()` and `updateWidgetOrder()`
+
+---
+
+## [v1.4.0] — Phase 4: Client Management + Onboarding
+
+### Added
+- `OnboardingPage` — mode selection (athlete / trainer), fires `POST /auth/onboard`
+- `OnboardingGate` — redirects unonboarded trainers to `/onboard`
+- `ClientsPage` — roster with self-client tile, trainer/athlete mode branching, Add Client card
+- `ClientProfilePage` — 3 tabs (Overview, Timeline, Baseline) with incomplete indicators
+- Goal list — ordered, achievable, deletable
+- Snapshot history with delta vs baseline
+- `SilhouetteAvatar`, `ClientCard`, `AddClientCard` with pulsing `+` badge
+- `ClientDrawer` — context-aware add/edit
+- `lib/queries/clients.ts` — full client, goal, snapshot query hooks
+- `lib/interactions.ts` — animation config in one place
+- `/clients/:id` route
+
+---
+
+## [v1.3.1] — Phase 3D: Usage Metrics + Onboarding Schema
+
+### Added
+- Trainer schema: `trainer_mode`, `reports_sent_count`, `last_active_at`
+- Client schema: `last_active_at`
+- New table: `trainer_usage_monthly` — billing meter
+- `TrainerModeEnum` (athlete | trainer)
+- `POST /auth/onboard` — sets `trainerMode` and `onboardedAt`
+- `PATCH /auth/me` — updates trainer profile and preferences
+
+---
+
+## [v1.3.0] — Phase 3C: Client Goals, Snapshots, Self-Training
+
+### Added
+- Client schema: `primaryFocus`, `secondaryFocus`, `progressionState`, `startDate`, `caloricGoal`, `isSelf`
+- New tables: `client_goals`, `client_snapshots`
+- Session schema: `energyLevel`, `mobilityFeel`, `stressLevel`, `sessionNotes`
+- Routes: full CRUD for client goals and snapshots
+- `GET /clients/self` — returns trainer's self-client
+- `isSelf` guard — blocks deletion of self-client
+- Auto-creates self-client on trainer registration
+
+---
+
+## [v1.2.1] — Phase 3.5: Storybook Component Library
+
+### Added
+- Storybook setup with all UI components: Button, Input, Select, TextArea, Badge, Spinner, Modal, Drawer, ConfirmDialog, EmptyState
+
+---
+
+## [v1.2.0] — Phase 3: Exercise Library
+
+### Added
+- Exercise library UI with search, filter by body part/type/equipment
+- Cloudinary media upload (images and video)
+- Body parts seeding
+- Exercise detail drawer
+
+---
+
+## [v1.1.1] — Phase 2b: Unit Tests
+
+### Added
+- 120 Vitest unit tests across auth service, middleware, and all routes
+
+---
+
+## [v1.1.0] — Phase 2: Authentication
+
+### Added
+- JWT access tokens + httpOnly refresh token cookies
+- argon2 password hashing
+- `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`
+- `authenticate` middleware
+- Device ID tracking
+
+---
+
+## [v1.0.0] — Phase 1: Scaffold
+
+### Added
+- pnpm monorepo: `apps/frontend`, `apps/backend`, `packages/shared`
+- Fastify + Drizzle ORM + PostgreSQL backend
+- React + Vite + Tailwind + TanStack Query frontend
+- Full DB schema: trainers, clients, exercises, sessions, workouts, sets, templates, sync log
+- Swagger/OpenAPI documentation at `/documentation`
+- GitHub Actions CI: typecheck, lint, test, build

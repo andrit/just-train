@@ -1,24 +1,24 @@
-# Trainer App
+# TrainerApp
 
-A mobile-first PWA for professional fitness trainers to plan sessions, track client performance, and build an exercise library.
+A mobile-first PWA for fitness trainers and athletes to plan sessions, track performance, and build an exercise library.
 
 ---
 
 ## Tech Stack
 
-| Layer       | Technology                                      |
-|-------------|------------------------------------------------|
-| Frontend    | React 18, Vite, TypeScript, Tailwind CSS        |
-| State       | TanStack Query (server), Zustand (client)       |
-| PWA         | vite-plugin-pwa, Workbox (Phase 6)              |
-| Offline     | IndexedDB (Phase 6)                             |
-| Backend     | Fastify, TypeScript                             |
-| ORM         | Drizzle + drizzle-kit                           |
-| Validation  | Zod (shared between frontend + backend)         |
-| Auth        | JWT access tokens + argon2 + httpOnly cookies   |
-| Database    | PostgreSQL                                      |
-| Media       | Cloudinary (Phase 3)                            |
-| Hosting     | Railway (backend + DB), Vercel (frontend)       |
+| Layer    | Technology                                    |
+|----------|-----------------------------------------------|
+| Frontend | React 18, Vite, TypeScript, Tailwind CSS      |
+| State    | TanStack Query (server), Zustand (client)     |
+| PWA      | vite-plugin-pwa, Workbox (Phase 8)            |
+| Offline  | IndexedDB (Phase 8)                           |
+| Backend  | Fastify, TypeScript                           |
+| ORM      | Drizzle + drizzle-kit                         |
+| Validation | Zod (shared between frontend + backend)     |
+| Auth     | JWT access tokens + argon2 + httpOnly cookies |
+| Database | PostgreSQL                                    |
+| Media    | Cloudinary                                    |
+| Hosting  | Railway (backend + DB), Vercel (frontend)     |
 
 ---
 
@@ -26,41 +26,32 @@ A mobile-first PWA for professional fitness trainers to plan sessions, track cli
 
 ```
 trainer-app/
-├── packages/
-│   └── shared/              # Enums, Zod schemas, TypeScript types, utilities
-│       └── src/
-│           ├── enums/       # All Zod enums (WorkoutTypeEnum, etc.)
-│           ├── schemas/     # Input schemas + response schemas
-│           ├── types/       # TypeScript interfaces
-│           └── utils/       # weight.ts (convertWeight, formatWeight)
-├── apps/
-│   ├── backend/             # Fastify API
-│   │   └── src/
-│   │       ├── db/          # Drizzle client + schema files
-│   │       ├── middleware/  # authenticate, requireRole
-│   │       ├── routes/      # auth, clients, exercises, sessions, templates
-│   │       └── services/    # auth.service.ts (passwords, JWTs, tokens)
-│   └── frontend/            # React PWA
-│       └── src/
-│           ├── components/  # auth/AuthProvider, layout/Layout
-│           ├── lib/         # api.ts (HTTP client with auto-refresh)
-│           ├── pages/       # Login, Dashboard, Clients, Exercises, Sessions, Templates
-│           └── store/       # authStore.ts, sessionStore.ts
-└── DEFERRED_ITEMS.md        # Items deferred per phase — reviewed each phase
+├── packages/shared/          # Enums, Zod schemas, TypeScript types, utilities
+├── apps/backend/             # Fastify API
+│   └── src/
+│       ├── db/               # Drizzle client + schema files
+│       ├── middleware/       # authenticate, requireRole
+│       ├── routes/           # auth, clients, exercises, sessions, templates
+│       └── services/         # auth.service.ts
+└── apps/frontend/            # React PWA
+    └── src/
+        ├── components/       # UI components, dashboard widgets, session components
+        ├── hooks/            # usePreferences, useUXEvent, useRestTimer, useReorderList
+        ├── lib/              # api.ts, queries/, interactions.ts, ux-events.ts, widgets.ts
+        ├── pages/            # All route pages
+        └── store/            # authStore.ts
 ```
 
 ---
 
 ## Terminology
 
-| Term         | Meaning                                                  |
-|--------------|----------------------------------------------------------|
-| **Session**  | A full training event for a client on a date             |
-| **Workout**  | A typed block within a session (cardio, resistance, etc.)|
-| **Exercise** | A movement in the library (squat, run, stretch)          |
-| **Set**      | One recorded effort — the atomic tracking unit           |
-
-Default session order: **Cardio → Stretching → Calisthenics/Resistance → Cooldown** (editable)
+| Term        | Meaning                                                   |
+|-------------|-----------------------------------------------------------|
+| **Session** | A full training event for a client on a date              |
+| **Workout** | A typed block within a session (cardio, resistance, etc.) |
+| **Exercise**| A movement in the library                                 |
+| **Set**     | One recorded effort — the atomic tracking unit            |
 
 ---
 
@@ -74,101 +65,125 @@ Default session order: **Cardio → Stretching → Calisthenics/Resistance → C
 ### Install
 
 ```bash
-git clone <repo>
-cd trainer-app
 pnpm install
+pnpm approve-builds    # approve native builds (argon2, esbuild)
+pnpm install           # re-run after approving
 ```
 
 ### Environment
 
 ```bash
-# Backend
 cp apps/backend/.env.example apps/backend/.env
 # Fill in DATABASE_URL, JWT_SECRET, COOKIE_SECRET
 
-# Generate JWT_SECRET:
+# Generate secrets:
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-
-# Generate COOKIE_SECRET:
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### Database
 
+**Development (recommended):**
 ```bash
 cd apps/backend
-pnpm db:generate   # Generate migrations from schema
-pnpm db:migrate    # Apply migrations to database
-pnpm db:studio     # Open Drizzle Studio (visual DB browser)
+pnpm db:push      # apply schema directly — no migration files needed
 ```
+
+**Production / new installs:**
+```bash
+cd apps/backend
+pnpm db:generate  # generate migration SQL from schema
+pnpm db:migrate   # apply migrations to database
+```
+
+> **Note:** If you see "column X does not exist" errors after adding schema changes,
+> run `dropdb trainer_app && createdb trainer_app` then `pnpm db:migrate` to apply
+> the full schema to a fresh database. This is safe during development — no real data
+> is lost.
 
 ### Run
 
 ```bash
-# From root — runs both frontend and backend
+# From monorepo root — runs both frontend and backend
 pnpm dev
 
-# Or individually:
-pnpm --filter backend dev    # http://localhost:3001
-pnpm --filter frontend dev   # http://localhost:5173
+# Backend: http://localhost:3001
+# Frontend: http://localhost:5173
+# API Docs: http://localhost:3001/documentation
 ```
 
-### API Documentation
-
-Swagger UI: **http://localhost:3001/documentation**
-
-Click **Authorize 🔒**, enter your JWT from `POST /api/v1/auth/login` to try protected endpoints.
-
 ---
 
-## Authentication
+## Git Workflow
 
-Phase 2 implements full JWT auth with refresh token rotation.
+### First-time setup
+```bash
+git init
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git add .
+git commit -m "feat: TrainerApp v1.5.0 — session logging"
+git tag v1.5.0
+git push -u origin main --tags
+```
 
-| Item                  | Detail                                                     |
-|-----------------------|------------------------------------------------------------|
-| Password hashing      | argon2id (OWASP recommended)                               |
-| Access token          | JWT, 15 min TTL, stored in Zustand memory only             |
-| Refresh token         | Opaque random string, 7 days TTL, httpOnly cookie          |
-| Token storage         | Access: memory only. Refresh: httpOnly cookie (no JS access)|
-| Token rotation        | Refresh token replaced on every use                        |
-| Rate limiting         | 10 login attempts per 15 min per IP                        |
-| Role guard            | `requireRole('admin')` middleware ready for admin routes   |
+### Updating to a new version
+```bash
+# 1. Unzip new version over the existing repo folder
+unzip -o TrainerApp-v1.5.1.zip -d .
 
-See `DEFERRED_ITEMS.md` for items like email verification and password reset.
+# 2. Apply any database schema changes
+cd apps/backend && pnpm db:push && cd ../..
 
----
+# 3. Commit and push
+chmod +x release.sh
+./release.sh v1.5.1 "feat: UX event side effects"
+```
 
-## Build Phases
-
-| Phase | Status | Description                                          |
-|-------|--------|------------------------------------------------------|
-| 1a    | ✅ Done | Monorepo scaffold, DB schema, API routes, Swagger    |
-| 2     | ✅ Done | Auth — JWT, argon2, refresh tokens, rate limiting    |
-| 2b    | ✅ Done | Unit tests — auth service, middleware, routes         |
-| 3     | ✅ Done | Exercise Library UI — CRUD, media uploads, Cloudinary |
-| 3.5   | ✅ Done | Storybook — component library, hooks, cn(), a11y      |
-| 3     | 🔜     | Exercise Library UI — CRUD + Cloudinary uploads      |
-| 4     | 🔜     | Client Management UI                                 |
-| 5     | 🔜     | Session tracking + set logging UI                    |
-| 6     | 🔜     | Offline sync — IndexedDB + Workbox background sync   |
+### release.sh
+One command to commit, tag, and push:
+```bash
+./release.sh v1.5.1 "feat: description"
+```
 
 ---
 
 ## CI / CD
 
-GitHub Actions runs on every PR:
+GitHub Actions runs on every push to `main`:
 1. `pnpm typecheck` — TypeScript across all packages
 2. `pnpm lint` — ESLint
-3. `pnpm build` — full build verification
+3. `pnpm --filter backend test` — Vitest unit tests
+4. `pnpm build` — full build verification
 
 See `.github/workflows/ci.yml`.
 
 ---
 
-## Testing
+## Build Phases
 
-See **[TESTING.md](./TESTING.md)** for the full guide.
+| Version | Description                                         | Status  |
+|---------|-----------------------------------------------------|---------|
+| v1.0.0  | Scaffold, DB schema, Swagger                        | ✅ Done |
+| v1.1.0  | Auth — JWT, argon2, refresh tokens                  | ✅ Done |
+| v1.1.1  | Unit tests — 120 tests                              | ✅ Done |
+| v1.2.0  | Exercise Library UI + Cloudinary                    | ✅ Done |
+| v1.2.1  | Storybook component library                         | ✅ Done |
+| v1.3.0  | Client goals, snapshots, self-training schema       | ✅ Done |
+| v1.3.1  | Usage metrics, trainerMode, onboarding schema       | ✅ Done |
+| v1.4.0  | Client management UI, onboarding screen             | ✅ Done |
+| v1.4.1  | Preference schema (ctaLabel, widgets, alerts)       | ✅ Done |
+| v1.4.2  | Dashboard with widget system                        | ✅ Done |
+| v1.4.3  | Storybook — Phase 4 components                      | ✅ Done |
+| v1.4.4  | UX event system                                     | ✅ Done |
+| v1.4.5  | Preferences screen                                  | ✅ Done |
+| v1.5.0  | Session logging — launcher, live session, summary   | ✅ Done |
+| v1.5.1  | Session history + client timeline                   | 🔜 Next |
+| v1.6.0  | KPI dashboard                                       | 🔜      |
+| v1.7.0  | Monthly reports (Resend email)                      | 🔜      |
+| v1.8.0  | Offline sync — IndexedDB + Workbox                  | 🔜      |
+
+---
+
+## Testing
 
 ```bash
 pnpm --filter backend test           # run once
@@ -176,8 +191,4 @@ pnpm --filter backend test:watch     # watch mode
 pnpm --filter backend test:coverage  # with coverage
 ```
 
-**Test files:** `apps/backend/src/__tests__/`
-- `services/auth.service.test.ts` — pure function unit tests (argon2, JWT, tokens)
-- `middleware/authenticate.test.ts` — middleware isolation tests
-- `routes/auth.test.ts` — auth endpoint integration tests
-- `routes/clients.test.ts` — client CRUD + auth/ownership pattern tests
+See `DEFERRED_ITEMS.md` for deferred features per phase.

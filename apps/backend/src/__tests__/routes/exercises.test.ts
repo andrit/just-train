@@ -78,8 +78,8 @@ function makeExercise(overrides: Record<string, unknown> = {}) {
     instructions: null,
     bodyPart:    { id: TEST_UNKNOWN_ID, name: 'legs', displayOrder: 4 },
     media:       [] as never[],
-    createdAt:   new Date().toISOString(),
-    updatedAt:   new Date().toISOString(),
+    createdAt:   new Date(),
+    updatedAt:   new Date(),
     ...overrides,
   }
 }

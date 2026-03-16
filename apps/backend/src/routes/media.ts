@@ -138,6 +138,8 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
         })
         .returning()
 
+      if (!media) return reply.status(500).send({ error: 'Upload failed' })
+
       return reply.status(201).send({
         ...media,
         createdAt: media.createdAt.toISOString(),

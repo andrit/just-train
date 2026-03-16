@@ -490,6 +490,9 @@ export default function PreferencesPage(): React.JSX.Element {
               </div>
             </div>
           </div>
+
+          {/* Widget order */}
+          <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-medium text-gray-200">Widget order</p>
               <p className="text-xs text-gray-600">Drag to reorder</p>
@@ -525,7 +528,7 @@ export default function PreferencesPage(): React.JSX.Element {
             <p className="text-xs text-gray-700 mt-3">
               Greyed-out widgets aren't in your current order. They'll become available in future updates.
             </p>
-         
+          </div>
         </Section>
 
         {/* ── Alerts ───────────────────────────────────────────────────────── */}

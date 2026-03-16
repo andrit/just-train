@@ -146,7 +146,7 @@ export function ClientForm({
           <Select
             label="Progression state"
             value={progressionState}
-            onChange={(e) => setProgressionState(e.target.value)}
+            onChange={(e) => setProgressionState(e.target.value as 'assessment' | 'programming' | 'maintenance')}
             options={PROGRESSION_OPTIONS}
             required
           />

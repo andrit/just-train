@@ -41,7 +41,7 @@ function DrawerDemo({
 // ── Stories ───────────────────────────────────────────────────────────────────
 
 export const Default: Story = {
-  args: {},
+  args: {} as any,
   render: () => (
     <DrawerDemo title="Exercise Detail">
       <p className="text-gray-400 text-sm">Drawer content goes here.</p>
@@ -51,7 +51,7 @@ export const Default: Story = {
 
 /** Mimics the real ExerciseDetail drawer. */
 export const ExerciseDetailContent: Story = {
-  args: {},
+  args: {} as any,
   render: () => (
     <DrawerDemo title="Exercise Detail">
       <div className="space-y-6">
@@ -103,7 +103,7 @@ export const ExerciseDetailContent: Story = {
 }
 
 export const InteractionTest: Story = {
-  args: {},
+  args: {} as any,
   render: () => (
     <DrawerDemo title="Test Drawer">
       <p data-testid="drawer-content" className="text-gray-400 text-sm">

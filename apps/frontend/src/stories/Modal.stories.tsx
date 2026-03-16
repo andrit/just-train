@@ -60,7 +60,7 @@ function ModalDemo({
 // ── Stories ───────────────────────────────────────────────────────────────────
 
 export const Default: Story = {
-  args: {},
+  args: {} as any,
   render: () => (
     <ModalDemo title="Create Exercise">
       <p className="text-gray-400 text-sm">Modal content goes here.</p>
@@ -69,7 +69,7 @@ export const Default: Story = {
 }
 
 export const Small: Story = {
-  args: {},
+  args: {} as any,
   render: () => (
     <ModalDemo title="Confirm Action" size="sm">
       <p className="text-gray-400 text-sm text-center">
@@ -80,7 +80,7 @@ export const Small: Story = {
 }
 
 export const Large: Story = {
-  args: {},
+  args: {} as any,
   render: () => (
     <ModalDemo title="Exercise Details" size="lg">
       <p className="text-gray-400 text-sm">
@@ -92,7 +92,7 @@ export const Large: Story = {
 
 /** Realistic exercise creation form inside a modal. */
 export const ExerciseForm: Story = {
-  args: {},
+  args: {} as any,
   render: () => (
     <ModalDemo title="New Exercise" size="md">
       <div className="space-y-4">
@@ -123,7 +123,7 @@ export const ExerciseForm: Story = {
 
 /** Play function tests that the modal opens and closes correctly. */
 export const InteractionTest: Story = {
-  args: {},
+  args: {} as any,
   render: () => (
     <ModalDemo title="Interaction Test">
       <p className="text-gray-400 text-sm" data-testid="modal-content">

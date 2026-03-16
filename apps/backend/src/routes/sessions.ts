@@ -205,7 +205,6 @@ This is the primary payload for the active workout view — loaded once when the
           trainerId:  request.trainer.trainerId,
           status:     'planned',
           startTime:  body.startTime ? new Date(body.startTime) : null,
-          endTime:    body.endTime   ? new Date(body.endTime)   : null,
         })
         .returning()
 

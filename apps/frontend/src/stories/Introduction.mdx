@@ -1,0 +1,91 @@
+import { Meta } from '@storybook/blocks'
+
+<Meta title="Introduction" />
+
+# Trainer App — Component Library
+
+This is the living documentation for every UI primitive in the Trainer App.
+
+Components are built against these principles:
+
+- **`forwardRef` throughout** — every form control forwards its ref so React Hook Form
+  and test utilities can reach the underlying DOM element
+- **`useId` for label associations** — every Input, TextArea, and Select generates a
+  stable, SSR-safe ID pair linking `<label>` to `<input>` and `<p role="alert">` to
+  `aria-describedby`
+- **`cn()` for class merging** — `clsx` + `tailwind-merge` means callers can pass a
+  `className` prop without worrying about Tailwind class conflicts
+- **Accessibility first** — Modals and Drawers use `role="dialog"`, `aria-modal`,
+  focus trapping (`useFocusTrap`), scroll locking (`useBodyScrollLock`), and keyboard
+  dismiss (`useKeyDown`). Spinners announce themselves via `role="status"`. Errors
+  use `role="alert"` for live-region announcements.
+- **TypeScript strict** — every prop interface is exported from its component file.
+  Types are co-located, not in a separate `types/` folder.
+
+---
+
+## Color tokens
+
+| Token | Hex | Usage |
+|---|---|---|
+| `brand-primary` | `#1a1a2e` | Page background |
+| `brand-secondary` | `#16213e` | Card backgrounds, modal panels |
+| `brand-accent` | `#0f3460` | Sidebar, nav panels |
+| `brand-highlight` | `#e94560` | CTAs, active states |
+| `surface` | `#1e2235` | Card surface |
+| `surface-raised` | `#252a40` | Hover states, elevated cards |
+| `surface-border` | `#2e3455` | Borders between surfaces |
+
+---
+
+## Typography
+
+| Family | Variable | Used for |
+|---|---|---|
+| Barlow Condensed | `font-display` | Headings, nav labels, page titles |
+| DM Sans | `font-body` / `font-sans` | Body text, form labels, prose |
+| DM Mono | `font-mono` | Numbers, weights, reps, stats |
+
+---
+
+## Hooks
+
+| Hook | Purpose |
+|---|---|
+| `useKeyDown(key, handler, enabled)` | Attach a keyboard listener while a condition is true |
+| `useBodyScrollLock(locked)` | Lock `document.body` scroll while an overlay is open |
+| `useFocusTrap(ref, active)` | Cycle Tab focus within a container; restore focus on close |
+
+---
+
+## Phase 4 Components
+
+### Clients
+Components for the client roster and profile screens.
+
+| Component | Stories | Notes |
+|---|---|---|
+| `SilhouetteAvatar` | Size variants, photo vs placeholder, "Me" badge | Used in cards, profile header, widgets |
+| `ClientCard` | Normal, assessment, at-risk, no activity, all states | At-risk gets amber left border |
+| `AddClientCard` | Default, in-list context | Pulsing `+` badge — disable by removing `animate-fab-pulse` |
+
+### Dashboard Widgets
+Composable tiles ordered by `trainer.widgetProgression`.
+
+| Widget | Stories | Mode |
+|---|---|---|
+| `AtRiskWidget` | 4 color schemes × 3 tones, empty, single | Trainer only |
+| `SelfTrainingWidget` | All CTA labels, with/without goal | Both |
+| `ActiveClientsWidget` | 6 clients, empty, one per state | Trainer only |
+| `GoalsWidget` | With achievements, empty | Both |
+| `RecentSessionsWidget` | Phase 5 placeholder | Both |
+
+### Design System / Interactions
+The `Interactions` story is the canonical reference for all animation classes.
+Edit `src/lib/interactions.ts` to change values globally.
+
+| Story | What it shows |
+|---|---|
+| `Button / All interaction classes` | Every class in `interactions.ts` with live preview |
+| `Animations / All keyframes` | Every keyframe from `tailwind.config.js` |
+| `Animations / Staggered list entry` | The 50ms stagger pattern used on dashboard and lists |

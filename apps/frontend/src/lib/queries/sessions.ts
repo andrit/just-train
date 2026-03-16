@@ -1,0 +1,261 @@
+// ------------------------------------------------------------
+// lib/queries/sessions.ts — TanStack Query hooks for session data
+//
+// CACHE KEYS:
+//   ['sessions']                    → session list (filtered)
+//   ['sessions', id]                → single session detail (full tree)
+//
+// SESSION LIFECYCLE:
+//   1. POST /sessions                     → creates session, status=planned
+//   2. PATCH /sessions/:id status=in_progress → starts session (sets startTime)
+//   3. POST /sessions/:id/workouts        → add workout block
+//   4. POST /workouts/:id/exercises       → add exercise to block
+//   5. POST /session-exercises/:id/sets   → log a set
+//   6. PATCH /sessions/:id status=completed → end session (sets endTime)
+// ------------------------------------------------------------
+
+import {
+  useQuery, useMutation, useQueryClient,
+  type UseQueryResult,
+  type UseMutationResult,
+} from '@tanstack/react-query'
+import { apiClient } from '@/lib/api'
+import type {
+  SessionDetailResponse,
+  SessionListResponse,
+  SessionSummaryResponse,
+  WorkoutResponse,
+  SessionExerciseResponse,
+  SetResponse,
+} from '@trainer-app/shared'
+
+// ── Query key factory ─────────────────────────────────────────────────────────
+
+export const sessionKeys = {
+  all:    ()         => ['sessions'] as const,
+  list:   (filters?: SessionFilters) => ['sessions', 'list', filters ?? {}] as const,
+  detail: (id: string) => ['sessions', id] as const,
+}
+
+// ── Filter types ──────────────────────────────────────────────────────────────
+
+export interface SessionFilters {
+  clientId?: string
+  status?:   'planned' | 'in_progress' | 'completed' | 'cancelled'
+}
+
+// ── Session list ──────────────────────────────────────────────────────────────
+
+export function useSessions(filters?: SessionFilters): UseQueryResult<SessionListResponse> {
+  const params = new URLSearchParams()
+  if (filters?.clientId) params.set('clientId', filters.clientId)
+  if (filters?.status)   params.set('status', filters.status)
+  const qs = params.toString()
+
+  return useQuery({
+    queryKey: sessionKeys.list(filters),
+    queryFn:  () => apiClient<SessionListResponse>(`/sessions${qs ? `?${qs}` : ''}`),
+    staleTime: 1000 * 30, // 30s — sessions change frequently during active use
+  })
+}
+
+// ── Active session (in_progress) ──────────────────────────────────────────────
+
+export function useActiveSession(): UseQueryResult<SessionSummaryResponse | null> {
+  return useQuery({
+    queryKey: ['sessions', 'active'],
+    queryFn:  async () => {
+      const list = await apiClient<SessionListResponse>('/sessions?status=in_progress')
+      return list[0] ?? null
+    },
+    staleTime: 1000 * 10,
+    refetchInterval: 1000 * 30, // Poll every 30s to detect session started elsewhere
+  })
+}
+
+// ── Session detail ────────────────────────────────────────────────────────────
+
+export function useSession(id: string | null): UseQueryResult<SessionDetailResponse> {
+  return useQuery({
+    queryKey: sessionKeys.detail(id ?? ''),
+    queryFn:  () => apiClient<SessionDetailResponse>(`/sessions/${id}`),
+    enabled:  !!id,
+    staleTime: 1000 * 10,
+  })
+}
+
+// ── Create session ────────────────────────────────────────────────────────────
+
+export interface CreateSessionInput {
+  clientId:   string
+  date:       string       // YYYY-MM-DD
+  templateId?: string | null
+  name?:      string
+}
+
+export function useCreateSession(): UseMutationResult<SessionSummaryResponse, Error, CreateSessionInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body) => apiClient.post<SessionSummaryResponse>('/sessions', body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: sessionKeys.all() })
+    },
+  })
+}
+
+// ── Update session (status, notes, subjective scores) ────────────────────────
+
+export interface UpdateSessionInput {
+  id:           string
+  status?:      'planned' | 'in_progress' | 'completed' | 'cancelled'
+  name?:        string
+  notes?:       string
+  energyLevel?: number
+  mobilityFeel?: number
+  stressLevel?: number
+  sessionNotes?: string
+}
+
+export function useUpdateSession(): UseMutationResult<SessionSummaryResponse, Error, UpdateSessionInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, ...body }) =>
+      apiClient.patch<SessionSummaryResponse>(`/sessions/${id}`, body),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(data.id) })
+      qc.invalidateQueries({ queryKey: sessionKeys.all() })
+    },
+  })
+}
+
+// ── Start session ─────────────────────────────────────────────────────────────
+
+export function useStartSession(): UseMutationResult<SessionSummaryResponse, Error, string> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id) =>
+      apiClient.patch<SessionSummaryResponse>(`/sessions/${id}`, { status: 'in_progress' }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(data.id) })
+      qc.invalidateQueries({ queryKey: sessionKeys.all() })
+    },
+  })
+}
+
+// ── End session ───────────────────────────────────────────────────────────────
+
+export interface EndSessionInput {
+  id:           string
+  energyLevel:  number
+  mobilityFeel: number
+  stressLevel:  number
+  sessionNotes?: string
+}
+
+export function useEndSession(): UseMutationResult<SessionSummaryResponse, Error, EndSessionInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, ...body }) =>
+      apiClient.patch<SessionSummaryResponse>(`/sessions/${id}`, {
+        ...body,
+        status: 'completed',
+      }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(data.id) })
+      qc.invalidateQueries({ queryKey: sessionKeys.all() })
+    },
+  })
+}
+
+// ── Add workout block ─────────────────────────────────────────────────────────
+
+export interface AddWorkoutInput {
+  sessionId:   string
+  workoutType: string
+  orderIndex?: number
+  notes?:      string
+}
+
+export function useAddWorkout(): UseMutationResult<WorkoutResponse, Error, AddWorkoutInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ sessionId, ...body }) =>
+      apiClient.post<WorkoutResponse>(`/sessions/${sessionId}/workouts`, body),
+    onSuccess: (_, { sessionId }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+    },
+  })
+}
+
+// ── Add exercise to workout ───────────────────────────────────────────────────
+
+export interface AddExerciseInput {
+  workoutId:   string
+  sessionId:   string   // for cache invalidation
+  exerciseId:  string
+  orderIndex?: number
+  targetSets?:            number
+  targetReps?:            number
+  targetWeight?:          number
+  targetWeightUnit?:      string
+  targetDurationSeconds?: number
+}
+
+export function useAddExercise(): UseMutationResult<SessionExerciseResponse, Error, AddExerciseInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ workoutId, sessionId: _sessionId, ...body }) =>
+      apiClient.post<SessionExerciseResponse>(`/workouts/${workoutId}/exercises`, body),
+    onSuccess: (_, { sessionId }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+    },
+  })
+}
+
+// ── Log a set ─────────────────────────────────────────────────────────────────
+
+export interface LogSetInput {
+  sessionExerciseId: string
+  sessionId:         string   // for cache invalidation
+  setNumber:         number
+  reps?:             number
+  weight?:           number
+  weightUnit?:       string
+  durationSeconds?:  number
+  distance?:         number
+  rpe?:              number
+  notes?:            string
+}
+
+export function useLogSet(): UseMutationResult<SetResponse, Error, LogSetInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ sessionExerciseId, sessionId: _sid, ...body }) =>
+      apiClient.post<SetResponse>(`/session-exercises/${sessionExerciseId}/sets`, body),
+    onSuccess: (_, { sessionId }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+    },
+  })
+}
+
+// ── Edit a set ────────────────────────────────────────────────────────────────
+
+export interface EditSetInput {
+  setId:     string
+  sessionId: string
+  reps?:     number
+  weight?:   number
+  rpe?:      number
+  notes?:    string
+}
+
+export function useEditSet(): UseMutationResult<SetResponse, Error, EditSetInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ setId, sessionId: _sid, ...body }) =>
+      apiClient.patch<SetResponse>(`/sets/${setId}`, body),
+    onSuccess: (_, { sessionId }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+    },
+  })
+}

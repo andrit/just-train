@@ -1,0 +1,83 @@
+# ------------------------------------------------------------
+# ci.yml — Continuous Integration workflow
+#
+# WHEN IT RUNS:
+#   - Every pull request to main
+#   - Every direct push to main
+#
+# STEPS:
+#   1. Install dependencies (all packages via pnpm workspaces)
+#   2. TypeScript typecheck across all packages
+#   3. ESLint across all packages
+#   4. Unit tests (Vitest — backend)        ← Phase 2 addition
+#   5. Build check
+#
+# PHASE 2 ADDITION: Test step runs Vitest on the backend.
+# Tests are FAST — no real DB, no real HTTP server, pure mocks.
+# Argon2 hashing tests may take ~1-2s; total suite should be <30s.
+#
+# FUTURE ADDITIONS:
+#   - Playwright E2E tests (Phase 5)
+#   - Database migration dry-run check (Phase 6)
+# ------------------------------------------------------------
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Typecheck, Lint, Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      # Install all workspace dependencies
+      # --frozen-lockfile fails if lockfile is out of sync with package.json
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # TypeScript typecheck — catches type errors without producing output
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # ESLint — code style and common bug checks
+      - name: Lint
+        run: pnpm lint
+
+      # Vitest unit tests — backend only (frontend has no tests yet)
+      # JWT_SECRET and other env vars are set in __tests__/setup.ts,
+      # but DATABASE_URL must exist for the pg Pool import not to error
+      # at module load time (even though the Pool is never connected in tests).
+      - name: Test
+        run: pnpm --filter backend test
+        env:
+          DATABASE_URL:    postgresql://ci:ci@localhost:5432/ci_db
+          JWT_SECRET:      ci-test-jwt-secret-not-used-in-production-64-bytes-padding-here
+          COOKIE_SECRET:   ci-test-cookie-secret-32-bytes!!
+          NODE_ENV:        test
+
+      # Build — final gate before merge
+      # Ensures Vite build and tsc compile succeed end-to-end
+      - name: Build
+        run: pnpm build
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_db
+          NODE_ENV:     production

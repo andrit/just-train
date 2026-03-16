@@ -1,0 +1,9 @@
+# pnpm workspaces — tells pnpm which folders are packages in this monorepo.
+# Each entry gets its own node_modules but shares a single lockfile.
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  argon2: true
+  es5-ext: false
+  esbuild: true

@@ -1,0 +1,49 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Trainer App — Fastify + Drizzle backend API",
+  "scripts": {
+    "dev":          "tsx watch --env-file=.env src/index.ts",
+    "build":        "tsc --outDir dist",
+    "start":        "node dist/index.js",
+    "typecheck":    "tsc --noEmit",
+    "lint":         "eslint src --ext .ts",
+    "test":         "vitest run",
+    "test:watch":   "vitest",
+    "test:coverage":"vitest run --coverage",
+    "db:generate":  "drizzle-kit generate",
+    "db:migrate":   "drizzle-kit migrate",
+    "db:studio":    "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@trainer-app/shared":     "workspace:*",
+    "@fastify/cookie":         "^9.3.1",
+    "@fastify/cors":           "^9.0.1",
+    "@fastify/helmet":         "^11.1.1",
+    "@fastify/multipart":      "^8.3.0",
+    "@fastify/rate-limit":     "^9.1.0",
+    "@fastify/swagger":        "^8.14.0",
+    "@fastify/swagger-ui":     "^4.0.0",
+    "fastify":                 "^4.27.0",
+    "fastify-type-provider-zod":"^1.1.9",
+    "argon2":                  "^0.31.2",
+    "jsonwebtoken":            "^9.0.2",
+    "drizzle-orm":             "^0.30.10",
+    "pg":                      "^8.11.5",
+    "zod":                     "^3.23.8",
+    "dotenv":                  "^16.4.5",
+    "cloudinary":              "^2.2.0",
+    "pino-pretty":             "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken":      "^9.0.6",
+    "@types/node":              "^20.12.12",
+    "@types/pg":                "^8.11.6",
+    "@vitest/coverage-v8":     "^1.6.0",
+    "drizzle-kit":             "^0.21.4",
+    "tsx":                     "^4.11.0",
+    "typescript":              "^5.4.5",
+    "vitest":                  "^1.6.0"
+  }
+}

@@ -1,0 +1,94 @@
+/* ----------------------------------------------------------------
+   index.css — Global styles and design tokens
+   
+   Phase 3: Added Google Fonts import for Barlow Condensed, DM Sans,
+   DM Mono. Added base resets and global component token classes.
+   ---------------------------------------------------------------- */
+
+/* Google Fonts — loaded once here, available via Tailwind font classes */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base resets ──────────────────────────────────────────────────────────── */
+
+@layer base {
+  html {
+    @apply font-body;
+    -webkit-tap-highlight-color: transparent; /* Remove tap flash on mobile */
+  }
+
+  body {
+    @apply bg-brand-primary text-gray-100 antialiased;
+    /* Smooth scrolling for the main content area */
+    scroll-behavior: smooth;
+  }
+
+  /* Headings default to display font */
+  h1, h2, h3 {
+    @apply font-display;
+  }
+
+  /* Form elements inherit font */
+  input, textarea, select, button {
+    @apply font-body;
+  }
+
+  /* Focus ring — keyboard accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-highlight ring-offset-2 ring-offset-brand-primary;
+  }
+}
+
+/* ── Utility classes ──────────────────────────────────────────────────────── */
+
+@layer utilities {
+  /* iOS safe area padding for bottom nav */
+  .safe-area-padding {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  /* Scrollable container that hides the scrollbar */
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Component shortcuts ──────────────────────────────────────────────────── */
+
+@layer components {
+  /* Card — the primary content container */
+  .card {
+    @apply bg-surface rounded-xl border border-surface-border;
+  }
+
+  /* Input field — consistent across all forms */
+  .field {
+    @apply w-full bg-brand-primary border border-surface-border rounded-lg
+           px-3 py-2.5 text-sm text-gray-100 placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-brand-highlight/50 focus:border-brand-highlight
+           transition-colors;
+  }
+
+  /* Label — consistent form label style */
+  .field-label {
+    @apply block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5;
+  }
+
+  /* Section heading inside cards / profile tabs */
+  .section-label {
+    @apply text-[11px] uppercase tracking-widest text-gray-500 mb-3;
+  }
+
+  /* Draft badge — shown on exercises that need enrichment */
+  .badge-draft {
+    @apply inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5
+           bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-full;
+  }
+}

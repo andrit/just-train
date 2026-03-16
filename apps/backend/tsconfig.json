@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "lib": ["ES2022"],
+    // Drizzle .values() and .set() expect null for nullable fields but Zod
+    // optional schemas produce undefined. Overriding here avoids sprinkling
+    // ?? null casts across every route file.
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["src"]
+}

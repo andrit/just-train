@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- PWA: This links to the icon shown on the browser tab -->
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png" />
+
+    <!-- PWA: Viewport meta is essential for mobile display -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- PWA: iOS-specific meta tags for home screen installation -->
+    <!-- Apple doesn't fully honor the web manifest, so these are required for iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Trainer" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- PWA: Theme color for Android Chrome's address bar -->
+    <meta name="theme-color" content="#1a1a2e" />
+
+    <title>Trainer App</title>
+  </head>
+  <body>
+    <!-- React mounts here -->
+    <div id="root"></div>
+
+    <!-- Vite injects the compiled React bundle here -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

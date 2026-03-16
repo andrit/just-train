@@ -1,0 +1,21 @@
+{
+  // Base TypeScript config shared by all apps and packages.
+  // Each workspace package extends this and adds its own overrides.
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,              // Enables all strict type checks
+    "noUncheckedIndexedAccess": true, // arr[0] is T | undefined, not T
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,        // Skip type-checking node_modules
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  }
+}

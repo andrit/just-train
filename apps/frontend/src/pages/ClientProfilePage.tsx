@@ -15,21 +15,22 @@
 // ------------------------------------------------------------
 
 import { useState }              from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { cn }                     from '@/lib/cn'
 import { interactions }           from '@/lib/interactions'
 import { useUXEvent, useUXEventRef } from '@/hooks/useUXEvent'
+import { useScrollRestoration, useRestoreScroll } from '@/hooks/useScrollRestoration'
 import {
   useClient, useClientGoals, useClientSnapshots, useLatestSnapshot,
   useCreateGoal, useUpdateGoal, useDeleteGoal,
 } from '@/lib/queries/clients'
+import { useSessions } from '@/lib/queries/sessions'
 import { SilhouetteAvatar }       from '@/components/clients/SilhouetteAvatar'
 import { ClientDrawer }           from '@/components/clients/ClientDrawer'
 import { Spinner }                from '@/components/ui/Spinner'
 import { Button }                 from '@/components/ui/Button'
 import { Input }                  from '@/components/ui/Input'
 import { ConfirmDialog }          from '@/components/ui/ConfirmDialog'
-import { cn as cx }               from '@/lib/cn'
 import {
   PROGRESSION_STATE_LABEL,
   PROGRESSION_STATE_COLOR,
@@ -378,11 +379,14 @@ function StatCard({
 
 // ── Timeline tab ──────────────────────────────────────────────────────────────
 
-function TimelineTab({ clientId }: { clientId: string }): React.JSX.Element {
+function TimelineTab({ clientId, clientName }: { clientId: string; clientName: string }): React.JSX.Element {
+  const navigate = useNavigate()
   const { data: goals,     isLoading: goalsLoading }     = useClientGoals(clientId)
   const { data: snapshots, isLoading: snapshotsLoading } = useClientSnapshots(clientId)
+  const { data: sessions,  isLoading: sessionsLoading }  = useSessions({ clientId })
+  const { saveScroll } = useScrollRestoration(`client-profile-${clientId}`)
 
-  const isLoading = goalsLoading || snapshotsLoading
+  const isLoading = goalsLoading || snapshotsLoading || sessionsLoading
 
   if (isLoading) {
     return (
@@ -392,14 +396,16 @@ function TimelineTab({ clientId }: { clientId: string }): React.JSX.Element {
     )
   }
 
-  // Merge goals and snapshots into a single timeline sorted by date
+  // Merge all event types into a single chronological timeline
   type TimelineEvent =
-    | { type: 'goal';     date: Date; goal:     typeof goals[0] }
-    | { type: 'snapshot'; date: Date; snapshot: typeof snapshots[0] }
+    | { type: 'session';  date: Date; session:  NonNullable<typeof sessions>[0] }
+    | { type: 'goal';     date: Date; goal:     NonNullable<typeof goals>[0] }
+    | { type: 'snapshot'; date: Date; snapshot: NonNullable<typeof snapshots>[0] }
 
   const events: TimelineEvent[] = [
-    ...(goals?.map((g) => ({ type: 'goal' as const, date: new Date(g.setAt), goal: g })) ?? []),
-    ...(snapshots?.map((s) => ({ type: 'snapshot' as const, date: new Date(s.capturedAt), snapshot: s })) ?? []),
+    ...(sessions?.map((s) => ({ type: 'session' as const,  date: new Date(s.date + 'T00:00:00'), session: s })) ?? []),
+    ...(goals?.map((g)    => ({ type: 'goal' as const,     date: new Date(g.setAt),              goal: g }))    ?? []),
+    ...(snapshots?.map((s) => ({ type: 'snapshot' as const, date: new Date(s.capturedAt),         snapshot: s })) ?? []),
   ].sort((a, b) => b.date.getTime() - a.date.getTime())
 
   if (events.length === 0) {
@@ -407,9 +413,33 @@ function TimelineTab({ clientId }: { clientId: string }): React.JSX.Element {
       <div className="text-center py-16 text-gray-500 text-sm" role="tabpanel" id="panel-timeline" aria-labelledby="tab-timeline">
         <p className="text-2xl mb-3" aria-hidden>📅</p>
         <p>No timeline events yet.</p>
-        <p className="text-xs text-gray-600 mt-1">Goals and snapshots will appear here as you add them.</p>
+        <p className="text-xs text-gray-600 mt-1">Sessions, goals and snapshots will appear here.</p>
       </div>
     )
+  }
+
+  // Dot color per event type — designed for future filter-by-type feature
+  const DOT_COLOR: Record<TimelineEvent['type'], string> = {
+    session:  'border-brand-highlight bg-brand-primary',
+    goal:     'border-emerald-500 bg-brand-primary',
+    snapshot: 'border-sky-500 bg-brand-primary',
+  }
+  const DOT_INNER: Record<TimelineEvent['type'], string> = {
+    session:  'bg-brand-highlight',
+    goal:     'bg-emerald-500',
+    snapshot: 'bg-sky-500',
+  }
+
+  const handleSessionTap = (sessionId: string): void => {
+    saveScroll()
+    navigate(`/session/${sessionId}/history`, {
+      state: {
+        from:       `/clients/${clientId}`,
+        scrollKey:  `client-profile-${clientId}`,
+        clientName,
+        returnTab:  'timeline',
+      },
+    })
   }
 
   return (
@@ -419,21 +449,21 @@ function TimelineTab({ clientId }: { clientId: string }): React.JSX.Element {
 
       <div className="space-y-4 pl-10">
         {events.map((event, i) => (
-          <div key={i} className="relative animate-slide-up" style={{ animationDelay: `${i * 30}ms` }}>
+          <div
+            key={i}
+            className="relative animate-slide-up"
+            style={{ animationDelay: `${i * 30}ms` }}
+            data-type={event.type}
+          >
             {/* Dot */}
             <div
               className={cn(
                 'absolute -left-[29px] top-1 w-4 h-4 rounded-full border-2 flex items-center justify-center',
-                event.type === 'goal'
-                  ? 'border-brand-highlight bg-brand-primary'
-                  : 'border-sky-500 bg-brand-primary',
+                DOT_COLOR[event.type],
               )}
               aria-hidden
             >
-              <div className={cn(
-                'w-1.5 h-1.5 rounded-full',
-                event.type === 'goal' ? 'bg-brand-highlight' : 'bg-sky-500',
-              )} />
+              <div className={cn('w-1.5 h-1.5 rounded-full', DOT_INNER[event.type])} />
             </div>
 
             {/* Date */}
@@ -442,9 +472,37 @@ function TimelineTab({ clientId }: { clientId: string }): React.JSX.Element {
             </p>
 
             {/* Content */}
-            {event.type === 'goal' ? (
+            {event.type === 'session' ? (
+              <button
+                type="button"
+                onClick={() => handleSessionTap(event.session.id)}
+                className={cn(
+                  'w-full card p-3 text-left',
+                  'hover:border-brand-highlight/30 hover:bg-brand-highlight/5',
+                  'transition-all duration-150 active:scale-[0.99]',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-brand-highlight uppercase tracking-wider mb-1">
+                    {event.session.status === 'completed' ? 'Session' : event.session.status}
+                  </p>
+                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-gray-600">
+                    <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-200 font-medium">
+                  {event.session.name ?? 'Training Session'}
+                </p>
+                <div className="flex gap-3 mt-1.5 text-xs text-gray-500">
+                  {event.session.energyLevel != null && (
+                    <span>Energy {event.session.energyLevel}/10</span>
+                  )}
+                </div>
+              </button>
+            ) : event.type === 'goal' ? (
               <div className="card p-3">
-                <p className="text-xs text-brand-highlight uppercase tracking-wider mb-1">
+                <p className="text-xs text-emerald-400 uppercase tracking-wider mb-1">
                   {event.goal.achievedAt ? '✓ Goal Achieved' : 'Goal Set'}
                 </p>
                 <p className="text-sm text-gray-300">{event.goal.goal}</p>
@@ -453,8 +511,8 @@ function TimelineTab({ clientId }: { clientId: string }): React.JSX.Element {
               <div className="card p-3">
                 <p className="text-xs text-sky-400 uppercase tracking-wider mb-1">Snapshot</p>
                 <div className="flex gap-4 text-sm text-gray-400">
-                  {event.snapshot.weightLbs && <span>{event.snapshot.weightLbs} lbs</span>}
-                  {event.snapshot.energyLevel && <span>Energy {event.snapshot.energyLevel}/10</span>}
+                  {event.snapshot.weightLbs    && <span>{event.snapshot.weightLbs} lbs</span>}
+                  {event.snapshot.energyLevel  && <span>Energy {event.snapshot.energyLevel}/10</span>}
                   {event.snapshot.selfImageScore && <span>Self-image {event.snapshot.selfImageScore}/10</span>}
                 </div>
               </div>
@@ -632,8 +690,17 @@ function SnapshotCard({
 export default function ClientProfilePage(): React.JSX.Element {
   const { id }     = useParams<{ id: string }>()
   const navigate   = useNavigate()
-  const [tab, setTab]           = useState<Tab>('overview')
+  const location   = useLocation()
+
+  // On return from session history, restore the tab the trainer was on
+  const returnTab = (location.state as { returnTab?: Tab } | null)?.returnTab
+  const [tab, setTab]           = useState<Tab>(returnTab ?? 'overview')
   const [editOpen, setEditOpen] = useState(false)
+
+  // Restore exact scroll after the correct tab has rendered.
+  // useRestoreScroll reads location.state.scrollKey — but scroll must fire
+  // after the tab content is in the DOM, so we defer via useEffect.
+  useRestoreScroll()
 
   const { data: client, isLoading, error } = useClient(id ?? null)
   const { data: snapshots }                = useClientSnapshots(id ?? null)
@@ -761,7 +828,7 @@ export default function ClientProfilePage(): React.JSX.Element {
             lastActiveAt={client.lastActiveAt}
           />
         )}
-        {tab === 'timeline' && <TimelineTab clientId={client.id} />}
+        {tab === 'timeline' && <TimelineTab clientId={client.id} clientName={client.name} />}
         {tab === 'baseline' && <BaselineTab clientId={client.id} />}
       </div>
 

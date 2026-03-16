@@ -35,6 +35,7 @@ import PreferencesPage                     from '@/pages/PreferencesPage'
 import SessionLauncherPage                 from '@/pages/SessionLauncherPage'
 import LiveSessionPage                     from '@/pages/LiveSessionPage'
 import SessionSummaryPage                  from '@/pages/SessionSummaryPage'
+import SessionHistoryPage                  from '@/pages/SessionHistoryPage'
 import NotFoundPage                        from '@/pages/NotFoundPage'
 
 // ── Onboarding gate ───────────────────────────────────────────────────────────
@@ -89,6 +90,7 @@ export default function App(): React.JSX.Element {
                     <Route path="/session/new"             element={<SessionLauncherPage />} />
                     <Route path="/session/:id"             element={<LiveSessionPage />} />
                     <Route path="/session/:id/summary"     element={<SessionSummaryPage />} />
+                    <Route path="/session/:id/history"     element={<SessionHistoryPage />} />
                     <Route path="/templates"               element={<TemplatesPage />} />
                     <Route path="/preferences"             element={<PreferencesPage />} />
                     <Route path="*"                        element={<NotFoundPage />} />

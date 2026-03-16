@@ -10,14 +10,14 @@ export default {
 
 function Demo({
   label,
-  className,
+  className = '',
   children,
   note,
 }: {
-  label:     string
-  className: string
-  children:  React.ReactNode
-  note?:     string
+  label:      string
+  className?: string
+  children:   React.ReactNode
+  note?:      string
 }): React.JSX.Element {
   return (
     <div className="flex items-start gap-4">

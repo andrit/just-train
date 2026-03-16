@@ -149,7 +149,7 @@ export default function ClientsPage(): React.JSX.Element {
                 <EmptyState
                   icon="👥"
                   title="No clients yet"
-                  description="Add your first client to start tracking their progress."
+                  message="Add your first client to start tracking their progress."
                 />
               )}
             </>

@@ -43,7 +43,7 @@ const MOBILE_NAV_ITEMS: NavItem[] = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
-  const pendingSyncCount = useSessionStore((s) => s.pendingSyncCount)
+  const pendingSyncCount = useSessionStore((s) => s.syncCount)
   const trainer          = useAuthStore((s) => s.trainer)
 
   const initials = trainer?.name

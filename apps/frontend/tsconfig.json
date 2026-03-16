@@ -5,6 +5,10 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "moduleResolution": "bundler",
     "noEmit": true,
+    // Same override as backend — optional props produce undefined, not null
+    "exactOptionalPropertyTypes": false,
+    // Array index access returns T not T|undefined — too noisy for UI code
+    "noUncheckedIndexedAccess": false,
     "paths": {
       "@/*": ["./src/*"],
       "@trainer-app/shared": ["../../packages/shared/src/index.ts"]

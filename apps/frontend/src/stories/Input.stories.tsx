@@ -57,7 +57,6 @@ export const NumberInput: Story = {
 
 export const SearchInput: Story = {
   args: {
-    label:       undefined,
     type:        'search',
     placeholder: 'Search exercises…',
   },

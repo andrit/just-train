@@ -5,6 +5,25 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v1.5.1] — Session History + Client Timeline
+
+### Added
+- `SessionHistoryPage` (`/session/:id/history`) — summary layout for reviewing past sessions: stats row (sets, volume, duration), flat exercise list with sets as pills (amber = missed target), subjective scores, session notes
+- `useScrollRestoration(key)` hook — saves `window.scrollY` to sessionStorage before navigation
+- `useRestoreScroll()` hook — reads `location.state.scrollKey` on mount, restores scroll after `requestAnimationFrame`
+- `TimelineTab` in `ClientProfilePage` — sessions added to unified chronological timeline alongside goals and snapshots
+- Session timeline cards — tappable, navigate to `/session/:id/history` with `saveScroll()` before leaving
+- Color-coded timeline dots by event type: brand highlight = session, emerald = goal, sky = snapshot. `data-type` attribute on each entry for future filter-by-type feature
+- `useRestoreScroll()` called in `ClientProfilePage` — exact pixel scroll restored on return from history
+- Slide transition on `SessionHistoryPage` — `animate-slide-in-right` on enter, back button returns left
+- `/session/:id/history` route registered in `App.tsx`
+
+### Fixed
+- Removed duplicate `cn as cx` import from `ClientProfilePage`
+- `useSessions` query hook now imported and used in `TimelineTab`
+
+---
+
 ## [v1.5.0] — Session Logging
 
 ### Added

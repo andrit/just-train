@@ -25,9 +25,7 @@ export const WithAction: Story = {
 }
 
 export const NoMessage: Story = {
-  args: {
-    message: undefined,
-  },
+  args: {},
 }
 
 /** Shown when filters return zero results. */

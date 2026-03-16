@@ -75,6 +75,7 @@ function ConfirmDemo(props: {
 // ── Stories ───────────────────────────────────────────────────────────────────
 
 export const Neutral: Story = {
+  args: {},
   render: () => (
     <ConfirmDemo
       title="Apply Template?"
@@ -85,6 +86,7 @@ export const Neutral: Story = {
 }
 
 export const Danger: Story = {
+  args: {},
   render: () => (
     <ConfirmDemo
       title="Delete Exercise?"
@@ -96,6 +98,7 @@ export const Danger: Story = {
 }
 
 export const WithLoadingState: Story = {
+  args: {},
   render: () => (
     <ConfirmDemo
       title="Delete Client?"
@@ -109,6 +112,7 @@ export const WithLoadingState: Story = {
 
 /** Play function: open → confirm path */
 export const InteractionConfirm: Story = {
+  args: {},
   render: () => (
     <ConfirmDemo
       title="Confirm Action"
@@ -132,6 +136,7 @@ export const InteractionConfirm: Story = {
 
 /** Play function: open → cancel path */
 export const InteractionCancel: Story = {
+  args: {},
   render: () => (
     <ConfirmDemo
       title="Confirm Action"

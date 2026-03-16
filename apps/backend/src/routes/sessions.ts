@@ -108,6 +108,9 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
       })
 
       return reply.send(result.map(serializeSession))
+    } catch (error) {
+      ;(app.log as any).error(error)
+      return reply.status(500).send({ error: 'Failed to fetch sessions' })
     }
   })
 
@@ -164,6 +167,9 @@ This is the primary payload for the active workout view — loaded once when the
       }
 
       return reply.send(serializeSession(result))
+    } catch (error) {
+      ;(app.log as any).error(error)
+      return reply.status(500).send({ error: 'Failed to fetch session' })
     }
   })
 

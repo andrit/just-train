@@ -565,6 +565,9 @@ export const ClientKpiResponseSchema = z.object({
   // Card 6 — Total sessions
   totalSessionsAllTime: z.number().int(),
 
+  // Sessions this month — used to enable/disable the Send Report button
+  sessionsThisMonth: z.number().int(),
+
   // Card 7 — Avg energy
   avgEnergyThisMonth: z.number().nullable()
     .describe('Average energyLevel score (1–10) across sessions this month'),

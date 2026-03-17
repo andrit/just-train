@@ -42,6 +42,7 @@ import { mediaRoutes }           from './routes/media'
 import { sessionRoutes }         from './routes/sessions'
 import { templateRoutes }        from './routes/templates'
 import { kpiRoutes }             from './routes/kpis'
+import { reportRoutes }          from './routes/reports'
 import { configureCloudinary } from './services/cloudinary.service'
 
 const app = Fastify({
@@ -225,6 +226,7 @@ app.register(exerciseRoutes,       { prefix: '/api/v1' })
 app.register(mediaRoutes,          { prefix: '/api/v1' })
 app.register(sessionRoutes,        { prefix: '/api/v1' })
 app.register(kpiRoutes,            { prefix: '/api/v1' })
+app.register(reportRoutes,         { prefix: '/api/v1' })
 app.register(templateRoutes,       { prefix: '/api/v1' })
 
 // ------------------------------------------------------------

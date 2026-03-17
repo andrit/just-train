@@ -154,6 +154,11 @@ export default {
           '0%':   { transform: 'translateX(0)',    opacity: '1' },
           '100%': { transform: 'translateX(100%)', opacity: '0' },
         },
+        // REPORT MODAL — pulsing amber border on blurb textarea until focused
+        'pulse-border-amber': {
+          '0%, 100%': { borderColor: 'rgb(245 158 11 / 0.8)', boxShadow: '0 0 0 2px rgb(245 158 11 / 0.25)' },
+          '50%':      { borderColor: 'rgb(245 158 11 / 0.25)', boxShadow: '0 0 0 0px rgb(245 158 11 / 0)' },
+        },
       },
       animation: {
         'slide-up':          'slide-up 0.2s ease-out',
@@ -174,6 +179,7 @@ export default {
         'lift':              'lift 0.15s ease-out forwards',
         'slide-out-left':    'slide-out-left 0.2s ease-in forwards',
         'slide-out-right':   'slide-out-right 0.2s ease-in forwards',
+        'pulse-border-amber': 'pulse-border-amber 1.5s ease-in-out infinite',
       },
     },
   },

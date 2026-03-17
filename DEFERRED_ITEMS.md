@@ -242,3 +242,22 @@ The following combinations determine feature access. Not yet enforced — docume
 **What:** Full audit of all test files to ensure no module-level variables are referenced inside `vi.mock()` factory functions.
 **Why deferred:** Fixed in exercises.test.ts (inline `chain`) and auth.test.ts (inline refresh token object). Other test files may have the same latent issue that CI catches but local testing misses.
 **When to revisit:** Before adding new test files — establish a linting rule (eslint-plugin-vitest) that flags this pattern automatically.
+
+---
+
+## Deferred in Phase 7 (v1.7.0)
+
+### SMS Report Delivery
+**What:** Send the monthly report as a text message (SMS) when the client has no email on record, or as an alternative delivery option.
+**Why deferred:** Requires a third-party SMS provider (Twilio, Vonage, etc.), phone number verification, and consent management. Adds meaningful cost per message.
+**When to revisit:** When the app has paying clients who need SMS. The phone number field is already captured on client records.
+**What's needed:**
+- Choose SMS provider (Twilio recommended)
+- Add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` to `.env`
+- Build `sms.service.ts` with a plain-text report variant
+- Add SMS option to the report send flow when email is missing
+
+### Report Scheduling
+**What:** Trainer can schedule reports to auto-send on the 1st of each month for all active clients.
+**Why deferred:** Requires a job queue (Redis + BullMQ, Phase 7.5) and per-client opt-in settings.
+**When to revisit:** Phase 7.5 when BullMQ is added.

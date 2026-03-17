@@ -5,6 +5,33 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v1.7.0] — Monthly Reports
+
+### Added
+- `services/report.service.ts` — HTML email builder (table-based, inline styles, email-client safe) + `sendReport()` via Resend + `resolveReportPeriod()` with calendar-month / rolling-30 fallback logic
+- `routes/reports.ts` — `GET /clients/:id/report-preview` (returns HTML + metadata) and `POST /clients/:id/report` (sends via Resend, increments `reportsSentCount`)
+- `ReportPreviewModal` — live HTML preview in an iframe, blurb textarea with pulsing amber border until focused, Send button disabled when no sessions or no client email
+- `useReportPreview` + `useSendReport` query hooks
+- Send Report button on client profile header — disabled with "No Sessions" label when `sessionsThisMonth === 0`
+- `sessionsThisMonth` field added to `ClientKpiResponse` schema and KPI route
+- `resend ^3.2.0` added to backend dependencies
+- `RESEND_API_KEY` + `REPORT_FROM_EMAIL` added to `.env.example`
+- `pulse-border-amber` animation keyframe added to Tailwind config
+- SMS delivery deferred to Phase 7.5 — added to `DEFERRED_ITEMS.md`
+
+### Report structure
+1. Header — client name, period label
+2. Highlights — sessions count + consistency %, volume, goals achieved
+3. Performance — focus KPI label (if available)
+4. Sessions table — date, name, sets, volume, energy (max 8 rows + overflow count)
+5. How you felt — energy + stress score bars
+6. Goals achieved — green highlighted section (if any)
+7. Looking ahead — active goals
+8. Trainer note — amber highlighted section (if blurb entered)
+9. Footer — trainer name
+
+---
+
 ## [v1.6.1] — Cleanup: serializeTrainer + ClientProfilePage split
 
 ### Refactored

@@ -219,3 +219,47 @@ export function useClientKpis(clientId: string | null | undefined): UseQueryResu
     retry: false,
   })
 }
+
+// ── Reports ───────────────────────────────────────────────────────────────────
+
+import type { UseMutationResult } from '@tanstack/react-query'
+
+export interface ReportPreview {
+  html:         string
+  periodLabel:  string
+  periodStart:  string
+  periodEnd:    string
+  sessionCount: number
+  clientEmail:  string | null
+}
+
+export interface SendReportInput {
+  clientId:    string
+  trainerNote?: string
+}
+
+export interface SendReportResult {
+  message:     string
+  emailId:     string
+  periodLabel: string
+}
+
+export function useReportPreview(
+  clientId: string | null,
+  trainerNote: string,
+): UseQueryResult<ReportPreview> {
+  const params = trainerNote ? `?trainerNote=${encodeURIComponent(trainerNote)}` : ''
+  return useQuery({
+    queryKey: ['clients', clientId, 'report-preview', trainerNote],
+    queryFn:  () => apiClient<ReportPreview>(`/clients/${clientId}/report-preview${params}`),
+    enabled:  !!clientId,
+    staleTime: 1000 * 60,
+  })
+}
+
+export function useSendReport(): UseMutationResult<SendReportResult, Error, SendReportInput> {
+  return useMutation({
+    mutationFn: ({ clientId, trainerNote }) =>
+      apiClient.post<SendReportResult>(`/clients/${clientId}/report`, { trainerNote }),
+  })
+}

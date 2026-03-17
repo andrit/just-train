@@ -301,6 +301,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         focusKpi,
         volumeThisMonthLbs:    volumeThisMonthLbs > 0 ? Math.round(volumeThisMonthLbs) : null,
         totalSessionsAllTime:  allSessions.length,
+        sessionsThisMonth:     monthSessions.length,
         avgEnergyThisMonth:    avg(energyScores),
         avgStressThisMonth:    avg(stressScores),
       })

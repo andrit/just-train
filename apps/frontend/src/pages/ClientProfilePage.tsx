@@ -24,6 +24,7 @@ import { KpiHero }                           from '@/components/kpi/KpiHero'
 import { OverviewTab }                       from '@/components/client-profile/OverviewTab'
 import { TimelineTab }                       from '@/components/client-profile/TimelineTab'
 import { BaselineTab }                       from '@/components/client-profile/BaselineTab'
+import { ReportPreviewModal }                from '@/components/reports/ReportPreviewModal'
 import {
   useClient, useClientSnapshots,
   useClientKpis,
@@ -87,8 +88,10 @@ export default function ClientProfilePage(): React.JSX.Element {
 
   // Restore tab + scroll position when returning from session history
   const returnTab = (location.state as { returnTab?: Tab } | null)?.returnTab
-  const [tab,      setTab]      = useState<Tab>(returnTab ?? 'overview')
-  const [editOpen, setEditOpen] = useState(false)
+  const [tab,        setTab]        = useState<Tab>(returnTab ?? 'overview')
+  const [editOpen,   setEditOpen]   = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
+  const [reportSentLabel, setReportSentLabel] = useState<string | null>(null)
 
   useRestoreScroll()
 
@@ -140,6 +143,29 @@ export default function ClientProfilePage(): React.JSX.Element {
           </button>
 
           <div className="flex items-center gap-2">
+            {/* Send Report */}
+            <button
+              type="button"
+              onClick={() => setReportOpen(true)}
+              disabled={(kpis?.sessionsThisMonth ?? 0) === 0}
+              title={(kpis?.sessionsThisMonth ?? 0) === 0 ? 'No sessions this period' : 'Send monthly report'}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm',
+                'bg-surface border border-surface-border',
+                'transition-all duration-150',
+                (kpis?.sessionsThisMonth ?? 0) > 0
+                  ? 'text-gray-300 hover:border-brand-highlight/40 hover:text-white'
+                  : 'text-gray-600 cursor-not-allowed opacity-50',
+                interactions.button.base,
+                interactions.button.press,
+              )}
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5" aria-hidden>
+                <path d="M2 4l6 5 6-5M2 4h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {(kpis?.sessionsThisMonth ?? 0) === 0 ? 'No Sessions' : 'Send Report'}
+            </button>
+
             {/* Start Session */}
             <Link
               to={`/session/new?clientId=${client.id}`}
@@ -243,6 +269,31 @@ export default function ClientProfilePage(): React.JSX.Element {
         client={client}
         onSuccess={() => setEditOpen(false)}
       />
+
+      {/* Report preview modal */}
+      <ReportPreviewModal
+        open={reportOpen}
+        clientId={client.id}
+        clientName={client.name}
+        onClose={() => setReportOpen(false)}
+        onSent={(label) => {
+          setReportOpen(false)
+          setReportSentLabel(label)
+          setTimeout(() => setReportSentLabel(null), 5000)
+        }}
+      />
+
+      {/* Report sent toast */}
+      {reportSentLabel && (
+        <div className={cn(
+          'fixed bottom-24 left-1/2 -translate-x-1/2 z-50',
+          'px-4 py-2.5 rounded-xl text-sm font-medium',
+          'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300',
+          'animate-slide-up shadow-lg',
+        )}>
+          Report sent — {reportSentLabel}
+        </div>
+      )}
     </div>
   )
 }

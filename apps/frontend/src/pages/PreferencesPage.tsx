@@ -491,6 +491,64 @@ export default function PreferencesPage(): React.JSX.Element {
             </div>
           </div>
 
+          {/* Weekly session target */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-200">Weekly session target</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Used for your consistency score
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => save('weeklySessionTarget', Math.max(1, (trainer?.weeklySessionTarget ?? 3) - 1))}
+                  className="w-7 h-7 rounded-lg border border-surface-border text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                >−</button>
+                <span className="font-mono text-white w-4 text-center">
+                  {trainer?.weeklySessionTarget ?? 3}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => save('weeklySessionTarget', Math.min(14, (trainer?.weeklySessionTarget ?? 3) + 1))}
+                  className="w-7 h-7 rounded-lg border border-surface-border text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                >+</button>
+              </div>
+            </div>
+          </div>
+
+          {/* 1RM estimates — athlete mode only */}
+          {(trainer?.trainerMode ?? 'trainer') === 'athlete' && (
+            <div className="card p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-200">1RM estimates</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Show Epley estimated max lift on KPI cards
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={trainer?.show1rmEstimate ?? false}
+                  onClick={() => save('show1rmEstimate', !(trainer?.show1rmEstimate ?? false))}
+                  className={cn(
+                    'relative w-10 h-5 rounded-full transition-colors duration-200',
+                    (trainer?.show1rmEstimate ?? false) ? 'bg-brand-highlight' : 'bg-surface-border',
+                    interactions.button.base,
+                    interactions.button.press,
+                  )}
+                >
+                  <span className={cn(
+                    'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200',
+                    (trainer?.show1rmEstimate ?? false) ? 'translate-x-5' : 'translate-x-0.5',
+                  )} />
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Widget order */}
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">

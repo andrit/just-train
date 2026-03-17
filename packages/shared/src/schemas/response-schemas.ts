@@ -104,6 +104,10 @@ export const TrainerResponseSchema = z.object({
     .describe('Message tone for the at-risk alert'),
   sessionLayout: z.enum(['horizontal', 'vertical'])
     .describe('How workout blocks are arranged in the live session screen'),
+  weeklySessionTarget: z.number().int()
+    .describe('Target sessions per week — used for consistency score'),
+  show1rmEstimate: z.boolean()
+    .describe('Athlete mode: whether to show Epley 1RM estimates on KPI cards'),
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -169,6 +173,12 @@ export const ClientResponseSchema = z.object({
     .describe('true = this is the trainer training themselves. Auto-created at registration.'),
   lastActiveAt:     z.string().datetime().nullable()
     .describe('Last session logged for this client — used for active client billing metric'),
+
+  // v1.6.0: per-client KPI preferences
+  weeklySessionTarget: z.number().int()
+    .describe('Target sessions per week for consistency score'),
+  show1rmEstimate: z.boolean()
+    .describe('Whether to show Epley 1RM estimates for this client'),
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -489,3 +499,78 @@ export type TrainerUsageMonthlyResponse = z.infer<typeof TrainerUsageMonthlyResp
 export const TrainerUsageMonthlyListResponseSchema = z.array(TrainerUsageMonthlyResponseSchema)
   .describe('Monthly usage history ordered by period descending')
 export type TrainerUsageMonthlyListResponse = z.infer<typeof TrainerUsageMonthlyListResponseSchema>
+
+// ============================================================
+// CLIENT KPIs (v1.6.0)
+// ============================================================
+
+// Focus-specific KPI — shape depends on client's primaryFocus
+export const FocusKpiSchema = z.discriminatedUnion('type', [
+  z.object({
+    type:        z.literal('resistance'),
+    topExercise: z.string().nullable()
+      .describe('Exercise with highest estimated 1RM or most volume'),
+    estOnermKg:  z.number().nullable()
+      .describe('Epley 1RM estimate in kg — null if show1rmEstimate=false'),
+    volumeTrend: z.enum(['up', 'down', 'flat', 'insufficient_data']),
+  }),
+  z.object({
+    type:         z.literal('cardio'),
+    totalDistanceKm: z.number().nullable(),
+    avgPaceMinPerKm: z.number().nullable(),
+    paceTrend:    z.enum(['up', 'down', 'flat', 'insufficient_data']),
+  }),
+  z.object({
+    type:        z.literal('calisthenics'),
+    topExercise: z.string().nullable(),
+    maxReps:     z.number().int().nullable(),
+    repsTrend:   z.enum(['up', 'down', 'flat', 'insufficient_data']),
+  }),
+  z.object({
+    type:            z.literal('mixed'),
+    totalVolumeLbs:  z.number().nullable(),
+    volumeTrend:     z.enum(['up', 'down', 'flat', 'insufficient_data']),
+  }),
+  z.object({
+    type: z.literal('insufficient_data'),
+  }),
+])
+export type FocusKpi = z.infer<typeof FocusKpiSchema>
+
+export const ClientKpiResponseSchema = z.object({
+  clientId:   z.string().uuid(),
+  computedAt: z.string().datetime(),
+
+  // Card 1 — Streak
+  currentStreakWeeks: z.number().int()
+    .describe('Consecutive weeks with at least one session'),
+  bestStreakWeeks:    z.number().int(),
+
+  // Card 2 — This week
+  sessionsThisWeek:    z.number().int(),
+  weeklySessionTarget: z.number().int(),
+
+  // Card 3 — Last session
+  daysSinceLastSession: z.number().int().nullable()
+    .describe('null = no sessions ever'),
+  lastSessionDate:      z.string().nullable()
+    .describe('YYYY-MM-DD of most recent completed session'),
+
+  // Card 4 — Focus-specific KPI
+  focusKpi: FocusKpiSchema,
+
+  // Card 5 — Volume this month
+  volumeThisMonthLbs: z.number().nullable(),
+
+  // Card 6 — Total sessions
+  totalSessionsAllTime: z.number().int(),
+
+  // Card 7 — Avg energy
+  avgEnergyThisMonth: z.number().nullable()
+    .describe('Average energyLevel score (1–10) across sessions this month'),
+
+  // Card 8 — Avg stress
+  avgStressThisMonth: z.number().nullable()
+    .describe('Average stressLevel score (1–10) across sessions this month'),
+})
+export type ClientKpiResponse = z.infer<typeof ClientKpiResponseSchema>

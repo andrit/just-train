@@ -56,6 +56,8 @@ export function ClientForm({
   const [progressionState, setProgressionState]= useState(client?.progressionState ?? 'assessment')
   const [startDate,        setStartDate]       = useState(client?.startDate        ?? '')
   const [notes,            setNotes]           = useState(client?.notes            ?? '')
+  const [weeklyTarget,     setWeeklyTarget]    = useState(client?.weeklySessionTarget ?? 3)
+  const [show1rm,          setShow1rm]         = useState(client?.show1rmEstimate   ?? false)
 
   // Sync fields if client prop changes (drawer re-opened with different client)
   useEffect(() => {
@@ -67,6 +69,8 @@ export function ClientForm({
     setProgressionState(client?.progressionState ?? 'assessment')
     setStartDate(client?.startDate   ?? '')
     setNotes(client?.notes           ?? '')
+    setWeeklyTarget(client?.weeklySessionTarget ?? 3)
+    setShow1rm(client?.show1rmEstimate ?? false)
   }, [client?.id])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -80,6 +84,8 @@ export function ClientForm({
       progressionState: progressionState,
       startDate:        startDate || undefined,
       notes:            notes.trim() || undefined,
+      weeklySessionTarget: weeklyTarget,
+      show1rmEstimate:  show1rm,
     })
   }
 
@@ -171,6 +177,59 @@ export function ClientForm({
           rows={3}
         />
       </section>
+
+      {/* Section: KPI Preferences — only shown when editing */}
+      {isEditing && (
+        <section>
+          <h3 className="text-[11px] uppercase tracking-widest text-gray-500 mb-3">KPI Settings</h3>
+
+          <div className="space-y-4">
+            {/* Weekly session target */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-200">Weekly session target</p>
+                <p className="text-xs text-gray-500 mt-0.5">Used for the consistency score</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setWeeklyTarget(Math.max(1, weeklyTarget - 1))}
+                  className="w-7 h-7 rounded-lg border border-surface-border text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                >−</button>
+                <span className="font-mono text-white w-4 text-center">{weeklyTarget}</span>
+                <button
+                  type="button"
+                  onClick={() => setWeeklyTarget(Math.min(14, weeklyTarget + 1))}
+                  className="w-7 h-7 rounded-lg border border-surface-border text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                >+</button>
+              </div>
+            </div>
+
+            {/* 1RM estimate toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-200">Show 1RM estimates</p>
+                <p className="text-xs text-gray-500 mt-0.5">Epley formula — best guess from logged sets</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={show1rm}
+                onClick={() => setShow1rm(!show1rm)}
+                className={cn(
+                  'relative w-10 h-5 rounded-full transition-colors duration-200',
+                  show1rm ? 'bg-brand-highlight' : 'bg-surface-border',
+                )}
+              >
+                <span className={cn(
+                  'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200',
+                  show1rm ? 'translate-x-5' : 'translate-x-0.5',
+                )} />
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">

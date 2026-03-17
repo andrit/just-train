@@ -20,9 +20,11 @@ import { cn }                     from '@/lib/cn'
 import { interactions }           from '@/lib/interactions'
 import { useUXEvent, useUXEventRef } from '@/hooks/useUXEvent'
 import { useScrollRestoration, useRestoreScroll } from '@/hooks/useScrollRestoration'
+import { usePreferences }         from '@/hooks/usePreferences'
+import { KpiHero }                from '@/components/kpi/KpiHero'
 import {
   useClient, useClientGoals, useClientSnapshots, useLatestSnapshot,
-  useCreateGoal, useUpdateGoal, useDeleteGoal,
+  useCreateGoal, useUpdateGoal, useDeleteGoal, useClientKpis,
 } from '@/lib/queries/clients'
 import { useSessions } from '@/lib/queries/sessions'
 import { SilhouetteAvatar }       from '@/components/clients/SilhouetteAvatar'
@@ -702,9 +704,12 @@ export default function ClientProfilePage(): React.JSX.Element {
   // after the tab content is in the DOM, so we defer via useEffect.
   useRestoreScroll()
 
+  const { trainerMode } = usePreferences()
+
   const { data: client, isLoading, error } = useClient(id ?? null)
   const { data: snapshots }                = useClientSnapshots(id ?? null)
   const { data: goals }                    = useClientGoals(id ?? null)
+  const { data: kpis, isLoading: kpisLoading } = useClientKpis(id)
 
   if (isLoading) {
     return (
@@ -803,6 +808,14 @@ export default function ClientProfilePage(): React.JSX.Element {
             </div>
           </div>
         </div>
+
+        {/* KPI Hero — above tabs */}
+        <KpiHero
+          client={client}
+          kpis={kpis}
+          isLoading={kpisLoading}
+          isAthlete={trainerMode === 'athlete'}
+        />
 
         {/* Tabs */}
         <div

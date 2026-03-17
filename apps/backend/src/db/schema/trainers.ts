@@ -106,6 +106,13 @@ export const trainers = pgTable('trainers', {
   // 'vertical'   = workout blocks stacked top-to-bottom (overview mode)
   sessionLayout:      text('session_layout').notNull().default('horizontal'),
 
+  // v1.6.0: KPI preferences
+  // weeklySessionTarget: used for consistency score ("X/3 sessions this week")
+  // show1rmEstimate:     athlete mode only — shows Epley 1RM estimates on KPI cards
+  //                      default off, first-time tip surfaces it
+  weeklySessionTarget: integer('weekly_session_target').notNull().default(3),
+  show1rmEstimate:     boolean('show_1rm_estimate').notNull().default(false),
+
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
@@ -158,6 +165,10 @@ export const clients = pgTable('clients', {
 
   // Soft-delete — inactive clients hidden from UI but history preserved
   active: boolean('active').notNull().default(true),
+
+  // v1.6.0: per-client KPI preferences (trainer configures per client)
+  weeklySessionTarget: integer('weekly_session_target').notNull().default(3),
+  show1rmEstimate:     boolean('show_1rm_estimate').notNull().default(false),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),

@@ -29,6 +29,7 @@ import type {
   CreateClientGoalInput,
   UpdateClientGoalInput,
   CreateClientSnapshotInput,
+  ClientKpiResponse,
 } from '@trainer-app/shared'
 
 // ── Query key factory ─────────────────────────────────────────────────────────
@@ -202,5 +203,17 @@ export function useCreateSnapshot(): UseMutationResult<ClientSnapshotResponse, E
       qc.invalidateQueries({ queryKey: clientKeys.snapshots(clientId) })
       qc.invalidateQueries({ queryKey: clientKeys.latestSnapshot(clientId) })
     },
+  })
+}
+
+// ── Client KPIs ───────────────────────────────────────────────────────────────
+
+export function useClientKpis(clientId: string | null | undefined): UseQueryResult<ClientKpiResponse> {
+  return useQuery({
+    queryKey: ['clients', clientId, 'kpis'],
+    queryFn:  () => apiClient<ClientKpiResponse>(`/clients/${clientId}/kpis`),
+    enabled:  !!clientId,
+    staleTime: 1000 * 60 * 5,
+    retry: false,
   })
 }

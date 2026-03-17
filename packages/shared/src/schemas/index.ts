@@ -65,6 +65,10 @@ export const UpdateTrainerSchema = z.object({
     .describe('Message tone for the at-risk alert'),
   sessionLayout:     z.enum(['horizontal', 'vertical']).optional()
     .describe('horizontal = scroll between workout blocks; vertical = stacked overview'),
+  weeklySessionTarget: z.number().int().min(1).max(14).optional()
+    .describe('Target sessions per week for consistency score'),
+  show1rmEstimate:   z.boolean().optional()
+    .describe('Athlete mode: show Epley 1RM estimates on KPI cards'),
 })
 export type UpdateTrainerInput = z.infer<typeof UpdateTrainerSchema>
 
@@ -102,7 +106,14 @@ export const CreateClientSchema = z.object({
 })
 export type CreateClientInput = z.infer<typeof CreateClientSchema>
 
-export const UpdateClientSchema = CreateClientSchema.partial()
+export const UpdateClientSchema = CreateClientSchema.partial().extend({
+  weeklySessionTarget: z.number().int().min(1).max(14).optional()
+    .describe('Target sessions per week for consistency score'),
+  show1rmEstimate: z.boolean().optional()
+    .describe('Whether to show Epley 1RM estimates for this client'),
+  active: z.boolean().optional()
+    .describe('false = soft-delete'),
+})
 export type UpdateClientInput = z.infer<typeof UpdateClientSchema>
 
 // ============================================================

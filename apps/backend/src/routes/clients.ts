@@ -268,6 +268,8 @@ function serializeClient(c: typeof clients.$inferSelect) {
     nutritionNotes:   c.nutritionNotes   ?? null,
     isSelf:           c.isSelf,
     lastActiveAt:     c.lastActiveAt?.toISOString() ?? null,
+    weeklySessionTarget: c.weeklySessionTarget,
+    show1rmEstimate:     c.show1rmEstimate,
     createdAt:        c.createdAt.toISOString(),
     updatedAt:        c.updatedAt.toISOString(),
   }

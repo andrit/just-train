@@ -5,6 +5,35 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v1.6.0] — KPI Dashboard
+
+### Added
+- `GET /clients/:id/kpis` backend route — computes all 8 KPI cards server-side (single source of truth for reports)
+- `ClientKpiResponseSchema` + `FocusKpiSchema` in shared — discriminated union per focus type (resistance / calisthenics / cardio / mixed / insufficient_data)
+- `KpiCard` component — stat card with label, value, context line, trend arrow (up/down/flat), highlight mode for at-risk cards
+- `KpiCarousel` component — 4-card visible window, snap scroll, dot navigation, desktop prev/next arrows
+- `KpiHero` component — translates `ClientKpiResponse` into 8 `KpiCardData` cards, renders carousel + 1RM tip nudge
+- `TipIcon` component — flexed bicep SVG with `!` badge, reusable tip indicator across the app
+- KPI hero section added above tabs on every client profile page
+- `weeklySessionTarget` + `show1rmEstimate` on `trainers` table (athlete preferences)
+- `weeklySessionTarget` + `show1rmEstimate` on `clients` table (per-client, trainer configures)
+- Weekly session target stepper + 1RM toggle in `PreferencesPage` dashboard section (athlete mode)
+- Weekly session target stepper + 1RM toggle in `ClientForm` KPI Settings section (edit mode only)
+- `useClientKpis(clientId)` query hook — 5 min stale time, no retry on 404
+- 1RM tip nudge in KpiHero — shown once to athletes when sessions exist, tracked in localStorage, dismissable
+
+### KPI Cards (in order)
+1. Streak — current + best consecutive weeks
+2. This week — `X/target` sessions
+3. Last session — days ago + date
+4. Focus KPI — resistance: top lift + vol trend; cardio: distance + pace; calisthenics: max reps; mixed: volume
+5. Volume this month — lbs
+6. All time — total completed sessions
+7. Avg energy — 1–10 this month
+8. Avg stress — 1–10 this month (highlights ≥7)
+
+---
+
 ## [v1.5.1] — Session History + Client Timeline
 
 ### Added

@@ -25,13 +25,15 @@ import {
 import type { TrainerResponse } from '@trainer-app/shared'
 
 export interface Preferences {
-  ctaLabel:          string
-  alertsEnabled:     boolean
-  alertColorScheme:  'amber' | 'red' | 'blue' | 'green'
-  alertTone:         'clinical' | 'motivating' | 'firm'
-  sessionLayout:     'horizontal' | 'vertical'
-  widgetOrder:       WidgetId[]
-  trainerMode:       'athlete' | 'trainer'
+  ctaLabel:            string
+  alertsEnabled:       boolean
+  alertColorScheme:    'amber' | 'red' | 'blue' | 'green'
+  alertTone:           'clinical' | 'motivating' | 'firm'
+  sessionLayout:       'horizontal' | 'vertical'
+  weeklySessionTarget: number
+  show1rmEstimate:     boolean
+  widgetOrder:         WidgetId[]
+  trainerMode:         'athlete' | 'trainer'
 }
 
 export function usePreferences(): Preferences & {
@@ -44,13 +46,15 @@ export function usePreferences(): Preferences & {
   const mode = (trainer?.trainerMode ?? 'trainer') as 'athlete' | 'trainer'
 
   const preferences: Preferences = {
-    ctaLabel:         trainer?.ctaLabel         ?? 'Start Training',
-    alertsEnabled:    trainer?.alertsEnabled     ?? true,
-    alertColorScheme: (trainer?.alertColorScheme as Preferences['alertColorScheme']) ?? 'amber',
-    alertTone:        (trainer?.alertTone        as Preferences['alertTone'])        ?? 'clinical',
-    sessionLayout:    (trainer?.sessionLayout    as Preferences['sessionLayout'])    ?? 'horizontal',
-    widgetOrder:      parseWidgetProgression(trainer?.widgetProgression, mode),
-    trainerMode:      mode,
+    ctaLabel:            trainer?.ctaLabel         ?? 'Start Training',
+    alertsEnabled:       trainer?.alertsEnabled     ?? true,
+    alertColorScheme:    (trainer?.alertColorScheme as Preferences['alertColorScheme']) ?? 'amber',
+    alertTone:           (trainer?.alertTone        as Preferences['alertTone'])        ?? 'clinical',
+    sessionLayout:       (trainer?.sessionLayout    as Preferences['sessionLayout'])    ?? 'horizontal',
+    weeklySessionTarget: trainer?.weeklySessionTarget ?? 3,
+    show1rmEstimate:     trainer?.show1rmEstimate    ?? false,
+    widgetOrder:         parseWidgetProgression(trainer?.widgetProgression, mode),
+    trainerMode:         mode,
   }
 
   const updatePreference = useCallback(async <K extends keyof UpdateablePrefs>(
@@ -74,10 +78,12 @@ export function usePreferences(): Preferences & {
 
 // Fields that can be updated via updatePreference()
 interface UpdateablePrefs {
-  ctaLabel:          string
-  alertsEnabled:     boolean
-  alertColorScheme:  'amber' | 'red' | 'blue' | 'green'
-  alertTone:         'clinical' | 'motivating' | 'firm'
-  sessionLayout:     'horizontal' | 'vertical'
-  widgetProgression: string | null
+  ctaLabel:            string
+  alertsEnabled:       boolean
+  alertColorScheme:    'amber' | 'red' | 'blue' | 'green'
+  alertTone:           'clinical' | 'motivating' | 'firm'
+  sessionLayout:       'horizontal' | 'vertical'
+  weeklySessionTarget: number
+  show1rmEstimate:     boolean
+  widgetProgression:   string | null
 }

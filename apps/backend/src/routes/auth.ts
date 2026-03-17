@@ -178,6 +178,10 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
           alertColorScheme:     trainer.alertColorScheme,
           alertTone:            trainer.alertTone,
           sessionLayout:        trainer.sessionLayout,
+
+          weeklySessionTarget:  trainer.weeklySessionTarget,
+
+          show1rmEstimate:      trainer.show1rmEstimate,
           createdAt:            trainer.createdAt.toISOString(),
           updatedAt:            trainer.updatedAt.toISOString(),
         },
@@ -269,6 +273,10 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
           alertColorScheme:     trainer.alertColorScheme,
           alertTone:            trainer.alertTone,
           sessionLayout:        trainer.sessionLayout,
+
+          weeklySessionTarget:  trainer.weeklySessionTarget,
+
+          show1rmEstimate:      trainer.show1rmEstimate,
           createdAt:            trainer.createdAt.toISOString(),
           updatedAt:            trainer.updatedAt.toISOString(),
         },
@@ -368,6 +376,10 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
           alertColorScheme:     trainer.alertColorScheme,
           alertTone:            trainer.alertTone,
           sessionLayout:        trainer.sessionLayout,
+
+          weeklySessionTarget:  trainer.weeklySessionTarget,
+
+          show1rmEstimate:      trainer.show1rmEstimate,
           createdAt:            trainer.createdAt.toISOString(),
           updatedAt:            trainer.updatedAt.toISOString(),
         },
@@ -489,6 +501,10 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
         alertColorScheme:     trainer.alertColorScheme,
         alertTone:            trainer.alertTone,
         sessionLayout:        trainer.sessionLayout,
+
+        weeklySessionTarget:  trainer.weeklySessionTarget,
+
+        show1rmEstimate:      trainer.show1rmEstimate,
         createdAt:            trainer.createdAt.toISOString(),
         updatedAt:            trainer.updatedAt.toISOString(),
       })
@@ -564,6 +580,10 @@ Called once from the onboarding screen after registration. Can be called again t
         alertColorScheme:     updated.alertColorScheme,
         alertTone:            updated.alertTone,
         sessionLayout:        updated.sessionLayout,
+
+        weeklySessionTarget:  updated.weeklySessionTarget,
+
+        show1rmEstimate:      updated.show1rmEstimate,
         createdAt:            updated.createdAt.toISOString(),
         updatedAt:            updated.updatedAt.toISOString(),
       })
@@ -628,6 +648,10 @@ Called once from the onboarding screen after registration. Can be called again t
         alertColorScheme:     updated.alertColorScheme,
         alertTone:            updated.alertTone,
         sessionLayout:        updated.sessionLayout,
+
+        weeklySessionTarget:  updated.weeklySessionTarget,
+
+        show1rmEstimate:      updated.show1rmEstimate,
         createdAt:            updated.createdAt.toISOString(),
         updatedAt:            updated.updatedAt.toISOString(),
       })

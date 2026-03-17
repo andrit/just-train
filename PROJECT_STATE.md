@@ -1,6 +1,6 @@
 # TrainerApp — Project State Document
 
-> **Last updated:** v1.5.1
+> **Last updated:** v1.6.0
 > **Purpose:** Living reference for architecture decisions, design principles, progress, and direction.
 > Updated at the end of every versioned release. Review this at the start of each new phase.
 
@@ -618,8 +618,8 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v1.4.5 | Preferences screen | ✅ |
 | v1.5.0 | Session logging | ✅ |
 | v1.5.1 | Session history + client timeline | ✅ |
-| v1.6.0 | KPI dashboard | 🔜 Next |
-| v1.7.0 | Monthly reports (Resend email) | 🔜 |
+| v1.6.0 | KPI dashboard | ✅ |
+| v1.7.0 | Monthly reports (Resend email) | 🔜 Next |
 | v1.7.5 | Redis + BullMQ for report queue | 🔜 |
 | v1.8.0 | Offline sync — IndexedDB + Workbox | 🔜 |
 | v2.0.0 | SaaS launch — Stripe, billing gates | 🔜 |

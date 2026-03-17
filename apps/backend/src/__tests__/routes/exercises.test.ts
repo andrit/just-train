@@ -25,7 +25,10 @@ import {
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
 
-// Chain shared across all DB builder calls in this file
+
+
+vi.mock('../../db', () => {
+  // Chain shared across all DB builder calls in this file
 const chain = {
   values:  vi.fn().mockReturnThis(),
   set:     vi.fn().mockReturnThis(),
@@ -34,9 +37,7 @@ const chain = {
   orderBy: vi.fn().mockResolvedValue([]),
   returning: vi.fn().mockResolvedValue([]),
 }
-
-vi.mock('../../db', () => ({
-  db: {
+  return { db: {
     query: {
       exercises: {
         findFirst: vi.fn().mockResolvedValue(undefined),
@@ -55,7 +56,8 @@ vi.mock('../../db', () => ({
   bodyParts:     {},
   exerciseMedia: {},
   trainers:      {},
-}))
+}
+})
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

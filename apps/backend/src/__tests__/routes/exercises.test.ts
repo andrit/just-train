@@ -25,38 +25,36 @@ import {
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
 
-
-
 vi.mock('../../db', () => {
-  // Chain shared across all DB builder calls in this file
-const chain = {
-  values:  vi.fn().mockReturnThis(),
-  set:     vi.fn().mockReturnThis(),
-  from:    vi.fn().mockReturnThis(),
-  where:   vi.fn().mockReturnThis(),
-  orderBy: vi.fn().mockResolvedValue([]),
-  returning: vi.fn().mockResolvedValue([]),
-}
-  return { db: {
-    query: {
-      exercises: {
-        findFirst: vi.fn().mockResolvedValue(undefined),
-        findMany:  vi.fn().mockResolvedValue([]),
+  const chain = {
+    values:    vi.fn().mockReturnThis(),
+    set:       vi.fn().mockReturnThis(),
+    from:      vi.fn().mockReturnThis(),
+    where:     vi.fn().mockReturnThis(),
+    orderBy:   vi.fn().mockResolvedValue([]),
+    returning: vi.fn().mockResolvedValue([]),
+  }
+  return {
+    db: {
+      query: {
+        exercises: {
+          findFirst: vi.fn().mockResolvedValue(undefined),
+          findMany:  vi.fn().mockResolvedValue([]),
+        },
+        bodyParts:     { findMany:  vi.fn().mockResolvedValue([]) },
+        exerciseMedia: { findFirst: vi.fn().mockResolvedValue(undefined) },
       },
-      bodyParts:  { findMany: vi.fn().mockResolvedValue([]) },
-      exerciseMedia: { findFirst: vi.fn().mockResolvedValue(undefined) },
+      select: vi.fn().mockReturnValue(chain),
+      insert: vi.fn().mockReturnValue(chain),
+      update: vi.fn().mockReturnValue(chain),
+      delete: vi.fn().mockReturnValue(chain),
+      _chain: chain,
     },
-    select: vi.fn().mockReturnValue(chain),
-    insert: vi.fn().mockReturnValue(chain),
-    update: vi.fn().mockReturnValue(chain),
-    delete: vi.fn().mockReturnValue(chain),
-    _chain: chain,
-  },
-  exercises:     {},
-  bodyParts:     {},
-  exerciseMedia: {},
-  trainers:      {},
-}
+    exercises:     {},
+    bodyParts:     {},
+    exerciseMedia: {},
+    trainers:      {},
+  }
 })
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

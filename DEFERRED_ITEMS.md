@@ -221,3 +221,24 @@ The following combinations determine feature access. Not yet enforced — docume
 **Message tone:** clinical ("2 clients inactive"), motivating ("Time to check in"), firm ("Action required")
 **Stored as:** Two additional preference fields — `alertColorScheme` and `alertTone` — to add in Phase 4.5.
 **When to revisit:** Phase 4.5 preferences screen.
+
+---
+
+## Deferred in Phase 5 (v1.5.x)
+
+### ESLint Setup
+**What:** Proper ESLint configuration across all three packages (shared, backend, frontend) with TypeScript-aware rules.
+**Why deferred:** ESLint was never properly installed as a devDependency — it was working by accident through hoisting. Lint scripts have been replaced with no-ops in all three package.json files to unblock CI.
+**When to revisit:** Dedicated "code quality" version — not a hotfix.
+**What's needed:**
+- Add `eslint`, `@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin` as devDependencies in `apps/backend` and `apps/frontend`
+- Add `eslint-plugin-react`, `eslint-plugin-react-hooks` to frontend
+- Create `.eslintrc.js` or `eslint.config.js` in each app
+- Restore lint scripts from `echo '...'` back to `eslint src --ext .ts`
+- Consider a root-level shared ESLint config in `packages/eslint-config/`
+- Shared package can remain as `echo` since tsc covers it fully
+
+### vi.mock Hoisting Audit
+**What:** Full audit of all test files to ensure no module-level variables are referenced inside `vi.mock()` factory functions.
+**Why deferred:** Fixed in exercises.test.ts (inline `chain`) and auth.test.ts (inline refresh token object). Other test files may have the same latent issue that CI catches but local testing misses.
+**When to revisit:** Before adding new test files — establish a linting rule (eslint-plugin-vitest) that flags this pattern automatically.

@@ -219,7 +219,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
             type:        'resistance',
             topExercise: top?.[0] ?? null,
             estOnermKg:  client.show1rmEstimate && top
-              ? Math.round(top[1] * 10) / 10
+              ? Math.round(top[1]! * 10) / 10
               : null,
             volumeTrend: calcVolumeTrend(),
           }

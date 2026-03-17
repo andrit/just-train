@@ -760,6 +760,24 @@ export default function ClientProfilePage(): React.JSX.Element {
             Clients
           </button>
 
+          {/* Start Session button */}
+          <Link
+            to={`/session/new?clientId=${client.id}`}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium',
+              'bg-brand-highlight text-white',
+              interactions.button.base,
+              interactions.fab.hover,
+              interactions.button.press,
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+            )}
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5" aria-hidden>
+              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            Start Session
+          </Link>
+
           {/* Edit button — animated */}
           <button
             type="button"

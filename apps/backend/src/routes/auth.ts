@@ -26,6 +26,7 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { db, trainers, clients, clientGoals, refreshTokens } from '../db'
+import type { Trainer } from '../db/schema/trainers'
 import { eq, and, gt } from 'drizzle-orm'
 import {
   hashPassword,
@@ -62,10 +63,50 @@ const MessageResponseSchema = z.object({
   message: z.string(),
 })
 
-// ── Device header extraction ─────────────────────────────────────────────────
+// ── Trainer serialiser ────────────────────────────────────────────────────────
+// Pure function — converts a raw Drizzle Trainer row to the TrainerResponse
+// shape. Called at every auth response point so the shape is defined once.
+//
+// Note: lastLoginAt is passed separately because the register route returns
+// null (just created) while login returns the updated value.
+
+function serializeTrainer(
+  trainer: Trainer,
+  overrides: { lastLoginAt?: string | null } = {},
+): z.infer<typeof TrainerResponseSchema> {
+  return {
+    id:                   trainer.id,
+    name:                 trainer.name,
+    email:                trainer.email,
+    role:                 trainer.role,
+    weightUnitPreference: trainer.weightUnitPreference,
+    emailVerified:        trainer.emailVerified,
+    lastLoginAt:          overrides.lastLoginAt !== undefined
+                            ? overrides.lastLoginAt
+                            : trainer.lastLoginAt?.toISOString() ?? null,
+    subscriptionTier:     trainer.subscriptionTier,
+    subscriptionStatus:   trainer.subscriptionStatus,
+    onboardedAt:          trainer.onboardedAt?.toISOString()  ?? null,
+    trainerMode:          trainer.trainerMode,
+    reportsSentCount:     trainer.reportsSentCount,
+    lastActiveAt:         trainer.lastActiveAt?.toISOString() ?? null,
+    ctaLabel:             trainer.ctaLabel,
+    alertsEnabled:        trainer.alertsEnabled,
+    widgetProgression:    trainer.widgetProgression ?? null,
+    alertColorScheme:     trainer.alertColorScheme,
+    alertTone:            trainer.alertTone,
+    sessionLayout:        trainer.sessionLayout,
+    weeklySessionTarget:  trainer.weeklySessionTarget,
+    show1rmEstimate:      trainer.show1rmEstimate,
+    createdAt:            trainer.createdAt.toISOString(),
+    updatedAt:            trainer.updatedAt.toISOString(),
+  }
+}
+
+// ── Device header extraction ──────────────────────────────────────────────────
 
 function extractDeviceInfo(request: { headers: Record<string, string | string[] | undefined> }): {
-  deviceId: string
+  deviceId:   string
   deviceName: string | null
 } {
   // Client sends X-Device-ID — a UUID stored in localStorage (generated on first app load)
@@ -158,33 +199,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.status(201).send({
         accessToken,
-        trainer: {
-          id:                   trainer.id,
-          name:                 trainer.name,
-          email:                trainer.email,
-          role:                 trainer.role,
-          weightUnitPreference: trainer.weightUnitPreference,
-          emailVerified:        trainer.emailVerified,
-          lastLoginAt:          null,
-          subscriptionTier:     trainer.subscriptionTier,
-          subscriptionStatus:   trainer.subscriptionStatus,
-          onboardedAt:          trainer.onboardedAt?.toISOString() ?? null,
-          trainerMode:          trainer.trainerMode,
-          reportsSentCount:     trainer.reportsSentCount,
-          lastActiveAt:         trainer.lastActiveAt?.toISOString() ?? null,
-          ctaLabel:             trainer.ctaLabel,
-          alertsEnabled:        trainer.alertsEnabled,
-          widgetProgression:    trainer.widgetProgression ?? null,
-          alertColorScheme:     trainer.alertColorScheme,
-          alertTone:            trainer.alertTone,
-          sessionLayout:        trainer.sessionLayout,
-
-          weeklySessionTarget:  trainer.weeklySessionTarget,
-
-          show1rmEstimate:      trainer.show1rmEstimate,
-          createdAt:            trainer.createdAt.toISOString(),
-          updatedAt:            trainer.updatedAt.toISOString(),
-        },
+        trainer: serializeTrainer(trainer, { lastLoginAt: null }),
       })
     } catch (error) {
       ;(app.log as any).error(error)
@@ -253,33 +268,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send({
         accessToken,
-        trainer: {
-          id:                   trainer.id,
-          name:                 trainer.name,
-          email:                trainer.email,
-          role:                 trainer.role,
-          weightUnitPreference: trainer.weightUnitPreference,
-          emailVerified:        trainer.emailVerified,
-          lastLoginAt:          trainer.lastLoginAt?.toISOString() ?? null,
-          subscriptionTier:     trainer.subscriptionTier,
-          subscriptionStatus:   trainer.subscriptionStatus,
-          onboardedAt:          trainer.onboardedAt?.toISOString() ?? null,
-          trainerMode:          trainer.trainerMode,
-          reportsSentCount:     trainer.reportsSentCount,
-          lastActiveAt:         trainer.lastActiveAt?.toISOString() ?? null,
-          ctaLabel:             trainer.ctaLabel,
-          alertsEnabled:        trainer.alertsEnabled,
-          widgetProgression:    trainer.widgetProgression ?? null,
-          alertColorScheme:     trainer.alertColorScheme,
-          alertTone:            trainer.alertTone,
-          sessionLayout:        trainer.sessionLayout,
-
-          weeklySessionTarget:  trainer.weeklySessionTarget,
-
-          show1rmEstimate:      trainer.show1rmEstimate,
-          createdAt:            trainer.createdAt.toISOString(),
-          updatedAt:            trainer.updatedAt.toISOString(),
-        },
+        trainer: serializeTrainer(trainer),
       })
     } catch (error) {
       ;(app.log as any).error(error)
@@ -356,33 +345,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
 
       return reply.send({
         accessToken,
-        trainer: {
-          id:                   trainer.id,
-          name:                 trainer.name,
-          email:                trainer.email,
-          role:                 trainer.role,
-          weightUnitPreference: trainer.weightUnitPreference,
-          emailVerified:        trainer.emailVerified,
-          lastLoginAt:          trainer.lastLoginAt?.toISOString() ?? null,
-          subscriptionTier:     trainer.subscriptionTier,
-          subscriptionStatus:   trainer.subscriptionStatus,
-          onboardedAt:          trainer.onboardedAt?.toISOString() ?? null,
-          trainerMode:          trainer.trainerMode,
-          reportsSentCount:     trainer.reportsSentCount,
-          lastActiveAt:         trainer.lastActiveAt?.toISOString() ?? null,
-          ctaLabel:             trainer.ctaLabel,
-          alertsEnabled:        trainer.alertsEnabled,
-          widgetProgression:    trainer.widgetProgression ?? null,
-          alertColorScheme:     trainer.alertColorScheme,
-          alertTone:            trainer.alertTone,
-          sessionLayout:        trainer.sessionLayout,
-
-          weeklySessionTarget:  trainer.weeklySessionTarget,
-
-          show1rmEstimate:      trainer.show1rmEstimate,
-          createdAt:            trainer.createdAt.toISOString(),
-          updatedAt:            trainer.updatedAt.toISOString(),
-        },
+        trainer: serializeTrainer(trainer),
       })
     } catch (error) {
       ;(app.log as any).error(error)
@@ -482,31 +445,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
       }
 
       return reply.send({
-        id:                   trainer.id,
-        name:                 trainer.name,
-        email:                trainer.email,
-        role:                 trainer.role,
-        weightUnitPreference: trainer.weightUnitPreference,
-        emailVerified:        trainer.emailVerified,
-        lastLoginAt:          trainer.lastLoginAt?.toISOString() ?? null,
-        subscriptionTier:     trainer.subscriptionTier,
-        subscriptionStatus:   trainer.subscriptionStatus,
-        onboardedAt:          trainer.onboardedAt?.toISOString() ?? null,
-        trainerMode:          trainer.trainerMode,
-        reportsSentCount:     trainer.reportsSentCount,
-        lastActiveAt:         trainer.lastActiveAt?.toISOString() ?? null,
-        ctaLabel:             trainer.ctaLabel,
-        alertsEnabled:        trainer.alertsEnabled,
-        widgetProgression:    trainer.widgetProgression ?? null,
-        alertColorScheme:     trainer.alertColorScheme,
-        alertTone:            trainer.alertTone,
-        sessionLayout:        trainer.sessionLayout,
-
-        weeklySessionTarget:  trainer.weeklySessionTarget,
-
-        show1rmEstimate:      trainer.show1rmEstimate,
-        createdAt:            trainer.createdAt.toISOString(),
-        updatedAt:            trainer.updatedAt.toISOString(),
+        ...serializeTrainer(trainer),
       })
     } catch (error) {
       ;(app.log as any).error(error)
@@ -561,31 +500,7 @@ Called once from the onboarding screen after registration. Can be called again t
       }
 
       return reply.send({
-        id:                   updated.id,
-        name:                 updated.name,
-        email:                updated.email,
-        role:                 updated.role,
-        weightUnitPreference: updated.weightUnitPreference,
-        emailVerified:        updated.emailVerified,
-        lastLoginAt:          updated.lastLoginAt?.toISOString() ?? null,
-        subscriptionTier:     updated.subscriptionTier,
-        subscriptionStatus:   updated.subscriptionStatus,
-        onboardedAt:          updated.onboardedAt?.toISOString() ?? null,
-        trainerMode:          updated.trainerMode,
-        reportsSentCount:     updated.reportsSentCount,
-        lastActiveAt:         updated.lastActiveAt?.toISOString() ?? null,
-        ctaLabel:             updated.ctaLabel,
-        alertsEnabled:        updated.alertsEnabled,
-        widgetProgression:    updated.widgetProgression ?? null,
-        alertColorScheme:     updated.alertColorScheme,
-        alertTone:            updated.alertTone,
-        sessionLayout:        updated.sessionLayout,
-
-        weeklySessionTarget:  updated.weeklySessionTarget,
-
-        show1rmEstimate:      updated.show1rmEstimate,
-        createdAt:            updated.createdAt.toISOString(),
-        updatedAt:            updated.updatedAt.toISOString(),
+        ...serializeTrainer(updated),
       })
     } catch (error) {
       ;(app.log as any).error(error)
@@ -629,31 +544,7 @@ Called once from the onboarding screen after registration. Can be called again t
       }
 
       return reply.send({
-        id:                   updated.id,
-        name:                 updated.name,
-        email:                updated.email,
-        role:                 updated.role,
-        weightUnitPreference: updated.weightUnitPreference,
-        emailVerified:        updated.emailVerified,
-        lastLoginAt:          updated.lastLoginAt?.toISOString() ?? null,
-        subscriptionTier:     updated.subscriptionTier,
-        subscriptionStatus:   updated.subscriptionStatus,
-        onboardedAt:          updated.onboardedAt?.toISOString() ?? null,
-        trainerMode:          updated.trainerMode,
-        reportsSentCount:     updated.reportsSentCount,
-        lastActiveAt:         updated.lastActiveAt?.toISOString() ?? null,
-        ctaLabel:             updated.ctaLabel,
-        alertsEnabled:        updated.alertsEnabled,
-        widgetProgression:    updated.widgetProgression ?? null,
-        alertColorScheme:     updated.alertColorScheme,
-        alertTone:            updated.alertTone,
-        sessionLayout:        updated.sessionLayout,
-
-        weeklySessionTarget:  updated.weeklySessionTarget,
-
-        show1rmEstimate:      updated.show1rmEstimate,
-        createdAt:            updated.createdAt.toISOString(),
-        updatedAt:            updated.updatedAt.toISOString(),
+        ...serializeTrainer(updated),
       })
     } catch (error) {
       ;(app.log as any).error(error)

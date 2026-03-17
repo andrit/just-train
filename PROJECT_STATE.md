@@ -1,6 +1,6 @@
 # TrainerApp — Project State Document
 
-> **Last updated:** v1.6.0
+> **Last updated:** v1.6.1
 > **Purpose:** Living reference for architecture decisions, design principles, progress, and direction.
 > Updated at the end of every versioned release. Review this at the start of each new phase.
 

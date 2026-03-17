@@ -5,6 +5,21 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v1.6.1] — Cleanup: serializeTrainer + ClientProfilePage split
+
+### Refactored
+- `apps/backend/src/routes/auth.ts` — extracted `serializeTrainer()` pure function. Six identical inline trainer response objects replaced with one call each. Adding a new trainer field is now a single-line change in one place.
+- `apps/frontend/src/pages/ClientProfilePage.tsx` — reduced from 875 lines to 248. Now orchestration-only: routing, state, data fetching, header, tab bar. All tab content extracted to dedicated components.
+- `apps/frontend/src/components/client-profile/OverviewTab.tsx` — extracted. Contains: StatCard, GoalRow, goal CRUD, focus display, progression state.
+- `apps/frontend/src/components/client-profile/TimelineTab.tsx` — extracted. Contains: unified timeline, session tap navigation, scroll save.
+- `apps/frontend/src/components/client-profile/BaselineTab.tsx` — extracted. Contains: SnapshotCard, snapshot history, take snapshot CTA.
+
+### Fixed
+- `apps/backend/src/__tests__/helpers/factories.ts` — `makeTrainer` and `makeClient` now include `weeklySessionTarget` and `show1rmEstimate`
+- `apps/backend/src/routes/kpis.ts` — `top[1]!` non-null assertion to fix `noUncheckedIndexedAccess` error
+
+---
+
 ## [v1.6.0] — KPI Dashboard
 
 ### Added

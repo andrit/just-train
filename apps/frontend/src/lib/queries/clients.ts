@@ -222,8 +222,6 @@ export function useClientKpis(clientId: string | null | undefined): UseQueryResu
 
 // ── Reports ───────────────────────────────────────────────────────────────────
 
-import type { UseMutationResult } from '@tanstack/react-query'
-
 export interface ReportPreview {
   html:         string
   periodLabel:  string

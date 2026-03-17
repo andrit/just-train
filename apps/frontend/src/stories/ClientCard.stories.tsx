@@ -25,6 +25,7 @@ const base: ClientResponse = {
   isSelf:              false,
   weeklySessionTarget: 3,
   show1rmEstimate:     false,
+  lastReportSentAt:    null,
   lastActiveAt:     new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
   createdAt:        '2024-09-01T00:00:00Z',
   updatedAt:        '2024-09-01T00:00:00Z',

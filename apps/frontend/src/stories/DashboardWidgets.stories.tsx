@@ -29,6 +29,7 @@ const makeClient = (overrides: Partial<ClientResponse> = {}): ClientResponse => 
   isSelf:              false,
   weeklySessionTarget: 3,
   show1rmEstimate:     false,
+  lastReportSentAt:    null,
   lastActiveAt:     new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   createdAt:        '2024-01-01T00:00:00Z',
   updatedAt:        '2024-01-01T00:00:00Z',

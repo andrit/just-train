@@ -306,25 +306,27 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
       return reply.status(401).send({ error: 'Refresh token missing' })
     }
 
-    // Frontend sends these headers so we can look up the right token
-    const trainerId = request.headers['x-trainer-id'] as string | undefined
-    const deviceId  = request.headers['x-device-id']  as string | undefined
+    // deviceId still needed to find the right token for this device
+    const deviceId  = request.headers['x-device-id'] as string | undefined
 
-    if (!trainerId || !deviceId) {
-      return reply.status(401).send({ error: 'X-Trainer-ID and X-Device-ID headers required' })
+    if (!deviceId) {
+      return reply.status(401).send({ error: 'X-Device-ID header required' })
     }
 
     try {
-      const tokenRecord = await findAndVerifyRefreshToken({ rawToken, trainerId, deviceId })
+      // Look up the token by raw value — trainerId is on the record itself,
+      // so we don't need X-Trainer-ID header (which breaks refresh-on-reload
+      // because the Zustand store is empty after a page refresh)
+      const tokenRecord = await findAndVerifyRefreshToken({ rawToken, deviceId })
 
       if (!tokenRecord) {
-        // Token not found or invalid — clear the stale cookie
         reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
         return reply.status(401).send({ error: 'Invalid or expired refresh token' })
       }
 
+      // trainerId comes from the token record — don't rely on the header
       const trainer = await db.query.trainers.findFirst({
-        where: eq(trainers.id, trainerId),
+        where: eq(trainers.id, tokenRecord.trainerId),
       })
 
       if (!trainer) {

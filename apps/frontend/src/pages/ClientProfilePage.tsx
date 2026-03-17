@@ -214,7 +214,7 @@ export default function ClientProfilePage(): React.JSX.Element {
             <h1 className="font-display text-3xl uppercase tracking-wide text-white leading-none">
               {client.name}
             </h1>
-            <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <span className={cn(
                 'text-[10px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider',
                 PROGRESSION_STATE_COLOR[client.progressionState],
@@ -226,6 +226,30 @@ export default function ClientProfilePage(): React.JSX.Element {
                   My Training
                 </span>
               )}
+              {/* Report status badge — not shown on trainer's own profile */}
+              {!client.isSelf && (() => {
+                const now = new Date()
+                const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+                const sentAt = client.lastReportSentAt ? new Date(client.lastReportSentAt) : null
+                const sentThisMonth = sentAt && sentAt >= thisMonthStart
+                const hasSessions = (kpis?.sessionsThisMonth ?? 0) > 0
+
+                if (sentThisMonth) {
+                  return (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-emerald-500/30 text-emerald-400/80 uppercase tracking-wider">
+                      Report Sent
+                    </span>
+                  )
+                }
+                if (hasSessions) {
+                  return (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400/80 uppercase tracking-wider">
+                      Report Due
+                    </span>
+                  )
+                }
+                return null
+              })()}
             </div>
           </div>
         </div>

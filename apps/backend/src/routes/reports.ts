@@ -155,11 +155,8 @@ export async function reportRoutes(app: FastifyInstance): Promise<void> {
       tags:     ['Reports'],
       security: [{ bearerAuth: [] }],
       summary:  'Preview the monthly report HTML',
-      description: 'Builds and returns the report HTML without sending. Used by the preview modal.',
+      description: 'Builds and returns the report HTML without sending. Trainer note is rendered client-side.',
       params: UuidParamSchema,
-      querystring: z.object({
-        trainerNote: z.string().max(1000).optional(),
-      }),
       response: {
         200: ReportPreviewResponseSchema,
         404: ErrorResponseSchema,
@@ -168,10 +165,8 @@ export async function reportRoutes(app: FastifyInstance): Promise<void> {
     },
   }, async (request, reply) => {
     const { id: clientId } = request.params as z.infer<typeof UuidParamSchema>
-    const { trainerNote }  = request.query as { trainerNote?: string }
-
     try {
-      const result = await buildReportData(clientId, request.trainer.trainerId, trainerNote ?? null)
+      const result = await buildReportData(clientId, request.trainer.trainerId, null)
       if (!result) return reply.status(404).send({ error: 'Client not found' })
 
       const html = buildReportHtml(result.data)
@@ -227,13 +222,15 @@ export async function reportRoutes(app: FastifyInstance): Promise<void> {
       // Send via Resend
       const { id: emailId } = await sendReport(result.data)
 
-      // Increment reportsSentCount
-      await db.update(trainers)
-        .set({
-          reportsSentCount: sql`${trainers.reportsSentCount} + 1`,
-          updatedAt: new Date(),
-        })
-        .where(eq(trainers.id, request.trainer.trainerId))
+      // Update client lastReportSentAt + trainer reportsSentCount in parallel
+      await Promise.all([
+        db.update(clients)
+          .set({ lastReportSentAt: new Date(), updatedAt: new Date() })
+          .where(eq(clients.id, clientId)),
+        db.update(trainers)
+          .set({ reportsSentCount: sql`${trainers.reportsSentCount} + 1`, updatedAt: new Date() })
+          .where(eq(trainers.id, request.trainer.trainerId)),
+      ])
 
       return reply.send({
         message:     `Report sent to ${result.data.clientEmail}`,

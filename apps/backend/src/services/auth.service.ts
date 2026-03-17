@@ -165,28 +165,31 @@ export async function storeRefreshToken(params: {
  * In practice there should be at most one active token per device.
  */
 export async function findAndVerifyRefreshToken(params: {
-  rawToken: string
-  trainerId: string
+  rawToken:  string
   deviceId:  string
+  trainerId?: string
 }): Promise<typeof refreshTokens.$inferSelect | null> {
   const now = new Date()
 
-  // Find active (not expired, not revoked) tokens for this trainer + device
+  // Find active tokens for this device (and optionally this trainer)
+  // trainerId is optional — on page refresh the Zustand store is empty
+  // so we can't send it as a header. The token itself carries the trainerId.
+  const conditions = [
+    eq(refreshTokens.deviceId, params.deviceId),
+    gt(refreshTokens.expiresAt, now),
+  ]
+  if (params.trainerId) {
+    conditions.push(eq(refreshTokens.trainerId, params.trainerId))
+  }
+
   const candidates = await db
     .select()
     .from(refreshTokens)
-    .where(
-      and(
-        eq(refreshTokens.trainerId, params.trainerId),
-        eq(refreshTokens.deviceId,  params.deviceId),
-        gt(refreshTokens.expiresAt, now),   // not expired
-      )
-    )
+    .where(and(...conditions))
 
   // Verify raw token against each candidate hash
-  // (should only ever be 1 active token per device after rotation)
   for (const candidate of candidates) {
-    if (candidate.revokedAt) continue  // skip revoked tokens
+    if (candidate.revokedAt) continue
 
     const valid = await argon2.verify(candidate.tokenHash, params.rawToken)
     if (valid) return candidate

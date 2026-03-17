@@ -246,14 +246,12 @@ export interface SendReportResult {
 
 export function useReportPreview(
   clientId: string | null,
-  trainerNote: string,
 ): UseQueryResult<ReportPreview> {
-  const params = trainerNote ? `?trainerNote=${encodeURIComponent(trainerNote)}` : ''
   return useQuery({
-    queryKey: ['clients', clientId, 'report-preview', trainerNote],
-    queryFn:  () => apiClient<ReportPreview>(`/clients/${clientId}/report-preview${params}`),
+    queryKey: ['clients', clientId, 'report-preview'],
+    queryFn:  () => apiClient<ReportPreview>(`/clients/${clientId}/report-preview`),
     enabled:  !!clientId,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 5,
   })
 }
 

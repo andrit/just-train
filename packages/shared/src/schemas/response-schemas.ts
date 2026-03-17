@@ -179,6 +179,8 @@ export const ClientResponseSchema = z.object({
     .describe('Target sessions per week for consistency score'),
   show1rmEstimate: z.boolean()
     .describe('Whether to show Epley 1RM estimates for this client'),
+  lastReportSentAt: z.string().datetime().nullable()
+    .describe('When the last monthly report was sent — null if never sent'),
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

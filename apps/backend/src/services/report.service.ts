@@ -105,6 +105,21 @@ export function resolveReportPeriod(
 
 // ── HTML builder ───────────────────────────────────────────────────────────────
 
+/** Escape user-controlled strings before interpolating into HTML */
+function esc(str: string): string {
+  return str
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;')
+    .replace(/'/g,  '&#039;')
+}
+
+/** Escape and preserve newlines as <br/> for multiline user content */
+function escMultiline(str: string): string {
+  return esc(str).replace(/\n/g, '<br/>')
+}
+
 function scoreBar(value: number, max = 10): string {
   const pct  = Math.round((value / max) * 100)
   const fill = pct >= 70 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444'
@@ -141,7 +156,7 @@ export function buildReportHtml(data: ReportData): string {
     <tr>
       <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:13px;color:#374151;">
         ${new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-        ${s.name ? `— ${s.name}` : ''}
+        ${s.name ? `— ${esc(s.name)}` : ''}
       </td>
       <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:13px;color:#6b7280;text-align:right;">
         ${s.sets} sets · ${s.volumeLbs > 0 ? `${s.volumeLbs.toLocaleString()} lbs` : '—'}
@@ -155,14 +170,14 @@ export function buildReportHtml(data: ReportData): string {
   const goalRows = activeGoals.slice(0, 4).map(g => `
     <tr>
       <td style="padding:6px 0;font-size:13px;color:#374151;">
-        <span style="color:#6b7280;margin-right:8px;">→</span>${g.goal}
+        <span style="color:#6b7280;margin-right:8px;">→</span>${esc(g.goal)}
       </td>
     </tr>`).join('')
 
   const achievedRows = completedGoals.map(g => `
     <tr>
       <td style="padding:6px 0;font-size:13px;color:#10b981;">
-        <span style="margin-right:8px;">✓</span>${g.goal}
+        <span style="margin-right:8px;">✓</span>${esc(g.goal)}
       </td>
     </tr>`).join('')
 
@@ -171,7 +186,7 @@ export function buildReportHtml(data: ReportData): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monthly Training Report — ${clientName}</title>
+  <title>Monthly Training Report — ${esc(clientName)}</title>
 </head>
 <body style="margin:0;padding:0;background:#f9fafb;font-family:Arial,Helvetica,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:32px 16px;">
@@ -185,9 +200,9 @@ export function buildReportHtml(data: ReportData): string {
           Monthly Training Report
         </p>
         <h1 style="margin:0 0 4px;font-size:28px;font-weight:700;color:#ffffff;">
-          ${clientName}
+          ${esc(clientName)}
         </h1>
-        <p style="margin:0;font-size:14px;color:#9ca3af;">${periodLabel}</p>
+        <p style="margin:0;font-size:14px;color:#9ca3af;">${esc(periodLabel)}</p>
       </td>
     </tr>
 
@@ -228,7 +243,7 @@ export function buildReportHtml(data: ReportData): string {
     <tr>
       <td style="background:#ffffff;padding:24px 32px;border-bottom:1px solid #f3f4f6;">
         <p style="margin:0 0 8px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;">Performance</p>
-        <p style="margin:0;font-size:15px;color:#374151;">${focusKpiLabel}</p>
+        <p style="margin:0;font-size:15px;color:#374151;">${focusKpiLabel != null ? esc(focusKpiLabel) : ''}</p>
       </td>
     </tr>` : ''}
 
@@ -283,15 +298,15 @@ export function buildReportHtml(data: ReportData): string {
     ${trainerNote ? `
     <tr>
       <td style="background:#fffbeb;padding:24px 32px;border-bottom:1px solid #f3f4f6;border-left:4px solid #f59e0b;">
-        <p style="margin:0 0 8px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#d97706;">A Note From ${trainerName}</p>
-        <p style="margin:0;font-size:14px;color:#374151;line-height:1.6;">${trainerNote.replace(/\n/g, '<br/>')}</p>
+        <p style="margin:0 0 8px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#d97706;">A Note From ${esc(trainerName)}</p>
+        <p style="margin:0;font-size:14px;color:#374151;line-height:1.6;">${escMultiline(trainerNote)}</p>
       </td>
     </tr>` : ''}
 
     <!-- Footer -->
     <tr>
       <td style="background:#111827;padding:24px 32px;border-radius:0 0 12px 12px;text-align:center;">
-        <p style="margin:0 0 4px;font-size:13px;color:#9ca3af;">Prepared by ${trainerName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#9ca3af;">Prepared by ${esc(trainerName)}</p>
         <p style="margin:0;font-size:12px;color:#6b7280;">Keep showing up. The work compounds.</p>
       </td>
     </tr>
@@ -317,7 +332,7 @@ export async function sendReport(data: ReportData): Promise<{ id: string }> {
   const { data: result, error } = await resend.emails.send({
     from:    `${data.trainerName} via TrainerApp <${fromEmail}>`,
     to:      data.clientEmail,
-    replyTo: data.trainerEmail,
+    reply_to: data.trainerEmail,
     subject,
     html:    buildReportHtml(data),
   })

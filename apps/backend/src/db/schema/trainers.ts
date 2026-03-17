@@ -170,6 +170,9 @@ export const clients = pgTable('clients', {
   weeklySessionTarget: integer('weekly_session_target').notNull().default(3),
   show1rmEstimate:     boolean('show_1rm_estimate').notNull().default(false),
 
+  // v1.7.0: tracks when the last monthly report was sent
+  lastReportSentAt:    timestamp('last_report_sent_at'),
+
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })

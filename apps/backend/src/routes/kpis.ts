@@ -209,7 +209,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
           for (const s of rSets) {
             if (s.weight && s.reps) {
               const est = epley1rmKg(s.weight, s.reps)
-              if (!byEx[s.exerciseName] || est > byEx[s.exerciseName]) {
+              if (!byEx[s.exerciseName] || est > byEx[s.exerciseName]!) {
                 byEx[s.exerciseName] = est
               }
             }

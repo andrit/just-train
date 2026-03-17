@@ -164,7 +164,11 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(404).send({ error: 'Exercise not found' })
       }
 
-      return reply.send(result)
+      return reply.send({
+        ...result,
+        createdAt: result.createdAt instanceof Date ? result.createdAt.toISOString() : result.createdAt,
+        updatedAt: result.updatedAt instanceof Date ? result.updatedAt.toISOString() : result.updatedAt,
+      })
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercise' })

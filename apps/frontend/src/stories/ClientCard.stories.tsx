@@ -22,7 +22,9 @@ const base: ClientResponse = {
   startDate:        '2024-09-01',
   caloricGoal:      null,
   nutritionNotes:   null,
-  isSelf:           false,
+  isSelf:              false,
+  weeklySessionTarget: 3,
+  show1rmEstimate:     false,
   lastActiveAt:     new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
   createdAt:        '2024-09-01T00:00:00Z',
   updatedAt:        '2024-09-01T00:00:00Z',

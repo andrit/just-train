@@ -103,6 +103,12 @@ export const CreateClientSchema = z.object({
     .describe('Target kcal/day — optional nutrition hook, not yet computed from logs'),
   nutritionNotes: z.string().max(1000).optional()
     .describe('Trainer-entered nutrition observations'),
+
+  // v1.6.0: KPI preferences
+  weeklySessionTarget: z.number().int().min(1).max(14).optional()
+    .describe('Target sessions per week for consistency score'),
+  show1rmEstimate: z.boolean().optional()
+    .describe('Whether to show Epley 1RM estimates for this client'),
 })
 export type CreateClientInput = z.infer<typeof CreateClientSchema>
 

@@ -18,7 +18,7 @@ A mobile-first PWA for fitness trainers and athletes to plan sessions, track per
 | Auth     | JWT access tokens + argon2 + httpOnly cookies |
 | Database | PostgreSQL                                    |
 | Media    | Cloudinary                                    |
-| Hosting  | Railway (backend + DB), Vercel (frontend)     |
+| Hosting  | Railway (backend + DB), Vercel (frontend) | Split by design — Vercel CDN for PWA load speed, Railway for API + Postgres co-location |
 
 ---
 

@@ -77,14 +77,16 @@ export function useClient(id: string | null): UseQueryResult<ClientResponse> {
 // ── Create client ─────────────────────────────────────────────────────────────
 
 export interface CreateClientInput {
-  name:             string
-  email?:           string
-  phone?:           string
-  primaryFocus?:    string
-  secondaryFocus?:  string
-  progressionState?: string
-  startDate?:       string
-  notes?:           string
+  name:                string
+  email?:              string
+  phone?:              string
+  primaryFocus?:       string
+  secondaryFocus?:     string
+  progressionState?:   string
+  startDate?:          string
+  notes?:              string
+  weeklySessionTarget?: number
+  show1rmEstimate?:    boolean
 }
 
 export function useCreateClient(): UseMutationResult<ClientResponse, Error, CreateClientInput> {

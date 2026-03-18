@@ -53,8 +53,9 @@ export const exercises = pgTable('exercises', {
   description:  text('description'),
   instructions: text('instructions'),   // Step-by-step form cues
 
+  // bodyPartId is nullable — draft exercises (quick-added mid-session)
+  // don't require a body part. Assigned during post-session enrichment.
   bodyPartId: uuid('body_part_id')
-    .notNull()
     .references(() => bodyParts.id),
 
   // workoutType on the exercise is the default/intended type.

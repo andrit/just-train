@@ -20,6 +20,7 @@ import { useRestTimer }                   from '@/hooks/useRestTimer'
 import { useAuthStore }                   from '@/store/authStore'
 import { useSession, useEndSession }      from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
+import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
 import { RestTimerBanner }                from '@/components/session/RestTimerBanner'
 import { EndSessionModal }                from '@/components/session/EndSessionModal'
 import { Spinner }                        from '@/components/ui/Spinner'
@@ -35,8 +36,9 @@ export default function LiveSessionPage(): React.JSX.Element {
   const { data: session, isLoading, error } = useSession(id ?? null)
   const endSession = useEndSession()
 
-  const [showEndModal, setShowEndModal] = useState(false)
-  const [navExpanded,  setNavExpanded]  = useState(false)
+  const [showEndModal,   setShowEndModal]  = useState(false)
+  const [navExpanded,    setNavExpanded]   = useState(false)
+  const [addBlockOpen,   setAddBlockOpen]  = useState(false)
 
   const weightUnit = trainer?.weightUnitPreference ?? 'lbs'
 
@@ -161,11 +163,24 @@ export default function LiveSessionPage(): React.JSX.Element {
         {workouts.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
-              <p className="text-2xl mb-3" aria-hidden>🏋️</p>
-              <p className="text-gray-400 text-sm">No workout blocks yet.</p>
-              <p className="text-gray-600 text-xs mt-1">
-                This session was started without a template. Exercise blocks coming in a future update.
-              </p>
+              <p className="text-4xl mb-4" aria-hidden>🏋️</p>
+              <p className="text-gray-300 font-medium mb-1">Ready to train</p>
+              <p className="text-gray-600 text-sm mb-6">Add your first workout block to get started</p>
+              <button
+                type="button"
+                onClick={() => setAddBlockOpen(true)}
+                className={cn(
+                  'flex items-center gap-2 px-5 py-3 rounded-xl mx-auto',
+                  'bg-brand-highlight text-white font-medium',
+                  interactions.button.base,
+                  interactions.button.press,
+                )}
+              >
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                  <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                Add Block
+              </button>
             </div>
           </div>
         ) : sessionLayout === 'horizontal' ? (
@@ -220,6 +235,35 @@ export default function LiveSessionPage(): React.JSX.Element {
         )}
 
       </div>
+
+      {/* Add Block FAB — shown when blocks exist */}
+      {workouts.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setAddBlockOpen(true)}
+          aria-label="Add workout block"
+          className={cn(
+            'fixed bottom-6 right-4 z-30',
+            'w-12 h-12 rounded-full',
+            'bg-brand-highlight text-white shadow-lg',
+            'flex items-center justify-center',
+            interactions.button.base,
+            interactions.fab.hover,
+            interactions.button.press,
+          )}
+        >
+          <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
+
+      {/* Add block sheet */}
+      <AddBlockSheet
+        open={addBlockOpen}
+        sessionId={id!}
+        onClose={() => setAddBlockOpen(false)}
+      />
 
       {/* End session modal */}
       <EndSessionModal

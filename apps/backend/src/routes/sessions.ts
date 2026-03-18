@@ -62,16 +62,43 @@ const WorkoutChildParamSchema = z.object({
 
 // Serialize a session row (with or without joined client) to match
 // SessionSummaryResponseSchema — converts Date objects to ISO strings.
+function serializeWorkout(w: any): any {
+  return {
+    ...w,
+    createdAt:        w.createdAt instanceof Date ? w.createdAt.toISOString() : w.createdAt,
+    updatedAt:        w.updatedAt instanceof Date ? w.updatedAt.toISOString() : w.updatedAt,
+    sessionExercises: (w.sessionExercises ?? []).map((se: any) => ({
+      ...se,
+      createdAt: se.createdAt instanceof Date ? se.createdAt.toISOString() : se.createdAt,
+      updatedAt: se.updatedAt instanceof Date ? se.updatedAt.toISOString() : se.updatedAt,
+      exercise: se.exercise ? {
+        ...se.exercise,
+        media: (se.exercise.media ?? []).map((m: any) => ({
+          ...m,
+          createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+          updatedAt: m.updatedAt instanceof Date ? m.updatedAt.toISOString() : m.updatedAt,
+        })),
+      } : null,
+      sets: (se.sets ?? []).map((set: any) => ({
+        ...set,
+        createdAt: set.createdAt instanceof Date ? set.createdAt.toISOString() : set.createdAt,
+        updatedAt: set.updatedAt instanceof Date ? set.updatedAt.toISOString() : set.updatedAt,
+      })),
+    })),
+  }
+}
+
 function serializeSession(s: any): any {
   return {
     ...s,
-    client:       s.client
+    client:    s.client
       ? { id: s.client.id, name: s.client.name, photoUrl: s.client.photoUrl ?? null }
       : null,
-    startTime:    s.startTime instanceof Date  ? s.startTime.toISOString()  : (s.startTime  ?? null),
-    endTime:      s.endTime   instanceof Date  ? s.endTime.toISOString()    : (s.endTime    ?? null),
-    createdAt:    s.createdAt instanceof Date  ? s.createdAt.toISOString()  : s.createdAt,
-    updatedAt:    s.updatedAt instanceof Date  ? s.updatedAt.toISOString()  : s.updatedAt,
+    startTime: s.startTime instanceof Date ? s.startTime.toISOString() : (s.startTime ?? null),
+    endTime:   s.endTime   instanceof Date ? s.endTime.toISOString()   : (s.endTime   ?? null),
+    createdAt: s.createdAt instanceof Date ? s.createdAt.toISOString() : s.createdAt,
+    updatedAt: s.updatedAt instanceof Date ? s.updatedAt.toISOString() : s.updatedAt,
+    workouts:  (s.workouts ?? []).map(serializeWorkout),
   }
 }
 
@@ -153,7 +180,7 @@ This is the primary payload for the active workout view — loaded once when the
               sessionExercises: {
                 orderBy: sessionExercises.orderIndex,
                 with: {
-                  exercise: { with: { bodyPart: true } },
+                  exercise: { with: { bodyPart: true, media: true } },
                   sets: { orderBy: sets.setNumber },
                 },
               },
@@ -310,12 +337,26 @@ These are suggestions — the trainer can use any order.`,
     const body = request.body as Omit<z.infer<typeof CreateWorkoutSchema>, 'sessionId'>
 
     try {
+      // Auto-assign orderIndex if not provided — append after existing blocks
+      let { orderIndex } = body
+      if (orderIndex === undefined) {
+        const existing = await db.query.workouts.findMany({
+          where: eq(workouts.sessionId, sessionId),
+          columns: { orderIndex: true },
+        })
+        orderIndex = existing.length + 1
+      }
+
       const [newWorkout] = await db
         .insert(workouts)
-        .values({ ...body, sessionId })
+        .values({ ...body, orderIndex, sessionId })
         .returning()
 
-      return reply.status(201).send(newWorkout)
+      // Return the full workout shape the schema expects (sessionExercises is empty on create)
+      return reply.status(201).send(serializeWorkout({
+        ...newWorkout,
+        sessionExercises: [],
+      }))
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to add workout block' })
@@ -386,12 +427,27 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
     const body = request.body as Omit<z.infer<typeof AddSessionExerciseSchema>, 'workoutId'>
 
     try {
+      // Auto-assign orderIndex if not provided
+      let { orderIndex } = body
+      if (orderIndex === undefined) {
+        const existing = await db.query.sessionExercises.findMany({
+          where: eq(sessionExercises.workoutId, workoutId),
+          columns: { orderIndex: true },
+        })
+        orderIndex = existing.length + 1
+      }
+
       const [newSessionExercise] = await db
         .insert(sessionExercises)
-        .values({ ...body, workoutId })
+        .values({ ...body, orderIndex, workoutId })
         .returning()
 
-      return reply.status(201).send(newSessionExercise)
+      // Response schema expects exercise + sets relations
+      return reply.status(201).send({
+        ...newSessionExercise,
+        exercise: null,
+        sets:     [],
+      })
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to add exercise to workout' })
@@ -478,7 +534,11 @@ Which fields you populate depends on the workout type:
         .values({ ...body, sessionExerciseId })
         .returning()
 
-      return reply.status(201).send(newSet)
+      return reply.status(201).send({
+        ...newSet,
+        createdAt: newSet.createdAt instanceof Date ? newSet.createdAt.toISOString() : newSet.createdAt,
+        updatedAt: newSet.updatedAt instanceof Date ? newSet.updatedAt.toISOString() : newSet.updatedAt,
+      })
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to record set' })
@@ -518,7 +578,11 @@ Which fields you populate depends on the workout type:
         return reply.status(404).send({ error: 'Set not found' })
       }
 
-      return reply.send(updated)
+      return reply.send({
+        ...updated,
+        createdAt: updated.createdAt instanceof Date ? updated.createdAt.toISOString() : updated.createdAt,
+        updatedAt: updated.updatedAt instanceof Date ? updated.updatedAt.toISOString() : updated.updatedAt,
+      })
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to update set' })

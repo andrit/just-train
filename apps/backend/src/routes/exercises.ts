@@ -200,11 +200,15 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         .values({
           ...body,
           trainerId: request.trainer.trainerId,
-          isDraft: false, // full library creation is never a draft
+          isDraft: false,
         })
         .returning()
 
-      return reply.status(201).send(newExercise)
+      return reply.status(201).send({
+        ...newExercise,
+        bodyPart: null,
+        media:    [],
+      })
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to create exercise' })
@@ -250,7 +254,11 @@ The exercise is flagged with \`isDraft: true\`. It appears in the library with a
         })
         .returning()
 
-      return reply.status(201).send(newExercise)
+      return reply.status(201).send({
+        ...newExercise,
+        bodyPart: null,
+        media:    [],
+      })
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to quick-add exercise' })

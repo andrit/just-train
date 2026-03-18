@@ -5,6 +5,25 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v1.8.0] — Live Session: Add Blocks + Exercises
+
+### Added
+- `BottomSheet` component — mobile-first slide-up overlay with backdrop, drag handle, Escape key dismiss, body scroll lock
+- `DragStepper` component — drag up/down number input with ▲/▼ buttons. 8px per step, linear feel (no acceleration). Works on both touch and mouse. Keyboard arrow key support. Range 1–30 reps, 1–10 sets.
+- `AddBlockSheet` — bottom sheet to pick workout type (resistance / cardio / calisthenics / stretching / cooldown) and create a block instantly
+- `AddExerciseSheet` — bottom sheet with live search, exercise list, quick-add draft, and target sets/reps steppers
+- `WorkoutBlock` — "Add Exercise" dashed button at bottom of each block opens `AddExerciseSheet`
+- `LiveSessionPage` — empty state replaced with "Add Block" CTA; FAB `+` button shown when blocks exist; `AddBlockSheet` wired
+
+### Quick-add exercise
+When search finds no match, "Create as draft" creates an `isDraft: true` exercise with the block's workout type, adds it to the block immediately. Post-session enrichment deferred — see `DEFERRED_ITEMS.md`.
+
+### Deferred
+- Post-session wrap-up (name drafts, add notes, preview next session) — `DEFERRED_ITEMS.md`
+- Draft exercise enrichment queue — `DEFERRED_ITEMS.md`
+
+---
+
 ## [v1.7.5] — Redis + BullMQ (Scheduled Reports + At-Risk Alerts)
 
 ### Added

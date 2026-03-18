@@ -215,7 +215,8 @@ export const CreateExerciseSchema = z.object({
   description: z.string().max(2000).optional(),
   instructions: z.string().max(5000).optional()
     .describe('Step-by-step form instructions'),
-  bodyPartId: z.string().uuid().describe('ID from GET /body-parts'),
+  bodyPartId: z.string().uuid().optional()
+    .describe('ID from GET /body-parts — optional for draft exercises, required for published'),
   workoutType: WorkoutTypeEnum,
   equipment: EquipmentEnum.default('none'),
   difficulty: DifficultyEnum.default('beginner'),
@@ -227,8 +228,8 @@ export const CreateExerciseSchema = z.object({
 export type CreateExerciseInput = z.infer<typeof CreateExerciseSchema>
 
 export const QuickAddExerciseSchema = z.object({
-  name: z.string().min(1).max(150),
-  bodyPartId: z.string().uuid(),
+  name:        z.string().min(1).max(150),
+  bodyPartId:  z.string().uuid().optional(),
   workoutType: WorkoutTypeEnum,
 })
 export type QuickAddExerciseInput = z.infer<typeof QuickAddExerciseSchema>
@@ -279,8 +280,8 @@ export type UpdateSessionInput = z.infer<typeof UpdateSessionSchema>
 export const CreateWorkoutSchema = z.object({
   sessionId: z.string().uuid(),
   workoutType: WorkoutTypeEnum,
-  orderIndex: z.number().int().min(1)
-    .describe('Position in session. Default: cardio=1, stretching=2, calisthenics/resistance=3, cooldown=4'),
+  orderIndex: z.number().int().min(1).optional()
+    .describe('Position in session — auto-assigned if not provided'),
   notes: z.string().max(1000).optional(),
 })
 export type CreateWorkoutInput = z.infer<typeof CreateWorkoutSchema>
@@ -296,9 +297,9 @@ export type UpdateWorkoutInput = z.infer<typeof UpdateWorkoutSchema>
 // ============================================================
 
 export const AddSessionExerciseSchema = z.object({
-  workoutId: z.string().uuid(),
+  workoutId:  z.string().uuid(),
   exerciseId: z.string().uuid(),
-  orderIndex: z.number().int().min(1),
+  orderIndex: z.number().int().min(1).optional(),
   targetSets: z.number().int().min(1).optional(),
   targetReps: z.number().int().min(1).optional(),
   targetWeight: z.number().min(0).optional(),

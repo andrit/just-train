@@ -261,3 +261,21 @@ The following combinations determine feature access. Not yet enforced — docume
 **What:** Trainer can schedule reports to auto-send on the 1st of each month for all active clients.
 **Why deferred:** Requires a job queue (Redis + BullMQ, Phase 7.5) and per-client opt-in settings.
 **When to revisit:** Phase 7.5 when BullMQ is added.
+
+---
+
+## Deferred in Phase 8 (v1.8.0)
+
+### Post-Session Wrap-Up
+**What:** After ending a session, a lightweight flow that lets the trainer:
+- Name and describe any draft exercises created mid-session
+- Add notes to individual exercises ("felt heavy — check form next time")
+- Add a session note / training log entry
+- Preview what to adjust for next session
+**Why deferred:** Core session logging comes first. Post-session enrichment adds polish, not capability.
+**When to revisit:** After templates are built (v1.8.5) — by then the session data model is stable.
+
+### Draft Exercise Enrichment
+**What:** A queue of draft exercises (isDraft: true) that need descriptions, body part assignments, and proper naming.
+**Trigger:** Any draft exercises created via quick-add during a session.
+**Where it shows:** A subtle indicator on the Exercises page + inline in the exercise library.

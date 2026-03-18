@@ -58,8 +58,7 @@ function isFirstOfMonth(timezone: string): boolean {
 // ── Scheduler startup ──────────────────────────────────────────────────────────
 
 export async function startScheduler(): Promise<void> {
-  const connection    = getRedisConnection()
-  const schedulerQueue = new Queue(SCHEDULER_QUEUE, { connection })
+  const schedulerQueue = new Queue(SCHEDULER_QUEUE, { connection: getRedisConnection() })
 
   // Reports: every hour on the 1st (filters by timezone inside the job)
   await schedulerQueue.upsertJobScheduler(
@@ -78,7 +77,7 @@ export async function startScheduler(): Promise<void> {
   new Worker(SCHEDULER_QUEUE, async (job) => {
     if (job.name === 'report-fanout') await fanOutScheduledReports()
     if (job.name === 'alert-fanout')  await fanOutAtRiskAlerts()
-  }, { connection })
+  }, { connection: getRedisConnection() })
 
   console.log('[Scheduler] Started — reports (hourly on 1st), alerts (hourly)')
 }

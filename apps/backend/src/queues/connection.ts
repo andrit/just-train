@@ -1,45 +1,45 @@
 // ------------------------------------------------------------
-// queues/connection.ts — Shared Redis connection for BullMQ (v1.7.5)
+// queues/connection.ts — BullMQ connection config (v1.7.5)
 //
-// Uses Upstash Redis via ioredis.
+// BullMQ v5 accepts a connection URL string directly via
+// { url } — no need for a separate ioredis instance.
+// This avoids the duplicate ioredis version conflict that
+// occurs when ioredis is also listed as a direct dependency.
 //
-// UPSTASH NOTES:
-//   - Use REDIS_URL starting with rediss:// (TLS required by Upstash)
-//   - maxRetriesPerRequest: null is required by BullMQ
-//   - enableReadyCheck: false avoids connection issues with Upstash
-//
-// The connection is created once and shared — BullMQ internally
-// creates additional connections for blocking commands (workers).
+// The connection config is returned as a plain object and
+// passed to Queue/Worker/QueueScheduler constructors.
 // ------------------------------------------------------------
 
-import IORedis from 'ioredis'
+export interface RedisConnection {
+  url: string
+  enableOfflineQueue:  boolean
+  maxRetriesPerRequest: null
+  enableReadyCheck:    boolean
+  tls?:                Record<string, never>
+}
 
-let _connection: IORedis | null = null
+let _config: RedisConnection | null = null
 
-export function getRedisConnection(): IORedis {
-  if (_connection) return _connection
+export function getRedisConnection(): RedisConnection {
+  if (_config) return _config
 
   const url = process.env.UPSTASH_REDIS_URL
   if (!url) {
     throw new Error('UPSTASH_REDIS_URL is not set — required for job queue')
   }
 
-  _connection = new IORedis(url, {
-    maxRetriesPerRequest: null,    // Required by BullMQ
-    enableReadyCheck:     false,   // Avoids Upstash handshake issues
-    tls:                  url.startsWith('rediss://') ? {} : undefined,
-  })
+  _config = {
+    url,
+    enableOfflineQueue:   false,
+    maxRetriesPerRequest: null,   // Required by BullMQ
+    enableReadyCheck:     false,  // Avoids Upstash handshake issues
+    ...(url.startsWith('rediss://') ? { tls: {} } : {}),
+  }
 
-  _connection.on('error', (err) => {
-    console.error('[Redis] Connection error:', err.message)
-  })
-
-  return _connection
+  return _config
 }
 
 export async function closeRedisConnection(): Promise<void> {
-  if (_connection) {
-    await _connection.quit()
-    _connection = null
-  }
+  // With URL-based connections BullMQ manages the lifecycle
+  _config = null
 }

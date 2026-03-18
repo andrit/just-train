@@ -14,8 +14,8 @@
 
 import type { FastifyInstance } from 'fastify'
 import { authenticate }        from '../middleware/authenticate'
-import { db, clients, sessions, trainers, clientGoals } from '../db'
-import { eq, and, desc, sql }   from 'drizzle-orm'
+import { db, clients, trainers } from '../db'
+import { eq, and, sql }          from 'drizzle-orm'
 import {
   UuidParamSchema,
   ErrorResponseSchema,
@@ -25,6 +25,7 @@ import {
   buildReportHtml,
   sendReport,
   resolveReportPeriod,
+  buildReportData,
   type ReportData,
 } from '../services/report.service'
 
@@ -51,102 +52,6 @@ const ReportSentResponseSchema = z.object({
 export async function reportRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', authenticate)
 
-  // ── Shared: build ReportData from DB ──────────────────────────────────────
-
-  async function buildReportData(
-    clientId:    string,
-    trainerId:   string,
-    trainerNote: string | null,
-  ): Promise<{ data: ReportData; periodLabel: string; periodStart: Date; periodEnd: Date } | null> {
-
-    const client = await db.query.clients.findFirst({
-      where: and(eq(clients.id, clientId), eq(clients.trainerId, trainerId)),
-    })
-    if (!client) return null
-
-    const trainer = await db.query.trainers.findFirst({
-      where: eq(trainers.id, trainerId),
-      columns: { id: true, name: true, email: true },
-    })
-    if (!trainer) return null
-
-    // Load all completed sessions with workout tree
-    const allSessions = await db.query.sessions.findMany({
-      where: and(eq(sessions.clientId, clientId), eq(sessions.status, 'completed')),
-      with: {
-        workouts: {
-          with: {
-            sessionExercises: {
-              with: { sets: true },
-            },
-          },
-        },
-      },
-      orderBy: desc(sessions.date),
-    })
-
-    // Resolve date period
-    const period = resolveReportPeriod(allSessions)
-
-    // Filter to period
-    const periodSessions = allSessions.filter(s => {
-      const d = new Date(s.date + 'T00:00:00')
-      return d >= period.start && d <= period.end
-    })
-
-    // Build session summaries
-    const reportSessions = periodSessions.map(s => {
-      const sets = s.workouts.reduce(
-        (a, w) => a + w.sessionExercises.reduce((b, se) => b + se.sets.length, 0), 0
-      )
-      const volumeLbs = s.workouts.reduce(
-        (a, w) => a + w.sessionExercises.reduce(
-          (b, se) => b + se.sets.reduce((c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0), 0
-        ), 0
-      )
-      return {
-        date:        s.date,
-        name:        s.name,
-        sets,
-        volumeLbs:   Math.round(volumeLbs),
-        energyLevel: s.energyLevel,
-      }
-    })
-
-    // Load goals
-    const goals = await db.query.clientGoals.findMany({
-      where: eq(clientGoals.clientId, clientId),
-    }).catch(() => [])
-
-    // Compute period averages
-    const energyScores = periodSessions.map(s => s.energyLevel).filter((e): e is number => e != null)
-    const stressScores = periodSessions.map(s => s.stressLevel).filter((e): e is number => e != null)
-    const avg = (arr: number[]) => arr.length > 0
-      ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10
-      : null
-
-    const totalVol = reportSessions.reduce((a, s) => a + s.volumeLbs, 0)
-
-    const data: ReportData = {
-      clientName:    client.name,
-      clientEmail:   client.email ?? '',
-      trainerName:   trainer.name,
-      trainerEmail:  trainer.email,
-      periodLabel:   period.label,
-      periodStart:   period.start.toISOString().split('T')[0]!,
-      periodEnd:     period.end.toISOString().split('T')[0]!,
-      sessions:      reportSessions,
-      goals:         goals.map(g => ({ goal: g.goal, achievedAt: g.achievedAt?.toISOString() ?? null })),
-      weeklyTarget:  client.weeklySessionTarget,
-      avgEnergyLevel: avg(energyScores),
-      avgStressLevel: avg(stressScores),
-      totalVolumeLbs: totalVol > 0 ? totalVol : null,
-      focusKpiLabel:  null,  // Future: wire to KPI service
-      trainerNote:   trainerNote ?? null,
-    }
-
-    return { data, periodLabel: period.label, periodStart: period.start, periodEnd: period.end }
-  }
 
   // ── GET /clients/:id/report-preview ──────────────────────────────────────
 

@@ -132,6 +132,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
   const { startSession: storeSession, getSession } = useSessionStore()
 
   const { data: selfClient } = useSelfClient()
+  const { data: clients }    = useClients()
   const { data: templates, isLoading: templatesLoading } = useTemplates()
 
   const createSession = useCreateSession()

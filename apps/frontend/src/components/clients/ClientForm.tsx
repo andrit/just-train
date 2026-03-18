@@ -58,6 +58,7 @@ export function ClientForm({
   const [notes,            setNotes]           = useState(client?.notes            ?? '')
   const [weeklyTarget,     setWeeklyTarget]    = useState(client?.weeklySessionTarget ?? 3)
   const [show1rm,          setShow1rm]         = useState(client?.show1rmEstimate   ?? false)
+  const [autoReport,       setAutoReport]      = useState(client?.autoReport        ?? true)
 
   // Sync fields if client prop changes (drawer re-opened with different client)
   useEffect(() => {
@@ -71,6 +72,7 @@ export function ClientForm({
     setNotes(client?.notes           ?? '')
     setWeeklyTarget(client?.weeklySessionTarget ?? 3)
     setShow1rm(client?.show1rmEstimate ?? false)
+    setAutoReport(client?.autoReport   ?? true)
   }, [client?.id])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -86,6 +88,7 @@ export function ClientForm({
       notes:            notes.trim() || undefined,
       weeklySessionTarget: weeklyTarget,
       show1rmEstimate:  show1rm,
+      autoReport:       autoReport,
     })
   }
 
@@ -224,6 +227,29 @@ export function ClientForm({
                 <span className={cn(
                   'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200',
                   show1rm ? 'translate-x-5' : 'translate-x-0.5',
+                )} />
+              </button>
+            </div>
+
+            {/* Auto-send monthly report toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-200">Auto-send monthly report</p>
+                <p className="text-xs text-gray-500 mt-0.5">Sends on the 1st — requires client email</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={autoReport}
+                onClick={() => setAutoReport(!autoReport)}
+                className={cn(
+                  'relative w-10 h-5 rounded-full transition-colors duration-200',
+                  autoReport ? 'bg-brand-highlight' : 'bg-surface-border',
+                )}
+              >
+                <span className={cn(
+                  'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200',
+                  autoReport ? 'translate-x-5' : 'translate-x-0.5',
                 )} />
               </button>
             </div>

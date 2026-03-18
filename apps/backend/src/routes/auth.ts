@@ -98,6 +98,8 @@ function serializeTrainer(
     sessionLayout:        trainer.sessionLayout    as 'horizontal' | 'vertical',
     weeklySessionTarget:  trainer.weeklySessionTarget,
     show1rmEstimate:      trainer.show1rmEstimate,
+    autoReportEnabled:    trainer.autoReportEnabled,
+    timezone:             trainer.timezone,
     createdAt:            trainer.createdAt.toISOString(),
     updatedAt:            trainer.updatedAt.toISOString(),
   }

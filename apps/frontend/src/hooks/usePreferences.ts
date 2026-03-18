@@ -32,6 +32,8 @@ export interface Preferences {
   sessionLayout:       'horizontal' | 'vertical'
   weeklySessionTarget: number
   show1rmEstimate:     boolean
+  autoReportEnabled:   boolean
+  timezone:            string
   widgetOrder:         WidgetId[]
   trainerMode:         'athlete' | 'trainer'
 }
@@ -53,6 +55,8 @@ export function usePreferences(): Preferences & {
     sessionLayout:       (trainer?.sessionLayout    as Preferences['sessionLayout'])    ?? 'horizontal',
     weeklySessionTarget: trainer?.weeklySessionTarget ?? 3,
     show1rmEstimate:     trainer?.show1rmEstimate    ?? false,
+    autoReportEnabled:   trainer?.autoReportEnabled  ?? true,
+    timezone:            trainer?.timezone            ?? 'UTC',
     widgetOrder:         parseWidgetProgression(trainer?.widgetProgression, mode),
     trainerMode:         mode,
   }
@@ -85,5 +89,7 @@ interface UpdateablePrefs {
   sessionLayout:       'horizontal' | 'vertical'
   weeklySessionTarget: number
   show1rmEstimate:     boolean
+  autoReportEnabled:   boolean
+  timezone:            string
   widgetProgression:   string | null
 }

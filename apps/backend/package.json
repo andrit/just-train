@@ -36,11 +36,14 @@
     "dotenv":                  "^16.4.5",
     "cloudinary":              "^2.2.0",
     "resend":                  "^3.2.0",
+    "bullmq":                  "^5.4.0",
+    "ioredis":                 "^5.3.2",
     "pino-pretty":             "^11.0.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken":      "^9.0.6",
     "@types/node":              "^20.12.12",
+    "@types/pg":                "^8.11.6",
     "@types/pg":                "^8.11.6",
     "@vitest/coverage-v8":     "^1.6.0",
     "drizzle-kit":             "^0.21.4",

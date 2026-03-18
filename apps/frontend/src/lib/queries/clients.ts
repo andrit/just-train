@@ -87,6 +87,7 @@ export interface CreateClientInput {
   notes?:              string
   weeklySessionTarget?: number
   show1rmEstimate?:    boolean
+  autoReport?:         boolean
 }
 
 export function useCreateClient(): UseMutationResult<ClientResponse, Error, CreateClientInput> {

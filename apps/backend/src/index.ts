@@ -43,7 +43,10 @@ import { sessionRoutes }         from './routes/sessions'
 import { templateRoutes }        from './routes/templates'
 import { kpiRoutes }             from './routes/kpis'
 import { reportRoutes }          from './routes/reports'
-import { configureCloudinary } from './services/cloudinary.service'
+import { configureCloudinary }   from './services/cloudinary.service'
+import { startScheduler }        from './queues/scheduler'
+import { startReportWorker, startAlertWorker } from './queues/workers'
+import { closeRedisConnection }  from './queues/connection'
 
 const app = Fastify({
   logger: {
@@ -272,6 +275,27 @@ const start = async (): Promise<void> => {
     ;(app.log as any).info(`Server:       http://${host}:${port}`)
     ;(app.log as any).info(`API Docs:     http://${host}:${port}/documentation`)
     ;(app.log as any).info(`Health:       http://${host}:${port}/health`)
+
+    // ── Job queue — only start if Redis is configured ──────────────────────
+    if (process.env.UPSTASH_REDIS_URL) {
+      const reportWorker = startReportWorker()
+      const alertWorker  = startAlertWorker()
+      await startScheduler()
+      ;(app.log as any).info('Queue:        BullMQ workers + scheduler started')
+
+      // Graceful shutdown — drain workers before exit
+      const shutdown = async (): Promise<void> => {
+        await reportWorker.close()
+        await alertWorker.close()
+        await closeRedisConnection()
+        await app.close()
+        process.exit(0)
+      }
+      process.once('SIGTERM', shutdown)
+      process.once('SIGINT',  shutdown)
+    } else {
+      ;(app.log as any).warn('Queue:        UPSTASH_REDIS_URL not set — job queue disabled')
+    }
   } catch (error) {
     ;(app.log as any).error(error)
     process.exit(1)

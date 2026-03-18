@@ -113,6 +113,13 @@ export const trainers = pgTable('trainers', {
   weeklySessionTarget: integer('weekly_session_target').notNull().default(3),
   show1rmEstimate:     boolean('show_1rm_estimate').notNull().default(false),
 
+  // v1.7.5: master switch for scheduled monthly reports
+  autoReportEnabled:   boolean('auto_report_enabled').notNull().default(true),
+
+  // v1.7.5: IANA timezone string — used to send reports/alerts at 08:00 local time
+  // e.g. 'America/New_York', 'Europe/London', 'Australia/Sydney'
+  timezone:            text('timezone').notNull().default('UTC'),
+
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
@@ -170,7 +177,9 @@ export const clients = pgTable('clients', {
   weeklySessionTarget: integer('weekly_session_target').notNull().default(3),
   show1rmEstimate:     boolean('show_1rm_estimate').notNull().default(false),
 
-  // v1.7.0: tracks when the last monthly report was sent
+  // v1.7.5: per-client scheduled report opt-in (default true)
+  // Overridden by trainer.autoReportEnabled master switch
+  autoReport:          boolean('auto_report').notNull().default(true),
   lastReportSentAt:    timestamp('last_report_sent_at'),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),

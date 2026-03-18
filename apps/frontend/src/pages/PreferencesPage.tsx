@@ -549,6 +549,70 @@ export default function PreferencesPage(): React.JSX.Element {
             </div>
           )}
 
+          {/* Auto-send monthly reports */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-200">Auto-send monthly reports</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Sends on the 1st for clients with auto-report enabled
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={trainer?.autoReportEnabled ?? true}
+                onClick={() => save('autoReportEnabled', !(trainer?.autoReportEnabled ?? true))}
+                className={cn(
+                  'relative w-10 h-5 rounded-full transition-colors duration-200',
+                  (trainer?.autoReportEnabled ?? true) ? 'bg-brand-highlight' : 'bg-surface-border',
+                  interactions.button.base,
+                  interactions.button.press,
+                )}
+              >
+                <span className={cn(
+                  'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200',
+                  (trainer?.autoReportEnabled ?? true) ? 'translate-x-5' : 'translate-x-0.5',
+                )} />
+              </button>
+            </div>
+          </div>
+
+          {/* Timezone */}
+          <div className="card p-4">
+            <p className="text-sm font-medium text-gray-200 mb-1">Timezone</p>
+            <p className="text-xs text-gray-500 mb-3">
+              Reports and alerts send at 08:00 in your local time
+            </p>
+            <select
+              value={trainer?.timezone ?? 'UTC'}
+              onChange={(e) => save('timezone', e.target.value)}
+              className="field w-full text-sm"
+            >
+              {[
+                'UTC',
+                'America/New_York',
+                'America/Chicago',
+                'America/Denver',
+                'America/Los_Angeles',
+                'America/Anchorage',
+                'Pacific/Honolulu',
+                'Europe/London',
+                'Europe/Paris',
+                'Europe/Berlin',
+                'Europe/Moscow',
+                'Asia/Dubai',
+                'Asia/Kolkata',
+                'Asia/Singapore',
+                'Asia/Tokyo',
+                'Australia/Sydney',
+                'Pacific/Auckland',
+              ].map(tz => (
+                <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Widget order */}
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">

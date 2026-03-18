@@ -108,6 +108,10 @@ export const TrainerResponseSchema = z.object({
     .describe('Target sessions per week — used for consistency score'),
   show1rmEstimate: z.boolean()
     .describe('Athlete mode: whether to show Epley 1RM estimates on KPI cards'),
+  autoReportEnabled: z.boolean()
+    .describe('Master switch — when false, no scheduled reports are sent regardless of client settings'),
+  timezone: z.string()
+    .describe('IANA timezone string e.g. America/New_York — reports and alerts send at 08:00 local time'),
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -179,6 +183,8 @@ export const ClientResponseSchema = z.object({
     .describe('Target sessions per week for consistency score'),
   show1rmEstimate: z.boolean()
     .describe('Whether to show Epley 1RM estimates for this client'),
+  autoReport: z.boolean()
+    .describe('Whether to automatically send this client a monthly report on the 1st'),
   lastReportSentAt: z.string().datetime().nullable()
     .describe('When the last monthly report was sent — null if never sent'),
 

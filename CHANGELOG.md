@@ -5,6 +5,39 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v1.7.5] — Redis + BullMQ (Scheduled Reports + At-Risk Alerts)
+
+### Added
+- `bullmq ^5.4.0` + `ioredis ^5.3.2` added to backend dependencies
+- `queues/connection.ts` — singleton Upstash Redis connection (TLS, BullMQ-compatible)
+- `queues/index.ts` — queue definitions (`reports`, `alerts`) + job data types
+- `queues/scheduler.ts` — hourly fanout workers that filter by trainer timezone (08:00 local). Reports only fire on the 1st of the trainer's local month.
+- `queues/workers.ts` — `startReportWorker()` (concurrency 3) and `startAlertWorker()` (concurrency 5) with graceful shutdown
+- `services/alert.service.ts` — at-risk digest email builder + Resend sender. Neutral/clinical tone always. Table-based inline-style HTML.
+- `timezone` column on trainers table — IANA string, default `'UTC'`
+- `autoReportEnabled` column on trainers table — master switch, default `true`
+- `autoReport` column on clients table — per-client opt-in, default `true`
+- Queue starts conditionally — no `UPSTASH_REDIS_URL` = queue disabled with warning (dev-friendly)
+- Graceful shutdown on `SIGTERM`/`SIGINT` — drains workers before exit
+- `PreferencesPage` — auto-report toggle + timezone selector (17 common IANA zones)
+- `ClientForm` — auto-report toggle in KPI Settings section
+- `UPSTASH_REDIS_URL` added to `.env.example`
+
+### At-risk alert logic
+- Runs daily at 08:00 trainer local time
+- Finds clients with no session in 14+ days (never trained = also at-risk)
+- One digest email per trainer listing all at-risk clients, color-coded red (21+ days) or amber (14–20 days)
+- Only sent if trainer has `alertsEnabled: true`
+- Deduplicated by `jobId` — one alert per trainer per day
+
+### Scheduled report logic
+- Runs on 1st of month at 08:00 trainer local time
+- Skips clients with no email, no sessions in period, or `autoReport: false`
+- Skips all clients if trainer `autoReportEnabled: false`
+- Deduplicated by `jobId` — one report per client per calendar month
+
+---
+
 ## [v1.7.0] — Monthly Reports
 
 ### Added

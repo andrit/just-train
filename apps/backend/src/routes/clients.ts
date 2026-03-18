@@ -270,6 +270,7 @@ function serializeClient(c: typeof clients.$inferSelect) {
     lastActiveAt:     c.lastActiveAt?.toISOString() ?? null,
     weeklySessionTarget: c.weeklySessionTarget,
     show1rmEstimate:     c.show1rmEstimate,
+    autoReport:          c.autoReport,
     lastReportSentAt:    c.lastReportSentAt?.toISOString() ?? null,
     createdAt:        c.createdAt.toISOString(),
     updatedAt:        c.updatedAt.toISOString(),

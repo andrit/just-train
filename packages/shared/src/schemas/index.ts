@@ -69,6 +69,10 @@ export const UpdateTrainerSchema = z.object({
     .describe('Target sessions per week for consistency score'),
   show1rmEstimate:   z.boolean().optional()
     .describe('Athlete mode: show Epley 1RM estimates on KPI cards'),
+  autoReportEnabled: z.boolean().optional()
+    .describe('Master switch for scheduled monthly reports'),
+  timezone: z.string().optional()
+    .describe('IANA timezone string e.g. America/New_York'),
 })
 export type UpdateTrainerInput = z.infer<typeof UpdateTrainerSchema>
 
@@ -117,6 +121,8 @@ export const UpdateClientSchema = CreateClientSchema.partial().extend({
     .describe('Target sessions per week for consistency score'),
   show1rmEstimate: z.boolean().optional()
     .describe('Whether to show Epley 1RM estimates for this client'),
+  autoReport: z.boolean().optional()
+    .describe('Whether to auto-send monthly reports for this client'),
   active: z.boolean().optional()
     .describe('false = soft-delete'),
 })

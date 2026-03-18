@@ -63,9 +63,10 @@ async function request<T>(
 
   const headers: Record<string, string> = {
     'X-Device-ID': DEVICE_ID,
-    // Only set Content-Type for JSON — multipart callers omit it so the browser
-    // sets it with the correct boundary.
-    ...(!init.body || typeof init.body === 'string'
+    // Only set Content-Type for non-DELETE requests with a JSON body.
+    // DELETE has no body — sending Content-Type: application/json with an
+    // empty body causes Fastify to return 400 FST_ERR_CTP_EMPTY_JSON_BODY.
+    ...(init.method !== 'DELETE' && (!init.body || typeof init.body === 'string')
       ? { 'Content-Type': 'application/json' }
       : {}),
   }

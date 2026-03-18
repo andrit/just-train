@@ -259,3 +259,29 @@ export function useEditSet(): UseMutationResult<SetResponse, Error, EditSetInput
     },
   })
 }
+
+// ── Delete workout block ──────────────────────────────────────────────────────
+
+export function useDeleteWorkout(): UseMutationResult<void, Error, { workoutId: string; sessionId: string }> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ workoutId, sessionId }) =>
+      apiClient.delete<void>(`/sessions/${sessionId}/workouts/${workoutId}`),
+    onSuccess: (_, { sessionId }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+    },
+  })
+}
+
+// ── Delete session exercise ───────────────────────────────────────────────────
+
+export function useDeleteSessionExercise(): UseMutationResult<void, Error, { sessionExerciseId: string; workoutId: string; sessionId: string }> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ workoutId, sessionExerciseId }) =>
+      apiClient.delete<void>(`/workouts/${workoutId}/exercises/${sessionExerciseId}`),
+    onSuccess: (_, { sessionId }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+    },
+  })
+}

@@ -1,60 +1,81 @@
 // ------------------------------------------------------------
-// store/sessionStore.ts — Active session tracking state
+// store/sessionStore.ts (v1.8.0)
 //
-// Tracks the currently open training session.
-// When a session is active (trainer has tapped "Start Session"),
-// this store holds the session data and queues any sets logged
-// while offline for background sync (Phase 6).
+// Persists active session IDs per client so navigating away
+// and back doesn't lose the session.
 //
-// OFFLINE NOTE:
-//   pendingSets are sets logged while offline. They are persisted
-//   to IndexedDB (Phase 6) and synced when connectivity returns.
-//   syncCount is the badge shown on the sync indicator in the UI.
+// DESIGN:
+//   - Map of clientId → ActiveSession
+//   - Persisted to localStorage (session IDs are not sensitive)
+//   - Each client has at most one active session at a time
+//   - Session is removed when ended (EndSessionModal confirms)
+//   - Athlete's own session uses their self-client ID as the key
+//
+// BACKWARD COMPAT:
+//   The old store had a single activeSessionId — removed in v1.8.0.
+//   The offline pendingSets queue is kept for Phase 8 (offline sync).
 // ------------------------------------------------------------
 
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-interface PendingSet {
-  localId:           string   // Client-generated UUID for deduplication
-  sessionExerciseId: string
-  setNumber:         number
-  payload:           Record<string, unknown>
-  createdLocallyAt:  string   // ISO timestamp
+export interface ActiveSession {
+  sessionId:  string
+  clientId:   string
+  clientName: string
+  startedAt:  string   // ISO string
 }
 
-interface SessionStore {
-  // The ID of the currently open session, or null if no session is active
-  activeSessionId: string | null
+interface SessionStoreState {
+  // clientId → ActiveSession
+  activeSessions: Record<string, ActiveSession>
 
-  // Sets queued for sync (offline mode — Phase 6)
-  pendingSets: PendingSet[]
-
-  // Number of pending operations waiting to sync
-  syncCount: number
-
-  // Actions
-  setActiveSession: (sessionId: string | null) => void
-  addPendingSet:    (set: PendingSet) => void
-  clearPendingSet:  (localId: string) => void
+  startSession:  (clientId: string, sessionId: string, clientName: string) => void
+  endSession:    (clientId: string) => void
+  getSession:    (clientId: string) => ActiveSession | null
+  hasSession:    (clientId: string) => boolean
+  clearAll:      () => void
 }
 
-export const useSessionStore = create<SessionStore>((set) => ({
-  activeSessionId: null,
-  pendingSets:     [],
-  syncCount:       0,
+export const useSessionStore = create<SessionStoreState>()(
+  persist(
+    (set, get) => ({
+      activeSessions: {},
 
-  setActiveSession: (sessionId) =>
-    set({ activeSessionId: sessionId }),
+      startSession: (clientId, sessionId, clientName) => {
+        set((state) => ({
+          activeSessions: {
+            ...state.activeSessions,
+            [clientId]: {
+              sessionId,
+              clientId,
+              clientName,
+              startedAt: new Date().toISOString(),
+            },
+          },
+        }))
+      },
 
-  addPendingSet: (pendingSet) =>
-    set((state) => ({
-      pendingSets: [...state.pendingSets, pendingSet],
-      syncCount:   state.syncCount + 1,
-    })),
+      endSession: (clientId) => {
+        set((state) => {
+          const next = { ...state.activeSessions }
+          delete next[clientId]
+          return { activeSessions: next }
+        })
+      },
 
-  clearPendingSet: (localId) =>
-    set((state) => {
-      const pendingSets = state.pendingSets.filter((s) => s.localId !== localId)
-      return { pendingSets, syncCount: pendingSets.length }
+      getSession: (clientId) => {
+        return get().activeSessions[clientId] ?? null
+      },
+
+      hasSession: (clientId) => {
+        return clientId in get().activeSessions
+      },
+
+      clearAll: () => set({ activeSessions: {} }),
     }),
-}))
+    {
+      name: 'trainer-app-sessions',
+    }
+  )
+)

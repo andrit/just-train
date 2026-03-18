@@ -18,6 +18,7 @@ import { usePreferences }                 from '@/hooks/usePreferences'
 import { useUXEvent }                     from '@/hooks/useUXEvent'
 import { useRestTimer }                   from '@/hooks/useRestTimer'
 import { useAuthStore }                   from '@/store/authStore'
+import { useSessionStore }                from '@/store/sessionStore'
 import { useSession, useEndSession }      from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
@@ -50,6 +51,8 @@ export default function LiveSessionPage(): React.JSX.Element {
 
   // ── Handler: end session ─────────────────────────────────────────────────
 
+  const { endSession: clearSessionStore } = useSessionStore()
+
   const handleEndSession = (scores: {
     energyLevel:  number
     mobilityFeel: number
@@ -61,6 +64,8 @@ export default function LiveSessionPage(): React.JSX.Element {
       { id, ...scores },
       {
         onSuccess: () => {
+          // Remove from persistent session store
+          if (session?.clientId) clearSessionStore(session.clientId)
           fire('session_end', { entityId: id })
           navigate(`/session/${id}/summary`)
         },

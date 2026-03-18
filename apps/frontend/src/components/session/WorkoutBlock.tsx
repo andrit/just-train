@@ -1,102 +1,190 @@
 // ------------------------------------------------------------
-// components/session/WorkoutBlock.tsx (v1.8.0)
+// components/session/WorkoutBlock.tsx (v1.8.0 — redesign)
 //
-// One workout block (e.g. "Resistance", "Cardio Finisher").
-// Contains all exercises for that block, each with set accordion rows.
-// Used in both horizontal scroll and vertical stack layouts.
+// Shows one exercise at a time (full focus), with prev/next
+// navigation between exercises in the block.
 //
-// v1.8.0: Add Exercise button at bottom opens AddExerciseSheet.
+// Block type + progress shown in header.
+// Delete block button in header (with confirmation).
+// Add Exercise button at bottom.
 // ------------------------------------------------------------
 
-import { useState }         from 'react'
-import { cn }               from '@/lib/cn'
-import { interactions }     from '@/lib/interactions'
-import { ExerciseBlock }    from './ExerciseBlock'
-import { AddExerciseSheet } from './AddExerciseSheet'
+import { useState }          from 'react'
+import { cn }                from '@/lib/cn'
+import { interactions }      from '@/lib/interactions'
+import { ExerciseBlock }     from './ExerciseBlock'
+import { AddExerciseSheet }  from './AddExerciseSheet'
+import { useDeleteWorkout }  from '@/lib/queries/sessions'
 import type { WorkoutResponse } from '@trainer-app/shared'
 
-// Workout type display labels and accent colors
-const WORKOUT_TYPE_STYLE: Record<string, { label: string; color: string }> = {
-  resistance:   { label: 'Resistance',   color: 'text-brand-highlight border-brand-highlight/30 bg-brand-highlight/5' },
-  cardio:       { label: 'Cardio',       color: 'text-sky-400 border-sky-400/30 bg-sky-400/5'       },
-  calisthenics: { label: 'Calisthenics', color: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5' },
-  stretching:   { label: 'Stretching',   color: 'text-violet-400 border-violet-400/30 bg-violet-400/5'   },
-  cooldown:     { label: 'Cooldown',     color: 'text-gray-400 border-gray-400/30 bg-gray-400/5'         },
+const WORKOUT_TYPE_STYLE: Record<string, { label: string; color: string; dot: string }> = {
+  resistance:   { label: 'Resistance',   color: 'text-brand-highlight',  dot: 'bg-brand-highlight' },
+  cardio:       { label: 'Cardio',       color: 'text-sky-400',          dot: 'bg-sky-400' },
+  calisthenics: { label: 'Calisthenics', color: 'text-emerald-400',      dot: 'bg-emerald-400' },
+  stretching:   { label: 'Stretching',   color: 'text-violet-400',       dot: 'bg-violet-400' },
+  cooldown:     { label: 'Cooldown',     color: 'text-gray-400',         dot: 'bg-gray-400' },
 }
 
 interface WorkoutBlockProps {
-  workout:     WorkoutResponse
-  sessionId:   string
-  weightUnit:  string
-  /** horizontal: fixed width card for scrolling. vertical: full width */
-  layout:      'horizontal' | 'vertical'
+  workout:    WorkoutResponse
+  sessionId:  string
+  weightUnit: string
+  layout:     'horizontal' | 'vertical'
   onSetLogged: (restSeconds?: number) => void
 }
 
 export function WorkoutBlock({
-  workout,
-  sessionId,
-  weightUnit,
-  layout,
-  onSetLogged,
+  workout, sessionId, weightUnit, layout, onSetLogged,
 }: WorkoutBlockProps): React.JSX.Element {
+  const [exerciseIndex,   setExerciseIndex]   = useState(0)
   const [addExerciseOpen, setAddExerciseOpen] = useState(false)
+  const [confirmDelete,   setConfirmDelete]   = useState(false)
 
-  const style = WORKOUT_TYPE_STYLE[workout.workoutType] ?? {
-    label: workout.workoutType,
-    color: 'text-gray-400 border-gray-400/30 bg-gray-400/5',
+  const deleteWorkout = useDeleteWorkout()
+  const style = WORKOUT_TYPE_STYLE[workout.workoutType] ?? { label: workout.workoutType, color: 'text-gray-400', dot: 'bg-gray-400' }
+
+  const exercises    = workout.sessionExercises
+  const totalEx      = exercises.length
+  const currentEx    = exercises[Math.min(exerciseIndex, Math.max(0, totalEx - 1))]
+  const clampedIndex = Math.min(exerciseIndex, Math.max(0, totalEx - 1))
+
+  const handleDeleteBlock = (): void => {
+    deleteWorkout.mutate(
+      { workoutId: workout.id, sessionId },
+      { onSuccess: () => setConfirmDelete(false) },
+    )
   }
 
-  const completedExercises = workout.sessionExercises.filter(
-    (se) => se.sets.length >= (se.targetSets ?? 3)
-  ).length
-  const totalExercises = workout.sessionExercises.length
+  // When an exercise is added, jump to it
+  const handleExerciseAdded = (): void => {
+    setAddExerciseOpen(false)
+    // New exercise is appended — jump to end
+    setExerciseIndex(Math.max(0, exercises.length))
+  }
 
   return (
     <>
-      <div
-        className={cn(
-          'flex flex-col bg-brand-secondary rounded-2xl border border-surface-border overflow-hidden',
-          layout === 'horizontal'
-            ? 'w-[85vw] max-w-sm shrink-0 h-full'
-            : 'w-full',
-        )}
-      >
+      <div className={cn(
+        'flex flex-col bg-brand-secondary rounded-2xl border border-surface-border',
+        layout === 'horizontal' ? 'w-[85vw] max-w-sm shrink-0 h-full' : 'w-full',
+      )}>
+
         {/* Block header */}
-        <div className={cn(
-          'flex items-center justify-between px-4 py-3 border-b border-surface-border',
-          style.color,
-        )}>
-          <span className="text-[10px] uppercase tracking-widest font-medium">
-            {style.label}
-          </span>
-          <span className="text-xs opacity-60">
-            {completedExercises}/{totalExercises}
-          </span>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border">
+          <div className="flex items-center gap-2">
+            <div className={cn('w-2 h-2 rounded-full shrink-0', style.dot)} />
+            <span className={cn('text-[10px] uppercase tracking-widest font-medium', style.color)}>
+              {style.label}
+            </span>
+            {totalEx > 0 && (
+              <span className="text-[10px] text-gray-600">
+                · {clampedIndex + 1}/{totalEx}
+              </span>
+            )}
+          </div>
+
+          {/* Delete block */}
+          {confirmDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">Remove block?</span>
+              <button
+                type="button"
+                onClick={handleDeleteBlock}
+                disabled={deleteWorkout.isPending}
+                className="text-xs text-red-400 hover:text-red-300 font-medium"
+              >
+                Remove
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs text-gray-500 hover:text-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(true)}
+              aria-label="Remove block"
+              className="text-gray-600 hover:text-red-400 transition-colors p-1"
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
         </div>
 
-        {/* Exercises */}
-        <div className={cn(
-          'flex-1 p-4 space-y-6',
-          layout === 'horizontal' && 'overflow-y-auto',
-        )}>
-          {workout.sessionExercises.length === 0 ? (
-            <div className="text-center py-6">
+        {/* Exercise content */}
+        <div className={cn('flex-1 p-4', layout === 'horizontal' && 'overflow-y-auto')}>
+          {exercises.length === 0 ? (
+            <div className="text-center py-8">
               <p className="text-gray-600 text-sm">No exercises yet</p>
               <p className="text-gray-700 text-xs mt-1">Tap + below to add one</p>
             </div>
-          ) : (
-            workout.sessionExercises.map((se) => (
-              <ExerciseBlock
-                key={se.id}
-                sessionExercise={se}
-                sessionId={sessionId}
-                weightUnit={weightUnit}
-                onSetLogged={onSetLogged}
-              />
-            ))
-          )}
+          ) : currentEx ? (
+            <ExerciseBlock
+              key={currentEx.id}
+              sessionExercise={currentEx}
+              sessionId={sessionId}
+              workoutId={workout.id}
+              weightUnit={weightUnit}
+              onSetLogged={onSetLogged}
+            />
+          ) : null}
         </div>
+
+        {/* Exercise navigation */}
+        {totalEx > 1 && (
+          <div className="flex items-center justify-between px-4 py-2 border-t border-surface-border/50">
+            <button
+              type="button"
+              onClick={() => setExerciseIndex(Math.max(0, clampedIndex - 1))}
+              disabled={clampedIndex === 0}
+              className={cn(
+                'flex items-center gap-1 text-xs text-gray-500 hover:text-gray-200 transition-colors',
+                clampedIndex === 0 && 'opacity-20 pointer-events-none',
+              )}
+            >
+              <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+                <path d="M8 2L4 6l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {exercises[clampedIndex - 1]?.exercise?.name ?? 'Prev'}
+            </button>
+
+            {/* Dots */}
+            <div className="flex gap-1">
+              {exercises.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setExerciseIndex(i)}
+                  className={cn(
+                    'rounded-full transition-all duration-150',
+                    i === clampedIndex ? 'w-3 h-1.5 bg-brand-highlight' : 'w-1.5 h-1.5 bg-surface-border',
+                  )}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setExerciseIndex(Math.min(totalEx - 1, clampedIndex + 1))}
+              disabled={clampedIndex === totalEx - 1}
+              className={cn(
+                'flex items-center gap-1 text-xs text-gray-500 hover:text-gray-200 transition-colors',
+                clampedIndex === totalEx - 1 && 'opacity-20 pointer-events-none',
+              )}
+            >
+              {exercises[clampedIndex + 1]?.exercise?.name ?? 'Next'}
+              <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+                <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         {/* Add exercise button */}
         <div className="px-4 pb-4 pt-2 border-t border-surface-border/50">
@@ -118,12 +206,6 @@ export function WorkoutBlock({
             Add Exercise
           </button>
         </div>
-
-        {workout.notes && (
-          <div className="px-4 py-2 border-t border-surface-border">
-            <p className="text-xs text-gray-600">{workout.notes}</p>
-          </div>
-        )}
       </div>
 
       <AddExerciseSheet
@@ -131,9 +213,8 @@ export function WorkoutBlock({
         workoutId={workout.id}
         sessionId={sessionId}
         workoutType={workout.workoutType}
-        onClose={() => setAddExerciseOpen(false)}
+        onClose={handleExerciseAdded}
       />
     </>
   )
 }
-

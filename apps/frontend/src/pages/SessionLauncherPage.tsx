@@ -16,6 +16,7 @@ import { interactions }                  from '@/lib/interactions'
 import { usePreferences }                from '@/hooks/usePreferences'
 import { useUXEvent }                    from '@/hooks/useUXEvent'
 import { useAuthStore }                  from '@/store/authStore'
+import { useSessionStore }               from '@/store/sessionStore'
 import { useSelfClient, useClients }     from '@/lib/queries/clients'
 import { useCreateSession, useStartSession } from '@/lib/queries/sessions'
 import { useTemplates }                  from '@/lib/queries/templates'
@@ -128,6 +129,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
   const trainer        = useAuthStore((s) => s.trainer)
   const { trainerMode, ctaLabel } = usePreferences()
   const { fire } = useUXEvent()
+  const { startSession: storeSession, getSession } = useSessionStore()
 
   const { data: selfClient } = useSelfClient()
   const { data: templates, isLoading: templatesLoading } = useTemplates()
@@ -162,6 +164,13 @@ export default function SessionLauncherPage(): React.JSX.Element {
       return
     }
 
+    // Resume existing session if one is already active for this client
+    const existing = getSession(clientId)
+    if (existing) {
+      navigate(`/session/${existing.sessionId}`)
+      return
+    }
+
     setError(null)
     try {
       // 1. Create the session record
@@ -172,6 +181,12 @@ export default function SessionLauncherPage(): React.JSX.Element {
 
       // 2. Immediately start it
       await startSession.mutateAsync(session.id)
+
+      // 3. Register in session store for persistence
+      const clientName = clients?.find(c => c.id === clientId)?.name
+        ?? selfClient?.name
+        ?? 'Client'
+      storeSession(clientId, session.id, clientName)
 
       fire('session_start', { entityId: session.id })
       navigate(`/session/${session.id}`)
@@ -198,6 +213,11 @@ export default function SessionLauncherPage(): React.JSX.Element {
       })
 
       await startSession.mutateAsync(session.id)
+
+      const clientName = clients?.find(c => c.id === clientId)?.name
+        ?? selfClient?.name
+        ?? 'Client'
+      storeSession(clientId, session.id, clientName)
 
       fire('session_start', { entityId: session.id, entity: 'session' })
       navigate(`/session/${session.id}`)

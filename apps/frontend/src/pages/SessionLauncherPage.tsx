@@ -129,7 +129,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
   const trainer        = useAuthStore((s) => s.trainer)
   const { trainerMode, ctaLabel } = usePreferences()
   const { fire } = useUXEvent()
-  const { startSession: storeSession, getSession } = useSessionStore()
+  const { startSession: storeSession, getSession, hasSession } = useSessionStore()
 
   const { data: selfClient } = useSelfClient()
   const { data: clients }    = useClients()
@@ -326,7 +326,10 @@ export default function SessionLauncherPage(): React.JSX.Element {
 
   const clientName = selectedClientId === selfClient?.id
     ? 'My Training'
-    : null // TODO: resolve from clients list
+    : clients?.find(c => c.id === selectedClientId)?.name ?? null
+
+  const hasActiveSession = selectedClientId ? hasSession(selectedClientId) : false
+  const displayCta = hasActiveSession ? 'Continue Session' : ctaLabel
 
   return (
     <div className="p-4 md:p-6 max-w-xl mx-auto">
@@ -345,7 +348,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         </button>
 
         <h1 className="font-display text-4xl uppercase tracking-wide text-white">
-          {ctaLabel}
+          {displayCta}
         </h1>
         {clientName && (
           <p className="text-sm text-gray-500 mt-1">Training: {clientName}</p>
@@ -409,7 +412,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
               Starting…
             </span>
           ) : (
-            ctaLabel
+            displayCta
           )}
         </button>
 

@@ -20,6 +20,7 @@ import { cn }                                from '@/lib/cn'
 import { interactions }                      from '@/lib/interactions'
 import { useRestoreScroll }                  from '@/hooks/useScrollRestoration'
 import { usePreferences }                    from '@/hooks/usePreferences'
+import { useSessionStore }                   from '@/store/sessionStore'
 import { KpiHero }                           from '@/components/kpi/KpiHero'
 import { OverviewTab }                       from '@/components/client-profile/OverviewTab'
 import { TimelineTab }                       from '@/components/client-profile/TimelineTab'
@@ -96,6 +97,7 @@ export default function ClientProfilePage(): React.JSX.Element {
   useRestoreScroll()
 
   const { trainerMode } = usePreferences()
+  const { hasSession }  = useSessionStore()
 
   const { data: client,    isLoading, error } = useClient(id ?? null)
   const { data: snapshots }                   = useClientSnapshots(id ?? null)
@@ -166,7 +168,7 @@ export default function ClientProfilePage(): React.JSX.Element {
               {(kpis?.sessionsThisMonth ?? 0) === 0 ? 'No Sessions' : 'Send Report'}
             </button>
 
-            {/* Start Session */}
+            {/* Start / Continue Session */}
             <Link
               to={`/session/new?clientId=${client.id}`}
               className={cn(
@@ -181,7 +183,7 @@ export default function ClientProfilePage(): React.JSX.Element {
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5" aria-hidden>
                 <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              Start Session
+              {kpis && hasSession(client.id) ? 'Continue Session' : 'Start Session'}
             </Link>
 
             {/* Edit */}

@@ -534,10 +534,13 @@ Which fields you populate depends on the workout type:
         .values({ ...body, sessionExerciseId })
         .returning()
 
+      if (!newSet) {
+        return reply.status(500).send({ error: 'Failed to record set' })
+      }
+
       return reply.status(201).send({
         ...newSet,
         createdAt: newSet.createdAt instanceof Date ? newSet.createdAt.toISOString() : newSet.createdAt,
-        updatedAt: newSet.updatedAt instanceof Date ? newSet.updatedAt.toISOString() : newSet.updatedAt,
       })
     } catch (error) {
       ;(app.log as any).error(error)
@@ -581,7 +584,6 @@ Which fields you populate depends on the workout type:
       return reply.send({
         ...updated,
         createdAt: updated.createdAt instanceof Date ? updated.createdAt.toISOString() : updated.createdAt,
-        updatedAt: updated.updatedAt instanceof Date ? updated.updatedAt.toISOString() : updated.updatedAt,
       })
     } catch (error) {
       ;(app.log as any).error(error)

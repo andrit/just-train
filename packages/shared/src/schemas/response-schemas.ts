@@ -31,6 +31,7 @@ import {
   SubscriptionTierEnum,
   SubscriptionStatusEnum,
   TrainerModeEnum,
+  ExerciseCategoryEnum,
 } from '../enums'
 
 // ============================================================
@@ -315,6 +316,7 @@ export const ExerciseDetailResponseSchema = ExerciseSummaryResponseSchema.extend
   bodyPartId:    z.string().uuid().nullable(),
   description:   z.string().nullable(),
   instructions:  z.string().nullable().describe('Step-by-step form instructions'),
+  category:      ExerciseCategoryEnum.nullable().describe('compound or isolation — resistance exercises only'),
   isPublic:      z.boolean().describe('true = visible to all trainers (future multi-trainer)'),
   visualization: z.string().url().nullable().describe('URL to muscle-group diagram image'),
   demonstration: z.string().url().nullable().describe('URL to form demonstration video'),

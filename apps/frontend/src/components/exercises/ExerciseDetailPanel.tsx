@@ -87,7 +87,7 @@ function ExerciseHero({
   return (
     <div className="relative">
       {/* Media area */}
-      <div className="aspect-video bg-brand-accent rounded-2xl overflow-hidden">
+      <div className="h-36 bg-brand-accent rounded-xl overflow-hidden">
         {!hasAny && (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2">
             <span className="text-5xl opacity-20" aria-hidden>💪</span>
@@ -128,12 +128,12 @@ function ExerciseHero({
 
       {/* Toggle */}
       {(hasVisualization || hasDemonstration) && (
-        <div className="flex gap-2 mt-3">
+        <div className="flex gap-2 mt-2">
           <button
             type="button"
             onClick={() => setMode('visualization')}
             className={cn(
-              'flex-1 py-2 rounded-xl text-xs font-medium border transition-all duration-150',
+              'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
               mode === 'visualization'
                 ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
                 : 'border-surface-border text-gray-500 hover:text-gray-300',
@@ -145,7 +145,7 @@ function ExerciseHero({
             type="button"
             onClick={() => setMode('demonstration')}
             className={cn(
-              'flex-1 py-2 rounded-xl text-xs font-medium border transition-all duration-150',
+              'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
               mode === 'demonstration'
                 ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
                 : 'border-surface-border text-gray-500 hover:text-gray-300',
@@ -384,7 +384,7 @@ export default function ExerciseDetailPanel({
 
   return (
     <>
-      <div className="space-y-5 pb-28">
+      <div className="space-y-4 pb-28">
 
         {/* Draft banner */}
         {exercise.isDraft && (

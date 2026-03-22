@@ -308,6 +308,58 @@ This is the primary payload for the active workout view — loaded once when the
   })
 
   // ----------------------------------------------------------
+  // DELETE /sessions/:id — Discard a session
+  //
+  // Permanently deletes a session and all its workouts, exercises
+  // and sets via CASCADE. Only the owning trainer can delete.
+  //
+  // Use cases:
+  //   - Client cancelled last minute — session never started
+  //   - Emergency mid-session — trainer wants no ghost record
+  //   - Accidental session creation
+  //
+  // For sessions with logged sets the frontend should warn the
+  // trainer that work will be lost. The backend deletes regardless.
+  // ----------------------------------------------------------
+  app.delete('/sessions/:id', {
+    schema: {
+      tags: ['Sessions'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Discard a session',
+      description: 'Permanently deletes a session and all associated workouts, exercises, and sets. Cannot be undone.',
+      params: UuidParamSchema,
+      response: {
+        204: z.null().describe('Session deleted'),
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id } = request.params as z.infer<typeof UuidParamSchema>
+
+    try {
+      const [deleted] = await db
+        .delete(sessions)
+        .where(
+          and(
+            eq(sessions.id, id),
+            eq(sessions.trainerId, request.trainer.trainerId)
+          )
+        )
+        .returning()
+
+      if (!deleted) {
+        return reply.status(404).send({ error: 'Session not found' })
+      }
+
+      return reply.status(204).send()
+    } catch (error) {
+      ;(app.log as any).error(error)
+      return reply.status(500).send({ error: 'Failed to delete session' })
+    }
+  })
+
+  // ----------------------------------------------------------
   // POST /sessions/:id/workouts — Add a workout block to a session
   // ----------------------------------------------------------
   app.post('/sessions/:id/workouts', {

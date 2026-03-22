@@ -20,7 +20,8 @@ import { useUXEvent }                     from '@/hooks/useUXEvent'
 import { useRestTimer }                   from '@/hooks/useRestTimer'
 import { useAuthStore }                   from '@/store/authStore'
 import { useSessionStore }                from '@/store/sessionStore'
-import { useSession, useEndSession }      from '@/lib/queries/sessions'
+import { useOverlayStore }                from '@/store/overlayStore'
+import { useSession, useEndSession, useDiscardSession } from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
 import { RestTimerBanner }                from '@/components/session/RestTimerBanner'
@@ -45,15 +46,31 @@ export default function LiveSessionContent({
 
   const { data: session, isLoading, error } = useSession(sessionId)
   const endSession                           = useEndSession()
+  const discardSession                       = useDiscardSession()
   const { endSession: clearSessionStore }    = useSessionStore()
 
-  const [showEndModal, setShowEndModal] = useState(false)
-  const [addBlockOpen, setAddBlockOpen] = useState(false)
+  const [showEndModal,     setShowEndModal]     = useState(false)
+  const [showDiscardMenu,  setShowDiscardMenu]  = useState(false)
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+  const [addBlockOpen,     setAddBlockOpen]     = useState(false)
 
   const weightUnit = trainer?.weightUnitPreference ?? 'lbs'
 
   const handleSetLogged = (restSeconds = 90): void => {
     restTimer.start(restSeconds)
+  }
+
+  const handleDiscard = (): void => {
+    discardSession.mutate(
+      { id: sessionId },
+      {
+        onSuccess: () => {
+          if (session?.clientId) clearSessionStore(session.clientId)
+          useOverlayStore.getState().hide()
+          navigate('/')
+        },
+      },
+    )
   }
 
   const handleEndSession = (scores: {
@@ -119,20 +136,81 @@ export default function LiveSessionContent({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* End session */}
-            <button
-              type="button"
-              onClick={() => setShowEndModal(true)}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium',
-                'bg-brand-highlight/10 border border-brand-highlight/30 text-brand-highlight',
-                'hover:bg-brand-highlight/20',
-                interactions.button.base,
-                interactions.button.press,
-              )}
-            >
-              End
-            </button>
+
+            {/* Discard confirm inline */}
+            {showDiscardConfirm ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">Discard session?</span>
+                <button
+                  type="button"
+                  onClick={handleDiscard}
+                  disabled={discardSession.isPending}
+                  className="text-xs text-red-400 hover:text-red-300 font-medium"
+                >
+                  {discardSession.isPending ? '…' : 'Discard'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardConfirm(false)}
+                  className="text-xs text-gray-500 hover:text-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : showDiscardMenu ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowDiscardMenu(false); setShowDiscardConfirm(true) }}
+                  className="text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded-lg border border-red-500/30 hover:bg-red-500/10"
+                >
+                  Discard Session
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardMenu(false)}
+                  className="text-xs text-gray-500 hover:text-gray-300 p-1"
+                >
+                  <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+                    <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* ⋯ menu */}
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardMenu(true)}
+                  aria-label="Session options"
+                  className={cn(
+                    'p-1.5 rounded-lg text-gray-500 hover:text-gray-300',
+                    interactions.button.base,
+                  )}
+                >
+                  <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                    <circle cx="4" cy="8" r="1.25" />
+                    <circle cx="8" cy="8" r="1.25" />
+                    <circle cx="12" cy="8" r="1.25" />
+                  </svg>
+                </button>
+
+                {/* End session */}
+                <button
+                  type="button"
+                  onClick={() => setShowEndModal(true)}
+                  className={cn(
+                    'px-3 py-1.5 rounded-lg text-sm font-medium',
+                    'bg-brand-highlight/10 border border-brand-highlight/30 text-brand-highlight',
+                    'hover:bg-brand-highlight/20',
+                    interactions.button.base,
+                    interactions.button.press,
+                  )}
+                >
+                  End
+                </button>
+              </>
+            )}
           </div>
         </header>
 

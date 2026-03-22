@@ -28,6 +28,7 @@ import {
   useCreateSession,
   useExecuteSession,
   useUpdateSessionName,
+  useDiscardSession,
 } from '@/lib/queries/sessions'
 import { WorkoutBlock }                          from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                         from '@/components/session/AddBlockSheet'
@@ -58,6 +59,7 @@ export function SessionPlanPanel({
   const createSession  = useCreateSession()
   const executeSession = useExecuteSession()
   const updateName     = useUpdateSessionName()
+  const discardSession = useDiscardSession()
 
   // ── State ─────────────────────────────────────────────────────────────────
 
@@ -68,8 +70,9 @@ export function SessionPlanPanel({
   const [sessionName,   setSessionName]   = useState('')
   const [nameEditing,   setNameEditing]   = useState(false)
   const [addBlockOpen,  setAddBlockOpen]  = useState(false)
-  const [error,         setError]         = useState<string | null>(null)
-  const [creating,      setCreating]      = useState(false)
+  const [error,              setError]              = useState<string | null>(null)
+  const [creating,           setCreating]           = useState(false)
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
 
   // Load session if editing existing
   const { data: session, isLoading: sessionLoading } = useSession(sessionId)
@@ -138,16 +141,31 @@ export function SessionPlanPanel({
         ?? selfClient?.name
         ?? 'Client'
 
-      // Move from planned store to active store
       removePlannedSession(sessionId)
       useSessionStore.getState().startSession(selectedClientId, sessionId, clientName)
-
-      // Expand the session overlay
       expand(selectedClientId)
       onClose()
     } catch {
       setError('Could not start session — please try again')
     }
+  }
+
+  const handleDiscard = (): void => {
+    if (!sessionId) {
+      // Session never created — just close
+      onClose()
+      return
+    }
+    discardSession.mutate(
+      { id: sessionId },
+      {
+        onSuccess: () => {
+          removePlannedSession(sessionId)
+          onClose()
+        },
+        onError: () => setError('Could not discard session — please try again'),
+      },
+    )
   }
 
   const workouts   = session?.workouts ?? []
@@ -168,42 +186,76 @@ export function SessionPlanPanel({
 
         {/* Nav */}
         <div className="flex items-center justify-between mb-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className={cn('flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300', interactions.button.base)}
-          >
-            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
-              <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Back
-          </button>
+          {showDiscardConfirm ? (
+            <div className="flex items-center gap-2 w-full">
+              <span className="text-xs text-gray-400 flex-1">Discard this plan?</span>
+              <button
+                type="button"
+                onClick={handleDiscard}
+                disabled={discardSession.isPending}
+                className="text-xs text-red-400 hover:text-red-300 font-medium"
+              >
+                {discardSession.isPending ? '…' : 'Discard'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDiscardConfirm(false)}
+                className="text-xs text-gray-500 hover:text-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onClose}
+                className={cn('flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300', interactions.button.base)}
+              >
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                  <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Back
+              </button>
 
-          {/* Execute button — only shown when session has content */}
-          {sessionId && workouts.length > 0 && (
-            <button
-              type="button"
-              onClick={handleExecute}
-              disabled={executeSession.isPending}
-              className={cn(
-                'flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium',
-                'bg-brand-highlight text-white',
-                interactions.button.base,
-                interactions.button.press,
-                executeSession.isPending && 'opacity-50',
-              )}
-            >
-              {executeSession.isPending ? (
-                <Spinner size="sm" />
-              ) : (
-                <>
-                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-                    <path d="M4 3l10 5-10 5V3z" fill="currentColor" />
-                  </svg>
-                  Execute
-                </>
-              )}
-            </button>
+              <div className="flex items-center gap-2">
+                {/* Discard button — subtle, always available once a session exists or is being built */}
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardConfirm(true)}
+                  className="text-xs text-gray-600 hover:text-red-400 transition-colors px-2 py-1"
+                >
+                  Discard
+                </button>
+
+                {/* Execute — only when session has blocks */}
+                {sessionId && workouts.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleExecute}
+                    disabled={executeSession.isPending}
+                    className={cn(
+                      'flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium',
+                      'bg-brand-highlight text-white',
+                      interactions.button.base,
+                      interactions.button.press,
+                      executeSession.isPending && 'opacity-50',
+                    )}
+                  >
+                    {executeSession.isPending ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      <>
+                        <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                          <path d="M4 3l10 5-10 5V3z" fill="currentColor" />
+                        </svg>
+                        Execute
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </>
           )}
         </div>
 

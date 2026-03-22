@@ -339,3 +339,15 @@ export function useUpdateSessionName(): UseMutationResult<void, Error, UpdateSes
     },
   })
 }
+
+// ── Discard (delete) a session ────────────────────────────────────────────────
+
+export function useDiscardSession(): UseMutationResult<void, Error, { id: string }> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id }) => apiClient.delete<void>(`/sessions/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: sessionKeys.all() })
+    },
+  })
+}

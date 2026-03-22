@@ -621,43 +621,64 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v1.6.0 | KPI dashboard | ✅ |
 | v1.7.0 | Monthly reports (Resend email) | ✅ |
 | v1.7.5 | Redis + BullMQ — scheduled reports + at-risk alerts | ✅ |
-| v1.8.0 | Offline sync — IndexedDB + Workbox | 🔜 |
-| v2.0.0 | SaaS launch — Stripe, billing gates | 🔜 |
+| v1.8.0 | Live session: add blocks, exercises, set logging, session store | ✅ |
+| **v1.9.0** | **Exercise library UI** | 🔨 Current |
+| v2.0.0 | SPA refactor — panels, overlays, persistent session | 🔜 |
+| v2.1.0 | Session planning — "plan the day" workflow | 🔜 |
+| v2.2.0 | Sessions view — history list | 🔜 |
+| v2.3.0 | Observable navigation service (RxJS) | 🔜 |
+| v2.4.0 | Offline sync — IndexedDB + Workbox | 🔜 |
+| v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 
 ---
 
-## What's Next (v1.6.0)
+## What's Next (v1.9.0) — Exercise Library UI
 
-**KPI Dashboard** — the answer to "Is this client moving forward?"
+The exercise library data is seeded (109 exercises). The page is a stub. Build it out.
 
-Per-client key performance indicators surfaced on the client profile and as a trainer-level overview. The data is already being captured — this phase calculates and displays it.
+**ExercisesPage** — browsable library:
+- Filter by workout type (resistance / cardio / calisthenics / stretching / cooldown)
+- Filter by body part (arms / back / chest / core / legs / shoulders / full_body)
+- Resistance exercises also filterable by compound / isolation
+- Search by name
+- Draft exercises shown with badge — tap to enrich
+- "Add to Workout" CTA — context-aware (see below)
 
-Core KPIs per focus type:
-- Resistance: total volume trend, estimated 1RM per exercise, PR tracking
-- Cardio: distance/duration trend, pace improvement
-- Calisthenics: max reps trend
-- All: consistency score (sessions per week vs target), streak, at-risk flag (14+ days no session)
+**Exercise detail view:**
+- Hero section — visualization (still image) or demonstration (video), toggle between them
+- Placeholder shown when both are null (Phase 9 content population)
+- Exercise info below: name, body part, equipment, difficulty, category, description, instructions
+- "Add to Workout" footer CTA
 
-Trainer-level overview: active client count, total sessions this month, at-risk clients list, top performers.
+**"Add to Workout" CTA — context-aware rules:**
+- Disabled if no sessions open (planned or active)
+- Adds directly if exactly one session open
+- Shows a session picker sheet if multiple sessions are open
+- Session picker lists all open sessions by client name + session type (planned/active)
 
-This feeds directly into the monthly report (v1.7.0) — the report is a narrative wrapper around these numbers.
+**Draft enrichment flow:**
+- isDraft exercises show an amber "Draft" badge in the library
+- Tapping a draft opens an inline edit form: name, body part, description
+- Saving clears the isDraft flag
 
 ---
 
 ## Known Deferred Items (summary)
 
-Full details in `DEFERRED_ITEMS.md`. Key items:
+Full details in `DEFERRED_ITEMS.md`.
 
 | Item | Deferred to |
 |---|---|
-| Subscription billing gates | SaaS phase (v2.0.0) |
-| Email verification | When multi-trainer opens |
+| Subscription billing gates | v3.0.0 SaaS |
+| Email verification | Multi-trainer launch |
 | Password reset flow | Settings UI phase |
-| Trainer mode switching UI | Settings UI phase |
-| Preferences Phase 4.5 (full mood system, alert customization UI) | v1.5.x |
-| Widget drag-to-reorder on dashboard | v1.5.x |
-| GuidanceNudge UI component | v1.5.0+ (rules exist, UI not wired) |
-| `trainer_usage_monthly` population job | SaaS phase |
+| Visualization / demonstration content | Phase 9 (post-SPA) |
+| Draft exercise enrichment queue | v1.9.x |
+| Post-session wrap-up | After session planning (v2.2.0+) |
+| Observable navigation service | v2.3.0 |
+| Offline sync | v2.4.0 |
+| ESLint setup | Dedicated code quality version |
+| SMS report delivery | When paying clients need it |
 | Redis + rate limiting persistence | v1.7.5 |
 | Offline sync | v1.8.0 |
 | Playwright E2E tests | Phase 5+ (noted in CI yml) |
@@ -674,17 +695,20 @@ pnpm dev                          # runs frontend + backend
 # Schema changed?
 cd apps/backend && pnpm db:push   # dev only — applies directly, no migration files
 
+# Seed exercise library (first time or after reset)
+cd apps/backend && pnpm db:seed
+
 # Typecheck
 pnpm typecheck                    # run from monorepo root. Silence = success.
 
 # Tests
 pnpm --filter backend test
 
-# Ship a version
-./release.sh v1.5.1 "feat: session history"
+# Ship a hotfix (no tag — dev iteration)
+./hotfix.sh "fix: description"
 
-# Ship a hotfix
-./hotfix.sh "fix: catch block in sessions.ts"
+# Ship a release (commits + tags + pushes)
+./release.sh v1.9.0 "feat: exercise library UI"
 ```
 
 ---

@@ -1,24 +1,27 @@
 # TrainerApp
 
-A mobile-first PWA for fitness trainers and athletes to plan sessions, track performance, and build an exercise library.
+A mobile-first PWA for fitness trainers and athletes to plan sessions, track performance, and build lives around consistent training.
 
 ---
 
 ## Tech Stack
 
-| Layer    | Technology                                    |
-|----------|-----------------------------------------------|
-| Frontend | React 18, Vite, TypeScript, Tailwind CSS      |
-| State    | TanStack Query (server), Zustand (client)     |
-| PWA      | vite-plugin-pwa, Workbox (Phase 8)            |
-| Offline  | IndexedDB (Phase 8)                           |
-| Backend  | Fastify, TypeScript                           |
-| ORM      | Drizzle + drizzle-kit                         |
-| Validation | Zod (shared between frontend + backend)     |
-| Auth     | JWT access tokens + argon2 + httpOnly cookies |
-| Database | PostgreSQL                                    |
-| Media    | Cloudinary                                    |
-| Hosting  | Railway (backend + DB), Vercel (frontend) | Split by design — Vercel CDN for PWA load speed, Railway for API + Postgres co-location |
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, Vite, TypeScript, Tailwind CSS |
+| State | TanStack Query (server), Zustand (client, persisted) |
+| PWA | vite-plugin-pwa, Workbox (Phase offline sync) |
+| Backend | Fastify, TypeScript |
+| ORM | Drizzle + drizzle-kit |
+| Validation | Zod (shared between frontend + backend) |
+| Auth | JWT access tokens + argon2 + httpOnly cookies |
+| Database | PostgreSQL |
+| Media | Cloudinary |
+| Email | Resend |
+| Queue | BullMQ + Upstash Redis |
+| Hosting | Railway (backend + DB), Vercel (frontend) |
+
+Split by design — Vercel CDN for PWA load speed, Railway for API + Postgres co-location.
 
 ---
 
@@ -26,32 +29,37 @@ A mobile-first PWA for fitness trainers and athletes to plan sessions, track per
 
 ```
 trainer-app/
-├── packages/shared/          # Enums, Zod schemas, TypeScript types, utilities
-├── apps/backend/             # Fastify API
+├── packages/shared/          # Enums, Zod schemas, TypeScript types
+├── apps/backend/
 │   └── src/
-│       ├── db/               # Drizzle client + schema files
+│       ├── db/
+│       │   ├── schema/       # Drizzle table definitions
+│       │   └── seeds/        # Exercise library seed (109 exercises)
 │       ├── middleware/       # authenticate, requireRole
+│       ├── queues/           # BullMQ workers + scheduler
 │       ├── routes/           # auth, clients, exercises, sessions, templates
-│       └── services/         # auth.service.ts
-└── apps/frontend/            # React PWA
+│       └── services/         # report.service, alert.service
+└── apps/frontend/
     └── src/
-        ├── components/       # UI components, dashboard widgets, session components
-        ├── hooks/            # usePreferences, useUXEvent, useRestTimer, useReorderList
-        ├── lib/              # api.ts, queries/, interactions.ts, ux-events.ts, widgets.ts
-        ├── pages/            # All route pages
-        └── store/            # authStore.ts
+        ├── components/       # UI components by domain
+        ├── hooks/            # usePreferences, useRestTimer, useUXEvent
+        ├── lib/              # api.ts, queries/, interactions.ts
+        ├── pages/            # Route pages
+        └── store/            # authStore, sessionStore
 ```
 
 ---
 
 ## Terminology
 
-| Term        | Meaning                                                   |
-|-------------|-----------------------------------------------------------|
-| **Session** | A full training event for a client on a date              |
-| **Workout** | A typed block within a session (cardio, resistance, etc.) |
-| **Exercise**| A movement in the library                                 |
-| **Set**     | One recorded effort — the atomic tracking unit            |
+| Term | Meaning |
+|---|---|
+| **Session** | A full training event for a client/athlete on a date |
+| **Workout** | A typed block within a session (resistance, cardio, etc.) |
+| **Exercise** | A movement in the library |
+| **Set** | One recorded effort — the atomic tracking unit |
+| **Planned session** | Built in advance, not yet executing |
+| **Active session** | Currently being executed in real time |
 
 ---
 
@@ -75,35 +83,23 @@ pnpm install           # re-run after approving
 ```bash
 cp apps/backend/.env.example apps/backend/.env
 # Fill in DATABASE_URL, JWT_SECRET, COOKIE_SECRET
-
-# Generate secrets:
-node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
 ### Database
 
-**Development (recommended):**
 ```bash
+# Always run from apps/backend/
 cd apps/backend
-pnpm db:push      # apply schema directly — no migration files needed
-```
 
-**Production / new installs:**
-```bash
-cd apps/backend
-pnpm db:generate  # generate migration SQL from schema
-pnpm db:migrate   # apply migrations to database
+pnpm db:push      # apply schema changes (dev)
+pnpm db:seed      # seed body parts + 109 public exercises
+pnpm db:studio    # open Drizzle Studio visual browser
 ```
-
-> **Note:** If you see "column X does not exist" errors after adding schema changes,
-> run `dropdb trainer_app && createdb trainer_app` then `pnpm db:migrate` to apply
-> the full schema to a fresh database. This is safe during development — no real data
-> is lost.
 
 ### Run
 
 ```bash
-# From monorepo root — runs both frontend and backend
+# From monorepo root
 pnpm dev
 
 # Backend: http://localhost:3001
@@ -115,33 +111,27 @@ pnpm dev
 
 ## Git Workflow
 
-### First-time setup
 ```bash
+# Hotfix (no tag — dev iteration)
+./hotfix.sh "fix: description"
+
+# Release (commits, tags, pushes — CI must pass)
+./release.sh v1.9.0 "feat: description"
+
+# First-time setup
 git init
 git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
 git add .
-git commit -m "feat: TrainerApp v1.5.0 — session logging"
-git tag v1.5.0
-git push -u origin main --tags
+git commit -m "feat: initial commit"
+git push -u origin main
 ```
 
 ### Updating to a new version
-```bash
-# 1. Unzip new version over the existing repo folder
-unzip -o TrainerApp-v1.5.1.zip -d .
 
-# 2. Apply any database schema changes
+```bash
+unzip -o TrainerApp-vX.X.X.zip -d .
 cd apps/backend && pnpm db:push && cd ../..
-
-# 3. Commit and push
-chmod +x release.sh
-./release.sh v1.5.1 "feat: UX event side effects"
-```
-
-### release.sh
-One command to commit, tag, and push:
-```bash
-./release.sh v1.5.1 "feat: description"
+./release.sh vX.X.X "feat: description"
 ```
 
 ---
@@ -150,45 +140,68 @@ One command to commit, tag, and push:
 
 GitHub Actions runs on every push to `main`:
 1. `pnpm typecheck` — TypeScript across all packages
-2. `pnpm lint` — ESLint
+2. `pnpm lint` — ESLint (currently no-op, see DEFERRED_ITEMS)
 3. `pnpm --filter backend test` — Vitest unit tests
 4. `pnpm build` — full build verification
-
-See `.github/workflows/ci.yml`.
 
 ---
 
 ## Build Phases
 
-| Version | Description                                         | Status  |
-|---------|-----------------------------------------------------|---------|
-| v1.0.0  | Scaffold, DB schema, Swagger                        | ✅ Done |
-| v1.1.0  | Auth — JWT, argon2, refresh tokens                  | ✅ Done |
-| v1.1.1  | Unit tests — 120 tests                              | ✅ Done |
-| v1.2.0  | Exercise Library UI + Cloudinary                    | ✅ Done |
-| v1.2.1  | Storybook component library                         | ✅ Done |
-| v1.3.0  | Client goals, snapshots, self-training schema       | ✅ Done |
-| v1.3.1  | Usage metrics, trainerMode, onboarding schema       | ✅ Done |
-| v1.4.0  | Client management UI, onboarding screen             | ✅ Done |
-| v1.4.1  | Preference schema (ctaLabel, widgets, alerts)       | ✅ Done |
-| v1.4.2  | Dashboard with widget system                        | ✅ Done |
-| v1.4.3  | Storybook — Phase 4 components                      | ✅ Done |
-| v1.4.4  | UX event system                                     | ✅ Done |
-| v1.4.5  | Preferences screen                                  | ✅ Done |
-| v1.5.0  | Session logging — launcher, live session, summary   | ✅ Done |
-| v1.5.1  | Session history + client timeline                   | 🔜 Next |
-| v1.6.0  | KPI dashboard                                       | 🔜      |
-| v1.7.0  | Monthly reports (Resend email)                      | 🔜      |
-| v1.8.0  | Offline sync — IndexedDB + Workbox                  | 🔜      |
+| Version | Description | Status |
+|---|---|---|
+| v1.0.0 | Scaffold, DB schema, Swagger | ✅ |
+| v1.1.0 | Auth — JWT, argon2, refresh tokens | ✅ |
+| v1.1.1 | Unit tests — 120 tests | ✅ |
+| v1.2.0 | Exercise Library backend + Cloudinary | ✅ |
+| v1.3.0 | Client goals, snapshots, self-training schema | ✅ |
+| v1.4.0 | Client management UI, onboarding, dashboard | ✅ |
+| v1.4.5 | Preferences screen | ✅ |
+| v1.5.0 | Session logging — launcher, live session, summary | ✅ |
+| v1.6.0 | KPI dashboard | ✅ |
+| v1.7.0 | Monthly reports via Resend | ✅ |
+| v1.7.5 | BullMQ + Upstash Redis — scheduled reports + at-risk alerts | ✅ |
+| v1.8.0 | Live session: add blocks, exercises, set logging, session store | ✅ |
+| **v1.9.0** | **Exercise library UI** | 🔨 Current |
+| v2.0.0 | SPA refactor — panels, overlays, persistent session | 🔜 |
+| v2.1.0 | Session planning — "plan the day" workflow | 🔜 |
+| v2.2.0 | Sessions view — history list | 🔜 |
+| v2.3.0 | Observable navigation service (RxJS) | 🔜 |
+| v2.4.0 | Offline sync — IndexedDB + Workbox | 🔜 |
+| v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
+
+---
+
+## User Types
+
+### Athlete
+Tracks their own training. Plans and executes sessions. May have 5 planned sessions open at once (chest day, leg day…). The base user — all trainer features build on top of this.
+
+### Trainer
+Everything the athlete has, plus a client roster. Can execute sessions with clients or as themselves. May be planning multiple clients' sessions while in their own workout.
+
+A trainer's `isSelf` client record is their athlete account.
+
+---
+
+## Session Model
+
+Two distinct session types with different UX:
+
+| | Planned | Active |
+|---|---|---|
+| State | Being built, edited | Executing right now |
+| Concurrent | Many open (workspace tabs) | One per person |
+| UI language | Editor — calm, structured | Full focus, minimal chrome |
+
+Active session uses the Spotify model: full-screen overlay → swipe down to minimise → persistent pill above nav → nav reappears.
 
 ---
 
 ## Testing
 
 ```bash
-pnpm --filter backend test           # run once
-pnpm --filter backend test:watch     # watch mode
-pnpm --filter backend test:coverage  # with coverage
+pnpm --filter backend test
+pnpm --filter backend test:watch
+pnpm --filter backend test:coverage
 ```
-
-See `DEFERRED_ITEMS.md` for deferred features per phase.

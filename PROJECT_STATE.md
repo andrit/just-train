@@ -702,3 +702,122 @@ Before marking a version complete, verify:
 - [ ] `DEFERRED_ITEMS.md` updated with anything newly deferred
 - [ ] Storybook stories added for new components
 - [ ] `./release.sh vX.X.X "message"` run — CI passes on GitHub
+
+---
+
+## Architecture Decision Record — SPA Refactor (March 2026)
+
+### Context
+The app uses React Router v6 in a route-per-page pattern. Every major transition unmounts the current tree and mounts a new one. This causes the live session UI to feel disconnected — starting a session navigates away from the client context entirely.
+
+### Decision: True SPA — layered panels, Zustand owns state, URL is secondary
+
+Navigation transitions to animated panel/overlay model. URL updates as a side-effect of state changes, not as the cause of them. React Router stays but is demoted from controller to observer.
+
+### Session Model — Two Types
+
+| | Planned Session | Active Session |
+|---|---|---|
+| State | Being built, edited | Executing right now |
+| Time | Async — days to build | Real-time |
+| Concurrent | Many open at once (chest day, leg day…) | One per person |
+| UI | Editor — calm, structured | Full focus, minimal chrome |
+
+**The athlete is the atom.** Trainer's `isSelf` client is an athlete account. Everything built for the athlete is inherited by the trainer for their own training. Trainer layer adds client management on top.
+
+### Concurrent Session Model
+- `plannedSessions: Record<sessionId, PlannedSession>` — many, any owner, workspace tabs
+- `activeSessions: Record<clientId, ActiveSession>` — one per person, real-time overlay
+
+Active session uses the Spotify model: full-screen overlay, swipe down to minimise to a persistent pill, tap pill to restore. Multiple active sessions (trainer's own + client's) = multiple pills, stacked.
+
+### Z-Index Layer Stack
+
+| Layer | What | Z-index |
+|---|---|---|
+| 0 — Base | Dashboard, list pages | 0 |
+| 1 — Panel | Client profile, session history, planned session editor | 10 |
+| 2 — Planned session pill | Minimised planned sessions indicator | 15 |
+| 3 — Active session overlay | Live executing session (full-screen) | 20 |
+| 4 — Active session pill | Minimised active session (Spotify bar) | 25 |
+| 5 — Sheet | Bottom sheets | 30 |
+| 6 — Modal | Destructive confirms | 40 |
+| 7 — Nav | Tab bar — hidden when active session is full-screen | 50 |
+| 8 — Toast | Notifications | 60 |
+
+Nav hides when active session overlay is full-screen. Swipe down → overlay minimises → pill appears above nav → nav reappears.
+
+### Back Button Strategy
+**Phase 1 (SPA refactor):** React Router location state — each panel push adds a history entry. Back button pops the entry and closes the panel. Handles Android back button and PWA standalone mode correctly by default.
+
+**Phase 2 (post-SPA):** Migrate nav to observable-based navigation service (RxJS). The nav service is abstracted from day one so this is an internal implementation swap, not a surface change. Observables solve rapid open/close race conditions and give a single auditable stream of all navigation events.
+
+"PWA install behaviour is correct" with React Router means: when installed to home screen in standalone mode, Android's back button fires a `popstate` event. React Router's history stack handles this natively. Raw `history.pushState` without a `popstate` listener would exit the app instead.
+
+### SPA Refactor Sequence
+1. **Exercise library** (current) — complete before refactor
+2. **Active session → persistent overlay** (highest value, fixes core UX complaint)
+3. **Session launcher → bottom sheet** (natural companion)
+4. **Client profile → slide panel** (unlocks plan-the-day workflow)
+5. **Session history/summary → inner views**
+6. **URL side-effect sync** (polish — last)
+7. **Observable navigation service** (post-refactor migration)
+
+---
+
+## Exercise Library (v1.8.5 — current focus)
+
+### Schema additions
+- `exercises.visualization` — text (URL), nullable — muscle-group diagram image
+- `exercises.demonstration` — text (URL), nullable — form demonstration video URL
+- `ExerciseDetailResponseSchema` — updated to include both fields + nullable trainerId/bodyPartId
+
+### Exercise library source
+`apps/backend/src/db/seeds/exercises-library.json` — 109 exercises, editable JSON.
+
+To re-seed after editing the JSON: delete public exercises from DB, then run `pnpm db:seed`.
+To add individual exercises after initial seed: use `POST /exercises` or direct DB insert/update.
+
+### Exercise counts
+| Category | Count |
+|---|---|
+| Resistance — compound | 24 |
+| Resistance — isolation | 24 |
+| Cardio | 14 |
+| Calisthenics | 18 |
+| Stretching | 22 |
+| Cooldown | 7 |
+| **Total** | **109** |
+
+### Exercise detail page design (planned)
+- **Hero section** — visualization (still image) or demonstration (video) with toggle between them
+- **Exercise info** — name, body part, equipment, difficulty, description, instructions
+- **Footer CTA** — "Add to Workout" (context-aware: disabled if no active/planned session)
+- **Draft badge** — shown on exercises created mid-session, prompts enrichment
+
+### Visualization and demonstration content (Phase 9 — deferred)
+- Visualizations: muscle-group highlight diagrams (like gym machine graphics)
+- Demonstrations: video links to proper form demonstrations
+- Content population deferred to Phase 9 (post-SPA refactor)
+- May be AI-generated, licensed, or user-uploaded depending on cost/quality tradeoff
+- Schema is ready — fields exist, currently null in seed
+
+### db:seed command
+```bash
+cd apps/backend
+pnpm db:push    # apply schema changes (visualization, demonstration columns)
+pnpm db:seed    # seeds body parts then all 109 exercises
+```
+
+---
+
+## Session Metrics by Workout Type (locked)
+
+| Type | Primary metrics | Secondary |
+|---|---|---|
+| Resistance | sets, reps, weight | RPE |
+| Cardio | distance, time, reps | RPE, pace |
+| Calisthenics | sets, reps, time | RPE |
+| Stretching | time (hold duration) | side (L/R/both) |
+| Cooldown | time | — |
+

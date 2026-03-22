@@ -311,14 +311,16 @@ export const ExerciseSummaryResponseSchema = z.object({
 export type ExerciseSummaryResponse = z.infer<typeof ExerciseSummaryResponseSchema>
 
 export const ExerciseDetailResponseSchema = ExerciseSummaryResponseSchema.extend({
-  trainerId:    z.string().uuid(),
-  bodyPartId:   z.string().uuid(),
-  description:  z.string().nullable(),
-  instructions: z.string().nullable().describe('Step-by-step form instructions'),
-  isPublic:     z.boolean().describe('true = visible to all trainers (future multi-trainer)'),
-  media:        z.array(ExerciseMediaResponseSchema).describe('All media ordered by displayOrder'),
-  createdAt:    z.string().datetime(),
-  updatedAt:    z.string().datetime(),
+  trainerId:     z.string().uuid().nullable(),
+  bodyPartId:    z.string().uuid().nullable(),
+  description:   z.string().nullable(),
+  instructions:  z.string().nullable().describe('Step-by-step form instructions'),
+  isPublic:      z.boolean().describe('true = visible to all trainers (future multi-trainer)'),
+  visualization: z.string().url().nullable().describe('URL to muscle-group diagram image'),
+  demonstration: z.string().url().nullable().describe('URL to form demonstration video'),
+  media:         z.array(ExerciseMediaResponseSchema).describe('All media ordered by displayOrder'),
+  createdAt:     z.string().datetime(),
+  updatedAt:     z.string().datetime(),
 })
 export type ExerciseDetailResponse = z.infer<typeof ExerciseDetailResponseSchema>
 

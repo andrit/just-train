@@ -42,6 +42,7 @@ import {
   REFRESH_TOKEN_COOKIE,
 } from '../services/auth.service'
 import { authenticate } from '../middleware/authenticate'
+import { seedExerciseLibrary } from '../db/seed-exercises'
 import {
   CreateTrainerSchema,
   LoginSchema,
@@ -191,6 +192,12 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         isSelf:           true,
         progressionState: 'assessment',
         startDate:        new Date().toISOString().split('T')[0],
+      })
+
+      // Seed the starter exercise library for this trainer — fire and forget,
+      // don't block the registration response if it fails.
+      seedExerciseLibrary(trainer.id).catch((err) => {
+        ;(app.log as any).warn({ err }, 'Exercise library seed failed for new trainer')
       })
 
       // Issue tokens immediately

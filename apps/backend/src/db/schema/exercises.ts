@@ -15,18 +15,19 @@ import {
 import { relations } from 'drizzle-orm'
 import {
   BodyPartEnum, WorkoutTypeEnum, EquipmentEnum,
-  DifficultyEnum, MediaTypeEnum,
+  DifficultyEnum, MediaTypeEnum, ExerciseCategoryEnum,
 } from '@trainer-app/shared'
 import { trainers } from './trainers'
 
 // ------------------------------------------------------------
 // POSTGRES ENUMS — derived from Zod enum .options
 // ------------------------------------------------------------
-export const bodyPartEnum    = pgEnum('body_part',  BodyPartEnum.options)
-export const workoutTypeEnum = pgEnum('workout_type', WorkoutTypeEnum.options)
-export const equipmentEnum   = pgEnum('equipment',  EquipmentEnum.options)
-export const difficultyEnum  = pgEnum('difficulty', DifficultyEnum.options)
-export const mediaTypeEnum   = pgEnum('media_type', MediaTypeEnum.options)
+export const bodyPartEnum        = pgEnum('body_part',       BodyPartEnum.options)
+export const workoutTypeEnum     = pgEnum('workout_type',    WorkoutTypeEnum.options)
+export const equipmentEnum       = pgEnum('equipment',       EquipmentEnum.options)
+export const difficultyEnum      = pgEnum('difficulty',      DifficultyEnum.options)
+export const mediaTypeEnum       = pgEnum('media_type',      MediaTypeEnum.options)
+export const exerciseCategoryEnum = pgEnum('exercise_category', ExerciseCategoryEnum.options)
 
 // ------------------------------------------------------------
 // BODY PARTS — lookup/reference table
@@ -45,8 +46,9 @@ export type BodyPart = typeof bodyParts.$inferSelect
 // ------------------------------------------------------------
 export const exercises = pgTable('exercises', {
   id:       uuid('id').primaryKey().defaultRandom(),
+  // null = public library exercise (no trainer owner)
+  // set = trainer-created exercise (private or public)
   trainerId: uuid('trainer_id')
-    .notNull()
     .references(() => trainers.id, { onDelete: 'cascade' }),
 
   name:         text('name').notNull(),
@@ -64,12 +66,21 @@ export const exercises = pgTable('exercises', {
   workoutType: workoutTypeEnum('workout_type').notNull(),
   equipment:   equipmentEnum('equipment').notNull().default('none'),
   difficulty:  difficultyEnum('difficulty').notNull().default('beginner'),
+  // compound = multi-joint (squat, bench). isolation = single-joint (curl, extension).
+  // Optional — mainly relevant for resistance exercises.
+  category:    exerciseCategoryEnum('exercise_category'),
 
   // true = quick-added mid-session, needs description/media added in library
   isDraft: boolean('is_draft').notNull().default(false),
 
   // true = visible to all trainers (future multi-trainer feature)
   isPublic: boolean('is_public').notNull().default(false),
+
+  // Media — populated in Phase 9 (post-SPA refactor)
+  // visualization: URL to a still image showing muscle groups (like a gym machine diagram)
+  // demonstration: URL to a video demonstrating proper form
+  visualization:  text('visualization'),
+  demonstration:  text('demonstration'),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),

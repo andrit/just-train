@@ -20,7 +20,7 @@
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
 import { db, exercises, bodyParts, exerciseMedia } from '../db'
-import { eq, and, ilike } from 'drizzle-orm'
+import { eq, and, ilike, or, isNull } from 'drizzle-orm'
 import {
   CreateExerciseSchema,
   QuickAddExerciseSchema,
@@ -102,7 +102,12 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
       request.query as z.infer<typeof ExerciseFilterSchema>
 
     try {
-      const conditions = [eq(exercises.trainerId, request.trainer.trainerId)]
+      // Return trainer's own exercises + the public library
+      const ownerCondition = or(
+        eq(exercises.trainerId, request.trainer.trainerId),
+        isNull(exercises.trainerId),
+      )
+      const conditions = [ownerCondition]
 
       if (workoutType) conditions.push(eq(exercises.workoutType, workoutType as never))
       if (bodyPartId)  conditions.push(eq(exercises.bodyPartId, bodyPartId))
@@ -152,7 +157,10 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
       const result = await db.query.exercises.findFirst({
         where: and(
           eq(exercises.id, id),
-          eq(exercises.trainerId, request.trainer.trainerId)
+          or(
+            eq(exercises.trainerId, request.trainer.trainerId),
+            isNull(exercises.trainerId),
+          )
         ),
         with: {
           bodyPart: true,

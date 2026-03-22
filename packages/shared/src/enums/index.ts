@@ -45,6 +45,11 @@ export type Side = z.infer<typeof SideEnum>
 export const DifficultyEnum = z.enum(['beginner', 'intermediate', 'advanced'])
 export type Difficulty = z.infer<typeof DifficultyEnum>
 
+// Compound = multi-joint (squat, bench, row). Isolation = single-joint (curl, extension).
+// Primarily used for resistance exercises. Optional for other workout types.
+export const ExerciseCategoryEnum = z.enum(['compound', 'isolation'])
+export type ExerciseCategory = z.infer<typeof ExerciseCategoryEnum>
+
 export const MediaTypeEnum = z.enum(['image', 'video'])
 export type MediaType = z.infer<typeof MediaTypeEnum>
 

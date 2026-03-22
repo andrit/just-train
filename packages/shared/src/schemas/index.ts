@@ -18,6 +18,7 @@ import {
   WeightUnitEnum,
   SideEnum,
   DifficultyEnum,
+  ExerciseCategoryEnum,
   ClientFocusEnum,
   ProgressionStateEnum,
   TrainerModeEnum,
@@ -220,6 +221,8 @@ export const CreateExerciseSchema = z.object({
   workoutType: WorkoutTypeEnum,
   equipment: EquipmentEnum.default('none'),
   difficulty: DifficultyEnum.default('beginner'),
+  category: ExerciseCategoryEnum.optional()
+    .describe('compound = multi-joint, isolation = single-joint. Mainly for resistance exercises.'),
   isDraft: z.boolean().default(false)
     .describe('true = quick-added mid-session, needs enriching in the library later'),
   isPublic: z.boolean().default(false)

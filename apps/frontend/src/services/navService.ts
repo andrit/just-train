@@ -41,6 +41,7 @@ export type PanelType =
   | 'sessionSummary'
   | 'sessionHistory'
   | 'sessionLauncher'
+  | 'sessionPlan'
 
 export interface PanelState {
   panel:     PanelType
@@ -90,6 +91,12 @@ export function useNav() {
     })
   }, [navigate, location.pathname])
 
+  const openSessionPlan = useCallback((sessionId?: string, clientId?: string): void => {
+    navigate(location.pathname, {
+      state: { panel: { panel: 'sessionPlan', entityId: sessionId, returnTab: clientId } },
+    })
+  }, [navigate, location.pathname])
+
   // ── Close current panel — pops history entry ───────────────────────────
 
   const closePanel = useCallback((): void => {
@@ -108,6 +115,7 @@ export function useNav() {
     openSessionSummary,
     openSessionHistory,
     openSessionLauncher,
+    openSessionPlan,
     closePanel,
     goToTab,
   }

@@ -35,6 +35,7 @@ import { useSessionStore }                   from '@/store/sessionStore'
 import { ActiveSessionOverlay }              from './ActiveSessionOverlay'
 import { ClientProfilePanel }                from './ClientProfilePanel'
 import { SessionLauncherSheet }              from './SessionLauncherSheet'
+import { SessionPlanPanel }                  from './SessionPlanPanel'
 import type { PanelState }                   from '@/services/navService'
 
 interface AppShellProps {
@@ -86,6 +87,26 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
         {currentPanel?.panel === 'clientProfile' && currentPanel.entityId && (
           <ClientProfilePanel
             clientId={currentPanel.entityId}
+            onClose={() => nav.closePanel()}
+          />
+        )}
+      </div>
+
+      {/* ── Session plan panel ───────────────────────────────────────────── */}
+      <div
+        className={cn(
+          'fixed inset-0 z-[10] bg-brand-primary',
+          'transition-transform duration-300 ease-out',
+          currentPanel?.panel === 'sessionPlan'
+            ? 'translate-x-0'
+            : 'translate-x-full',
+        )}
+        aria-hidden={currentPanel?.panel !== 'sessionPlan'}
+      >
+        {currentPanel?.panel === 'sessionPlan' && (
+          <SessionPlanPanel
+            sessionId={currentPanel.entityId}
+            clientId={currentPanel.returnTab}
             onClose={() => nav.closePanel()}
           />
         )}

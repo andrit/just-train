@@ -1,19 +1,17 @@
 // ------------------------------------------------------------
-// store/sessionStore.ts (v1.8.0)
+// store/sessionStore.ts (v2.1.0)
 //
-// Persists active session IDs per client so navigating away
-// and back doesn't lose the session.
+// Tracks both active (executing) and planned (being built) sessions.
 //
-// DESIGN:
-//   - Map of clientId → ActiveSession
-//   - Persisted to localStorage (session IDs are not sensitive)
-//   - Each client has at most one active session at a time
-//   - Session is removed when ended (EndSessionModal confirms)
-//   - Athlete's own session uses their self-client ID as the key
+// ACTIVE SESSIONS:
+//   - clientId → ActiveSession (one per client at a time)
+//   - Persisted to localStorage
+//   - Cleared when session ends
 //
-// BACKWARD COMPAT:
-//   The old store had a single activeSessionId — removed in v1.8.0.
-//   The offline pendingSets queue is kept for Phase 8 (offline sync).
+// PLANNED SESSIONS:
+//   - sessionId → PlannedSession (many open at once)
+//   - Persisted to localStorage
+//   - Cleared when executed or discarded
 // ------------------------------------------------------------
 
 import { create } from 'zustand'
@@ -26,32 +24,46 @@ export interface ActiveSession {
   startedAt:  string   // ISO string
 }
 
-interface SessionStoreState {
-  // clientId → ActiveSession
-  activeSessions: Record<string, ActiveSession>
+export interface PlannedSession {
+  sessionId:  string
+  clientId:   string
+  clientName: string
+  name:       string   // e.g. "Chest Day", "Thursday Push"
+  createdAt:  string   // ISO string
+}
 
+interface SessionStoreState {
+  activeSessions:  Record<string, ActiveSession>   // clientId → session
+  plannedSessions: Record<string, PlannedSession>  // sessionId → plan
+
+  // Active
   startSession:  (clientId: string, sessionId: string, clientName: string) => void
   endSession:    (clientId: string) => void
   getSession:    (clientId: string) => ActiveSession | null
   hasSession:    (clientId: string) => boolean
-  clearAll:      () => void
+
+  // Planned
+  addPlannedSession:    (session: PlannedSession) => void
+  removePlannedSession: (sessionId: string) => void
+  getPlannedSessions:   () => PlannedSession[]
+  hasPlannedSession:    (sessionId: string) => boolean
+
+  clearAll: () => void
 }
 
 export const useSessionStore = create<SessionStoreState>()(
   persist(
     (set, get) => ({
-      activeSessions: {},
+      activeSessions:  {},
+      plannedSessions: {},
+
+      // ── Active ────────────────────────────────────────────────────────────
 
       startSession: (clientId, sessionId, clientName) => {
         set((state) => ({
           activeSessions: {
             ...state.activeSessions,
-            [clientId]: {
-              sessionId,
-              clientId,
-              clientName,
-              startedAt: new Date().toISOString(),
-            },
+            [clientId]: { sessionId, clientId, clientName, startedAt: new Date().toISOString() },
           },
         }))
       },
@@ -64,18 +76,30 @@ export const useSessionStore = create<SessionStoreState>()(
         })
       },
 
-      getSession: (clientId) => {
-        return get().activeSessions[clientId] ?? null
+      getSession:  (clientId)  => get().activeSessions[clientId] ?? null,
+      hasSession:  (clientId)  => clientId in get().activeSessions,
+
+      // ── Planned ───────────────────────────────────────────────────────────
+
+      addPlannedSession: (session) => {
+        set((state) => ({
+          plannedSessions: { ...state.plannedSessions, [session.sessionId]: session },
+        }))
       },
 
-      hasSession: (clientId) => {
-        return clientId in get().activeSessions
+      removePlannedSession: (sessionId) => {
+        set((state) => {
+          const next = { ...state.plannedSessions }
+          delete next[sessionId]
+          return { plannedSessions: next }
+        })
       },
 
-      clearAll: () => set({ activeSessions: {} }),
+      getPlannedSessions: () => Object.values(get().plannedSessions),
+      hasPlannedSession:  (sessionId) => sessionId in get().plannedSessions,
+
+      clearAll: () => set({ activeSessions: {}, plannedSessions: {} }),
     }),
-    {
-      name: 'trainer-app-sessions',
-    }
+    { name: 'trainer-app-sessions' }
   )
 )

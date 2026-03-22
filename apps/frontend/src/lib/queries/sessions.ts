@@ -285,3 +285,57 @@ export function useDeleteSessionExercise(): UseMutationResult<void, Error, { ses
     },
   })
 }
+
+// ── Planned sessions ──────────────────────────────────────────────────────────
+
+export function usePlannedSessions(clientId?: string): UseQueryResult<SessionListResponse> {
+  const filters = { status: 'planned' as const, ...(clientId && { clientId }) }
+  const qs = new URLSearchParams(
+    Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== undefined)) as Record<string, string>
+  ).toString()
+  const qc = useQueryClient()
+  return useQuery({
+    queryKey: sessionKeys.list(filters),
+    queryFn:  () => apiClient<SessionListResponse>(`/sessions?${qs}`),
+    staleTime: 30_000,
+  })
+}
+
+// ── Execute a planned session (planned → in_progress) ────────────────────────
+
+export interface ExecuteSessionInput {
+  id: string
+}
+
+export function useExecuteSession(): UseMutationResult<void, Error, ExecuteSessionInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id }) =>
+      apiClient.patch<void>(`/sessions/${id}`, {
+        status:    'in_progress',
+        startTime: new Date().toISOString(),
+      }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(id) })
+      qc.invalidateQueries({ queryKey: sessionKeys.all() })
+    },
+  })
+}
+
+// ── Update session name ───────────────────────────────────────────────────────
+
+export interface UpdateSessionNameInput {
+  id:   string
+  name: string
+}
+
+export function useUpdateSessionName(): UseMutationResult<void, Error, UpdateSessionNameInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, name }) => apiClient.patch<void>(`/sessions/${id}`, { name }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(id) })
+      qc.invalidateQueries({ queryKey: sessionKeys.all() })
+    },
+  })
+}

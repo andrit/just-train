@@ -1,0 +1,349 @@
+// ------------------------------------------------------------
+// components/shell/SessionPlanPanel.tsx (v2.1.0)
+//
+// Plan builder for a planned session. Opened as a panel (z-10)
+// from the Sessions page or client profile.
+//
+// FLOW:
+//   1. Trainer picks a client (if trainer mode)
+//   2. Names the session ("Chest Day", "Thursday Push", optional)
+//   3. Adds workout blocks + exercises with targets (same UI as live)
+//   4. Saves — session stays as status: planned
+//   5. Execute button → transitions to in_progress, expands overlay
+//
+// The plan builder reuses WorkoutBlock and AddBlockSheet from
+// the live session UI — same interaction, different context.
+// ------------------------------------------------------------
+
+import { useState }                              from 'react'
+import { cn }                                    from '@/lib/cn'
+import { interactions }                          from '@/lib/interactions'
+import { usePreferences }                        from '@/hooks/usePreferences'
+import { useAuthStore }                          from '@/store/authStore'
+import { useSessionStore }                       from '@/store/sessionStore'
+import { useOverlayStore }                       from '@/store/overlayStore'
+import { useClients, useSelfClient }             from '@/lib/queries/clients'
+import {
+  useSession,
+  useCreateSession,
+  useExecuteSession,
+  useUpdateSessionName,
+} from '@/lib/queries/sessions'
+import { WorkoutBlock }                          from '@/components/session/WorkoutBlock'
+import { AddBlockSheet }                         from '@/components/session/AddBlockSheet'
+import { Spinner }                               from '@/components/ui/Spinner'
+
+interface SessionPlanPanelProps {
+  /** If provided, editing an existing planned session */
+  sessionId?:  string
+  /** Pre-selected client */
+  clientId?:   string
+  onClose:     () => void
+}
+
+export function SessionPlanPanel({
+  sessionId: existingSessionId,
+  clientId:  initialClientId,
+  onClose,
+}: SessionPlanPanelProps): React.JSX.Element {
+  const trainer        = useAuthStore((s) => s.trainer)
+  const { trainerMode }= usePreferences()
+  const weightUnit     = trainer?.weightUnitPreference ?? 'lbs'
+
+  const { data: selfClient }  = useSelfClient()
+  const { data: clients }     = useClients()
+  const { addPlannedSession, removePlannedSession } = useSessionStore()
+  const { expand }             = useOverlayStore()
+
+  const createSession  = useCreateSession()
+  const executeSession = useExecuteSession()
+  const updateName     = useUpdateSessionName()
+
+  // ── State ─────────────────────────────────────────────────────────────────
+
+  const [sessionId,        setSessionId]        = useState<string | null>(existingSessionId ?? null)
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(
+    initialClientId ?? (trainerMode === 'athlete' ? selfClient?.id ?? null : null)
+  )
+  const [sessionName,   setSessionName]   = useState('')
+  const [nameEditing,   setNameEditing]   = useState(false)
+  const [addBlockOpen,  setAddBlockOpen]  = useState(false)
+  const [error,         setError]         = useState<string | null>(null)
+  const [creating,      setCreating]      = useState(false)
+
+  // Load session if editing existing
+  const { data: session, isLoading: sessionLoading } = useSession(sessionId)
+
+  // ── Create the session record (deferred until first block is added) ───────
+  // We create lazily so we don't create ghost sessions if the user cancels.
+
+  const ensureSession = async (): Promise<string> => {
+    if (sessionId) return sessionId
+
+    const clientId = selectedClientId
+    if (!clientId) throw new Error('No client selected')
+
+    setCreating(true)
+    try {
+      const created = await createSession.mutateAsync({
+        clientId,
+        date:   new Date().toISOString().split('T')[0]!,
+        name:   sessionName.trim() || undefined,
+      })
+
+      const clientName = clients?.find(c => c.id === clientId)?.name
+        ?? selfClient?.name
+        ?? 'Client'
+
+      addPlannedSession({
+        sessionId:  created.id,
+        clientId,
+        clientName,
+        name:       sessionName.trim() || 'Untitled Plan',
+        createdAt:  new Date().toISOString(),
+      })
+
+      setSessionId(created.id)
+      return created.id
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const handleAddBlock = async (): Promise<void> => {
+    try {
+      await ensureSession()
+      setAddBlockOpen(true)
+    } catch (e) {
+      setError('Please select a client first')
+    }
+  }
+
+  const handleNameBlur = async (): Promise<void> => {
+    setNameEditing(false)
+    if (sessionId && sessionName.trim()) {
+      updateName.mutate({ id: sessionId, name: sessionName.trim() })
+    }
+  }
+
+  // ── Execute — transition planned → in_progress, open overlay ─────────────
+
+  const handleExecute = async (): Promise<void> => {
+    if (!sessionId || !selectedClientId) return
+    setError(null)
+    try {
+      await executeSession.mutateAsync({ id: sessionId })
+
+      const clientName = clients?.find(c => c.id === selectedClientId)?.name
+        ?? selfClient?.name
+        ?? 'Client'
+
+      // Move from planned store to active store
+      removePlannedSession(sessionId)
+      useSessionStore.getState().startSession(selectedClientId, sessionId, clientName)
+
+      // Expand the session overlay
+      expand(selectedClientId)
+      onClose()
+    } catch {
+      setError('Could not start session — please try again')
+    }
+  }
+
+  const workouts   = session?.workouts ?? []
+  const clientName = selectedClientId
+    ? (clients?.find(c => c.id === selectedClientId)?.name ?? selfClient?.name ?? 'Client')
+    : null
+
+  const allClients = [
+    ...(selfClient ? [selfClient] : []),
+    ...(clients ?? []).filter(c => !c.isSelf),
+  ]
+
+  return (
+    <div className="flex flex-col h-full">
+
+      {/* Header */}
+      <div className="px-4 pt-4 pb-3 border-b border-surface-border shrink-0">
+
+        {/* Nav */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className={cn('flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300', interactions.button.base)}
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+              <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Back
+          </button>
+
+          {/* Execute button — only shown when session has content */}
+          {sessionId && workouts.length > 0 && (
+            <button
+              type="button"
+              onClick={handleExecute}
+              disabled={executeSession.isPending}
+              className={cn(
+                'flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium',
+                'bg-brand-highlight text-white',
+                interactions.button.base,
+                interactions.button.press,
+                executeSession.isPending && 'opacity-50',
+              )}
+            >
+              {executeSession.isPending ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                    <path d="M4 3l10 5-10 5V3z" fill="currentColor" />
+                  </svg>
+                  Execute
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Session name input */}
+        {nameEditing ? (
+          <input
+            type="text"
+            value={sessionName}
+            onChange={(e) => setSessionName(e.target.value)}
+            onBlur={handleNameBlur}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleNameBlur() }}
+            placeholder="e.g. Chest Day, Thursday Push..."
+            autoFocus
+            className="field text-lg font-display uppercase tracking-wide w-full mb-2"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setNameEditing(true)}
+            className="text-left mb-2 group"
+          >
+            <h1 className={cn(
+              'font-display text-2xl uppercase tracking-wide leading-tight',
+              sessionName ? 'text-white' : 'text-gray-600',
+            )}>
+              {sessionName || 'Untitled Plan'}
+            </h1>
+            <p className="text-xs text-gray-600 group-hover:text-gray-400 mt-0.5">
+              {clientName ?? 'Tap to name this session'} · tap to rename
+            </p>
+          </button>
+        )}
+
+        {/* Client selector — trainer mode, before session created */}
+        {!sessionId && trainerMode === 'trainer' && (
+          <div className="flex gap-2 overflow-x-auto scrollbar-hidden mt-2">
+            {allClients.map((client) => (
+              <button
+                key={client.id}
+                type="button"
+                onClick={() => setSelectedClientId(client.id)}
+                className={cn(
+                  'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                  selectedClientId === client.id
+                    ? 'bg-brand-highlight text-white border-brand-highlight'
+                    : 'border-surface-border text-gray-500 hover:border-gray-400 hover:text-gray-300',
+                )}
+              >
+                {client.isSelf ? 'My Training' : client.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="mx-4 mt-3 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+          <p className="text-sm text-red-400">{error}</p>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4 pb-24">
+        {sessionLoading || creating ? (
+          <div className="flex justify-center py-12">
+            <Spinner size="lg" className="text-brand-highlight" />
+          </div>
+        ) : workouts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-3xl mb-4" aria-hidden>📋</p>
+            <p className="text-gray-300 font-medium mb-1">Plan your session</p>
+            <p className="text-gray-600 text-sm mb-6">
+              Add workout blocks and exercises. Set targets for sets, reps and weight.
+            </p>
+            <button
+              type="button"
+              onClick={handleAddBlock}
+              disabled={!selectedClientId}
+              className={cn(
+                'flex items-center gap-2 px-5 py-3 rounded-xl font-medium',
+                interactions.button.base,
+                interactions.button.press,
+                selectedClientId
+                  ? 'bg-brand-highlight text-white'
+                  : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
+              )}
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              {selectedClientId ? 'Add Block' : 'Select a client first'}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {workouts.map((workout) => (
+              <WorkoutBlock
+                key={workout.id}
+                workout={workout}
+                sessionId={sessionId!}
+                weightUnit={weightUnit}
+                layout="vertical"
+                onSetLogged={() => {}}  // no-op — planning mode, no logging
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Add block FAB */}
+      {sessionId && workouts.length > 0 && (
+        <button
+          type="button"
+          onClick={handleAddBlock}
+          aria-label="Add workout block"
+          className={cn(
+            'fixed bottom-6 right-4 z-30',
+            'w-12 h-12 rounded-full',
+            'bg-brand-highlight text-white shadow-lg',
+            'flex items-center justify-center',
+            interactions.button.base,
+            interactions.fab.hover,
+            interactions.button.press,
+          )}
+        >
+          <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
+
+      {/* Add block sheet */}
+      {sessionId && (
+        <AddBlockSheet
+          open={addBlockOpen}
+          sessionId={sessionId}
+          onClose={() => setAddBlockOpen(false)}
+        />
+      )}
+    </div>
+  )
+}

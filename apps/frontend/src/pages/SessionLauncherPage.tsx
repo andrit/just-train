@@ -17,6 +17,7 @@ import { usePreferences }                from '@/hooks/usePreferences'
 import { useUXEvent }                    from '@/hooks/useUXEvent'
 import { useAuthStore }                  from '@/store/authStore'
 import { useSessionStore }               from '@/store/sessionStore'
+import { useOverlayStore }               from '@/store/overlayStore'
 import { useSelfClient, useClients }     from '@/lib/queries/clients'
 import { useCreateSession, useStartSession } from '@/lib/queries/sessions'
 import { useTemplates }                  from '@/lib/queries/templates'
@@ -130,6 +131,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
   const { trainerMode, ctaLabel } = usePreferences()
   const { fire } = useUXEvent()
   const { startSession: storeSession, getSession, hasSession } = useSessionStore()
+  const { expand } = useOverlayStore()
 
   const { data: selfClient } = useSelfClient()
   const { data: clients }    = useClients()
@@ -168,29 +170,24 @@ export default function SessionLauncherPage(): React.JSX.Element {
     // Resume existing session if one is already active for this client
     const existing = getSession(clientId)
     if (existing) {
-      navigate(`/session/${existing.sessionId}`)
+      expand(clientId)
+      navigate(-1)
       return
     }
 
     setError(null)
     try {
-      // 1. Create the session record
-      const session = await createSession.mutateAsync({
-        clientId,
-        date: today,
-      })
-
-      // 2. Immediately start it
+      const session = await createSession.mutateAsync({ clientId, date: today })
       await startSession.mutateAsync(session.id)
 
-      // 3. Register in session store for persistence
       const clientName = clients?.find(c => c.id === clientId)?.name
         ?? selfClient?.name
         ?? 'Client'
       storeSession(clientId, session.id, clientName)
 
       fire('session_start', { entityId: session.id })
-      navigate(`/session/${session.id}`)
+      expand(clientId)
+      navigate(-1)
     } catch {
       setError('Could not start session — please try again')
     }
@@ -221,7 +218,8 @@ export default function SessionLauncherPage(): React.JSX.Element {
       storeSession(clientId, session.id, clientName)
 
       fire('session_start', { entityId: session.id, entity: 'session' })
-      navigate(`/session/${session.id}`)
+      expand(clientId)
+      navigate(-1)
     } catch {
       setError('Could not load template — please try again')
     }

@@ -1,21 +1,28 @@
 // ------------------------------------------------------------
-// App.tsx — Root component and route definitions
+// App.tsx — Root component and route definitions (v2.0.0)
 //
-// PHASE 4 ADDITIONS:
-//   - /onboard route — shown once after registration when
-//     trainer.onboardedAt is null. Sets trainerMode.
-//   - OnboardingGate — redirects to /onboard if authenticated
-//     but not yet onboarded. Sits between ProtectedRoute and Layout.
-//   - /clients/:id route added for client profile page.
+// SPA ARCHITECTURE:
+//   Tabs (URL routes):  /  /clients  /exercises  /sessions  /templates
+//   Panels (location.state): clientProfile, sessionSummary, sessionHistory
+//   Overlays (store): live session (Spotify model)
+//   Sheets (store): sessionLauncher
 //
-// ROUTE STRUCTURE:
+// AppShell sits inside Layout and manages panels + overlays.
+// All navigation goes through navService (React Router now,
+// RxJS observable stream in v2.3.0).
+//
+// URL ROUTES (kept for deep-linking + PWA fallback):
 //   /login              → LoginPage (public)
-//   /onboard            → OnboardingPage (protected, pre-onboarding only)
-//   /                   → Dashboard (protected, post-onboarding)
-//   /clients            → Client list
-//   /clients/:id        → Client profile
+//   /onboard            → OnboardingPage (protected, pre-onboarding)
+//   /                   → Dashboard
+//   /clients            → Client list (profiles open as panels)
+//   /clients/:id        → ClientProfilePage (URL fallback only)
 //   /exercises          → Exercise library
-//   /sessions           → Session list
+//   /sessions           → Session history list
+//   /session/new        → SessionLauncherPage (URL fallback)
+//   /session/:id        → LiveSessionPage (URL fallback)
+//   /session/:id/summary → SessionSummaryPage
+//   /session/:id/history → SessionHistoryPage
 //   /templates          → Template list
 // ------------------------------------------------------------
 
@@ -23,6 +30,7 @@ import { Navigate, Routes, Route }         from 'react-router-dom'
 import { AuthProvider, ProtectedRoute }    from '@/components/auth/AuthProvider'
 import { useAuthStore }                    from '@/store/authStore'
 import Layout                              from '@/components/layout/Layout'
+import { AppShell }                        from '@/components/shell/AppShell'
 import LoginPage                           from '@/pages/LoginPage'
 import OnboardingPage                      from '@/pages/OnboardingPage'
 import DashboardPage                       from '@/pages/DashboardPage'
@@ -81,20 +89,22 @@ export default function App(): React.JSX.Element {
             <ProtectedRoute>
               <OnboardingGate>
                 <Layout>
-                  <Routes>
-                    <Route path="/"                        element={<DashboardPage />} />
-                    <Route path="/clients"                 element={<ClientsPage />} />
-                    <Route path="/clients/:id"             element={<ClientProfilePage />} />
-                    <Route path="/exercises"               element={<ExercisesPage />} />
-                    <Route path="/sessions"                element={<SessionsPage />} />
-                    <Route path="/session/new"             element={<SessionLauncherPage />} />
-                    <Route path="/session/:id"             element={<LiveSessionPage />} />
-                    <Route path="/session/:id/summary"     element={<SessionSummaryPage />} />
-                    <Route path="/session/:id/history"     element={<SessionHistoryPage />} />
-                    <Route path="/templates"               element={<TemplatesPage />} />
-                    <Route path="/preferences"             element={<PreferencesPage />} />
-                    <Route path="*"                        element={<NotFoundPage />} />
-                  </Routes>
+                  <AppShell>
+                    <Routes>
+                      <Route path="/"                        element={<DashboardPage />} />
+                      <Route path="/clients"                 element={<ClientsPage />} />
+                      <Route path="/clients/:id"             element={<ClientProfilePage />} />
+                      <Route path="/exercises"               element={<ExercisesPage />} />
+                      <Route path="/sessions"                element={<SessionsPage />} />
+                      <Route path="/session/new"             element={<SessionLauncherPage />} />
+                      <Route path="/session/:id"             element={<LiveSessionPage />} />
+                      <Route path="/session/:id/summary"     element={<SessionSummaryPage />} />
+                      <Route path="/session/:id/history"     element={<SessionHistoryPage />} />
+                      <Route path="/templates"               element={<TemplatesPage />} />
+                      <Route path="/preferences"             element={<PreferencesPage />} />
+                      <Route path="*"                        element={<NotFoundPage />} />
+                    </Routes>
+                  </AppShell>
                 </Layout>
               </OnboardingGate>
             </ProtectedRoute>

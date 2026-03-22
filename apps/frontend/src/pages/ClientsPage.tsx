@@ -12,8 +12,8 @@
 // ------------------------------------------------------------
 
 import { useState }           from 'react'
-import { Link }               from 'react-router-dom'
 import { useAuthStore }       from '@/store/authStore'
+import { useNav }             from '@/services/navService'
 import { useClients, useSelfClient } from '@/lib/queries/clients'
 import { ClientCard }          from '@/components/clients/ClientCard'
 import { AddClientCard }       from '@/components/clients/AddClientCard'
@@ -30,6 +30,7 @@ export default function ClientsPage(): React.JSX.Element {
   const isTrainer  = trainer?.trainerMode === 'trainer'
 
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const nav = useNav()
 
   const { data: clients,    isLoading: clientsLoading } = useClients()
   const { data: selfClient, isLoading: selfLoading     } = useSelfClient()
@@ -78,10 +79,11 @@ export default function ClientsPage(): React.JSX.Element {
 
           {/* Self-client tile — always shown */}
           {selfClient && (
-            <Link
-              to={`/clients/${selfClient.id}`}
+            <button
+              type="button"
+              onClick={() => nav.openClientProfile(selfClient.id)}
               className={cn(
-                'card block p-4 border-brand-highlight/20',
+                'card block p-4 border-brand-highlight/20 w-full text-left',
                 interactions.card.base,
                 interactions.card.hover,
                 interactions.card.press,
@@ -122,7 +124,7 @@ export default function ClientsPage(): React.JSX.Element {
                   <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-            </Link>
+            </button>
           )}
 
           {/* Client list — trainer mode only */}

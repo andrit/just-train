@@ -7,11 +7,14 @@
 //   - Primary focus tag
 //   - Last session label
 //   - At-risk warning if no session in 14+ days
+//
+// v2.0.0: Opens client profile panel via navService
+// instead of navigating to /clients/:id
 // ------------------------------------------------------------
 
-import { Link }             from 'react-router-dom'
 import { cn }               from '@/lib/cn'
 import { interactions }     from '@/lib/interactions'
+import { useNav }           from '@/services/navService'
 import { SilhouetteAvatar } from './SilhouetteAvatar'
 import {
   PROGRESSION_STATE_LABEL,
@@ -31,16 +34,17 @@ interface ClientCardProps {
 export function ClientCard({ client }: ClientCardProps): React.JSX.Element {
   const atRisk     = isAtRisk(client)
   const noActivity = hasNoActivity(client)
+  const nav        = useNav()
 
   return (
-    <Link
-      to={`/clients/${client.id}`}
+    <button
+      type="button"
+      onClick={() => nav.openClientProfile(client.id)}
       className={cn(
-        'card block p-4 relative overflow-hidden',
+        'card block p-4 relative overflow-hidden w-full text-left',
         interactions.card.base,
         interactions.card.hover,
         interactions.card.press,
-        // At-risk gets a subtle left border accent
         atRisk && 'border-l-2 border-l-amber-500/60',
       )}
     >
@@ -109,6 +113,6 @@ export function ClientCard({ client }: ClientCardProps): React.JSX.Element {
           No sessions logged yet
         </p>
       )}
-    </Link>
+    </button>
   )
 }

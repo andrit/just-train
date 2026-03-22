@@ -6,6 +6,7 @@
 import { NavLink }         from 'react-router-dom'
 import { cn }              from '@/lib/cn'
 import { useSessionStore } from '@/store/sessionStore'
+import { useOverlayStore } from '@/store/overlayStore'
 import { useAuthStore }    from '@/store/authStore'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -45,6 +46,8 @@ const MOBILE_NAV_ITEMS: NavItem[] = [
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
   const pendingSyncCount = 0  // Phase 8: offline sync count — not yet implemented
   const trainer          = useAuthStore((s) => s.trainer)
+  const { state: overlayState } = useOverlayStore()
+  const navHidden = overlayState === 'expanded'
 
   const initials = trainer?.name
     ? trainer.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase()
@@ -135,7 +138,11 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
 
       {/* ── Bottom tab bar (mobile) ───────────────────────────────────── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-brand-accent/95 backdrop-blur-sm border-t border-surface-border flex justify-around items-center safe-area-padding z-50"
+        className={cn(
+          "md:hidden fixed bottom-0 left-0 right-0 bg-brand-accent/95 backdrop-blur-sm border-t border-surface-border flex justify-around items-center safe-area-padding z-50",
+          "transition-transform duration-300",
+          navHidden && "translate-y-full",
+        )}
         aria-label="Main navigation"
       >
         {MOBILE_NAV_ITEMS.map((item) => (

@@ -4,6 +4,10 @@
 // Provides builder functions for common test objects.
 // Each factory has sensible defaults and accepts overrides.
 //
+// ⚠️  When adding a new column to any table, update the
+//     corresponding make*() function here or CI typecheck fails.
+//     See CONTRIBUTING.md — "Adding a new column to an existing table"
+//
 // USAGE:
 //   const trainer  = makeTrainer()
 //   const client   = makeClient({ isSelf: true })

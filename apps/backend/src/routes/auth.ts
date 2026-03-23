@@ -75,6 +75,9 @@ function serializeTrainer(
   trainer: Trainer,
   overrides: { lastLoginAt?: string | null } = {},
 ): z.infer<typeof TrainerResponseSchema> {
+  // ⚠️  When adding a new trainer column, this function MUST be updated.
+  //     Also update: TrainerResponseSchema, usePreferences.ts, makeTrainer() in factories.ts
+  //     See CONTRIBUTING.md — "Adding a new column to an existing table"
   return {
     id:                   trainer.id,
     name:                 trainer.name,

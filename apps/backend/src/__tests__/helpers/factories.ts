@@ -53,6 +53,7 @@ export function makeTrainer(overrides: Partial<Trainer> = {}): Trainer {
     show1rmEstimate:      false,
     autoReportEnabled:    true,
     timezone:             'UTC',
+    prNotifyType:         '1rm' as const,
     createdAt:            new Date('2025-01-01T00:00:00Z'),
     updatedAt:            new Date('2025-01-01T00:00:00Z'),
     ...overrides,

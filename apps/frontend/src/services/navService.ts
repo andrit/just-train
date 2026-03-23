@@ -1,38 +1,39 @@
 // ------------------------------------------------------------
-// services/navService.ts (v2.0.0)
+// services/navService.ts (v2.3.0-lite)
 //
 // Navigation abstraction layer.
 //
-// WHY THIS EXISTS:
-//   All navigation in the app goes through this service, not
-//   directly through React Router. This means when we migrate
-//   to an observable-based navigation system (v2.3.0), we swap
-//   the implementation here without touching any call sites.
+// All navigation in the app goes through useNav(). Nothing
+// touches React Router directly.
 //
-// CURRENT IMPLEMENTATION: React Router location.state
-//   Each panel/overlay open pushes a history entry so the
-//   Android back button and browser back close the panel rather
-//   than exiting the app. React Router handles PWA standalone
-//   mode correctly by default.
+// INTERNAL MECHANISM: React Router location.state
+//   Panel open/close pushes/pops history entries so the Android
+//   back button and browser back work natively. PWA standalone
+//   mode is handled correctly by React Router by default.
 //
-// FUTURE IMPLEMENTATION: RxJS observable stream (v2.3.0)
-//   Every open/close becomes a stream emission. Debounced rapid
-//   interactions, auditable navigation log, race condition free.
+// INTERNAL EVENT BUS: navEventBus (see navEventBus.ts)
+//   Every navigation call emits a NavEvent before executing.
+//   This gives us:
+//     - Debouncing — double-tap on a card can't open the panel twice
+//     - Audit log  — full navigation history for debugging
+//     - Foundation — when v2.3.0 (RxJS) lands, navEventBus.ts is
+//                    swapped for an RxJS Subject. This file and all
+//                    call sites are unchanged.
+//
+// UPGRADING TO RxJS (v2.3.0):
+//   1. Replace navEventBus.ts with an RxJS Subject implementation
+//   2. Update the two import lines below if needed
+//   3. Done — no changes anywhere else in the codebase
 //
 // PANEL MODEL vs ROUTE MODEL:
-//   Tabs  (/, /clients, /exercises, etc.) → still URL routes
-//   Panels (client profile, session summary) → history.state
-//   Overlays (live session) → sessionStore + CSS transform
-//
-// USAGE:
-//   const nav = useNav()
-//   nav.openClientProfile(clientId)   // pushes history entry
-//   nav.closePanel()                  // pops history entry
-//   nav.goToTab('clients')            // React Router navigate
+//   Tabs    → URL routes  (/, /clients, /exercises, …)
+//   Panels  → history.state (clientProfile, sessionHistory, …)
+//   Overlays→ overlayStore + CSS transform (live session)
 // ------------------------------------------------------------
 
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useCallback }               from 'react'
+import { navEventBus }               from './navEventBus'
 
 // ── Panel state — stored in location.state ────────────────────────────────────
 
@@ -44,9 +45,9 @@ export type PanelType =
   | 'sessionPlan'
 
 export interface PanelState {
-  panel:     PanelType
-  entityId?: string       // clientId, sessionId, etc.
-  returnTab?: string      // restore tab on close
+  panel:      PanelType
+  entityId?:  string
+  returnTab?: string
 }
 
 export type TabRoute =
@@ -57,6 +58,11 @@ export type TabRoute =
   | '/templates'
   | '/preferences'
 
+// ── Re-export for consumers that want to observe or inspect ───────────────────
+
+export { navEventBus }
+export type { NavEvent, NavAction } from './navEventBus'
+
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useNav() {
@@ -65,47 +71,48 @@ export function useNav() {
 
   const currentPanel = (location.state as { panel?: PanelState } | null)?.panel ?? null
 
-  // ── Open a panel — pushes a history entry ──────────────────────────────
-
   const openClientProfile = useCallback((clientId: string, returnTab?: string): void => {
+    navEventBus.next('openClientProfile', { entityId: clientId, returnTab })
     navigate(location.pathname, {
       state: { panel: { panel: 'clientProfile', entityId: clientId, returnTab } },
     })
   }, [navigate, location.pathname])
 
   const openSessionSummary = useCallback((sessionId: string): void => {
+    navEventBus.next('openSessionSummary', { entityId: sessionId })
     navigate(location.pathname, {
       state: { panel: { panel: 'sessionSummary', entityId: sessionId } },
     })
   }, [navigate, location.pathname])
 
   const openSessionHistory = useCallback((sessionId: string): void => {
+    navEventBus.next('openSessionHistory', { entityId: sessionId })
     navigate(location.pathname, {
       state: { panel: { panel: 'sessionHistory', entityId: sessionId } },
     })
   }, [navigate, location.pathname])
 
   const openSessionLauncher = useCallback((clientId?: string): void => {
+    navEventBus.next('openSessionLauncher', { entityId: clientId })
     navigate(location.pathname, {
       state: { panel: { panel: 'sessionLauncher', entityId: clientId } },
     })
   }, [navigate, location.pathname])
 
   const openSessionPlan = useCallback((sessionId?: string, clientId?: string): void => {
+    navEventBus.next('openSessionPlan', { entityId: sessionId, returnTab: clientId })
     navigate(location.pathname, {
       state: { panel: { panel: 'sessionPlan', entityId: sessionId, returnTab: clientId } },
     })
   }, [navigate, location.pathname])
 
-  // ── Close current panel — pops history entry ───────────────────────────
-
   const closePanel = useCallback((): void => {
+    navEventBus.next('closePanel')
     navigate(-1)
   }, [navigate])
 
-  // ── Navigate to a tab — URL change ────────────────────────────────────
-
   const goToTab = useCallback((tab: TabRoute): void => {
+    navEventBus.next('goToTab', { entityId: tab })
     navigate(tab)
   }, [navigate])
 

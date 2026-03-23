@@ -626,7 +626,7 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v2.0.0 | SPA refactor — panels, overlays, persistent session | 🔜 |
 | v2.1.0 | Session planning — "plan the day" workflow | 🔜 |
 | v2.2.0 | Sessions view — history list | 🔜 |
-| v2.3.0 | Observable navigation service (RxJS) | 🔜 |
+| v2.3.0 | Observable navigation service (RxJS) | ⏸ Deferred — debounce + audit log shipped in navEventBus.ts |
 | v2.4.0 | Offline sync — IndexedDB + Workbox | 🔜 |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 

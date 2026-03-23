@@ -1,15 +1,18 @@
 // ------------------------------------------------------------
-// components/session/ExerciseBlock.tsx (v1.8.0 — redesign)
+// components/session/ExerciseBlock.tsx (v2.2.0)
 //
 // Full-screen focused exercise view.
 //
 // LAYOUT:
 //   Left spine — vertical timeline of sets (●=past ●=active ○=future)
 //   Center     — active set is the hero (big inputs, Log button)
-//   Past sets  — compact rows above active, color-coded vs target
-//   Future sets — ghost rows below
 //
-// "Current set is the hero. Everything else recedes."
+// SET LOGGING INPUTS — by workout type:
+//   resistance   → Weight × Reps
+//   cardio       → Distance OR Time OR Intensity (auto-detected from targets)
+//   calisthenics → Reps OR Time (auto-detected from targets)
+//   stretching   → Hold time (seconds)
+//   cooldown     → Duration (seconds)
 // ------------------------------------------------------------
 
 import { useState, useEffect }    from 'react'
@@ -20,14 +23,13 @@ import { useUXEventRef }           from '@/hooks/useUXEvent'
 import type { SessionExerciseResponse, SetResponse } from '@trainer-app/shared'
 
 const DEFAULT_TARGET_SETS = 3
-const DEFAULT_REP_TARGETS = [10, 8, 6]
 
-// ── Set outcome helpers ───────────────────────────────────────────────────────
+// ── Outcome helpers ───────────────────────────────────────────────────────────
 
 type Outcome = 'hit' | 'surpassed' | 'missed' | 'none'
 
-function outcome(actual: number | null, target: number | null): Outcome {
-  if (!actual || !target) return 'none'
+function outcome(actual: number | null | undefined, target: number | null | undefined): Outcome {
+  if (actual == null || !target) return 'none'
   if (actual > target)  return 'surpassed'
   if (actual === target) return 'hit'
   return 'missed'
@@ -40,139 +42,265 @@ const OUTCOME_COLOR: Record<Outcome, string> = {
   none:      'text-gray-400',
 }
 
-// ── Past set row (compact) ────────────────────────────────────────────────────
+// ── Input field ───────────────────────────────────────────────────────────────
 
-function PastSetRow({ set, setNumber, targetReps, targetWeight }: {
-  set: SetResponse; setNumber: number
-  targetReps: number | null; targetWeight: number | null
+function BigInput({ label, value, onChange, placeholder, mode = 'decimal', onEnter }: {
+  label: string; value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  mode?: 'decimal' | 'numeric'
+  onEnter?: () => void
 }): React.JSX.Element {
-  const repsOk  = outcome(set.reps, targetReps)
-  const wtOk    = outcome(set.weight, targetWeight)
-  const overall = repsOk === 'missed' || wtOk === 'missed' ? 'missed'
-    : repsOk === 'surpassed' || wtOk === 'surpassed' ? 'surpassed'
-    : 'hit'
-
   return (
-    <div className="flex items-center gap-3 py-2">
-      {/* Spine dot */}
-      <div className="flex flex-col items-center w-5 shrink-0">
-        <div className={cn(
-          'w-4 h-4 rounded-full flex items-center justify-center',
-          overall === 'missed' ? 'bg-amber-500/20' : 'bg-emerald-500/20',
-        )}>
-          <svg viewBox="0 0 10 10" fill="none" className={cn('w-2.5 h-2.5', OUTCOME_COLOR[overall])}>
-            <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Set number */}
-      <span className="text-xs text-gray-600 font-mono w-5 shrink-0">{setNumber}</span>
-
-      {/* Values */}
-      <div className="flex items-center gap-1 font-mono text-sm">
-        {set.weight != null && (
-          <span className={cn(OUTCOME_COLOR[wtOk], 'font-medium')}>{set.weight}</span>
+    <div className="flex-1">
+      <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">{label}</p>
+      <input
+        type="number"
+        inputMode={mode}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter' && onEnter) onEnter() }}
+        placeholder={placeholder ?? '—'}
+        className={cn(
+          'w-full text-center text-3xl font-mono font-bold py-3 rounded-xl',
+          'bg-brand-primary border-2 border-surface-border text-white placeholder-gray-700',
+          'focus:outline-none focus:border-brand-highlight transition-colors',
         )}
-        {set.weight != null && set.reps != null && (
-          <span className="text-gray-600 text-xs">×</span>
-        )}
-        {set.reps != null && (
-          <span className={cn(OUTCOME_COLOR[repsOk], 'font-medium')}>{set.reps}</span>
-        )}
-        {set.durationSeconds != null && (
-          <span className="text-emerald-400 font-medium">{set.durationSeconds}s</span>
-        )}
-      </div>
-
-      {/* Target */}
-      {(targetReps || targetWeight) && (
-        <span className="text-xs text-gray-700 font-mono ml-auto">
-          {targetWeight && `${targetWeight}×`}{targetReps}
-        </span>
-      )}
+      />
     </div>
   )
 }
 
-// ── Active set (hero) ─────────────────────────────────────────────────────────
+// ── Detect which cardio mode to show based on targets ─────────────────────────
 
-function ActiveSetHero({ setNumber, targetReps, targetWeight, weightUnit, lastSet, onLog, isLogging }: {
-  setNumber: number; targetReps: number | null; targetWeight: number | null
-  weightUnit: string; lastSet: SetResponse | null
-  onLog: (reps: number, weight: number | null) => void; isLogging: boolean
+type CardioMode = 'distance' | 'time' | 'intensity' | 'reps'
+
+function detectCardioMode(se: SessionExerciseResponse): CardioMode {
+  if (se.targetDistance   != null) return 'distance'
+  if (se.targetIntensity  != null) return 'intensity'
+  if (se.targetReps       != null) return 'reps'
+  return 'time'  // default
+}
+
+// ── Intensity selector ────────────────────────────────────────────────────────
+
+const INTENSITY_LEVELS = ['low', 'moderate', 'high', 'max'] as const
+type IntensityLevel = typeof INTENSITY_LEVELS[number]
+
+function IntensityPicker({ value, onChange }: { value: string; onChange: (v: string) => void }): React.JSX.Element {
+  return (
+    <div className="space-y-2">
+      <p className="text-[10px] text-gray-500 uppercase tracking-wider text-center">Intensity</p>
+      <div className="flex gap-2">
+        {INTENSITY_LEVELS.map((level) => (
+          <button
+            key={level}
+            type="button"
+            onClick={() => onChange(level)}
+            className={cn(
+              'flex-1 py-3 rounded-xl text-sm font-medium capitalize border transition-all',
+              value === level
+                ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                : 'border-surface-border text-gray-500 hover:text-gray-300',
+            )}
+          >
+            {level}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Active set hero — workout-type-aware ──────────────────────────────────────
+
+function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, lastSet, onLog, isLogging }: {
+  setNumber:       number
+  sessionExercise: SessionExerciseResponse
+  workoutType:     string
+  weightUnit:      string
+  lastSet:         SetResponse | null
+  onLog:           (data: LogData) => void
+  isLogging:       boolean
 }): React.JSX.Element {
-  const [reps,   setReps]   = useState(String(targetReps ?? lastSet?.reps ?? ''))
-  const [weight, setWeight] = useState(String(targetWeight ?? lastSet?.weight ?? ''))
-  const [logRef, fireLog]   = useUXEventRef<HTMLButtonElement>()
+  const [logRef, fireLog] = useUXEventRef<HTMLButtonElement>()
 
+  // ── Resistance state ──────────────────────────────────────────────────────
+  const [weight, setWeight] = useState(String(sessionExercise.targetWeight ?? lastSet?.weight ?? ''))
+  const [reps,   setReps]   = useState(String(sessionExercise.targetReps   ?? lastSet?.reps   ?? ''))
+
+  // ── Cardio state ──────────────────────────────────────────────────────────
+  const cardioMode = detectCardioMode(sessionExercise)
+  const [distance,  setDistance]  = useState(String(sessionExercise.targetDistance ?? ''))
+  const [duration,  setDuration]  = useState(String(sessionExercise.targetDurationSeconds ?? ''))
+  const [intensity, setIntensity] = useState<string>(sessionExercise.targetIntensity ?? 'moderate')
+  const [cardioReps,setCardioReps] = useState(String(sessionExercise.targetReps ?? ''))
+
+  // ── Calisthenics state ────────────────────────────────────────────────────
+  const caliIsTime = sessionExercise.targetDurationSeconds != null && sessionExercise.targetReps == null
+  const [caliReps, setCaliReps] = useState(String(sessionExercise.targetReps ?? lastSet?.reps ?? ''))
+  const [caliTime, setCaliTime] = useState(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
+
+  // Reset pre-fill when set number changes
   useEffect(() => {
-    setReps(String(targetReps ?? lastSet?.reps ?? ''))
-    setWeight(String(targetWeight ?? lastSet?.weight ?? ''))
-  }, [setNumber, targetReps, targetWeight, lastSet?.reps, lastSet?.weight])
+    setWeight(String(sessionExercise.targetWeight ?? lastSet?.weight ?? ''))
+    setReps(String(sessionExercise.targetReps ?? lastSet?.reps ?? ''))
+    setCaliReps(String(sessionExercise.targetReps ?? lastSet?.reps ?? ''))
+    setDuration(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
+  }, [setNumber])
+
+  const canLog = (): boolean => {
+    switch (workoutType) {
+      case 'resistance':   return reps.trim().length > 0
+      case 'cardio':
+        if (cardioMode === 'distance')  return distance.trim().length > 0
+        if (cardioMode === 'time')      return duration.trim().length > 0
+        if (cardioMode === 'reps')      return cardioReps.trim().length > 0
+        return true // intensity always loggable
+      case 'calisthenics': return caliIsTime ? caliTime.trim().length > 0 : caliReps.trim().length > 0
+      case 'stretching':   return duration.trim().length > 0
+      case 'cooldown':     return duration.trim().length > 0
+      default:             return reps.trim().length > 0
+    }
+  }
 
   const handleLog = (): void => {
-    const r = parseInt(reps, 10)
-    const w = weight.trim() ? parseFloat(weight) : null
-    if (isNaN(r) || r <= 0) return
+    if (!canLog()) return
     fireLog('set_logged', { entity: 'set' })
-    onLog(r, w)
+
+    switch (workoutType) {
+      case 'resistance':
+        onLog({
+          reps:       parseInt(reps, 10) || undefined,
+          weight:     weight.trim() ? parseFloat(weight) : undefined,
+          weightUnit,
+        })
+        break
+      case 'cardio':
+        onLog({
+          ...(cardioMode === 'distance'  && { distance:        parseFloat(distance) }),
+          ...(cardioMode === 'time'      && { durationSeconds: parseInt(duration, 10) }),
+          ...(cardioMode === 'intensity' && { intensity:       intensity as IntensityLevel }),
+          ...(cardioMode === 'reps'      && { reps:            parseInt(cardioReps, 10) }),
+        })
+        break
+      case 'calisthenics':
+        onLog(caliIsTime
+          ? { durationSeconds: parseInt(caliTime, 10) }
+          : { reps: parseInt(caliReps, 10) }
+        )
+        break
+      case 'stretching':
+        onLog({ durationSeconds: parseInt(duration, 10) })
+        break
+      case 'cooldown':
+        onLog({ durationSeconds: parseInt(duration, 10) })
+        break
+      default:
+        onLog({ reps: parseInt(reps, 10) || undefined })
+    }
+  }
+
+  const lastSetSummary = (): string | null => {
+    if (!lastSet) return null
+    const parts: string[] = []
+    if (lastSet.weight   != null) parts.push(`${lastSet.weight}${weightUnit}`)
+    if (lastSet.reps     != null) parts.push(`${lastSet.reps} reps`)
+    if (lastSet.durationSeconds != null) parts.push(`${lastSet.durationSeconds}s`)
+    if (lastSet.distance != null) parts.push(`${lastSet.distance}m`)
+    if (lastSet.intensity!= null) parts.push(lastSet.intensity)
+    return parts.length > 0 ? parts.join(' · ') : null
   }
 
   return (
     <div className="flex items-start gap-3 py-3">
-      {/* Spine dot — pulsing active indicator */}
+      {/* Spine dot */}
       <div className="flex flex-col items-center w-5 shrink-0 pt-1">
         <div className="w-4 h-4 rounded-full bg-brand-highlight/20 border-2 border-brand-highlight flex items-center justify-center">
           <div className="w-1.5 h-1.5 rounded-full bg-brand-highlight animate-pulse" />
         </div>
       </div>
 
-      {/* Hero content */}
       <div className="flex-1">
         <p className="text-[10px] uppercase tracking-widest text-brand-highlight/70 mb-3">
           Set {setNumber}
         </p>
 
-        {/* Large inputs */}
-        <div className="flex gap-3 items-center mb-3">
-          <div className="flex-1">
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">Weight ({weightUnit})</p>
-            <input
-              type="number" inputMode="decimal"
+        {/* ── Resistance: Weight × Reps ──────────────────────────── */}
+        {workoutType === 'resistance' && (
+          <div className="flex gap-3 items-center mb-3">
+            <BigInput
+              label={`Weight (${weightUnit})`}
               value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              placeholder={targetWeight ? String(targetWeight) : '—'}
-              className={cn(
-                'w-full text-center text-3xl font-mono font-bold py-3 rounded-xl',
-                'bg-brand-primary border-2 border-surface-border text-white placeholder-gray-700',
-                'focus:outline-none focus:border-brand-highlight transition-colors',
-              )}
+              onChange={setWeight}
+              placeholder={sessionExercise.targetWeight ? String(sessionExercise.targetWeight) : 'optional'}
             />
-          </div>
-          <span className="text-gray-600 font-display text-2xl pb-0.5">×</span>
-          <div className="flex-1">
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">Reps</p>
-            <input
-              type="number" inputMode="numeric"
+            <span className="text-gray-600 font-display text-2xl pb-0.5">×</span>
+            <BigInput
+              label="Reps"
               value={reps}
-              onChange={(e) => setReps(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleLog() }}
-              placeholder={targetReps ? String(targetReps) : '—'}
-              className={cn(
-                'w-full text-center text-3xl font-mono font-bold py-3 rounded-xl',
-                'bg-brand-primary border-2 border-surface-border text-white placeholder-gray-700',
-                'focus:outline-none focus:border-brand-highlight transition-colors',
-              )}
+              onChange={setReps}
+              mode="numeric"
+              placeholder={sessionExercise.targetReps ? String(sessionExercise.targetReps) : '—'}
+              onEnter={handleLog}
             />
           </div>
-        </div>
+        )}
+
+        {/* ── Cardio: context-specific metric ───────────────────── */}
+        {workoutType === 'cardio' && (
+          <div className="mb-3 space-y-3">
+            {cardioMode === 'distance' && (
+              <BigInput label="Distance (m)" value={distance} onChange={setDistance} placeholder={sessionExercise.targetDistance ? String(sessionExercise.targetDistance) : '—'} onEnter={handleLog} />
+            )}
+            {cardioMode === 'time' && (
+              <BigInput label="Duration (seconds)" value={duration} onChange={setDuration} mode="numeric" placeholder={sessionExercise.targetDurationSeconds ? String(sessionExercise.targetDurationSeconds) : '—'} onEnter={handleLog} />
+            )}
+            {cardioMode === 'intensity' && (
+              <IntensityPicker value={intensity} onChange={setIntensity} />
+            )}
+            {cardioMode === 'reps' && (
+              <BigInput label="Reps" value={cardioReps} onChange={setCardioReps} mode="numeric" placeholder={sessionExercise.targetReps ? String(sessionExercise.targetReps) : '—'} onEnter={handleLog} />
+            )}
+          </div>
+        )}
+
+        {/* ── Calisthenics: Reps OR Time ────────────────────────── */}
+        {workoutType === 'calisthenics' && (
+          <div className="mb-3">
+            {caliIsTime ? (
+              <BigInput label="Hold (seconds)" value={caliTime} onChange={setCaliTime} mode="numeric" onEnter={handleLog} />
+            ) : (
+              <BigInput label="Reps" value={caliReps} onChange={setCaliReps} mode="numeric" onEnter={handleLog} />
+            )}
+          </div>
+        )}
+
+        {/* ── Stretching / Cooldown: Duration ──────────────────── */}
+        {(workoutType === 'stretching' || workoutType === 'cooldown') && (
+          <div className="mb-3">
+            <BigInput
+              label="Duration (seconds)"
+              value={duration}
+              onChange={setDuration}
+              mode="numeric"
+              placeholder={sessionExercise.targetDurationSeconds ? String(sessionExercise.targetDurationSeconds) : '—'}
+              onEnter={handleLog}
+            />
+          </div>
+        )}
+
+        {/* ── Fallback ───────────────────────────────────────────── */}
+        {!['resistance','cardio','calisthenics','stretching','cooldown'].includes(workoutType) && (
+          <div className="flex gap-3 items-center mb-3">
+            <BigInput label="Reps" value={reps} onChange={setReps} mode="numeric" onEnter={handleLog} />
+          </div>
+        )}
 
         {/* Last time context */}
-        {lastSet && (
+        {lastSetSummary() && (
           <p className="text-xs text-gray-600 text-center mb-3">
-            Last time: {lastSet.weight != null ? `${lastSet.weight} × ` : ''}{lastSet.reps} reps
-            {lastSet.rpe != null && ` · RPE ${lastSet.rpe}`}
+            Last: {lastSetSummary()}
           </p>
         )}
 
@@ -181,13 +309,13 @@ function ActiveSetHero({ setNumber, targetReps, targetWeight, weightUnit, lastSe
           ref={logRef}
           type="button"
           onClick={handleLog}
-          disabled={isLogging || !reps}
+          disabled={isLogging || !canLog()}
           className={cn(
             'w-full py-4 rounded-xl font-display text-lg uppercase tracking-wide',
             'bg-brand-highlight text-white',
             interactions.button.base,
             interactions.button.press,
-            (isLogging || !reps) && 'opacity-50 cursor-not-allowed',
+            (isLogging || !canLog()) && 'opacity-50 cursor-not-allowed',
           )}
         >
           {isLogging ? '…' : '+ Log Set'}
@@ -197,11 +325,71 @@ function ActiveSetHero({ setNumber, targetReps, targetWeight, weightUnit, lastSe
   )
 }
 
-// ── Future set (ghost) ────────────────────────────────────────────────────────
+// ── Past set row ──────────────────────────────────────────────────────────────
 
-function FutureSetRow({ setNumber, targetReps, targetWeight }: {
-  setNumber: number; targetReps: number | null; targetWeight: number | null
+function PastSetRow({ set, setNumber, sessionExercise, workoutType }: {
+  set:             SetResponse
+  setNumber:       number
+  sessionExercise: SessionExerciseResponse
+  workoutType:     string
 }): React.JSX.Element {
+  const repsOk   = outcome(set.reps,     sessionExercise.targetReps)
+  const weightOk = outcome(set.weight,   sessionExercise.targetWeight)
+  const timeOk   = outcome(set.durationSeconds, sessionExercise.targetDurationSeconds)
+  const distOk   = outcome(set.distance, sessionExercise.targetDistance)
+
+  const overall: Outcome = (() => {
+    const relevant = [repsOk, weightOk, timeOk, distOk].filter(o => o !== 'none')
+    if (relevant.some(o => o === 'missed'))    return 'missed'
+    if (relevant.some(o => o === 'surpassed')) return 'surpassed'
+    if (relevant.some(o => o === 'hit'))       return 'hit'
+    return 'none'
+  })()
+
+  return (
+    <div className="flex items-center gap-3 py-2">
+      <div className="flex flex-col items-center w-5 shrink-0">
+        <div className={cn('w-4 h-4 rounded-full flex items-center justify-center', overall === 'missed' ? 'bg-amber-500/20' : 'bg-emerald-500/20')}>
+          <svg viewBox="0 0 10 10" fill="none" className={cn('w-2.5 h-2.5', OUTCOME_COLOR[overall])}>
+            <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      </div>
+      <span className="text-xs text-gray-600 font-mono w-5 shrink-0">{setNumber}</span>
+
+      <div className="flex items-center gap-1.5 font-mono text-sm flex-1">
+        {workoutType === 'resistance' && (
+          <>
+            {set.weight != null && <span className={cn(OUTCOME_COLOR[weightOk], 'font-medium')}>{set.weight}</span>}
+            {set.weight != null && set.reps != null && <span className="text-gray-600 text-xs">×</span>}
+            {set.reps   != null && <span className={cn(OUTCOME_COLOR[repsOk], 'font-medium')}>{set.reps}</span>}
+          </>
+        )}
+        {workoutType === 'cardio' && (
+          <>
+            {set.distance        != null && <span className={cn(OUTCOME_COLOR[distOk],  'font-medium')}>{set.distance}m</span>}
+            {set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk],  'font-medium')}>{set.durationSeconds}s</span>}
+            {set.intensity       != null && <span className="text-gray-300 font-medium capitalize">{set.intensity}</span>}
+            {set.reps            != null && <span className={cn(OUTCOME_COLOR[repsOk],  'font-medium')}>{set.reps} reps</span>}
+          </>
+        )}
+        {(workoutType === 'calisthenics') && (
+          <>
+            {set.reps            != null && <span className={cn(OUTCOME_COLOR[repsOk], 'font-medium')}>{set.reps} reps</span>}
+            {set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk], 'font-medium')}>{set.durationSeconds}s</span>}
+          </>
+        )}
+        {(workoutType === 'stretching' || workoutType === 'cooldown') && (
+          set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk], 'font-medium')}>{set.durationSeconds}s</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Future set row ────────────────────────────────────────────────────────────
+
+function FutureSetRow({ setNumber }: { setNumber: number }): React.JSX.Element {
   return (
     <div className="flex items-center gap-3 py-2 opacity-30">
       <div className="w-5 shrink-0 flex justify-center">
@@ -211,13 +399,19 @@ function FutureSetRow({ setNumber, targetReps, targetWeight }: {
       <div className="flex gap-1">
         {[0,1,2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-gray-700" />)}
       </div>
-      {(targetReps || targetWeight) && (
-        <span className="text-xs text-gray-700 font-mono ml-auto">
-          {targetWeight && `${targetWeight}×`}{targetReps}
-        </span>
-      )}
     </div>
   )
+}
+
+// ── Log data type ─────────────────────────────────────────────────────────────
+
+interface LogData {
+  reps?:            number
+  weight?:          number
+  weightUnit?:      string
+  durationSeconds?: number
+  distance?:        number
+  intensity?:       string
 }
 
 // ── Exercise block ────────────────────────────────────────────────────────────
@@ -226,41 +420,39 @@ interface ExerciseBlockProps {
   sessionExercise: SessionExerciseResponse
   sessionId:       string
   workoutId:       string
+  workoutType:     string
   weightUnit:      string
   onSetLogged:     (restSeconds?: number) => void
 }
 
 export function ExerciseBlock({
-  sessionExercise, sessionId, workoutId, weightUnit, onSetLogged,
+  sessionExercise, sessionId, workoutId, workoutType, weightUnit, onSetLogged,
 }: ExerciseBlockProps): React.JSX.Element {
-  const logSet        = useLogSet()
+  const logSet         = useLogSet()
   const deleteExercise = useDeleteSessionExercise()
 
-  const loggedSets   = sessionExercise.sets
-  const loggedCount  = loggedSets.length
-  const targetSets   = sessionExercise.targetSets ?? DEFAULT_TARGET_SETS
-  const futureSets   = Math.max(0, targetSets - loggedCount - 1)
-  const exerciseName = sessionExercise.exercise?.name ?? 'Unknown Exercise'
+  const loggedSets  = sessionExercise.sets
+  const loggedCount = loggedSets.length
+  const targetSets  = sessionExercise.targetSets ?? DEFAULT_TARGET_SETS
+  const futureSets  = Math.max(0, targetSets - loggedCount - 1)
+  const isDone      = loggedCount >= targetSets
 
-  const handleLog = (reps: number, weight: number | null): void => {
+  const handleLog = (data: LogData): void => {
     logSet.mutate(
       {
         sessionExerciseId: sessionExercise.id,
         sessionId,
         setNumber: loggedCount + 1,
-        reps,
-        weight:    weight ?? undefined,
-        weightUnit,
+        reps:             data.reps,
+        weight:           data.weight,
+        weightUnit:       data.weightUnit ?? weightUnit,
+        durationSeconds:  data.durationSeconds,
+        distance:         data.distance,
+        intensity:        data.intensity,
       },
       { onSuccess: () => onSetLogged(90) },
     )
   }
-
-  const handleDelete = (): void => {
-    deleteExercise.mutate({ sessionExerciseId: sessionExercise.id, workoutId, sessionId })
-  }
-
-  const isDone = loggedCount >= targetSets
 
   return (
     <div className="relative">
@@ -268,17 +460,15 @@ export function ExerciseBlock({
       <div className="flex items-start justify-between mb-2 px-1">
         <div>
           <h3 className="font-display text-xl uppercase tracking-wide text-white leading-tight">
-            {exerciseName}
+            {sessionExercise.exercise?.name ?? 'Unknown Exercise'}
           </h3>
           {sessionExercise.notes && (
             <p className="text-xs text-gray-600 mt-0.5">{sessionExercise.notes}</p>
           )}
         </div>
-
-        {/* Delete exercise */}
         <button
           type="button"
-          onClick={handleDelete}
+          onClick={() => deleteExercise.mutate({ sessionExerciseId: sessionExercise.id, workoutId, sessionId })}
           aria-label="Remove exercise"
           className="text-gray-600 hover:text-red-400 transition-colors p-1 ml-2 shrink-0"
         >
@@ -288,31 +478,25 @@ export function ExerciseBlock({
         </button>
       </div>
 
-      {/* Vertical spine + set rows */}
+      {/* Spine + sets */}
       <div className="relative pl-0">
-        {/* Spine line */}
-        <div
-          className="absolute left-2.5 top-0 bottom-0 w-px bg-surface-border"
-          aria-hidden
-        />
+        <div className="absolute left-2.5 top-0 bottom-0 w-px bg-surface-border" aria-hidden />
 
-        {/* Past sets */}
         {loggedSets.map((set, i) => (
           <PastSetRow
             key={set.id}
             setNumber={i + 1}
             set={set}
-            targetReps={sessionExercise.targetReps ?? (i < DEFAULT_REP_TARGETS.length ? (DEFAULT_REP_TARGETS[i] ?? null) : null)}
-            targetWeight={sessionExercise.targetWeight ?? null}
+            sessionExercise={sessionExercise}
+            workoutType={workoutType}
           />
         ))}
 
-        {/* Active set */}
         {!isDone && (
           <ActiveSetHero
             setNumber={loggedCount + 1}
-            targetReps={sessionExercise.targetReps ?? (loggedCount < DEFAULT_REP_TARGETS.length ? (DEFAULT_REP_TARGETS[loggedCount] ?? null) : null)}
-            targetWeight={sessionExercise.targetWeight ?? null}
+            sessionExercise={sessionExercise}
+            workoutType={workoutType}
             weightUnit={weightUnit}
             lastSet={loggedSets[loggedSets.length - 1] ?? null}
             onLog={handleLog}
@@ -320,20 +504,10 @@ export function ExerciseBlock({
           />
         )}
 
-        {/* Future sets */}
-        {!isDone && Array.from({ length: futureSets }, (_, i) => {
-          const idx = loggedCount + 1 + i
-          return (
-            <FutureSetRow
-              key={idx}
-              setNumber={idx + 1}
-              targetReps={sessionExercise.targetReps ?? (idx < DEFAULT_REP_TARGETS.length ? (DEFAULT_REP_TARGETS[idx] ?? null) : null)}
-              targetWeight={sessionExercise.targetWeight ?? null}
-            />
-          )
-        })}
+        {!isDone && Array.from({ length: futureSets }, (_, i) => (
+          <FutureSetRow key={i} setNumber={loggedCount + 2 + i} />
+        ))}
 
-        {/* Done */}
         {isDone && (
           <div className="flex items-center gap-2 py-2 px-1">
             <div className="w-5 flex justify-center shrink-0">

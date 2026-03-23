@@ -130,6 +130,7 @@ export function WorkoutBlock({
               sessionExercise={currentEx}
               sessionId={sessionId}
               workoutId={workout.id}
+              workoutType={workout.workoutType}
               weightUnit={weightUnit}
               onSetLogged={onSetLogged}
             />

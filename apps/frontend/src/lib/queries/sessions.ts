@@ -199,6 +199,8 @@ export interface AddExerciseInput {
   targetWeight?:          number
   targetWeightUnit?:      string
   targetDurationSeconds?: number
+  targetDistance?:        number
+  targetIntensity?:       'low' | 'moderate' | 'high' | 'max'
 }
 
 export function useAddExercise(): UseMutationResult<SessionExerciseResponse, Error, AddExerciseInput> {
@@ -216,13 +218,14 @@ export function useAddExercise(): UseMutationResult<SessionExerciseResponse, Err
 
 export interface LogSetInput {
   sessionExerciseId: string
-  sessionId:         string   // for cache invalidation
+  sessionId:         string
   setNumber:         number
   reps?:             number
   weight?:           number
   weightUnit?:       string
   durationSeconds?:  number
   distance?:         number
+  intensity?:        string
   rpe?:              number
   notes?:            string
 }

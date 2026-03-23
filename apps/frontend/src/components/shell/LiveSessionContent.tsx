@@ -312,7 +312,9 @@ export default function LiveSessionContent({
         open={showEndModal}
         onConfirm={handleEndSession}
         onCancel={() => setShowEndModal(false)}
-        loading={endSession.isPending}
+        onDiscard={handleDiscard}
+        loading={endSession.isPending || discardSession.isPending}
+        hasWork={(workouts ?? []).some(w => w.sessionExercises.some(se => se.sets.length > 0))}
       />
     </>
   )

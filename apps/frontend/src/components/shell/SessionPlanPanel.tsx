@@ -228,6 +228,26 @@ export function SessionPlanPanel({
                   Discard
                 </button>
 
+                {/* Save Plan — always available once session is created in DB */}
+                {sessionId && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium',
+                      'border border-surface-border text-gray-300',
+                      'hover:border-brand-highlight/40 hover:text-white',
+                      interactions.button.base,
+                      interactions.button.press,
+                    )}
+                  >
+                    <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                      <path d="M2 9l4 4 8-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Save Plan
+                  </button>
+                )}
+
                 {/* Execute — only when session has blocks */}
                 {sessionId && workouts.length > 0 && (
                   <button
@@ -284,7 +304,11 @@ export function SessionPlanPanel({
               {sessionName || 'Untitled Plan'}
             </h1>
             <p className="text-xs text-gray-600 group-hover:text-gray-400 mt-0.5">
-              {clientName ?? 'Tap to name this session'} · tap to rename
+              {clientName ?? 'Select a client'} · tap to rename
+              {sessionId
+                ? <span className="text-emerald-600/70"> · saved</span>
+                : <span className="text-gray-700"> · not saved yet</span>
+              }
             </p>
           </button>
         )}
@@ -329,7 +353,7 @@ export function SessionPlanPanel({
             <p className="text-3xl mb-4" aria-hidden>📋</p>
             <p className="text-gray-300 font-medium mb-1">Plan your session</p>
             <p className="text-gray-600 text-sm mb-6">
-              Add workout blocks and exercises. Set targets for sets, reps and weight.
+              Add blocks and exercises with targets. The plan saves automatically when you add your first block.
             </p>
             <button
               type="button"

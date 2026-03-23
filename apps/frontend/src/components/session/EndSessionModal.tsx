@@ -65,10 +65,12 @@ interface EndSessionModalProps {
   open:      boolean
   onConfirm: (scores: { energyLevel: number; mobilityFeel: number; stressLevel: number; sessionNotes?: string }) => void
   onCancel:  () => void
+  onDiscard?: () => void  // offered when session has no logged sets
   loading:   boolean
+  hasWork:   boolean      // true if at least one set was logged
 }
 
-export function EndSessionModal({ open, onConfirm, onCancel, loading }: EndSessionModalProps): React.JSX.Element {
+export function EndSessionModal({ open, onConfirm, onCancel, onDiscard, loading, hasWork }: EndSessionModalProps): React.JSX.Element {
   const [energy,   setEnergy]   = useState(7)
   const [mobility, setMobility] = useState(7)
   const [stress,   setStress]   = useState(5)
@@ -81,6 +83,48 @@ export function EndSessionModal({ open, onConfirm, onCancel, loading }: EndSessi
       stressLevel:  stress,
       sessionNotes: notes.trim() || undefined,
     })
+  }
+
+  // Empty session — offer discard or end anyway
+  if (!hasWork) {
+    return (
+      <Modal open={open} onClose={onCancel} title="No work logged">
+        <div className="space-y-4 py-2">
+          <p className="text-sm text-gray-400">
+            No sets were logged in this session. You can discard it (no record kept) or end it anyway.
+          </p>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onCancel}
+              disabled={loading}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={onDiscard}
+              disabled={loading || !onDiscard}
+              className="flex-1"
+            >
+              Discard
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleConfirm}
+              loading={loading}
+              className="flex-1"
+            >
+              End Anyway
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    )
   }
 
   return (

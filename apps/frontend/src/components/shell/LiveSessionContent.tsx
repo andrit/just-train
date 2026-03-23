@@ -24,7 +24,6 @@ import { useOverlayStore }                from '@/store/overlayStore'
 import { useSession, useEndSession, useDiscardSession } from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
-import { RestTimerBanner }                from '@/components/session/RestTimerBanner'
 import { EndSessionModal }                from '@/components/session/EndSessionModal'
 import { Spinner }                        from '@/components/ui/Spinner'
 
@@ -120,12 +119,7 @@ export default function LiveSessionContent({
 
   return (
     <>
-      <RestTimerBanner timer={restTimer} />
-
-      <div className={cn(
-        'flex flex-col h-full bg-brand-primary',
-        restTimer.isRunning && 'pt-14',
-      )}>
+      <div className="flex flex-col h-full bg-brand-primary">
         {/* Session header */}
         <header className="px-4 py-3 border-b border-surface-border flex items-center justify-between shrink-0">
           <div className="min-w-0">
@@ -260,6 +254,7 @@ export default function LiveSessionContent({
                     layout="horizontal"
                     onSetLogged={handleSetLogged}
                     onAddBlock={() => setAddBlockOpen(true)}
+                    restTimer={restTimer}
                   />
                 </div>
               ))}
@@ -276,6 +271,7 @@ export default function LiveSessionContent({
                 layout="vertical"
                 onSetLogged={handleSetLogged}
                 onAddBlock={() => setAddBlockOpen(true)}
+                restTimer={restTimer}
               />
             ))}
           </div>

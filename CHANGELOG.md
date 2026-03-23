@@ -409,3 +409,31 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - Full DB schema: trainers, clients, exercises, sessions, workouts, sets, templates, sync log
 - Swagger/OpenAPI documentation at `/documentation`
 - GitHub Actions CI: typecheck, lint, test, build
+
+## [v2.5.0] — UI/UX Polish + Gamification Foundations
+
+### Session execution layout
+- `WorkoutBlock` redesigned for execution mode: exercises navigate horizontally (snap-scroll + tappable peeks), two-row dot system (block position + exercise position within block), carved footer bar (Add exercise | New block), rest timer replaces footer temporarily after set log
+- PR flash sequence: amber overlay on log (1.5s) fades to persistent chip on set row (`1RM` or `Vol` pill, amber/highlight)
+- Overview mode (plan builder) unchanged — vertical exercise list
+
+### PR system
+- `sets` table: `isPR boolean` + `isPRVolume boolean` columns, detected at log time
+- Backend: Epley 1RM formula (`weight × (1 + reps/30)`) compared against historical max for client+exercise; volume (`weight × reps`) tracked separately
+- `prNotifyType` preference (`1rm` / `volume` / `both`) added to trainer schema + PreferencesPage
+- Session history: PR filter toggle ("PRs only") on SessionHistoryPanel; `1RM` and `Vol` chips inline on set rows
+- Personal Bests: `GET /clients/:id/personal-bests` endpoint; `PersonalBestsTab` component; new "PRs" tab on client profile (panel + page); ⓘ tooltips on metrics
+
+### Gamification foundations
+- `consistencyScore` added to `ClientKpiResponseSchema` and computed in KPI route (rolling 4-week score 0–100)
+- Consistency score card added to KpiHero carousel
+- `currentStreakWeeks` + `bestStreakWeeks` already computed; now displayed alongside consistency
+
+### Code quality — DRY pass
+- `lib/exerciseLabels.ts` — WORKOUT_TYPE_BADGE_VARIANT, WORKOUT_TYPE_LABEL, WORKOUT_TYPE_COLOR, EQUIPMENT_LABEL, DIFFICULTY_COLOR, DIFFICULTY_TEXT_COLOR. Removed local copies from ExerciseCard, ExerciseDetailPanel, ExerciseDetail
+- `lib/formatters.ts` — formatDate, formatDuration, formatElapsed, formatEpley, formatVolume, formatSetSummary, formatTotalVolume, formatSeconds. Removed local copies from SessionsPage, SessionHistoryPage, SessionHistoryPanel
+
+### Developer experience
+- `CONTRIBUTING.md` — checklist for new column additions (schema, serializer, response schema, test factory, backfill SQL)
+- `serializeTrainer()` and `factories.ts` annotated with CONTRIBUTING.md reference
+

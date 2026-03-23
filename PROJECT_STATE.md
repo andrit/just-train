@@ -628,8 +628,8 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v2.2.0 | Sessions view — history list | ✅ |
 | v2.3.0 | Nav event bus — debouncing, audit log, RxJS-ready (full RxJS deferred to v3.1.0) | ✅ |
 | v2.4.0 | Offline sync — write queue, prefetch, banner | ✅ |
-| **v2.5.0** | **UI/UX polish — execution layout, PR system, gamification foundations** | 🔨 Current |
-| v2.6.0 | ESLint + code quality | 🔜 |
+| v2.5.0 | UI/UX polish — execution layout, PR system, gamification foundations | ✅ |
+| **v2.6.0** | **ESLint + code quality** | 🔨 Next |
 | v2.7.0 | Post-session wrap-up + milestone/badge system | 🔜 |
 | v2.8.0 | Camera / video capture + coach challenges | 🔜 |
 | v2.9.0 | Leaderboards + weekly quests + social share | 🔜 |

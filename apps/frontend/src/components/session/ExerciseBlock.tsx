@@ -383,6 +383,16 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType }: {
           set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk], 'font-medium')}>{set.durationSeconds}s</span>
         )}
       </div>
+
+      {/* PR chip — amber pill, persists in history */}
+      {(set.isPR || set.isPRVolume) && (
+        <span className={cn(
+          'shrink-0 text-[9px] font-medium px-1.5 py-0.5 rounded-full',
+          'bg-amber-500/15 text-amber-400 border border-amber-500/30',
+        )}>
+          {set.isPR && set.isPRVolume ? 'PR ×2' : 'PR'}
+        </span>
+      )}
     </div>
   )
 }
@@ -422,7 +432,7 @@ interface ExerciseBlockProps {
   workoutId:       string
   workoutType:     string
   weightUnit:      string
-  onSetLogged:     (restSeconds?: number) => void
+  onSetLogged:     (restSeconds?: number, pr?: { isPR: boolean; isPRVolume: boolean; weight?: number | null; reps?: number | null }) => void
 }
 
 export function ExerciseBlock({
@@ -450,7 +460,16 @@ export function ExerciseBlock({
         distance:         data.distance,
         intensity:        data.intensity,
       },
-      { onSuccess: () => onSetLogged(90) },
+      {
+        onSuccess: (newSet) => {
+          onSetLogged(90, {
+            isPR:       newSet?.isPR       ?? false,
+            isPRVolume: newSet?.isPRVolume ?? false,
+            weight:     data.weight,
+            reps:       data.reps,
+          })
+        },
+      },
     )
   }
 

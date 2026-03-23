@@ -350,6 +350,8 @@ export const SetResponseSchema = z.object({
   side:              SideEnum.nullable(),
   rpe:               z.number().int().nullable().describe('Rate of Perceived Exertion 1–10'),
   notes:             z.string().nullable(),
+  isPR:              z.boolean().describe('True if Epley 1RM estimate exceeds all prior sets for this client + exercise'),
+  isPRVolume:        z.boolean().describe('True if weight × reps exceeds all prior sets for this client + exercise'),
   createdAt:         z.string().datetime(),
 })
 export type SetResponse = z.infer<typeof SetResponseSchema>
@@ -581,6 +583,11 @@ export const ClientKpiResponseSchema = z.object({
 
   // Sessions this month — used to enable/disable the Send Report button
   sessionsThisMonth: z.number().int(),
+
+  // Consistency score — rolling 4-week score 0-100
+  // sessions completed ÷ sessions targeted × 100, capped at 100
+  consistencyScore: z.number().int().min(0).max(100)
+    .describe('Rolling 4-week consistency score 0–100'),
 
   // Card 7 — Avg energy
   avgEnergyThisMonth: z.number().nullable()

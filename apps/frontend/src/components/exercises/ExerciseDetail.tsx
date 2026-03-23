@@ -11,9 +11,9 @@ import { Button }         from '@/components/ui/Button'
 import { Badge }          from '@/components/ui/Badge'
 import { Spinner }        from '@/components/ui/Spinner'
 import { ConfirmDialog }  from '@/components/ui/ConfirmDialog'
+import { WORKOUT_TYPE_BADGE_VARIANT } from '@/lib/exerciseLabels'
 import ExerciseForm       from './ExerciseForm'
 import MediaUploader      from './MediaUploader'
-import type { BadgeVariant } from '@/components/ui/Badge'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -25,13 +25,6 @@ interface ExerciseDetailProps {
 
 // ── Label maps ────────────────────────────────────────────────────────────────
 
-const WORKOUT_TYPE_VARIANTS: Record<string, BadgeVariant> = {
-  cardio:       'info',
-  stretching:   'success',
-  calisthenics: 'warning',
-  resistance:   'danger',
-  cooldown:     'default',
-}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -97,7 +90,7 @@ export default function ExerciseDetail({
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant={WORKOUT_TYPE_VARIANTS[exercise.workoutType] ?? 'default'}>
+          <Badge variant={WORKOUT_TYPE_BADGE_VARIANT[exercise.workoutType] ?? 'default'}>
             {exercise.workoutType}
           </Badge>
           {exercise.isDraft && (

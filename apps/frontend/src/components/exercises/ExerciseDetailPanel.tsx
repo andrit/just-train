@@ -31,39 +31,14 @@ import { Button }                                from '@/components/ui/Button'
 import { Badge }                                 from '@/components/ui/Badge'
 import { Spinner }                               from '@/components/ui/Spinner'
 import { ConfirmDialog }                         from '@/components/ui/ConfirmDialog'
+import {
+  WORKOUT_TYPE_BADGE_VARIANT,
+  EQUIPMENT_LABEL,
+  DIFFICULTY_COLOR,
+}                                                from '@/lib/exerciseLabels'
 import ExerciseForm                              from './ExerciseForm'
 import MediaUploader                             from './MediaUploader'
-import type { BadgeVariant }                     from '@/components/ui/Badge'
 import type { ActiveSession }                    from '@/store/sessionStore'
-
-// ── Label maps ────────────────────────────────────────────────────────────────
-
-const WORKOUT_TYPE_VARIANTS: Record<string, BadgeVariant> = {
-  cardio:       'info',
-  stretching:   'success',
-  calisthenics: 'warning',
-  resistance:   'danger',
-  cooldown:     'default',
-}
-
-const DIFFICULTY_COLOR: Record<string, string> = {
-  beginner:     'text-green-400 bg-green-500/10 border-green-500/30',
-  intermediate: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  advanced:     'text-red-400   bg-red-500/10   border-red-500/30',
-}
-
-const EQUIPMENT_LABELS: Record<string, string> = {
-  none:            'Bodyweight',
-  bodyweight:      'Bodyweight',
-  barbell:         'Barbell',
-  dumbbell:        'Dumbbell',
-  cable:           'Cable',
-  machine:         'Machine',
-  kettlebell:      'Kettlebell',
-  resistance_band: 'Band',
-  cardio_machine:  'Cardio Machine',
-  other:           'Other',
-}
 
 // ── Hero section ──────────────────────────────────────────────────────────────
 
@@ -414,7 +389,7 @@ export default function ExerciseDetailPanel({
         {/* Name + type */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant={WORKOUT_TYPE_VARIANTS[exercise.workoutType] ?? 'default'}>
+            <Badge variant={WORKOUT_TYPE_BADGE_VARIANT[exercise.workoutType] ?? 'default'}>
               {exercise.workoutType}
             </Badge>
             {exercise.category && (
@@ -436,7 +411,7 @@ export default function ExerciseDetailPanel({
             </span>
           )}
           <span className="text-xs px-3 py-1.5 rounded-full border border-surface-border text-gray-400">
-            {EQUIPMENT_LABELS[exercise.equipment] ?? exercise.equipment}
+            {EQUIPMENT_LABEL[exercise.equipment] ?? exercise.equipment}
           </span>
           <span className={cn(
             'text-xs px-3 py-1.5 rounded-full border capitalize',

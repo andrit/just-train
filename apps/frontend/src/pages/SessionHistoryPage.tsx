@@ -19,25 +19,9 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { cn }                                   from '@/lib/cn'
 import { useSession }                           from '@/lib/queries/sessions'
 import { useRestoreScroll }                     from '@/hooks/useScrollRestoration'
+import { formatDuration, formatDateLong }       from '@/lib/formatters'
 import { Spinner }                              from '@/components/ui/Spinner'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function formatDuration(startTime: string | null, endTime: string | null): string | null {
-  if (!startTime || !endTime) return null
-  const mins = Math.round(
-    (new Date(endTime).getTime() - new Date(startTime).getTime()) / 60000
-  )
-  return mins >= 60
-    ? `${Math.floor(mins / 60)}h ${mins % 60}m`
-    : `${mins} min`
-}
-
-function formatDate(date: string): string {
-  return new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
-  })
-}
 
 // ── Score bar ─────────────────────────────────────────────────────────────────
 
@@ -146,7 +130,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
           <h1 className="font-display text-2xl uppercase tracking-wide text-white">
             {session.name ?? 'Training Session'}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">{formatDate(session.date)}</p>
+          <p className="text-sm text-gray-500 mt-1">{formatDateLong(session.date)}</p>
         </div>
 
         {/* Stats row */}

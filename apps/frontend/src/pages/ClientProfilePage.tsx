@@ -25,6 +25,7 @@ import { KpiHero }                           from '@/components/kpi/KpiHero'
 import { OverviewTab }                       from '@/components/client-profile/OverviewTab'
 import { TimelineTab }                       from '@/components/client-profile/TimelineTab'
 import { BaselineTab }                       from '@/components/client-profile/BaselineTab'
+import { PersonalBestsTab }                  from '@/components/client-profile/PersonalBestsTab'
 import { ReportPreviewModal }                from '@/components/reports/ReportPreviewModal'
 import {
   useClient, useClientSnapshots,
@@ -42,7 +43,7 @@ import {
 
 // ── Tab types ─────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'timeline' | 'baseline'
+type Tab = 'overview' | 'timeline' | 'baseline' | 'prs'
 
 // ── Tab button ────────────────────────────────────────────────────────────────
 
@@ -269,6 +270,7 @@ export default function ClientProfilePage(): React.JSX.Element {
           <TabButton id="overview" label="Overview" active={tab === 'overview'} incomplete={overviewIncomplete} onClick={() => setTab('overview')} />
           <TabButton id="timeline" label="Timeline" active={tab === 'timeline'} onClick={() => setTab('timeline')} />
           <TabButton id="baseline" label="Baseline" active={tab === 'baseline'} incomplete={baselineIncomplete} onClick={() => setTab('baseline')} />
+          <TabButton id="prs" label="PRs" active={tab === 'prs'} onClick={() => setTab('prs')} />
         </div>
       </div>
 
@@ -286,6 +288,7 @@ export default function ClientProfilePage(): React.JSX.Element {
         )}
         {tab === 'timeline' && <TimelineTab clientId={client.id} clientName={client.name} />}
         {tab === 'baseline' && <BaselineTab clientId={client.id} />}
+        {tab === 'prs'      && <PersonalBestsTab clientId={client.id} />}
       </div>
 
       {/* Edit drawer */}

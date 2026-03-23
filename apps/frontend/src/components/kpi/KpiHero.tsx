@@ -108,6 +108,14 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
       context: kpis.bestStreakWeeks > 0 ? `best: ${kpis.bestStreakWeeks} wks` : undefined,
       isEmpty: kpis.totalSessionsAllTime === 0,
     },
+    // Card 1b — Consistency score
+    {
+      label:     'Consistency',
+      value:     `${kpis.consistencyScore}%`,
+      context:   '4-week rolling',
+      highlight: kpis.consistencyScore < 50 && kpis.totalSessionsAllTime > 0,
+      isEmpty:   kpis.totalSessionsAllTime === 0,
+    },
     // Card 2 — This week
     {
       label:     'This week',

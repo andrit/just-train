@@ -30,6 +30,7 @@ import {
   useSessions,
   useExecuteSession,
 }                                        from '@/lib/queries/sessions'
+import { formatDate, formatDuration }    from '@/lib/formatters'
 import { Spinner }                       from '@/components/ui/Spinner'
 import type { SessionSummaryResponse }   from '@trainer-app/shared'
 
@@ -38,29 +39,6 @@ import type { SessionSummaryResponse }   from '@trainer-app/shared'
 type StatusTab = 'all' | 'planned' | 'in_progress' | 'completed'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function formatDate(dateStr: string): string {
-  const d         = new Date(dateStr + 'T00:00:00')
-  const today     = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
-
-  if (d.toDateString() === today.toDateString())     return 'Today'
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
-
-  // Within the last week — show weekday
-  const daysAgo = Math.floor((today.getTime() - d.getTime()) / 86400000)
-  if (daysAgo < 7) return d.toLocaleDateString('en-US', { weekday: 'long' })
-
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-}
-
-function formatDuration(start: string | null, end: string | null): string {
-  if (!start || !end) return ''
-  const mins = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000)
-  if (mins < 60) return `${mins}m`
-  return `${Math.floor(mins / 60)}h ${mins % 60}m`
-}
 
 function groupByDate(sessions: SessionSummaryResponse[]): Array<{ label: string; sessions: SessionSummaryResponse[] }> {
   const map = new Map<string, SessionSummaryResponse[]>()

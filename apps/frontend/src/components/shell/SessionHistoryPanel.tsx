@@ -7,28 +7,12 @@
 // full refactor of that page for now.
 // ------------------------------------------------------------
 
+import { useState }             from 'react'
 import { cn }                  from '@/lib/cn'
 import { interactions }        from '@/lib/interactions'
 import { useSession }          from '@/lib/queries/sessions'
+import { formatDate, formatDuration, formatTotalVolume } from '@/lib/formatters'
 import { Spinner }             from '@/components/ui/Spinner'
-
-// Reuse helpers from SessionHistoryPage inline
-
-function formatDuration(startTime: string | null, endTime: string | null): string | null {
-  if (!startTime || !endTime) return null
-  const mins = Math.round(
-    (new Date(endTime).getTime() - new Date(startTime).getTime()) / 60000
-  )
-  return mins >= 60
-    ? `${Math.floor(mins / 60)}h ${mins % 60}m`
-    : `${mins} min`
-}
-
-function formatDate(date: string): string {
-  return new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
-  })
-}
 
 function ScoreRow({ label, value }: { label: string; value: number }): React.JSX.Element {
   return (
@@ -49,6 +33,7 @@ interface SessionHistoryPanelProps {
 
 export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelProps): React.JSX.Element {
   const { data: session, isLoading } = useSession(sessionId)
+  const [prFilterOn, setPrFilterOn]  = useState(false)
 
   if (isLoading) {
     return (
@@ -124,13 +109,30 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
         {totalVolume > 0 && (
           <div className="flex-1 text-center">
             <p className="font-display text-xl text-white">
-              {totalVolume >= 1000
-                ? `${(totalVolume / 1000).toFixed(1)}k`
-                : totalVolume.toLocaleString()}
+              {formatTotalVolume(totalVolume)}
             </p>
             <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Volume</p>
           </div>
         )}
+      </div>
+
+      {/* PR filter */}
+      <div className="px-4 pb-3 border-b border-surface-border shrink-0">
+        <button
+          type="button"
+          onClick={() => setPrFilterOn(!prFilterOn)}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+            prFilterOn
+              ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
+              : 'border-surface-border text-gray-500 hover:border-gray-500 hover:text-gray-300',
+          )}
+        >
+          <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+            <path d="M6 1l1.2 2.8H10L7.6 5.5l.9 2.8L6 6.8l-2.5 1.5.9-2.8L2 3.8h2.8L6 1z" fill="currentColor" />
+          </svg>
+          PRs only
+        </button>
       </div>
 
       {/* Exercise breakdown */}
@@ -149,7 +151,9 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
                     {se.exercise?.name ?? 'Unknown'}
                   </p>
                   <div className="space-y-1">
-                    {se.sets.map((set, i) => {
+                    {se.sets
+                      .filter(set => !prFilterOn || set.isPR || set.isPRVolume)
+                      .map((set, i) => {
                       const hitReps   = !se.targetReps   || (set.reps ?? 0) >= se.targetReps
                       const hitWeight = !se.targetWeight || (set.weight ?? 0) >= se.targetWeight
                       const hit = hitReps && hitWeight
@@ -166,12 +170,23 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
                             {set.reps != null && <span>{set.reps}</span>}
                             {set.durationSeconds != null && <span>{set.durationSeconds}s</span>}
                           </div>
-                          {/* Target */}
-                          {(se.targetReps || se.targetWeight) && (
-                            <span className="text-gray-700 text-[10px]">
-                              {se.targetWeight && `${se.targetWeight}×`}{se.targetReps}
-                            </span>
-                          )}
+                          <div className="flex gap-1 shrink-0">
+                            {set.isPR && (
+                              <span className="text-[9px] font-medium bg-amber-500/15 border border-amber-500/30 text-amber-400 px-1.5 py-0.5 rounded-full">
+                                1RM
+                              </span>
+                            )}
+                            {set.isPRVolume && (
+                              <span className="text-[9px] font-medium bg-brand-highlight/10 border border-brand-highlight/30 text-brand-highlight px-1.5 py-0.5 rounded-full">
+                                Vol
+                              </span>
+                            )}
+                            {!set.isPR && !set.isPRVolume && (se.targetReps || se.targetWeight) && (
+                              <span className="text-gray-700 text-[10px]">
+                                {se.targetWeight && `${se.targetWeight}×`}{se.targetReps}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       )
                     })}

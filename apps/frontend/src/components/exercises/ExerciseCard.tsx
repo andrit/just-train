@@ -9,45 +9,13 @@
 import { cn }                            from '@/lib/cn'
 import { Badge }                         from '@/components/ui/Badge'
 import { getThumbnailUrl }               from './utils'
+import {
+  WORKOUT_TYPE_BADGE_VARIANT,
+  WORKOUT_TYPE_LABEL,
+  EQUIPMENT_LABEL,
+  DIFFICULTY_TEXT_COLOR,
+}                                        from '@/lib/exerciseLabels'
 import type { ExerciseSummaryResponse }  from '@trainer-app/shared'
-import type { BadgeVariant }             from '@/components/ui/Badge'
-
-// ── Label maps ────────────────────────────────────────────────────────────────
-
-const WORKOUT_TYPE_VARIANTS: Record<string, BadgeVariant> = {
-  cardio:       'info',
-  stretching:   'success',
-  calisthenics: 'warning',
-  resistance:   'danger',
-  cooldown:     'default',
-}
-
-const WORKOUT_TYPE_LABELS: Record<string, string> = {
-  cardio:       'Cardio',
-  stretching:   'Stretch',
-  calisthenics: 'Calisthenics',
-  resistance:   'Resistance',
-  cooldown:     'Cooldown',
-}
-
-const DIFFICULTY_CLASSES: Record<string, string> = {
-  beginner:     'text-green-400',
-  intermediate: 'text-amber-400',
-  advanced:     'text-red-400',
-}
-
-const EQUIPMENT_LABELS: Record<string, string> = {
-  none:            'Bodyweight',
-  bodyweight:      'Bodyweight',
-  barbell:         'Barbell',
-  dumbbell:        'Dumbbell',
-  cable:           'Cable',
-  machine:         'Machine',
-  kettlebell:      'Kettlebell',
-  resistance_band: 'Band',
-  cardio_machine:  'Cardio Machine',
-  other:           'Other',
-}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -106,8 +74,8 @@ export default function ExerciseCard({
         )}
 
         <div className="absolute top-2 right-2">
-          <Badge variant={WORKOUT_TYPE_VARIANTS[exercise.workoutType] ?? 'default'}>
-            {WORKOUT_TYPE_LABELS[exercise.workoutType] ?? exercise.workoutType}
+          <Badge variant={WORKOUT_TYPE_BADGE_VARIANT[exercise.workoutType] ?? 'default'}>
+            {WORKOUT_TYPE_LABEL[exercise.workoutType] ?? exercise.workoutType}
           </Badge>
         </div>
       </div>
@@ -126,10 +94,10 @@ export default function ExerciseCard({
           )}
 
           <span className="text-xs text-gray-500">
-            {EQUIPMENT_LABELS[exercise.equipment] ?? exercise.equipment}
+            {EQUIPMENT_LABEL[exercise.equipment] ?? exercise.equipment}
           </span>
 
-          <span className={cn('text-xs ml-auto', DIFFICULTY_CLASSES[exercise.difficulty] ?? 'text-gray-400')}>
+          <span className={cn('text-xs ml-auto', DIFFICULTY_TEXT_COLOR[exercise.difficulty] ?? 'text-gray-400')}>
             {exercise.difficulty}
           </span>
         </div>

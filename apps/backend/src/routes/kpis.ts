@@ -24,7 +24,7 @@
 
 import type { FastifyInstance }  from 'fastify'
 import { authenticate }          from '../middleware/authenticate'
-import { db, clients, sessions } from '../db'
+import { db, clients, sessions, workouts, sessionExercises, sets } from '../db'
 import { eq, and, desc }         from 'drizzle-orm'
 import {
   ClientKpiResponseSchema,
@@ -289,6 +289,19 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       const avg = (arr: number[]) =>
         arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : null
 
+      // ── Consistency score ────────────────────────────────────────────────────
+      // Rolling 4-week score: sessions completed ÷ sessions targeted × 100
+      // Capped at 100. A trainer targeting 3/week who did 3,3,4,2 = 12/12 = 100
+      const target4Weeks = client.weeklySessionTarget * 4
+      const fourWeeksAgo = new Date(now)
+      fourWeeksAgo.setUTCDate(fourWeeksAgo.getUTCDate() - 28)
+      const sessions4Weeks = allSessions.filter(
+        s => new Date(s.date + 'T00:00:00') >= fourWeeksAgo
+      ).length
+      const consistencyScore = target4Weeks > 0
+        ? Math.min(100, Math.round((sessions4Weeks / target4Weeks) * 100))
+        : 0
+
       return reply.send({
         clientId,
         computedAt:            now.toISOString(),
@@ -302,12 +315,133 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         volumeThisMonthLbs:    volumeThisMonthLbs > 0 ? Math.round(volumeThisMonthLbs) : null,
         totalSessionsAllTime:  allSessions.length,
         sessionsThisMonth:     monthSessions.length,
+        consistencyScore,
         avgEnergyThisMonth:    avg(energyScores),
         avgStressThisMonth:    avg(stressScores),
       })
     } catch (error) {
       ;(app.log as any).error(error)
       return reply.status(500).send({ error: 'Failed to compute KPIs' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // GET /clients/:id/personal-bests
+  // Returns best 1RM estimate and best volume per exercise for a client.
+  // Only resistance exercises with weight+reps are included.
+  // ----------------------------------------------------------
+
+  const PersonalBestSchema = z.object({
+    exerciseId:   z.string().uuid(),
+    exerciseName: z.string(),
+    best1rm:      z.number().describe('Epley 1RM estimate: weight × (1 + reps/30)'),
+    best1rmWeight:z.number(),
+    best1rmReps:  z.number().int(),
+    best1rmDate:  z.string().describe('YYYY-MM-DD'),
+    bestVolume:   z.number().describe('weight × reps in a single set'),
+    bestVolumeWeight: z.number(),
+    bestVolumeReps:   z.number().int(),
+    bestVolumeDate:   z.string(),
+  })
+
+  app.get('/clients/:id/personal-bests', {
+    schema: {
+      tags:     ['Clients'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Get personal bests for a client',
+      params:   UuidParamSchema,
+      response: {
+        200: z.array(PersonalBestSchema),
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: clientId } = request.params as z.infer<typeof UuidParamSchema>
+
+    try {
+      // Verify client belongs to this trainer
+      const client = await db.query.clients.findFirst({
+        where: and(eq(clients.id, clientId), eq(clients.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!client) return reply.status(404).send({ error: 'Client not found' })
+
+      // Fetch all resistance sets with weight+reps for this client
+      const rows = await db
+        .select({
+          exerciseId:   sessionExercises.exerciseId,
+          weight:       sets.weight,
+          reps:         sets.reps,
+          sessionDate:  sessions.date,
+        })
+        .from(sets)
+        .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
+        .innerJoin(workouts, eq(sessionExercises.workoutId, workouts.id))
+        .innerJoin(sessions, eq(workouts.sessionId, sessions.id))
+        .where(
+          and(
+            eq(sessions.clientId, clientId),
+            eq(sessions.trainerId, request.trainer.trainerId),
+          )
+        )
+
+      // Fetch exercise names in one query
+      const exerciseIds = [...new Set(rows.map(r => r.exerciseId))]
+      const exerciseMap = new Map<string, string>()
+      if (exerciseIds.length > 0) {
+        const { exercises: exercisesTable } = await import('../db')
+        const exRows = await db.query.exercises.findMany({
+          where: (ex, { inArray }) => inArray(ex.id, exerciseIds),
+          columns: { id: true, name: true },
+        })
+        exRows.forEach(e => exerciseMap.set(e.id, e.name))
+      }
+
+      // Compute bests per exercise
+      const epley = (w: number, r: number) => w * (1 + r / 30)
+      const bests = new Map<string, {
+        best1rm: number; best1rmWeight: number; best1rmReps: number; best1rmDate: string
+        bestVolume: number; bestVolumeWeight: number; bestVolumeReps: number; bestVolumeDate: string
+      }>()
+
+      for (const row of rows) {
+        if (!row.weight || !row.reps || row.reps <= 0) continue
+        const e1rm   = epley(row.weight, row.reps)
+        const volume = row.weight * row.reps
+        const cur    = bests.get(row.exerciseId)
+
+        bests.set(row.exerciseId, {
+          best1rm:           cur && cur.best1rm >= e1rm ? cur.best1rm : e1rm,
+          best1rmWeight:     cur && cur.best1rm >= e1rm ? cur.best1rmWeight : row.weight,
+          best1rmReps:       cur && cur.best1rm >= e1rm ? cur.best1rmReps   : row.reps,
+          best1rmDate:       cur && cur.best1rm >= e1rm ? cur.best1rmDate   : row.sessionDate,
+          bestVolume:        cur && cur.bestVolume >= volume ? cur.bestVolume       : volume,
+          bestVolumeWeight:  cur && cur.bestVolume >= volume ? cur.bestVolumeWeight : row.weight,
+          bestVolumeReps:    cur && cur.bestVolume >= volume ? cur.bestVolumeReps   : row.reps,
+          bestVolumeDate:    cur && cur.bestVolume >= volume ? cur.bestVolumeDate   : row.sessionDate,
+        })
+      }
+
+      const result = [...bests.entries()]
+        .map(([exerciseId, b]) => ({
+          exerciseId,
+          exerciseName:     exerciseMap.get(exerciseId) ?? 'Unknown',
+          best1rm:          Math.round(b.best1rm * 10) / 10,
+          best1rmWeight:    b.best1rmWeight,
+          best1rmReps:      b.best1rmReps,
+          best1rmDate:      b.best1rmDate,
+          bestVolume:       Math.round(b.bestVolume),
+          bestVolumeWeight: b.bestVolumeWeight,
+          bestVolumeReps:   b.bestVolumeReps,
+          bestVolumeDate:   b.bestVolumeDate,
+        }))
+        .sort((a, b) => b.best1rm - a.best1rm)  // highest 1RM first
+
+      return reply.send(result)
+    } catch (error) {
+      ;(app.log as any).error(error)
+      return reply.status(500).send({ error: 'Failed to compute personal bests' })
     }
   })
 }

@@ -260,3 +260,27 @@ export function useSendReport(): UseMutationResult<SendReportResult, Error, Send
       apiClient.post<SendReportResult>(`/clients/${clientId}/report`, { trainerNote }),
   })
 }
+
+// ── Personal bests ────────────────────────────────────────────────────────────
+
+export interface PersonalBest {
+  exerciseId:       string
+  exerciseName:     string
+  best1rm:          number
+  best1rmWeight:    number
+  best1rmReps:      number
+  best1rmDate:      string
+  bestVolume:       number
+  bestVolumeWeight: number
+  bestVolumeReps:   number
+  bestVolumeDate:   string
+}
+
+export function useClientPersonalBests(clientId: string | null): UseQueryResult<PersonalBest[]> {
+  return useQuery({
+    queryKey:  ['clients', clientId, 'personal-bests'],
+    queryFn:   () => apiClient<PersonalBest[]>(`/clients/${clientId}/personal-bests`),
+    enabled:   !!clientId,
+    staleTime: 1000 * 60 * 5,
+  })
+}

@@ -36,6 +36,11 @@ export interface Preferences {
   timezone:            string
   widgetOrder:         WidgetId[]
   trainerMode:         'athlete' | 'trainer'
+  // v2.5.0: which PR type triggers the in-session flash/chip
+  // '1rm'    — Epley 1RM estimate new best (default)
+  // 'volume' — weight × reps new best
+  // 'both'   — either type
+  prNotifyType:        '1rm' | 'volume' | 'both'
 }
 
 export function usePreferences(): Preferences & {
@@ -59,6 +64,7 @@ export function usePreferences(): Preferences & {
     timezone:            trainer?.timezone            ?? 'UTC',
     widgetOrder:         parseWidgetProgression(trainer?.widgetProgression, mode),
     trainerMode:         mode,
+    prNotifyType:        (trainer?.prNotifyType as Preferences['prNotifyType']) ?? '1rm',
   }
 
   const updatePreference = useCallback(async <K extends keyof UpdateablePrefs>(
@@ -92,4 +98,5 @@ interface UpdateablePrefs {
   autoReportEnabled:   boolean
   timezone:            string
   widgetProgression:   string | null
+  prNotifyType:        '1rm' | 'volume' | 'both'
 }

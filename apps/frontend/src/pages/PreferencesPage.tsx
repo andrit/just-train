@@ -549,6 +549,50 @@ export default function PreferencesPage(): React.JSX.Element {
             </div>
           )}
 
+          {/* PR notification type */}
+          <div className="card p-4">
+            <div className="mb-3">
+              <p className="text-sm font-medium text-gray-200">Personal record notifications</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Which PR type triggers the flash and badge during a live session
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {([
+                { value: '1rm'   as const, label: '1RM', desc: 'Epley estimate' },
+                { value: 'volume'as const, label: 'Volume', desc: 'Weight × reps' },
+                { value: 'both'  as const, label: 'Both',   desc: 'Either type' },
+              ]).map(({ value, label, desc }) => {
+                const current = (trainer?.prNotifyType ?? '1rm') as '1rm' | 'volume' | 'both'
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => save('prNotifyType', value)}
+                    className={cn(
+                      'flex-1 px-3 py-2.5 rounded-xl border text-left transition-all duration-150',
+                      current === value
+                        ? 'border-brand-highlight/50 bg-brand-highlight/10'
+                        : 'border-surface-border bg-surface hover:border-gray-500',
+                      interactions.button.base,
+                      interactions.button.press,
+                    )}
+                  >
+                    <p className={cn('text-xs font-medium', current === value ? 'text-brand-highlight' : 'text-gray-300')}>
+                      {current === value && <span className="mr-1">✓</span>}{label}
+                    </p>
+                    <p className="text-[10px] text-gray-600 mt-0.5">{desc}</p>
+                  </button>
+                )
+              })}
+            </div>
+            {saving.prNotifyType && (
+              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                <Spinner size="sm" /> Saving…
+              </p>
+            )}
+          </div>
+
           {/* Auto-send monthly reports */}
           <div className="card p-4">
             <div className="flex items-center justify-between">

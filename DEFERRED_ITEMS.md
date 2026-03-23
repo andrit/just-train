@@ -122,8 +122,33 @@ Why not now: localStorage is sufficient for the data volumes involved. The inter
 Shipped in v2.4.0: Write queue (localStorage), connectivity detection, prefetch on load, offline banner, sync-on-reconnect. All critical writes (set logging, exercise additions, session end) are offline-aware.
 
 ### Session Metrics — Duration, Cardio Fields
-When: Session planning build (v2.1.0)
-What: Distance, time, pace tracking for cardio. Time-based holds for stretching and cooldown. Schema has fields; UI not built.
+Shipped in v2.2.0 (workout-type-aware inputs) and v2.5.0 (horizontal exercise navigation, rest timer in footer). All metric types covered: resistance (weight×reps), cardio (distance/time/intensity), calisthenics (reps/time), stretching (hold), cooldown (duration).
+
+### Post-Session Wrap-Up (v2.7.0)
+When: v2.7.0 — after gamification foundations ship in v2.5.0
+What: Lightweight end-of-session flow:
+- Name/describe draft exercises created mid-session
+- Add notes to exercises and the session overall
+- Surface PRs achieved in this session
+- Preview adjustments for next session
+- Streak + consistency update shown
+Schema: ready. Natural home for PR celebration on session complete.
+
+### Milestone / Badge System (v2.7.0)
+When: v2.7.0 alongside post-session wrap-up
+What: `trainer_milestones` table. Auto-detection job on session complete. Milestone types: first session, 10/50/100 sessions, first PR, volume milestones, streak milestones. Display on client profile and in post-session wrap-up.
+
+### Coach Challenges (v2.8.0)
+When: v2.8.0 alongside video capture
+What: Trainer sets a challenge for a client ("10 pull-ups unassisted by end of month"). Progress tracked automatically from session data. `challenges` table (trainer creates, client assigned, metric + deadline + completion detection).
+
+### Leaderboards + Weekly Quests (v2.9.0)
+When: v2.9.0 — needs meaningful user base, privacy design, opt-in consent
+What: King/Queen of the Gym leaderboards (trainer-scoped first, not global). Weekly/monthly quests tied to performance metrics. Anti-gaming considerations. Global leaderboards deferred to v3.x behind subscription gate.
+
+### Social Share — Athlete Tier (v2.9.0)
+When: v2.9.0 alongside leaderboards
+What: Share session summary / PR achievement card as image. Native share sheet on mobile (Web Share API). Augments athlete subscription value. Depends partly on video capture scope from v2.8.0.
 
 ---
 

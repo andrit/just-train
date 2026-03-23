@@ -113,6 +113,8 @@ export const TrainerResponseSchema = z.object({
     .describe('Master switch — when false, no scheduled reports are sent regardless of client settings'),
   timezone: z.string()
     .describe('IANA timezone string e.g. America/New_York — reports and alerts send at 08:00 local time'),
+  prNotifyType: z.enum(['1rm', 'volume', 'both']).default('1rm')
+    .describe('Which PR type triggers in-session flash/badge. 1rm = Epley estimate, volume = weight×reps, both = either'),
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

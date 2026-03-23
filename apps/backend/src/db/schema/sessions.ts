@@ -14,7 +14,7 @@
 
 import {
   pgTable, uuid, text, integer, real,
-  timestamp, pgEnum,
+  timestamp, pgEnum, boolean,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { SessionStatusEnum, SideEnum } from '@trainer-app/shared'
@@ -154,6 +154,13 @@ export const sets = pgTable('sets', {
   // Universal — Rate of Perceived Exertion 1 (easy) to 10 (max effort)
   rpe:   integer('rpe'),
   notes: text('notes'),
+
+  // Personal records — set at log time by comparing historical maxes.
+  // isPR:       Epley 1RM estimate (weight × (1 + reps/30)) exceeds prior best.
+  // isPRVolume: weight × reps exceeds prior best.
+  // Both tracked independently — a set can be one, both, or neither.
+  isPR:       boolean('is_pr').notNull().default(false),
+  isPRVolume: boolean('is_pr_volume').notNull().default(false),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })

@@ -581,9 +581,66 @@ Which fields you populate depends on the workout type:
     const body = request.body as Omit<z.infer<typeof CreateSetSchema>, 'sessionExerciseId'>
 
     try {
+      // ── PR detection ────────────────────────────────────────────────────
+      // Only meaningful for resistance sets with both weight and reps
+      let isPR       = false
+      let isPRVolume = false
+
+      if (body.weight != null && body.reps != null && body.reps > 0) {
+        const epley = (w: number, r: number): number => w * (1 + r / 30)
+        const newEpley  = epley(body.weight, body.reps)
+        const newVolume = body.weight * body.reps
+
+        // Find the exercise for this sessionExercise
+        const seRow = await db.query.sessionExercises.findFirst({
+          where: eq(sessionExercises.id, sessionExerciseId),
+          with: {
+            workout: {
+              with: {
+                session: {
+                  columns: { clientId: true },
+                },
+              },
+            },
+          },
+        })
+
+        if (seRow) {
+          const clientId    = seRow.workout.session.clientId
+          const exerciseId  = seRow.exerciseId
+
+          // Query all historical sets for this client + exercise
+          const historicalSets = await db
+            .select({ weight: sets.weight, reps: sets.reps })
+            .from(sets)
+            .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
+            .innerJoin(workouts, eq(sessionExercises.workoutId, workouts.id))
+            .innerJoin(sessions, eq(workouts.sessionId, sessions.id))
+            .where(
+              and(
+                eq(sessions.clientId, clientId),
+                eq(sessionExercises.exerciseId, exerciseId),
+              )
+            )
+
+          let bestEpley  = 0
+          let bestVolume = 0
+          for (const row of historicalSets) {
+            if (row.weight != null && row.reps != null && row.reps > 0) {
+              bestEpley  = Math.max(bestEpley,  epley(row.weight, row.reps))
+              bestVolume = Math.max(bestVolume, row.weight * row.reps)
+            }
+          }
+
+          isPR       = newEpley  > bestEpley
+          isPRVolume = newVolume > bestVolume
+        }
+      }
+      // ── End PR detection ────────────────────────────────────────────────
+
       const [newSet] = await db
         .insert(sets)
-        .values({ ...body, sessionExerciseId })
+        .values({ ...body, sessionExerciseId, isPR, isPRVolume })
         .returning()
 
       if (!newSet) {

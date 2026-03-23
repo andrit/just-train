@@ -627,17 +627,103 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v2.1.0 | Session planning — "plan the day" workflow | ✅ |
 | v2.2.0 | Sessions view — history list | ✅ |
 | v2.3.0 | Nav event bus — debouncing, audit log, RxJS-ready (full RxJS deferred to v3.1.0) | ✅ |
-| **v2.4.0** | **Offline sync — write queue, prefetch, banner** | ✅ Current |
+| v2.4.0 | Offline sync — write queue, prefetch, banner | ✅ |
+| **v2.5.0** | **UI/UX polish — execution layout, PR system, gamification foundations** | 🔨 Current |
+| v2.6.0 | ESLint + code quality | 🔜 |
+| v2.7.0 | Post-session wrap-up + milestone/badge system | 🔜 |
+| v2.8.0 | Camera / video capture + coach challenges | 🔜 |
+| v2.9.0 | Leaderboards + weekly quests + social share | 🔜 |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 | v3.1.0 | Observable navigation — RxJS swap inside navService | 🔜 |
 
 ---
 
+## v2.5.0 Spec — UI/UX Polish + Gamification Foundations
+
+### Session execution layout — WorkoutBlock redesign
+
+**The change:** exercises within a block navigate horizontally (same snap-scroll pattern as blocks), not vertically stacked. The set spine stays vertical within the current exercise only.
+
+**Navigation model:**
+```
+← Block 1 | Block 2 | Block 3 →        top dot row — block position
+           ← Ex 1 | Ex 2 | Ex 3 →      mid dot row — exercise position within block
+                    Set 1               vertical spine — sets within current exercise
+                    Set 2
+                    Set 3  ← active hero
+```
+
+**Peek cards (tappable):**
+- Left peek — previous exercise, shows name + final logged value (e.g. "Bench · 100×8"). Tap to jump back.
+- Right peek — next exercise, shows name + targets (e.g. "OHP · 3×8"). Tap to jump ahead.
+- Swipe gesture also navigates (existing snap-scroll behaviour)
+- Opacity 0.5 (past) and 0.4 (future) to visually recede
+
+**Footer bar:**
+- Single full-width bar, rounded with the card, not floating buttons
+- Two carved sections divided by a hairline: "Add exercise" (left, primary weight) | "New block" (right, secondary weight)
+- After set log: footer temporarily replaced by rest timer bar ("Rest 1:30 · Skip")
+- After rest timer ends: footer restores to Add exercise / New block
+
+**PR flash sequence (on set log):**
+1. Log set tapped
+2. If new PR detected: PR flash fills log area (~1.5s) — "New PR · 105kg × 5" amber treatment
+3. Simultaneously: rest timer slides into footer bar
+4. Flash fades, PR chip appears on the logged set row in the spine (amber pill "PR")
+5. Rest timer counts down in footer
+6. Timer ends: footer restores to Add exercise / New block
+
+**Overview mode (plan builder) — unchanged:**
+- Vertical exercise list, targets shown inline, no set spine
+
+---
+
+### PR system — data + UI
+
+**Schema addition:** `isPR` and `isPRVolume` boolean columns on `sets` table.
+
+**Detection at log time (backend):**
+- Query historical max 1RM estimate for this client + exercise
+- Epley formula: `weight × (1 + reps / 30)`
+- If new set's Epley score exceeds all prior sets → `isPR = true`
+- Also check max volume (weight × reps) → `isPRVolume = true`
+- Both tracked independently, both can be true on same set
+
+**Where PRs surface:**
+- Live session: PR flash + persistent chip on set row
+- Session history detail: PR chip inline on set row
+- Session history: "PRs only" filter — every PR grouped by exercise
+- Client profile: "Personal Bests" section — best 1RM + best volume per exercise with ⓘ tooltips
+
+**ⓘ tooltips:**
+- 1RM: *"Estimated max single rep using the Epley formula: weight × (1 + reps / 30)"*
+- Volume: *"Highest single-set volume: weight × reps"*
+
+---
+
+### Gamification foundations — client profile
+
+**Streaks:** current streak (consecutive weeks ≥1 session) + longest ever. On KPI hero + monthly email.
+
+**Consistency score:** rolling 4-week score (sessions completed ÷ targeted × 100). Requires `targetSessionsPerWeek` on client (default 3). Replaces/augments at-risk indicator.
+
+**Personal Bests section:** tabbed list per exercise — best 1RM estimate + best volume + dates. Filterable by workout type. ⓘ on column headers.
+
+---
+
+### Code quality — DRY pass
+
+**`lib/exerciseLabels.ts`** — consolidates WORKOUT_TYPE_VARIANTS, WORKOUT_TYPE_LABELS, WORKOUT_TYPE_COLORS, EQUIPMENT_LABELS, DIFFICULTY_COLORS (currently duplicated across 4+ files).
+
+**`lib/formatters.ts`** — consolidates formatDate, formatDuration, formatElapsed, formatEpley, formatVolume (currently duplicated across 4+ files).
+
+---
+
 ## Current State (v2.4.0)
 
-All core training workflows are complete and offline-capable. The app works end-to-end for a trainer managing multiple clients through full training days including planned sessions, live execution, set logging, and session review. Writes are queued when offline and synced on reconnect. The exercise library is seeded with 109 exercises across all workout types.
+All core training workflows complete and offline-capable. The app covers the full trainer day: plan sessions for multiple clients, execute live with set logging, review history, all working offline with sync on reconnect.
 
-### Next: v3.0.0 — SaaS / Stripe billing gates
+### Active: v2.5.0 — UI/UX Polish + Gamification Foundations
 
 **ExercisesPage** — browsable library:
 - Filter by workout type (resistance / cardio / calisthenics / stretching / cooldown)

@@ -120,6 +120,12 @@ export const trainers = pgTable('trainers', {
   // e.g. 'America/New_York', 'Europe/London', 'Australia/Sydney'
   timezone:            text('timezone').notNull().default('UTC'),
 
+  // v2.5.0: PR notification type during live sessions
+  // '1rm'    — flash/chip only when Epley 1RM estimate is a new best (default)
+  // 'volume' — flash/chip only when weight × reps is a new best
+  // 'both'   — flash/chip for either type of PR
+  prNotifyType:        text('pr_notify_type').notNull().default('1rm'),
+
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })

@@ -31,10 +31,11 @@ interface WorkoutBlockProps {
   weightUnit: string
   layout:     'horizontal' | 'vertical'
   onSetLogged: (restSeconds?: number) => void
+  onAddBlock?: () => void   // opens AddBlockSheet from within the block
 }
 
 export function WorkoutBlock({
-  workout, sessionId, weightUnit, layout, onSetLogged,
+  workout, sessionId, weightUnit, layout, onSetLogged, onAddBlock,
 }: WorkoutBlockProps): React.JSX.Element {
   const [exerciseIndex,   setExerciseIndex]   = useState(0)
   const [addExerciseOpen, setAddExerciseOpen] = useState(false)
@@ -206,6 +207,27 @@ export function WorkoutBlock({
             </svg>
             Add Exercise
           </button>
+
+          {/* New Block — only shown when onAddBlock is provided (live session) */}
+          {onAddBlock && (
+            <button
+              type="button"
+              onClick={onAddBlock}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm',
+                'border border-surface-border text-gray-500',
+                'hover:border-brand-highlight/40 hover:text-gray-300',
+                interactions.button.base,
+                interactions.button.press,
+              )}
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                <rect x="2" y="3" width="5" height="10" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                <rect x="9" y="3" width="5" height="10" rx="1" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+              New Block
+            </button>
+          )}
         </div>
       </div>
 

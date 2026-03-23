@@ -20,7 +20,7 @@
 //                    swapped for an RxJS Subject. This file and all
 //                    call sites are unchanged.
 //
-// UPGRADING TO RxJS (v2.3.0):
+// UPGRADING TO RxJS (v3.1.0):
 //   1. Replace navEventBus.ts with an RxJS Subject implementation
 //   2. Update the two import lines below if needed
 //   3. Done — no changes anywhere else in the codebase

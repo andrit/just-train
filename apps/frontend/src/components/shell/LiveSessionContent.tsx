@@ -259,6 +259,7 @@ export default function LiveSessionContent({
                     weightUnit={weightUnit}
                     layout="horizontal"
                     onSetLogged={handleSetLogged}
+                    onAddBlock={() => setAddBlockOpen(true)}
                   />
                 </div>
               ))}
@@ -274,13 +275,14 @@ export default function LiveSessionContent({
                 weightUnit={weightUnit}
                 layout="vertical"
                 onSetLogged={handleSetLogged}
+                onAddBlock={() => setAddBlockOpen(true)}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Add block FAB */}
+      {/* Add Block FAB — labelled so its purpose is clear */}
       {workouts.length > 0 && (
         <button
           type="button"
@@ -288,17 +290,17 @@ export default function LiveSessionContent({
           aria-label="Add workout block"
           className={cn(
             'fixed bottom-6 right-4 z-30',
-            'w-12 h-12 rounded-full',
+            'flex items-center gap-2 px-4 h-12 rounded-full',
             'bg-brand-highlight text-white shadow-lg',
-            'flex items-center justify-center',
             interactions.button.base,
             interactions.fab.hover,
             interactions.button.press,
           )}
         >
-          <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
+          <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0">
             <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
+          <span className="text-sm font-medium pr-1">Add Block</span>
         </button>
       )}
 

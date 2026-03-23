@@ -288,20 +288,26 @@ export function AddExerciseSheet({
   const addExercise                    = useAddExercise()
   const createExercise                 = useCreateExercise()
 
+  // Pre-filter by the block's workout type — trainer can override with "All"
+  const [showAllTypes, setShowAllTypes] = useState(false)
+
   const filtered = useMemo(() => {
     if (!exercises) return []
     const q = search.trim().toLowerCase()
-    if (!q) return exercises.slice(0, 20)
-    return exercises.filter(e =>
+    const typeFiltered = showAllTypes
+      ? exercises
+      : exercises.filter(e => e.workoutType === workoutType)
+    if (!q) return typeFiltered.slice(0, 30)
+    return typeFiltered.filter(e =>
       e.name.toLowerCase().includes(q) ||
       (e.bodyPart?.name ?? '').toLowerCase().includes(q)
     )
-  }, [exercises, search])
+  }, [exercises, search, workoutType, showAllTypes])
 
   const showQuickAdd = search.trim().length > 1 && filtered.length === 0
 
   const handleClose = (): void => {
-    setSearch(''); setSelected(null); setIsConfirming(false)
+    setSearch(''); setSelected(null); setIsConfirming(false); setShowAllTypes(false)
     onClose()
   }
 
@@ -396,6 +402,33 @@ export function AddExerciseSheet({
               autoFocus
               className="w-full field text-sm placeholder-gray-600"
             />
+            {/* Type filter — shows which type is active, tap All to expand */}
+            <div className="flex gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => setShowAllTypes(false)}
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize',
+                  !showAllTypes
+                    ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                    : 'border-surface-border text-gray-500 hover:text-gray-300',
+                )}
+              >
+                {workoutType}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAllTypes(true)}
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-medium border transition-all',
+                  showAllTypes
+                    ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                    : 'border-surface-border text-gray-500 hover:text-gray-300',
+                )}
+              >
+                All types
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-1">

@@ -258,6 +258,7 @@ export const EndSession_Modal: StoryObj = {
             onConfirm={(scores) => { console.log('Scores:', scores); setOpen(false) }}
             onCancel={() => setOpen(false)}
             loading={false}
+            hasWork={true}
           />
         </div>
       )

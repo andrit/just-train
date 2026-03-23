@@ -8,6 +8,8 @@ import { cn }              from '@/lib/cn'
 import { useSessionStore } from '@/store/sessionStore'
 import { useOverlayStore } from '@/store/overlayStore'
 import { useAuthStore }    from '@/store/authStore'
+import { useSyncStatus }   from '@/hooks/useSyncStatus'
+import { OfflineBanner }   from '@/components/shell/OfflineBanner'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -44,7 +46,7 @@ const MOBILE_NAV_ITEMS: NavItem[] = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
-  const pendingSyncCount = 0  // Phase 8: offline sync count — not yet implemented
+  const { pending: pendingSyncCount } = useSyncStatus()
   const trainer          = useAuthStore((s) => s.trainer)
   const { state: overlayState } = useOverlayStore()
   const navHidden = overlayState === 'expanded'
@@ -133,6 +135,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
 
       {/* ── Main content ─────────────────────────────────────────────── */}
       <main className="flex-1 pb-20 md:pb-0 min-h-screen overflow-y-auto">
+        <OfflineBanner />
         {children}
       </main>
 

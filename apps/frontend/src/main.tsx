@@ -14,35 +14,30 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import App from './App'
 import './index.css'
+import { syncService, SYNC_COMPLETE_EVENT } from './services/syncService'
 
-// ------------------------------------------------------------
-// TanStack Query client configuration
-//
-// The QueryClient manages the cache for all server state.
-// defaultOptions apply to every query/mutation in the app
-// unless overridden at the individual query level.
-// ------------------------------------------------------------
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // How long data is considered fresh before a background refetch
-      staleTime: 1000 * 60 * 5, // 5 minutes
-
-      // How long inactive data stays in the cache before being garbage collected
-      gcTime: 1000 * 60 * 30,   // 30 minutes
-
-      // Retry failed requests twice before showing an error
-      retry: 2,
-
-      // Don't refetch when the user switches back to the browser tab
-      // (relevant for workout tracking — we don't want unexpected refreshes mid-session)
+      staleTime: 1000 * 60 * 5,
+      gcTime:    1000 * 60 * 30,
+      retry:     2,
       refetchOnWindowFocus: false,
     },
     mutations: {
-      // Retry failed mutations once (e.g. if a set-recording request fails)
       retry: 1,
     },
   },
+})
+
+// Initialise offline sync — registers online/offline listeners + prefetch
+syncService.init()
+
+// When the queue flushes successfully, invalidate all session queries
+// so the UI reflects the newly synced data
+window.addEventListener(SYNC_COMPLETE_EVENT, () => {
+  queryClient.invalidateQueries({ queryKey: ['sessions'] })
+  queryClient.invalidateQueries({ queryKey: ['clients'] })
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

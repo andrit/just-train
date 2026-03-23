@@ -594,7 +594,7 @@ sync_log table replay, conflict resolution strategy, sync status indicator in na
 **What:** Stripe integration, billing gate enforcement (free/pro/studio limits),
 subscription management UI, trainer_usage_monthly Stripe meter sync,
 client portal magic link (read-only report access), multi-trainer studio accounts.
-**Versions:** v2.0.0
+**Versions:** v2.4.0
 **Status:** 🔜 Not started
 
 ---
@@ -622,19 +622,22 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v1.7.0 | Monthly reports (Resend email) | ✅ |
 | v1.7.5 | Redis + BullMQ — scheduled reports + at-risk alerts | ✅ |
 | v1.8.0 | Live session: add blocks, exercises, set logging, session store | ✅ |
-| **v1.9.0** | **Exercise library UI** | 🔨 Current |
-| v2.0.0 | SPA refactor — panels, overlays, persistent session | 🔜 |
-| v2.1.0 | Session planning — "plan the day" workflow | 🔜 |
-| v2.2.0 | Sessions view — history list | 🔜 |
-| v2.3.0 | Observable navigation service (RxJS) | ⏸ Deferred — debounce + audit log shipped in navEventBus.ts |
-| v2.4.0 | Offline sync — IndexedDB + Workbox | 🔜 |
+| v1.9.0 | Exercise library UI | ✅ |
+| v2.0.0 | SPA refactor — panels, overlays, persistent session | ✅ |
+| v2.1.0 | Session planning — "plan the day" workflow | ✅ |
+| v2.2.0 | Sessions view — history list | ✅ |
+| v2.3.0 | Nav event bus — debouncing, audit log, RxJS-ready (full RxJS deferred to v3.1.0) | ✅ |
+| **v2.4.0** | **Offline sync — write queue, prefetch, banner** | ✅ Current |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
+| v3.1.0 | Observable navigation — RxJS swap inside navService | 🔜 |
 
 ---
 
-## What's Next (v1.9.0) — Exercise Library UI
+## Current State (v2.4.0)
 
-The exercise library data is seeded (109 exercises). The page is a stub. Build it out.
+All core training workflows are complete and offline-capable. The app works end-to-end for a trainer managing multiple clients through full training days including planned sessions, live execution, set logging, and session review. Writes are queued when offline and synced on reconnect. The exercise library is seeded with 109 exercises across all workout types.
+
+### Next: v3.0.0 — SaaS / Stripe billing gates
 
 **ExercisesPage** — browsable library:
 - Filter by workout type (resistance / cardio / calisthenics / stretching / cooldown)

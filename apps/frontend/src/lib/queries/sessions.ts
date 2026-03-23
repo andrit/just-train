@@ -19,7 +19,8 @@ import {
   type UseQueryResult,
   type UseMutationResult,
 } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api'
+import { apiClient }        from '@/lib/api'
+import { offlineAwareApi }  from '@/lib/offlineAwareApi'
 import type {
   SessionDetailResponse,
   SessionListResponse,
@@ -156,10 +157,11 @@ export function useEndSession(): UseMutationResult<SessionSummaryResponse, Error
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, ...body }) =>
-      apiClient.patch<SessionSummaryResponse>(`/sessions/${id}`, {
-        ...body,
-        status: 'completed',
-      }),
+      offlineAwareApi.patch<SessionSummaryResponse>(
+        `/sessions/${id}`,
+        { ...body, status: 'completed', endTime: new Date().toISOString() },
+        `End session`,
+      ),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(data.id) })
       qc.invalidateQueries({ queryKey: sessionKeys.all() })
@@ -180,7 +182,11 @@ export function useAddWorkout(): UseMutationResult<WorkoutResponse, Error, AddWo
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ sessionId, ...body }) =>
-      apiClient.post<WorkoutResponse>(`/sessions/${sessionId}/workouts`, body),
+      offlineAwareApi.post<WorkoutResponse>(
+        `/sessions/${sessionId}/workouts`,
+        body,
+        `Add ${(body as any).workoutType ?? ''} workout block`,
+      ),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
     },
@@ -207,7 +213,11 @@ export function useAddExercise(): UseMutationResult<SessionExerciseResponse, Err
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ workoutId, sessionId: _sessionId, ...body }) =>
-      apiClient.post<SessionExerciseResponse>(`/workouts/${workoutId}/exercises`, body),
+      offlineAwareApi.post<SessionExerciseResponse>(
+        `/workouts/${workoutId}/exercises`,
+        body,
+        `Add exercise to workout`,
+      ),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
     },
@@ -234,7 +244,11 @@ export function useLogSet(): UseMutationResult<SetResponse, Error, LogSetInput> 
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ sessionExerciseId, sessionId: _sid, ...body }) =>
-      apiClient.post<SetResponse>(`/session-exercises/${sessionExerciseId}/sets`, body),
+      offlineAwareApi.post<SetResponse>(
+        `/session-exercises/${sessionExerciseId}/sets`,
+        body,
+        `Log set — set ${body.setNumber}`,
+      ),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
     },

@@ -115,10 +115,11 @@ What: Lightweight end-of-session flow:
 When: v1.9.x — alongside exercise library UI
 What: Indicator on Exercises page for isDraft=true exercises. Click to enrich inline. Currently invisible to the trainer after creation.
 
-### Offline Sync (v2.4.0)
-When: After SPA refactor
-What: IndexedDB + Workbox service worker. Sets logged offline queue to sync when connectivity returns. BullMQ workers already handle server-side processing. Frontend queue (pendingSets) is stubbed in sessionStore.
-Complexity: High. Do after SPA architecture is stable.
+### Offline Sync — IndexedDB upgrade path (v3.x)
+When: If localStorage proves insufficient (unlikely given data volumes)
+What: Swap `services/offlineQueue.ts` implementation from localStorage to IndexedDB. The `OfflineQueue` interface is already defined — it's a one-file change. The Background Sync API (writes replay while app is closed) would also become available with IndexedDB + service worker.
+Why not now: localStorage is sufficient for the data volumes involved. The interface is already abstracted for trivial upgrade.
+Shipped in v2.4.0: Write queue (localStorage), connectivity detection, prefetch on load, offline banner, sync-on-reconnect. All critical writes (set logging, exercise additions, session end) are offline-aware.
 
 ### Session Metrics — Duration, Cardio Fields
 When: Session planning build (v2.1.0)
@@ -128,11 +129,10 @@ What: Distance, time, pace tracking for cardio. Time-based holds for stretching 
 
 ## SPA Architecture (v2.0.0 sequence)
 
-### Observable Navigation Service (v2.3.0)
-When: After SPA refactor ships (v2.0.0)
-What: Replace React Router location-state navigation with RxJS observable stream. Every panel open/close is a stream emission. Solves rapid open/close race conditions, gives single auditable navigation log.
-Why deferred from v2.0.0: SPA refactor + observable layer simultaneously = too many moving parts, no working increments.
-How to migrate: Nav is abstracted as a service from day one in v2.0.0. Swap the underlying implementation in v2.3.0 without touching call sites.
+### Observable Navigation Service — full RxJS (v3.1.0)
+When: After v3.0.0 SaaS ships
+What: Replace the `NavEventBusImpl` class in `services/navEventBus.ts` with an RxJS `Subject`. The public interface (`.next()`, `.subscribe()`, `.getValue()`) is identical — it's a one-file swap. All call sites in `navService.ts` and `useNavLog.ts` are unchanged.
+Shipped in v2.3.0: Debouncing per action (300ms panel opens, 150ms close), in-memory audit log (200 entries), dev console logging, `useNavLog` hook for subscribers.
 
 ### Android Back Button Edge Cases
 When: Post-observable migration

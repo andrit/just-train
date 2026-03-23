@@ -5,7 +5,88 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [v1.8.0] — Live Session: Add Blocks + Exercises
+## [v2.4.0] — Offline Sync
+
+### Added
+- `services/offlineQueue.ts` — persistent write queue behind a storage-agnostic interface. localStorage now, IndexedDB-ready. Implements `.enqueue()`, `.getAll()`, `.remove()`, `.clear()`, `.size()`. Swap one export line to migrate to IndexedDB in v3.x.
+- `services/syncService.ts` — two responsibilities: (1) flush the offline queue on reconnect via `window 'online'` event, (2) prefetch clients, planned sessions, and exercise library on app load to warm Workbox cache. Emits `CustomEvent` for status updates and query invalidation.
+- `lib/offlineAwareApi.ts` — wraps `apiClient` for mutating requests. If online, attempts normally. If offline or network error, queues the write and returns a stub. GET requests are never queued — handled by Workbox cache.
+- `hooks/useOnlineStatus.ts` — reactive `boolean` from `navigator.onLine` + `online`/`offline` events.
+- `hooks/useSyncStatus.ts` — reactive `{ pending, status, flush }` from `syncService` CustomEvents.
+- `components/shell/OfflineBanner.tsx` — contextual banner: offline (queued count), syncing (progress), error (tap to retry), hidden when idle online.
+- `main.tsx` — `syncService.init()` called on bootstrap; `SYNC_COMPLETE_EVENT` listener invalidates session + client queries after successful flush.
+
+### Changed
+- `useLogSet`, `useAddExercise`, `useAddWorkout`, `useEndSession` mutations now use `offlineAwareApi` — all critical session writes are offline-tolerant.
+- `Layout.tsx` — `OfflineBanner` mounted above main content; `pendingSyncCount` wired to real `useSyncStatus` value (was hardcoded 0).
+
+### Offline scenario covered
+Trainer opens app on gym WiFi → prefetch runs (clients, sessions, exercises cached) → WiFi drops → trainer completes all 5 sessions, logging sets throughout → writes queue locally → WiFi restored → queue flushes automatically → queries invalidated → UI reflects synced state. App open required for sync (background sync deferred to IndexedDB upgrade).
+
+---
+
+## [v2.3.0] — Nav Event Bus
+
+### Added
+- `services/navEventBus.ts` — internal event bus mirroring RxJS Subject API (`.next()`, `.subscribe()`, `.getValue()`). Debounces rapid navigation per action (300ms panel opens, 150ms close, 200ms tab switches). In-memory audit log capped at 200 entries. Full RxJS swap deferred to v3.1.0 — replace this file only.
+- `hooks/useNavLog.ts` — subscribe to nav events or read the audit log from any component.
+- `services/navService.ts` — every navigation call now emits through `navEventBus` before executing React Router navigate.
+
+### Fixed
+- Exercise search in `AddExerciseSheet` pre-filters by the block's workout type (cardio block → cardio exercises). "All types" chip to override.
+- `WorkoutBlock` — "New Block" button added alongside "Add Exercise" so multiple blocks per session is discoverable. FAB labelled "Add Block" (was unlabelled `+`).
+
+---
+
+## [v2.2.0] — Sessions View
+
+### Added
+- `SessionsPage` — full rebuild with sticky header, search, status tabs (All / Planned / Active / Done), client filter chips (trainer mode). Sessions grouped by date label. Context-aware cards: planned shows Edit + Start, active shows Resume, completed is tappable.
+- `SessionHistoryPanel` — slide-in detail view: stats row (duration, sets, volume), exercise breakdown with per-set hit/miss vs targets, subjective scores, notes.
+- `AppShell` — `sessionHistory` panel wired.
+
+### Fixed
+- `SessionCard` outer element changed from `<button>` to `<div role="button">` — fixes nested button DOM warning.
+- `handleResume` registers session in `activeSessions` store before expanding overlay — fixes Resume doing nothing when store was cleared.
+- `EndSessionModal` — `hasWork` prop added. Empty sessions (no logged sets) show "Discard / End Anyway" instead of the score sliders.
+- `SessionPlanPanel` — "Save Plan" button added. Plan saves automatically on first block add; "not saved yet / saved" indicator in subheading. Empty state copy clarified.
+
+---
+
+## [v2.1.0] — Session Planning
+
+### Added
+- `sessionStore` extended with `plannedSessions: Record<sessionId, PlannedSession>` alongside `activeSessions`.
+- `usePlannedSessions`, `useExecuteSession`, `useUpdateSessionName`, `useDiscardSession` query hooks.
+- `SessionPlanPanel` — plan builder: lazy DB creation (on first block add), client selector, session naming, workout blocks via existing `WorkoutBlock`/`AddBlockSheet`, Execute button transitions `planned → in_progress` and expands overlay, Discard with confirm.
+- `SessionLauncherSheet` — session launcher as a `BottomSheet`, replaces `/session/new` page for SPA flow.
+- `navService` — `openSessionPlan` added, `sessionPlan` panel type added.
+- `SessionsPage` — initial planned sessions view + recent completed sessions list.
+- `AppShell` — `SessionPlanPanel` and `SessionLauncherSheet` wired.
+- `DELETE /sessions/:id` backend route — hard deletes session + all children via CASCADE. Trainer-scoped.
+
+### Fixed (hotfix)
+- `AddExerciseSheet` / `ExerciseBlock` — workout-type-aware target inputs and set logging. Resistance: Sets × Reps × Weight. Cardio: Rounds + Distance/Time/Intensity picker. Calisthenics: Sets × Reps or Sets × Time toggle. Stretching: Sets × Hold time. Cooldown: Duration only.
+- `LiveSessionContent` — discard flow via `⋯` menu in header (inline confirm, no modal). Discards session, clears store, hides overlay.
+- `EndSessionModal` — `hasWork` prop; empty sessions offer Discard/End Anyway.
+
+---
+
+## [v2.0.0] — SPA Refactor
+
+### Added
+- `services/navService.ts` — all navigation through `useNav()`. React Router now, RxJS-ready.
+- `store/overlayStore.ts` — overlay UI state: `hidden / minimised / expanded`.
+- `components/shell/LiveSessionContent.tsx` — session UI extracted from page, used by overlay + page.
+- `components/shell/ActiveSessionOverlay.tsx` — Spotify-model persistent overlay. Auto-expands on session start, swipe-down to minimise, animated pill above nav, live elapsed timer, multi-session switcher.
+- `components/shell/ClientProfilePanel.tsx` — client profile as slide-in panel.
+- `components/shell/AppShell.tsx` — SPA root: reads `location.state` for panel open/close, mounts all panels + overlay.
+- `ClientCard`, `ClientsPage` — converted from `<Link>` to `useNav().openClientProfile()`.
+- `Layout.tsx` — bottom nav hides on overlay expand.
+- `LiveSessionPage` — thin wrapper delegating to `LiveSessionContent`, auto-expands overlay.
+- `SessionLauncherPage` — calls `expand() + navigate(-1)` instead of routing to `/session/:id`.
+
+
 
 ### Added
 - `BottomSheet` component — mobile-first slide-up overlay with backdrop, drag handle, Escape key dismiss, body scroll lock

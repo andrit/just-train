@@ -10,7 +10,7 @@ A mobile-first PWA for fitness trainers and athletes to plan sessions, track per
 |---|---|
 | Frontend | React 18, Vite, TypeScript, Tailwind CSS |
 | State | TanStack Query (server), Zustand (client, persisted) |
-| PWA | vite-plugin-pwa, Workbox (Phase offline sync) |
+| PWA | vite-plugin-pwa, Workbox, offline write queue (localStorage → IndexedDB-ready) |
 | Backend | Fastify, TypeScript |
 | ORM | Drizzle + drizzle-kit |
 | Validation | Zod (shared between frontend + backend) |
@@ -163,11 +163,13 @@ GitHub Actions runs on every push to `main`:
 | v1.7.5 | BullMQ + Upstash Redis — scheduled reports + at-risk alerts | ✅ |
 | v1.8.0 | Live session: add blocks, exercises, set logging, session store | ✅ |
 | **v1.9.0** | **Exercise library UI** | 🔨 Current |
-| v2.0.0 | SPA refactor — panels, overlays, persistent session | 🔜 |
-| v2.1.0 | Session planning — "plan the day" workflow | 🔜 |
-| v2.2.0 | Sessions view — history list | 🔜 |
-| v2.3.0 | Observable navigation service (RxJS) | 🔜 |
-| v2.4.0 | Offline sync — IndexedDB + Workbox | 🔜 |
+| v2.0.0 | SPA refactor — panels, overlays, persistent session | ✅ |
+| v2.1.0 | Session planning — "plan the day" workflow | ✅ |
+| v2.2.0 | Sessions view — history list | ✅ |
+| v2.3.0 | Nav event bus — debouncing, audit log, RxJS-ready | ✅ |
+| v2.4.0 | Offline sync — write queue, prefetch, banner | ✅ |
+| v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
+| v3.1.0 | Observable navigation — full RxJS swap | 🔜 |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 
 ---

@@ -41,7 +41,7 @@ export interface Preferences {
   // 'volume' — weight × reps new best
   // 'both'   — either type
   prNotifyType:        '1rm' | 'volume' | 'both'
-  restDurationSeconds: 30 | 60 | 90
+  restDurationSeconds: number
 }
 
 export function usePreferences(): Preferences & {
@@ -66,7 +66,7 @@ export function usePreferences(): Preferences & {
     widgetOrder:         parseWidgetProgression(trainer?.widgetProgression, mode),
     trainerMode:         mode,
     prNotifyType:        (trainer?.prNotifyType as Preferences['prNotifyType']) ?? '1rm',
-    restDurationSeconds: ((trainer?.restDurationSeconds ?? 90) as 30 | 60 | 90),
+    restDurationSeconds: trainer?.restDurationSeconds ?? 90,
   }
 
   const updatePreference = useCallback(async <K extends keyof UpdateablePrefs>(
@@ -101,4 +101,5 @@ interface UpdateablePrefs {
   timezone:            string
   widgetProgression:   string | null
   prNotifyType:        '1rm' | 'volume' | 'both'
+  restDurationSeconds: number
 }

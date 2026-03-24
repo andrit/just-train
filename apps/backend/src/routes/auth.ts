@@ -105,6 +105,7 @@ function serializeTrainer(
     autoReportEnabled:    trainer.autoReportEnabled,
     timezone:             trainer.timezone,
     prNotifyType:         (trainer.prNotifyType ?? '1rm') as '1rm' | 'volume' | 'both',
+    restDurationSeconds:  trainer.restDurationSeconds ?? 90,
     createdAt:            trainer.createdAt.toISOString(),
     updatedAt:            trainer.updatedAt.toISOString(),
   }

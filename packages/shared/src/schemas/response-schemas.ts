@@ -115,6 +115,8 @@ export const TrainerResponseSchema = z.object({
     .describe('IANA timezone string e.g. America/New_York — reports and alerts send at 08:00 local time'),
   prNotifyType: z.enum(['1rm', 'volume', 'both']).default('1rm')
     .describe('Which PR type triggers in-session flash/badge. 1rm = Epley estimate, volume = weight×reps, both = either'),
+  restDurationSeconds: z.number().int().default(90)
+    .describe('Default rest timer duration after a logged set. Options: 30 | 60 | 90'),
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

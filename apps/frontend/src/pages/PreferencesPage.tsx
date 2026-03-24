@@ -593,6 +593,45 @@ export default function PreferencesPage(): React.JSX.Element {
             )}
           </div>
 
+          {/* Rest timer duration */}
+          <div className="card p-4">
+            <div className="mb-3">
+              <p className="text-sm font-medium text-gray-200">Rest timer duration</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                How long the rest timer runs after logging a set
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {([30, 60, 90] as const).map((seconds) => {
+                const current = trainer?.restDurationSeconds ?? 90
+                const label = seconds === 60 ? '1 min' : seconds === 90 ? '1:30' : '30s'
+                return (
+                  <button
+                    key={seconds}
+                    type="button"
+                    onClick={() => save('restDurationSeconds', seconds)}
+                    className={cn(
+                      'flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all duration-150',
+                      current === seconds
+                        ? 'border-brand-highlight/50 bg-brand-highlight/10 text-brand-highlight'
+                        : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
+                      interactions.button.base,
+                      interactions.button.press,
+                    )}
+                  >
+                    {current === seconds && <span className="mr-1 text-brand-highlight">✓</span>}
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+            {saving.restDurationSeconds && (
+              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                <Spinner size="sm" /> Saving…
+              </p>
+            )}
+          </div>
+
           {/* Auto-send monthly reports */}
           <div className="card p-4">
             <div className="flex items-center justify-between">

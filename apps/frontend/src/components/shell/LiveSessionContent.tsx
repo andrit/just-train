@@ -39,7 +39,7 @@ export default function LiveSessionContent({
 }: LiveSessionContentProps): React.JSX.Element {
   const navigate          = useNavigate()
   const trainer           = useAuthStore((s) => s.trainer)
-  const { sessionLayout } = usePreferences()
+  const { sessionLayout, restDurationSeconds } = usePreferences()
   const { fire }          = useUXEvent()
   const restTimer         = useRestTimer()
 
@@ -55,7 +55,7 @@ export default function LiveSessionContent({
 
   const weightUnit = trainer?.weightUnitPreference ?? 'lbs'
 
-  const handleSetLogged = (restSeconds = 90): void => {
+  const handleSetLogged = (restSeconds = restDurationSeconds): void => {
     restTimer.start(restSeconds)
   }
 
@@ -254,6 +254,7 @@ export default function LiveSessionContent({
                     layout="horizontal"
                     onSetLogged={handleSetLogged}
                     onAddBlock={() => setAddBlockOpen(true)}
+                    restDurationSeconds={restDurationSeconds}
                     restTimer={restTimer}
                   />
                 </div>
@@ -271,6 +272,7 @@ export default function LiveSessionContent({
                 layout="vertical"
                 onSetLogged={handleSetLogged}
                 onAddBlock={() => setAddBlockOpen(true)}
+                restDurationSeconds={restDurationSeconds}
                 restTimer={restTimer}
               />
             ))}

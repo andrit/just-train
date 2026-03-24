@@ -427,16 +427,17 @@ interface LogData {
 // ── Exercise block ────────────────────────────────────────────────────────────
 
 interface ExerciseBlockProps {
-  sessionExercise: SessionExerciseResponse
-  sessionId:       string
-  workoutId:       string
-  workoutType:     string
-  weightUnit:      string
-  onSetLogged:     (restSeconds?: number, pr?: { isPR: boolean; isPRVolume: boolean; weight?: number | null; reps?: number | null }) => void
+  sessionExercise:     SessionExerciseResponse
+  sessionId:           string
+  workoutId:           string
+  workoutType:         string
+  weightUnit:          string
+  restDurationSeconds?: number
+  onSetLogged:         (restSeconds?: number, pr?: { isPR: boolean; isPRVolume: boolean; weight?: number | null; reps?: number | null }) => void
 }
 
 export function ExerciseBlock({
-  sessionExercise, sessionId, workoutId, workoutType, weightUnit, onSetLogged,
+  sessionExercise, sessionId, workoutId, workoutType, weightUnit, restDurationSeconds = 90, onSetLogged,
 }: ExerciseBlockProps): React.JSX.Element {
   const logSet         = useLogSet()
   const deleteExercise = useDeleteSessionExercise()
@@ -462,7 +463,7 @@ export function ExerciseBlock({
       },
       {
         onSuccess: (newSet) => {
-          onSetLogged(90, {
+          onSetLogged(restDurationSeconds, {
             isPR:       newSet?.isPR       ?? false,
             isPRVolume: newSet?.isPRVolume ?? false,
             weight:     data.weight,

@@ -126,6 +126,10 @@ export const trainers = pgTable('trainers', {
   // 'both'   — flash/chip for either type of PR
   prNotifyType:        text('pr_notify_type').notNull().default('1rm'),
 
+  // v2.6.0: default rest timer duration shown after a logged set
+  // 30 | 60 | 90 seconds. Default 90.
+  restDurationSeconds: integer('rest_duration_seconds').notNull().default(90),
+
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })

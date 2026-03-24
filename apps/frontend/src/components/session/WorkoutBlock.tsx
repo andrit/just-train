@@ -30,13 +30,13 @@ import { useDeleteWorkout }              from '@/lib/queries/sessions'
 import type { WorkoutResponse }          from '@trainer-app/shared'
 
 interface WorkoutBlockProps {
-  workout:     WorkoutResponse
-  sessionId:   string
-  weightUnit:  string
-  layout:      'horizontal' | 'vertical'
-  onSetLogged: (restSeconds?: number) => void
-  onAddBlock?: () => void
-  /** Rest timer state — passed from LiveSessionContent */
+  workout:            WorkoutResponse
+  sessionId:          string
+  weightUnit:         string
+  layout:             'horizontal' | 'vertical'
+  onSetLogged:        (restSeconds?: number) => void
+  onAddBlock?:        () => void
+  restDurationSeconds?: number
   restTimer?: {
     isRunning:  boolean
     remaining:  number
@@ -45,7 +45,7 @@ interface WorkoutBlockProps {
 }
 
 export function WorkoutBlock({
-  workout, sessionId, weightUnit, layout, onSetLogged, onAddBlock, restTimer,
+  workout, sessionId, weightUnit, layout, onSetLogged, onAddBlock, restDurationSeconds = 90, restTimer,
 }: WorkoutBlockProps): React.JSX.Element {
   const [exerciseIndex,   setExerciseIndex]   = useState(0)
   const [addExerciseOpen, setAddExerciseOpen] = useState(false)
@@ -77,7 +77,7 @@ export function WorkoutBlock({
   }
 
   // PR flash — shown for ~1.5s then fades, chip stays on set row
-  const handleSetLoggedWithPR = (restSeconds = 90, pr?: { isPR: boolean; isPRVolume: boolean; weight?: number | null; reps?: number | null }): void => {
+  const handleSetLoggedWithPR = (restSeconds = restDurationSeconds, pr?: { isPR: boolean; isPRVolume: boolean; weight?: number | null; reps?: number | null }): void => {
     onSetLogged(restSeconds)
     if (pr?.isPR || pr?.isPRVolume) {
       const label = pr.weight && pr.reps
@@ -213,6 +213,7 @@ export function WorkoutBlock({
                     workoutId={workout.id}
                     workoutType={workout.workoutType}
                     weightUnit={weightUnit}
+                    restDurationSeconds={restDurationSeconds}
                     onSetLogged={handleSetLoggedWithPR}
                   />
                 ) : null}

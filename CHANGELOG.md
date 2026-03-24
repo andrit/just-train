@@ -437,3 +437,16 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - `CONTRIBUTING.md` — checklist for new column additions (schema, serializer, response schema, test factory, backfill SQL)
 - `serializeTrainer()` and `factories.ts` annotated with CONTRIBUTING.md reference
 
+
+## [v2.6.0] — ESLint
+
+### Added
+- `packages/eslint-config/` — shared ESLint 9 flat config base. Rules: `@typescript-eslint/recommended`, `no-explicit-any` warn, `no-unused-vars` error with `_` prefix escape, `no-console` warn, `eqeqeq`, `prefer-const`, `no-var`.
+- `apps/frontend/eslint.config.js` — extends base + `eslint-plugin-react` + `eslint-plugin-react-hooks`. `rules-of-hooks` error, `exhaustive-deps` warn. Stories/tests relaxed.
+- `apps/backend/eslint.config.js` — extends base. `no-console` off (pino wraps it). Tests/seeds relaxed.
+
+### Changed
+- `apps/frontend/package.json` — `lint` script wired to `eslint . --max-warnings 0`
+- `apps/backend/package.json` — same
+- `pnpm lint` at root now runs all three packages via `pnpm -r lint`
+

@@ -220,14 +220,12 @@ What: Color scheme (amber/red/blue/green) and message tone (clinical/motivating/
 ## Code Quality
 
 ### ESLint Setup
-When: Dedicated code quality version
-What: Proper ESLint config across all packages with TypeScript-aware rules. Currently lint scripts are no-ops.
-Needs:
-- `eslint`, `@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin` in backend + frontend
-- `eslint-plugin-react`, `eslint-plugin-react-hooks` in frontend
-- `eslint.config.js` per app
-- Root-level shared config in `packages/eslint-config/`
-- Restore lint scripts from `echo` no-ops
+Shipped in v2.6.0. ESLint 9 flat config across all packages:
+- `packages/eslint-config/` — shared base (TypeScript rules, no-any warn, unused-vars error with _ escape, no-console warn)
+- `apps/frontend/eslint.config.js` — extends base + react + react-hooks
+- `apps/backend/eslint.config.js` — extends base, relaxed console rule (pino wraps it)
+- `pnpm lint` in root runs all three
+- `--max-warnings 0` — lint must be clean to pass CI
 
 ### vi.mock Hoisting Audit
 When: Before adding new test files

@@ -22,7 +22,6 @@ import { useSelfClient, useClients }     from '@/lib/queries/clients'
 import { useCreateSession, useStartSession } from '@/lib/queries/sessions'
 import { useTemplates }                  from '@/lib/queries/templates'
 import { Spinner }                       from '@/components/ui/Spinner'
-import { Button }                        from '@/components/ui/Button'
 
 // ── Template card ─────────────────────────────────────────────────────────────
 
@@ -127,7 +126,7 @@ type View = 'main' | 'client-select' | 'template-pick'
 export default function SessionLauncherPage(): React.JSX.Element {
   const navigate       = useNavigate()
   const [searchParams] = useSearchParams()
-  const trainer        = useAuthStore((s) => s.trainer)
+  const _trainer        = useAuthStore((s) => s.trainer)
   const { trainerMode, ctaLabel } = usePreferences()
   const { fire } = useUXEvent()
   const { startSession: storeSession, getSession, hasSession } = useSessionStore()
@@ -156,7 +155,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
     }
   }, [trainerMode, selfClient, selectedClientId])
 
-  const today = new Date().toISOString().split('T')[0]!
+  const today = new Date().toISOString().split('T')[0] ?? ''
 
   // ── Start blank session ───────────────────────────────────────────────────
 

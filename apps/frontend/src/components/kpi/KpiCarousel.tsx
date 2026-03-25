@@ -56,6 +56,7 @@ export function KpiCarousel({ cards, isLoading }: KpiCarouselProps): React.JSX.E
   if (isLoading) {
     return (
       <div className="grid grid-cols-4 gap-3">
+        {/* eslint-disable-next-line react/no-array-index-key */}
         {Array.from({ length: VISIBLE }).map((_, i) => <SkeletonCard key={i} />)}
       </div>
     )
@@ -75,7 +76,7 @@ export function KpiCarousel({ cards, isLoading }: KpiCarouselProps): React.JSX.E
       >
         {cards.map((card, i) => (
           <div
-            key={i}
+            key={i}  // eslint-disable-line react/no-array-index-key
             style={{ scrollSnapAlign: i % VISIBLE === 0 ? 'start' : 'none' }}
           >
             <KpiCard data={card} />
@@ -109,7 +110,7 @@ export function KpiCarousel({ cards, isLoading }: KpiCarouselProps): React.JSX.E
           {/* Dots */}
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
-              key={i}
+              key={i}  // eslint-disable-line react/no-array-index-key
               type="button"
               onClick={() => scrollToPage(i)}
               aria-label={`Go to KPI page ${i + 1}`}

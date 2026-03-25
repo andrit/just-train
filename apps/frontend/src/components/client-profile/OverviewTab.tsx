@@ -177,8 +177,8 @@ export function OverviewTab({
         />
         <StatCard
           label="Last Session"
-          value={lastActiveAt ? lastSessionLabel({ lastActiveAt } as any) : '—'}
-          warning={lastActiveAt ? isAtRisk({ lastActiveAt } as any) : false}
+          value={lastActiveAt ? lastSessionLabel({ lastActiveAt } as { lastActiveAt: string }) : '—'}
+          warning={lastActiveAt ? isAtRisk({ lastActiveAt } as { lastActiveAt: string }) : false}
         />
         <StatCard
           label="Days In"

@@ -73,6 +73,7 @@ export function ClientForm({
     setWeeklyTarget(client?.weeklySessionTarget ?? 3)
     setShow1rm(client?.show1rmEstimate ?? false)
     setAutoReport(client?.autoReport   ?? true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client?.id])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {

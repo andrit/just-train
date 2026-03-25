@@ -19,7 +19,7 @@
 //   Middle — exercise position within this block
 // ------------------------------------------------------------
 
-import { useState, useRef, useEffect }  from 'react'
+import { useState } from 'react'
 import { cn }                            from '@/lib/cn'
 import { interactions }                  from '@/lib/interactions'
 import { formatSeconds }                 from '@/lib/formatters'
@@ -151,6 +151,7 @@ export function WorkoutBlock({
               <div className="flex justify-center gap-1.5 py-2">
                 {exercises.map((_, i) => (
                   <button
+                    // eslint-disable-next-line react/no-array-index-key
                     key={i}
                     type="button"
                     onClick={() => setExerciseIndex(i)}
@@ -187,7 +188,7 @@ export function WorkoutBlock({
                       {prevEx.exercise?.name ?? '—'}
                     </p>
                     {prevEx.sets.length > 0 && (() => {
-                      const last = prevEx.sets[prevEx.sets.length - 1]!
+                      const last = prevEx.sets[prevEx.sets.length - 1]
                       return (
                         <p className="text-[9px] font-mono text-gray-400 mt-1 truncate">
                           {last.weight != null ? `${last.weight}×` : ''}{last.reps ?? last.durationSeconds ?? '—'}
@@ -301,13 +302,13 @@ export function WorkoutBlock({
                   <path d="M8 5v3l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 <span className="text-sm font-mono font-medium text-brand-highlight">
-                  {formatSeconds(restTimer!.remaining)}
+                  {formatSeconds(restTimer?.remaining ?? 0)}
                 </span>
                 <span className="text-xs text-gray-500">rest</span>
               </div>
               <button
                 type="button"
-                onClick={restTimer!.skip}
+                onClick={() => restTimer?.skip()}
                 className="px-4 py-3 text-xs text-gray-500 hover:text-gray-300 border-l border-surface-border transition-colors"
               >
                 Skip

@@ -14,7 +14,6 @@ import { useEffect }               from 'react'
 import { useSessionStore }         from '@/store/sessionStore'
 import { useOverlayStore }         from '@/store/overlayStore'
 import LiveSessionContent          from '@/components/shell/LiveSessionContent'
-import { Spinner }                 from '@/components/ui/Spinner'
 
 export default function LiveSessionPage(): React.JSX.Element {
   const { id }     = useParams<{ id: string }>()

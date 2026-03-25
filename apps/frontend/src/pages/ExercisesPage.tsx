@@ -19,7 +19,6 @@
 
 import { useState, useDeferredValue }       from 'react'
 import { cn }                                from '@/lib/cn'
-import { interactions }                      from '@/lib/interactions'
 import { useExercises, useBodyParts }        from '@/lib/queries/exercises'
 import { BottomSheet }                       from '@/components/ui/BottomSheet'
 import { Spinner }                           from '@/components/ui/Spinner'
@@ -71,7 +70,7 @@ export default function ExercisesPage(): React.JSX.Element {
 
   // Client-side category filter (not in backend query yet)
   const filtered = category
-    ? (exercises ?? []).filter((e) => (e as any).category === category)
+    ? (exercises ?? []).filter((e) => ( e as { category?: string }).category === category)
     : (exercises ?? [])
 
   const hasFilters = !!(search || bodyPartId || workoutType || draftsOnly || category)

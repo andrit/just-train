@@ -53,7 +53,7 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
   const currentPanel = (location.state as { panel?: PanelState } | null)?.panel ?? null
 
   // Hide nav when overlay is expanded
-  const navHidden = overlayState === 'expanded'
+  const _navHidden = overlayState === 'expanded'
 
   // When all sessions end, hide the overlay
   const sessionCount = Object.keys(activeSessions).length

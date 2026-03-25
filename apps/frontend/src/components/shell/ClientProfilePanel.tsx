@@ -38,7 +38,7 @@ import {
 
 type Tab = 'overview' | 'timeline' | 'baseline' | 'prs'
 
-function TabButton({ id, label, active, incomplete, onClick }: {
+function TabButton({ id: _id, label, active, incomplete, onClick }: {
   id: Tab; label: string; active: boolean; incomplete?: boolean; onClick: () => void
 }): React.JSX.Element {
   return (
@@ -75,7 +75,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
   const [reportSentLabel, setReportSentLabel] = useState<string | null>(null)
 
   const { trainerMode }           = usePreferences()
-  const { hasSession, activeSessions } = useSessionStore()
+  const { hasSession } = useSessionStore()
   const { expand }                = useOverlayStore()
   const nav                       = useNav()
 

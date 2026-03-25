@@ -6,9 +6,6 @@
 // For now shows count + a placeholder spark.
 // ------------------------------------------------------------
 
-import { cn }         from '@/lib/cn'
-import { Link }       from 'react-router-dom'
-import { interactions } from '@/lib/interactions'
 
 interface GoalsWidgetProps {
   /** Total active (unachieved) goals across all clients */

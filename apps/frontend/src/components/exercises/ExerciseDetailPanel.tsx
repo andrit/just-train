@@ -196,7 +196,7 @@ function AddToWorkoutSheet({
 }): React.JSX.Element {
   const [targetSets, setTargetSets] = useState(3)
   const [targetReps, setTargetReps] = useState(10)
-  const addExercise                 = useAddExercise()
+  const _addExercise                 = useAddExercise()
 
   // session.sessionId is the session — but we need a workoutId.
   // We need to pick which workout block to add to, or create one.

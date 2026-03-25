@@ -25,17 +25,10 @@ import {
   ClientGoalResponseSchema,
   ClientGoalListResponseSchema,
   ErrorResponseSchema,
-  UuidParamSchema,
 } from '@trainer-app/shared'
 import { z } from 'zod'
 
-const ClientGoalParamSchema = z.object({
-  clientId: z.string().uuid(),
-  id:       z.string().uuid().optional(),
-})
-
 export async function clientGoalRoutes(app: FastifyInstance): Promise<void> {
-
   app.addHook('preHandler', authenticate)
 
   // ── Shared ownership check helper ─────────────────────────────────────────
@@ -123,9 +116,10 @@ export async function clientGoalRoutes(app: FastifyInstance): Promise<void> {
         })
         .returning()
 
-      return reply.status(201).send(serializeGoal(goal!))
+      if (!goal) return reply.status(500).send({ error: 'Failed to create goal' })
+      return reply.status(201).send(serializeGoal(goal))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to create goal' })
     }
   })
@@ -159,15 +153,15 @@ export async function clientGoalRoutes(app: FastifyInstance): Promise<void> {
     if (!client) return reply.status(404).send({ error: 'Client not found' })
 
     try {
-      const updates: Record<string, unknown> = {}
-      if (body.goal      !== undefined) updates.goal       = body.goal
+      const updates: Partial<typeof clientGoals.$inferInsert> = {}
+      if (body.goal       !== undefined) updates.goal       = body.goal
       if (body.achievedAt !== undefined) {
         updates.achievedAt = body.achievedAt ? new Date(body.achievedAt) : null
       }
 
       const [updated] = await db
         .update(clientGoals)
-        .set(updates as any)
+        .set(updates)
         .where(and(eq(clientGoals.id, id), eq(clientGoals.clientId, clientId)))
         .returning()
 
@@ -175,7 +169,7 @@ export async function clientGoalRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(serializeGoal(updated))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to update goal' })
     }
   })

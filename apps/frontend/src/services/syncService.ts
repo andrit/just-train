@@ -97,7 +97,7 @@ async function flushQueue(): Promise<void> {
 async function prefetch(): Promise<void> {
   if (!navigator.onLine) return
 
-  const today = new Date().toISOString().split('T')[0]!
+  const today = new Date().toISOString().split('T')[0] ?? ''
 
   const targets = [
     '/clients',

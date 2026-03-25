@@ -20,7 +20,7 @@ export const AnimationTriggers: StoryObj = {
 }
 
 function AnimationDemo(): React.JSX.Element {
-  const { fire } = useUXEvent()
+  const { fire: _fire } = useUXEvent()
   const [lastFired, setLastFired] = useState<string | null>(null)
 
   const eventAnimationPairs = Object.entries(UX_ANIMATION_MAP) as [string, string][]
@@ -172,6 +172,7 @@ function SideEffectDemo(): React.JSX.Element {
           <p className="text-gray-600">Fire an event to see it logged here…</p>
         ) : (
           log.map((entry, i) => (
+            // eslint-disable-next-line react/no-array-index-key
             <p key={i} className={cn('text-gray-400', i === 0 && 'text-emerald-400')}>
               {entry}
             </p>

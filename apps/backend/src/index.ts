@@ -272,16 +272,16 @@ const start = async (): Promise<void> => {
     }
 
     await app.listen({ port, host })
-    ;(app.log as any).info(`Server:       http://${host}:${port}`)
-    ;(app.log as any).info(`API Docs:     http://${host}:${port}/documentation`)
-    ;(app.log as any).info(`Health:       http://${host}:${port}/health`)
+    ;app.log.info(`Server:       http://${host}:${port}`)
+    ;app.log.info(`API Docs:     http://${host}:${port}/documentation`)
+    ;app.log.info(`Health:       http://${host}:${port}/health`)
 
     // ── Job queue — only start if Redis is configured ──────────────────────
     if (process.env.UPSTASH_REDIS_URL) {
       const reportWorker = startReportWorker()
       const alertWorker  = startAlertWorker()
       await startScheduler()
-      ;(app.log as any).info('Queue:        BullMQ workers + scheduler started')
+      ;app.log.info('Queue:        BullMQ workers + scheduler started')
 
       // Graceful shutdown — drain workers before exit
       const shutdown = async (): Promise<void> => {
@@ -294,10 +294,10 @@ const start = async (): Promise<void> => {
       process.once('SIGTERM', shutdown)
       process.once('SIGINT',  shutdown)
     } else {
-      ;(app.log as any).warn('Queue:        UPSTASH_REDIS_URL not set — job queue disabled')
+      ;app.log.warn('Queue:        UPSTASH_REDIS_URL not set — job queue disabled')
     }
   } catch (error) {
-    ;(app.log as any).error(error)
+    ;app.log.error(error)
     process.exit(1)
   }
 }

@@ -188,9 +188,10 @@ export async function clientSnapshotRoutes(app: FastifyInstance): Promise<void> 
         })
         .returning()
 
-      return reply.status(201).send(serializeSnapshot(snapshot!))
+      if (!snapshot) return reply.status(500).send({ error: 'Failed to create snapshot' })
+      return reply.status(201).send(serializeSnapshot(snapshot))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to create snapshot' })
     }
   })
@@ -224,7 +225,7 @@ export async function clientSnapshotRoutes(app: FastifyInstance): Promise<void> 
     try {
       const [updated] = await db
         .update(clientSnapshots)
-        .set(body as any)
+        .set(body as Partial<typeof clientSnapshots.$inferInsert>)
         .where(and(eq(clientSnapshots.id, id), eq(clientSnapshots.clientId, clientId)))
         .returning()
 
@@ -232,7 +233,7 @@ export async function clientSnapshotRoutes(app: FastifyInstance): Promise<void> 
 
       return reply.send(serializeSnapshot(updated))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to update snapshot' })
     }
   })

@@ -145,7 +145,7 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
         createdAt: media.createdAt.toISOString(),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Upload failed' })
     }
   })
@@ -174,17 +174,17 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
     const media = await db.query.exerciseMedia.findFirst({
       where: eq(exerciseMedia.id, mediaId),
       with:  { exercise: true },
-    } as any)
+    })
 
-    if (!media || (media as any).exercise?.trainerId !== request.trainer.trainerId) {
+    if (!media || media.exercise?.trainerId !== request.trainer.trainerId) {
       return reply.status(404).send({ error: 'Media not found' })
     }
 
     try {
       // Delete from Cloudinary first — if DB delete fails, Cloudinary stays clean
       await deleteByPublicId(
-        (media as any).cloudinaryPublicId,
-        (media as any).mediaType,
+        media.cloudinaryPublicId,
+        media.mediaType,
       )
 
       // Delete from DB
@@ -197,7 +197,7 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
 
       return reply.status(204).send()
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to delete media' })
     }
   })
@@ -259,7 +259,7 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
         createdAt: updated.createdAt.toISOString(),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to update primary media' })
     }
   })

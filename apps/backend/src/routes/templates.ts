@@ -53,7 +53,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(result)
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to fetch templates' })
     }
   })
@@ -106,7 +106,7 @@ Use this to display the template builder/editor and to preview what a session wi
 
       return reply.send(result)
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to fetch template' })
     }
   })
@@ -142,7 +142,7 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
 
       return reply.status(201).send(newTemplate)
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to create template' })
     }
   })
@@ -187,7 +187,7 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
 
       return reply.send(updated)
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to update template' })
     }
   })
@@ -234,7 +234,7 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
 
       return reply.status(204).send()
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to delete template' })
     }
   })

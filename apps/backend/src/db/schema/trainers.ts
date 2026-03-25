@@ -18,7 +18,7 @@
 // DB enums and TypeScript types are always in sync.
 // ------------------------------------------------------------
 
-import { pgTable, uuid, text, boolean, timestamp, date, integer, decimal, pgEnum } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, boolean, timestamp, integer, pgEnum } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import {
   TrainerRoleEnum,

@@ -90,7 +90,7 @@ export function SessionPlanPanel({
     try {
       const created = await createSession.mutateAsync({
         clientId,
-        date:   new Date().toISOString().split('T')[0]!,
+        date:   new Date().toISOString().split('T')[0] ?? '',
         name:   sessionName.trim() || undefined,
       })
 
@@ -117,7 +117,7 @@ export function SessionPlanPanel({
     try {
       await ensureSession()
       setAddBlockOpen(true)
-    } catch (e) {
+    } catch (_e) {
       setError('Please select a client first')
     }
   }
@@ -380,7 +380,7 @@ export function SessionPlanPanel({
               <WorkoutBlock
                 key={workout.id}
                 workout={workout}
-                sessionId={sessionId!}
+                sessionId={sessionId ?? ""}
                 weightUnit={weightUnit}
                 layout="vertical"
                 onSetLogged={() => {}}  // no-op — planning mode, no logging

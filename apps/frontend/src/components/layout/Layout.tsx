@@ -5,7 +5,6 @@
 
 import { NavLink }         from 'react-router-dom'
 import { cn }              from '@/lib/cn'
-import { useSessionStore } from '@/store/sessionStore'
 import { useOverlayStore } from '@/store/overlayStore'
 import { useAuthStore }    from '@/store/authStore'
 import { useSyncStatus }   from '@/hooks/useSyncStatus'

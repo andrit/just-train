@@ -23,11 +23,11 @@
 //   HTTP → Rate limit check → Zod validation → auth.service → DB → response
 // ------------------------------------------------------------
 
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
 import { z } from 'zod'
-import { db, trainers, clients, clientGoals, refreshTokens } from '../db'
+import { db, trainers, clients } from '../db'
 import type { Trainer } from '../db/schema/trainers'
-import { eq, and, gt } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import {
   hashPassword,
   verifyPassword,
@@ -159,7 +159,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     },
   }, async (request, reply) => {
     const { name, email, password } = request.body as z.infer<typeof CreateTrainerSchema>
-    const { deviceId, deviceName } = extractDeviceInfo(request as any)
+    const { deviceId, deviceName } = extractDeviceInfo(request as FastifyRequest)
 
     // Check for duplicate email
     const existing = await db.query.trainers.findFirst({
@@ -202,7 +202,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       // Seed the starter exercise library for this trainer — fire and forget,
       // don't block the registration response if it fails.
       seedExerciseLibrary(trainer.id).catch((err) => {
-        ;(app.log as any).warn({ err }, 'Exercise library seed failed for new trainer')
+        ;app.log.warn({ err }, 'Exercise library seed failed for new trainer')
       })
 
       // Issue tokens immediately
@@ -216,7 +216,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         trainer: serializeTrainer(trainer, { lastLoginAt: null }),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to create account' })
     }
   })
@@ -249,7 +249,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     },
   }, async (request, reply) => {
     const { email, password } = request.body as z.infer<typeof LoginSchema>
-    const { deviceId, deviceName } = extractDeviceInfo(request as any)
+    const { deviceId, deviceName } = extractDeviceInfo(request as FastifyRequest)
 
     try {
       const trainer = await db.query.trainers.findFirst({
@@ -285,7 +285,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         trainer: serializeTrainer(trainer),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Login failed' })
     }
   })
@@ -364,7 +364,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
         trainer: serializeTrainer(trainer),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Token refresh failed' })
     }
   })
@@ -403,7 +403,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
       reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
       return reply.send({ message: 'Logged out successfully' })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Logout failed' })
     }
   })
@@ -429,7 +429,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
       reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
       return reply.send({ message: 'Logged out from all devices' })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Logout failed' })
     }
   })
@@ -464,7 +464,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
         ...serializeTrainer(trainer),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to fetch trainer profile' })
     }
   })
@@ -519,7 +519,7 @@ Called once from the onboarding screen after registration. Can be called again t
         ...serializeTrainer(updated),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to complete onboarding' })
     }
   })
@@ -563,7 +563,7 @@ Called once from the onboarding screen after registration. Can be called again t
         ...serializeTrainer(updated),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to update profile' })
     }
   })

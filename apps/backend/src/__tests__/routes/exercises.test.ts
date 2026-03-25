@@ -20,7 +20,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { exerciseRoutes } from '../../routes/exercises'
 import { generateAccessToken } from '../../services/auth.service'
 import {
-  makeTrainer, TEST_TRAINER_ID, TEST_CLIENT_ID, TEST_UNKNOWN_ID,
+  makeTrainer as _makeTrainer, TEST_TRAINER_ID, TEST_CLIENT_ID, TEST_UNKNOWN_ID,
 } from '../helpers/factories'
 
 // ── Module mocks ──────────────────────────────────────────────────────────────

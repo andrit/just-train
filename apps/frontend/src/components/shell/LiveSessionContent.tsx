@@ -35,7 +35,7 @@ interface LiveSessionContentProps {
 
 export default function LiveSessionContent({
   sessionId,
-  onMinimise,
+  onMinimise: _onMinimise,
 }: LiveSessionContentProps): React.JSX.Element {
   const navigate          = useNavigate()
   const trainer           = useAuthStore((s) => s.trainer)

@@ -45,6 +45,7 @@ function groupByDate(sessions: SessionSummaryResponse[]): Array<{ label: string;
   for (const s of sessions) {
     const label = formatDate(s.date)
     if (!map.has(label)) map.set(label, [])
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     map.get(label)!.push(s)
   }
   return Array.from(map.entries()).map(([label, sessions]) => ({ label, sessions }))

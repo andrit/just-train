@@ -11,7 +11,7 @@
 // edit support planned for a future patch).
 // ------------------------------------------------------------
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { cn }                          from '@/lib/cn'
 import { interactions }                from '@/lib/interactions'
 import { useUXEventRef }               from '@/hooks/useUXEvent'
@@ -24,7 +24,7 @@ type SetOutcome = 'hit' | 'surpassed' | 'missed' | 'none'
 function getOutcome(
   actual:  number | null,
   target:  number | null,
-  isReps = false,
+  _isReps = false,
 ): SetOutcome {
   if (actual === null || target === null) return 'none'
   if (actual >= target) return actual > target ? 'surpassed' : 'hit'

@@ -14,7 +14,6 @@
 
 import { pgTable, uuid, text, timestamp } from 'drizzle-orm/pg-core'
 import { relations }                       from 'drizzle-orm'
-import { ProgressionStateEnum }            from '@trainer-app/shared'
 import { clients, progressionStateEnum }   from './trainers'
 
 export const clientGoals = pgTable('client_goals', {

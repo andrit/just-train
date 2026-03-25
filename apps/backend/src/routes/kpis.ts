@@ -209,7 +209,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
           for (const s of rSets) {
             if (s.weight && s.reps) {
               const est = epley1rmKg(s.weight, s.reps)
-              if (!byEx[s.exerciseName] || est > byEx[s.exerciseName]!) {
+              if (!byEx[s.exerciseName] || est > (byEx[s.exerciseName] ?? 0)) {
                 byEx[s.exerciseName] = est
               }
             }
@@ -219,6 +219,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
             type:        'resistance',
             topExercise: top?.[0] ?? null,
             estOnermKg:  client.show1rmEstimate && top
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               ? Math.round(top[1]! * 10) / 10
               : null,
             volumeTrend: calcVolumeTrend(),
@@ -320,7 +321,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         avgStressThisMonth:    avg(stressScores),
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to compute KPIs' })
     }
   })
@@ -390,7 +391,6 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       const exerciseIds = [...new Set(rows.map(r => r.exerciseId))]
       const exerciseMap = new Map<string, string>()
       if (exerciseIds.length > 0) {
-        const { exercises: exercisesTable } = await import('../db')
         const exRows = await db.query.exercises.findMany({
           where: (ex, { inArray }) => inArray(ex.id, exerciseIds),
           columns: { id: true, name: true },
@@ -440,7 +440,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(result)
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to compute personal bests' })
     }
   })

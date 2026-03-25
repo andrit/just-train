@@ -6,7 +6,7 @@
 // ------------------------------------------------------------
 
 import { cn } from '@/lib/cn'
-import { getInitials } from './utils'
+// import { getInitials } from './utils' // removed — unused
 
 interface SilhouetteAvatarProps {
   name:      string
@@ -41,7 +41,7 @@ export function SilhouetteAvatar({
 }: SilhouetteAvatarProps): React.JSX.Element {
   const sizeClass     = SIZE_CLASSES[size]
   const iconSizeClass = ICON_SIZE_CLASSES[size]
-  const textSizeClass = TEXT_SIZE_CLASSES[size]
+  const _textSizeClass = TEXT_SIZE_CLASSES[size]
 
   if (photoUrl) {
     return (

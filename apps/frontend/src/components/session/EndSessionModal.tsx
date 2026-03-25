@@ -8,8 +8,6 @@
 // ------------------------------------------------------------
 
 import { useState }     from 'react'
-import { cn }           from '@/lib/cn'
-import { interactions } from '@/lib/interactions'
 import { Modal }        from '@/components/ui/Modal'
 import { Button }       from '@/components/ui/Button'
 

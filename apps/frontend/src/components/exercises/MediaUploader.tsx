@@ -8,7 +8,6 @@
 import { useRef, useState }                                  from 'react'
 import { cn }                                               from '@/lib/cn'
 import { useUploadMedia, useDeleteMedia, useSetPrimaryMedia } from '@/lib/queries/exercises'
-import { Button }         from '@/components/ui/Button'
 import { ConfirmDialog }  from '@/components/ui/ConfirmDialog'
 import { Spinner }        from '@/components/ui/Spinner'
 import { getThumbnailUrl } from './utils'

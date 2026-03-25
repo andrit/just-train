@@ -3,15 +3,13 @@
 // ------------------------------------------------------------
 
 import {
-  useQuery, useMutation, useQueryClient,
+  useQuery,
   type UseQueryResult,
-  type UseMutationResult,
 } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
 import type {
   TemplateListResponse,
   TemplateDetailResponse,
-  TemplateSummaryResponse,
 } from '@trainer-app/shared'
 
 export const templateKeys = {

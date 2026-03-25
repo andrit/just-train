@@ -62,23 +62,29 @@ const WorkoutChildParamSchema = z.object({
 
 // Serialize a session row (with or without joined client) to match
 // SessionSummaryResponseSchema — converts Date objects to ISO strings.
+// These functions operate on raw Drizzle query results which have
+// complex nested types — any is intentional here.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeWorkout(w: any): any {
   return {
     ...w,
     createdAt:        w.createdAt instanceof Date ? w.createdAt.toISOString() : w.createdAt,
     updatedAt:        w.updatedAt instanceof Date ? w.updatedAt.toISOString() : w.updatedAt,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sessionExercises: (w.sessionExercises ?? []).map((se: any) => ({
       ...se,
       createdAt: se.createdAt instanceof Date ? se.createdAt.toISOString() : se.createdAt,
       updatedAt: se.updatedAt instanceof Date ? se.updatedAt.toISOString() : se.updatedAt,
       exercise: se.exercise ? {
         ...se.exercise,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         media: (se.exercise.media ?? []).map((m: any) => ({
           ...m,
           createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
           updatedAt: m.updatedAt instanceof Date ? m.updatedAt.toISOString() : m.updatedAt,
         })),
       } : null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sets: (se.sets ?? []).map((set: any) => ({
         ...set,
         createdAt: set.createdAt instanceof Date ? set.createdAt.toISOString() : set.createdAt,
@@ -88,6 +94,7 @@ function serializeWorkout(w: any): any {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeSession(s: any): any {
   return {
     ...s,
@@ -136,7 +143,7 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(result.map(serializeSession))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to fetch sessions' })
     }
   })
@@ -195,7 +202,7 @@ This is the primary payload for the active workout view — loaded once when the
 
       return reply.send(serializeSession(result))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to fetch session' })
     }
   })
@@ -247,7 +254,7 @@ This is the primary payload for the active workout view — loaded once when the
 
       return reply.status(201).send(serializeSession({ ...newSession, client }))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to create session' })
     }
   })
@@ -302,7 +309,7 @@ This is the primary payload for the active workout view — loaded once when the
 
       return reply.send(serializeSession({ ...updated, client }))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to update session' })
     }
   })
@@ -354,7 +361,7 @@ This is the primary payload for the active workout view — loaded once when the
 
       return reply.status(204).send()
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to delete session' })
     }
   })
@@ -410,7 +417,7 @@ These are suggestions — the trainer can use any order.`,
         sessionExercises: [],
       }))
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to add workout block' })
     }
   })
@@ -446,7 +453,7 @@ These are suggestions — the trainer can use any order.`,
 
       return reply.status(204).send()
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to remove workout block' })
     }
   })
@@ -501,7 +508,7 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
         sets:     [],
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to add exercise to workout' })
     }
   })
@@ -537,7 +544,7 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
 
       return reply.status(204).send()
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to remove exercise' })
     }
   })
@@ -652,7 +659,7 @@ Which fields you populate depends on the workout type:
         createdAt: newSet.createdAt instanceof Date ? newSet.createdAt.toISOString() : newSet.createdAt,
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to record set' })
     }
   })
@@ -695,7 +702,7 @@ Which fields you populate depends on the workout type:
         createdAt: updated.createdAt instanceof Date ? updated.createdAt.toISOString() : updated.createdAt,
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to update set' })
     }
   })
@@ -731,7 +738,7 @@ Which fields you populate depends on the workout type:
 
       return reply.status(204).send()
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to delete set' })
     }
   })

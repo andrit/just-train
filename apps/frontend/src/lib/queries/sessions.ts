@@ -185,7 +185,7 @@ export function useAddWorkout(): UseMutationResult<WorkoutResponse, Error, AddWo
       offlineAwareApi.post<WorkoutResponse>(
         `/sessions/${sessionId}/workouts`,
         body,
-        `Add ${(body as any).workoutType ?? ''} workout block`,
+        `Add ${(body as { workoutType?: string }).workoutType ?? ''} workout block`,
       ),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
@@ -310,7 +310,7 @@ export function usePlannedSessions(clientId?: string): UseQueryResult<SessionLis
   const qs = new URLSearchParams(
     Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== undefined)) as Record<string, string>
   ).toString()
-  const qc = useQueryClient()
+
   return useQuery({
     queryKey: sessionKeys.list(filters),
     queryFn:  () => apiClient<SessionListResponse>(`/sessions?${qs}`),

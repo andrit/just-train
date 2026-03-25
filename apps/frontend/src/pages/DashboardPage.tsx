@@ -20,7 +20,6 @@ import { WidgetRenderer }       from '@/components/dashboard/WidgetRenderer'
 import { Spinner }              from '@/components/ui/Spinner'
 import { useAuthStore }         from '@/store/authStore'
 import { useUXEvent }           from '@/hooks/useUXEvent'
-import { cn }                   from '@/lib/cn'
 import type { WidgetId }        from '@/lib/widgets'
 import type { ClientGoalResponse } from '@trainer-app/shared'
 

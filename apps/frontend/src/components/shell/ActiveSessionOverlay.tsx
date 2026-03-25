@@ -104,7 +104,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
   // Auto-expand when a new session starts
   useEffect(() => {
     if (sessionCount > 0 && state === 'hidden') {
-      const first = sessionList[0]!
+      const first = sessionList[0]
       expand(first.clientId)
     }
     if (sessionCount === 0) {
@@ -116,7 +116,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
   if (sessionCount === 0) return null
 
   const focusedSession = (focusedClientId ? activeSessions[focusedClientId] : null)
-    ?? sessionList[0]!
+    ?? sessionList[0]
 
   const getClientName = (clientId: string): string => {
     if (selfClient?.id === clientId) return selfClient.name

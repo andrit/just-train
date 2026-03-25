@@ -147,6 +147,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
     setReps(String(sessionExercise.targetReps ?? lastSet?.reps ?? ''))
     setCaliReps(String(sessionExercise.targetReps ?? lastSet?.reps ?? ''))
     setDuration(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setNumber])
 
   const canLog = (): boolean => {

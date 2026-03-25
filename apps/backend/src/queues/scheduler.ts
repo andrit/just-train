@@ -23,7 +23,7 @@ import {
   type AtRiskAlertJobData,
 } from './index'
 import { db, clients, trainers } from '../db'
-import { eq, and, isNotNull, lte } from 'drizzle-orm'
+import { eq, and, isNotNull } from 'drizzle-orm'
 
 const SCHEDULER_QUEUE = 'scheduler'
 

@@ -295,6 +295,7 @@ export default function PreferencesPage(): React.JSX.Element {
   ): Promise<void> => {
     setSaving((s) => ({ ...s, [key]: true }))
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await updatePreference(key as any, value as any)
       if (fieldRef) fire('update', { target: fieldRef })
     } finally {

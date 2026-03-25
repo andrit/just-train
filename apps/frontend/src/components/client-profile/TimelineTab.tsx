@@ -88,6 +88,7 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
       <div className="space-y-4 pl-10">
         {events.map((event, i) => (
           <div
+            // eslint-disable-next-line react/no-array-index-key
             key={i}
             className="relative animate-slide-up"
             style={{ animationDelay: `${i * 30}ms` }}

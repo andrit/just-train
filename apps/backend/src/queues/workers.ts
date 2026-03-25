@@ -24,8 +24,8 @@ import {
   type ScheduledReportJobData,
   type AtRiskAlertJobData,
 } from './index'
-import { db, clients, sessions, trainers } from '../db'
-import { eq, and, desc }     from 'drizzle-orm'
+import { db, clients, trainers } from '../db'
+import { eq, and }            from 'drizzle-orm'
 import { sql }               from 'drizzle-orm'
 import { buildReportData, sendReport } from '../services/report.service'
 import { sendAtRiskDigest }  from '../services/alert.service'

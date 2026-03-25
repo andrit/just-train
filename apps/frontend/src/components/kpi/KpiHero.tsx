@@ -10,7 +10,7 @@
 //   - Empty state when the client has no sessions yet
 // ------------------------------------------------------------
 
-import { useState, useEffect }  from 'react'
+import { useState } from 'react'
 import { Link }                  from 'react-router-dom'
 import { cn }                    from '@/lib/cn'
 import { KpiCarousel }           from './KpiCarousel'

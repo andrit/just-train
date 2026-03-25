@@ -7,7 +7,6 @@
 // that makes the widget feel present and intentional.
 // ------------------------------------------------------------
 
-import { cn } from '@/lib/cn'
 
 interface RecentSessionsWidgetProps {
   /** Phase 5: pass real sessions here */
@@ -24,6 +23,7 @@ export function RecentSessionsWidget({}: RecentSessionsWidgetProps): React.JSX.E
         {/* Skeleton rows to give the widget visual weight */}
         {[0.8, 0.6, 0.7].map((opacity, i) => (
           <div
+            // eslint-disable-next-line react/no-array-index-key
             key={i}
             className="flex items-center gap-3 p-2.5 rounded-xl bg-surface border border-surface-border"
             style={{ opacity: opacity * 0.4 }}

@@ -34,7 +34,7 @@ export function SessionLauncherSheet({
   clientId: initialClientId,
   onClose,
 }: SessionLauncherSheetProps): React.JSX.Element {
-  const trainer        = useAuthStore((s) => s.trainer)
+  const _trainer        = useAuthStore((s) => s.trainer)
   const { trainerMode, ctaLabel } = usePreferences()
   const { fire }       = useUXEvent()
 
@@ -68,7 +68,7 @@ export function SessionLauncherSheet({
     }
   }, [trainerMode, selfClient, selectedClientId])
 
-  const today = new Date().toISOString().split('T')[0]!
+  const today = new Date().toISOString().split('T')[0] ?? ''
 
   const getClientName = (id: string): string =>
     clients?.find(c => c.id === id)?.name ?? selfClient?.name ?? 'Client'

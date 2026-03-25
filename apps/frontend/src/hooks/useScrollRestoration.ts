@@ -25,7 +25,7 @@
 // ------------------------------------------------------------
 
 import { useCallback, useEffect }  from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 const STORAGE_PREFIX = 'scroll_restore_'
 
@@ -78,5 +78,6 @@ export function useRestoreScroll(): void {
     }
 
     requestAnimationFrame(tryScroll)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.key])
 }

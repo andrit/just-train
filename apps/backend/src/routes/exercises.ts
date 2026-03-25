@@ -75,7 +75,7 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(result)
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to fetch body parts' })
     }
   })
@@ -129,7 +129,7 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(result)
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercises' })
     }
   })
@@ -178,7 +178,7 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         updatedAt: result.updatedAt instanceof Date ? result.updatedAt.toISOString() : result.updatedAt,
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercise' })
     }
   })
@@ -218,7 +218,7 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         media:    [],
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to create exercise' })
     }
   })
@@ -268,7 +268,7 @@ The exercise is flagged with \`isDraft: true\`. It appears in the library with a
         media:    [],
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to quick-add exercise' })
     }
   })
@@ -313,7 +313,7 @@ The exercise is flagged with \`isDraft: true\`. It appears in the library with a
 
       return reply.send(updated)
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to update exercise' })
     }
   })
@@ -361,7 +361,7 @@ The exercise is flagged with \`isDraft: true\`. It appears in the library with a
 
       return reply.status(204).send()
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(409).send({
         error: 'Cannot delete — exercise is used in one or more sessions or templates',
       })

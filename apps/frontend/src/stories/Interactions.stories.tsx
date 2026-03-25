@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { cn }                  from '@/lib/cn'
-import { interactions, animationClasses } from '@/lib/interactions'
+import { interactions } from '@/lib/interactions'
 
 export default {
   title: 'Design System / Interactions',

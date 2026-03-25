@@ -362,7 +362,7 @@ export function AddExerciseSheet({
 
   const handleQuickAdd = (): void => {
     createExercise.mutate(
-      { name: search.trim(), workoutType, isDraft: true } as any,
+      { name: search.trim(), workoutType, isDraft: true } as Parameters<typeof createExercise.mutate>[0],
       {
         onSuccess: (newExercise) => {
           addExercise.mutate(

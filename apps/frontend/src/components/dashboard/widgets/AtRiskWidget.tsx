@@ -13,7 +13,6 @@
 // structure — they just map to different className sets and message strings.
 // ------------------------------------------------------------
 
-import { useState }       from 'react'
 import { Link }           from 'react-router-dom'
 import { cn }             from '@/lib/cn'
 import { interactions }   from '@/lib/interactions'

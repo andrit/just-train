@@ -15,7 +15,7 @@
 import type { FastifyInstance } from 'fastify'
 import { authenticate }        from '../middleware/authenticate'
 import { db, clients, trainers } from '../db'
-import { eq, and, sql }          from 'drizzle-orm'
+import { eq, sql }          from 'drizzle-orm'
 import {
   UuidParamSchema,
   ErrorResponseSchema,
@@ -24,9 +24,7 @@ import { z }                   from 'zod'
 import {
   buildReportHtml,
   sendReport,
-  resolveReportPeriod,
   buildReportData,
-  type ReportData,
 } from '../services/report.service'
 
 const ReportBodySchema = z.object({
@@ -85,7 +83,7 @@ export async function reportRoutes(app: FastifyInstance): Promise<void> {
         clientEmail:  result.data.clientEmail || null,
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to generate report preview' })
     }
   })
@@ -143,7 +141,7 @@ export async function reportRoutes(app: FastifyInstance): Promise<void> {
         periodLabel: result.periodLabel,
       })
     } catch (error) {
-      ;(app.log as any).error(error)
+      ;app.log.error(error)
       return reply.status(500).send({ error: 'Failed to send report' })
     }
   })

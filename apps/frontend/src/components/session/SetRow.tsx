@@ -11,7 +11,7 @@
 // edit support planned for a future patch).
 // ------------------------------------------------------------
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { cn }                          from '@/lib/cn'
 import { interactions }                from '@/lib/interactions'
 import { useUXEventRef }               from '@/hooks/useUXEvent'

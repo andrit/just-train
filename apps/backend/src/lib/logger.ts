@@ -12,24 +12,24 @@
 //
 // USAGE:
 //   import { routeLog } from '../lib/logger'
-//   const log = routeLog(app)
-//   log.error('something went wrong')
+//   routeLog(app).error(error)
+//   routeLog(app).warn({ err }, 'seed failed')
 // ------------------------------------------------------------
 
 import type { FastifyInstance } from 'fastify'
 
 interface RouteLogger {
-  error(msg: unknown): void
-  warn(msg: unknown):  void
-  info(msg: unknown):  void
+  error(msg: unknown, context?: string): void
+  warn(msg: unknown, context?: string):  void
+  info(msg: unknown, context?: string):  void
 }
 
 export function routeLog(app: FastifyInstance): RouteLogger {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const log = app.log as any
   return {
-    error: (msg) => log.error(msg instanceof Error ? msg.message : msg),
-    warn:  (msg) => log.warn(msg  instanceof Error ? msg.message : msg),
-    info:  (msg) => log.info(msg  instanceof Error ? msg.message : msg),
+    error: (msg, context) => context ? log.error(msg, context) : log.error(msg instanceof Error ? msg.message : msg),
+    warn:  (msg, context) => context ? log.warn(msg, context)  : log.warn(msg  instanceof Error ? msg.message : msg),
+    info:  (msg, context) => context ? log.info(msg, context)  : log.info(msg  instanceof Error ? msg.message : msg),
   }
 }

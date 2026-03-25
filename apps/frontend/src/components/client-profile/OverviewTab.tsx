@@ -28,7 +28,7 @@ import {
   lastSessionLabel,
   isAtRisk,
 } from '@/components/clients/utils'
-import type { ClientGoalResponse } from '@trainer-app/shared'
+import type { ClientGoalResponse, ClientResponse } from '@trainer-app/shared'
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
 
@@ -177,8 +177,8 @@ export function OverviewTab({
         />
         <StatCard
           label="Last Session"
-          value={lastActiveAt ? lastSessionLabel({ lastActiveAt } as { lastActiveAt: string }) : '—'}
-          warning={lastActiveAt ? isAtRisk({ lastActiveAt } as { lastActiveAt: string }) : false}
+          value={lastActiveAt ? lastSessionLabel({ lastActiveAt } as ClientResponse) : '—'}
+          warning={lastActiveAt ? isAtRisk({ lastActiveAt } as ClientResponse) : false}
         />
         <StatCard
           label="Days In"

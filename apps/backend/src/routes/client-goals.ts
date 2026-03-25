@@ -119,7 +119,7 @@ export async function clientGoalRoutes(app: FastifyInstance): Promise<void> {
       if (!goal) return reply.status(500).send({ error: 'Failed to create goal' })
       return reply.status(201).send(serializeGoal(goal))
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to create goal' })
     }
   })
@@ -169,7 +169,7 @@ export async function clientGoalRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(serializeGoal(updated))
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to update goal' })
     }
   })

@@ -1,26 +1,23 @@
 // ------------------------------------------------------------
 // src/lib/logger.ts
 //
-// Typed wrapper around Fastify's pino logger.
+// Typed error logging helper for Fastify routes.
 //
 // WHY THIS EXISTS:
-//   Fastify's FastifyInstance.log type doesn't always expose
-//   .error() with the right overloads for (error, message) calls.
-//   Rather than cast `(app.log as any)` in every catch block
-//   (which triggers @typescript-eslint/no-explicit-any), we
-//   extract a typed logger reference once here.
+//   FastifyBaseLogger doesn't expose .error() in a way TypeScript
+//   accepts when passing an Error object directly. This helper
+//   casts once here so every catch block stays clean.
 //
 // USAGE:
-//   import { getLogger } from '../lib/logger'
-//   const log = getLogger(app)
-//   ...
+//   import { logError } from '../lib/logger'
 //   } catch (error) {
-//     log.error(error, 'Failed to fetch sessions')
+//     logError(app, error)
 //   }
 // ------------------------------------------------------------
 
-import type { FastifyInstance, FastifyBaseLogger } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
-export function getLogger(app: FastifyInstance): FastifyBaseLogger {
-  return app.log
+export function logError(app: FastifyInstance, error: unknown): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(app.log as any).error(error)
 }

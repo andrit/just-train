@@ -83,7 +83,7 @@ export async function reportRoutes(app: FastifyInstance): Promise<void> {
         clientEmail:  result.data.clientEmail || null,
       })
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to generate report preview' })
     }
   })
@@ -141,7 +141,7 @@ export async function reportRoutes(app: FastifyInstance): Promise<void> {
         periodLabel: result.periodLabel,
       })
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to send report' })
     }
   })

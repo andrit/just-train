@@ -297,7 +297,7 @@ const start = async (): Promise<void> => {
       ;app.log.warn('Queue:        UPSTASH_REDIS_URL not set — job queue disabled')
     }
   } catch (error) {
-    ;app.log.error(error)
+    ;app.log.error(error instanceof Error ? error.message : String(error))
     process.exit(1)
   }
 }

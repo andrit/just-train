@@ -98,7 +98,7 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
         .orderBy(clients.name)
       return reply.send(result.map(serializeClient))
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to fetch clients' })
     }
   })
@@ -129,7 +129,7 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
       if (!result) return reply.status(404).send({ error: 'Client not found' })
       return reply.send(serializeClient(result))
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to fetch client' })
     }
   })
@@ -163,7 +163,7 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
       if (!newClient) return reply.status(500).send({ error: 'Failed to create client' })
       return reply.status(201).send(serializeClient(newClient))
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to create client' })
     }
   })
@@ -199,7 +199,7 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
       if (!updated) return reply.status(404).send({ error: 'Client not found' })
       return reply.send(serializeClient(updated))
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to update client' })
     }
   })
@@ -241,7 +241,7 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
       if (!updated) return reply.status(404).send({ error: 'Client not found' })
       return reply.status(204).send()
     } catch (error) {
-      ;app.log.error(error)
+      ;app.log.error(error instanceof Error ? error.message : String(error))
       return reply.status(500).send({ error: 'Failed to deactivate client' })
     }
   })

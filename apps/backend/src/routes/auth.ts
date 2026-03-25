@@ -1,3 +1,4 @@
+import { routeLog } from '../lib/logger'
 // ------------------------------------------------------------
 // routes/auth.ts — Authentication endpoints
 //
@@ -202,7 +203,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       // Seed the starter exercise library for this trainer — fire and forget,
       // don't block the registration response if it fails.
       seedExerciseLibrary(trainer.id).catch((err) => {
-        ;app.log.warn({ err }, 'Exercise library seed failed for new trainer')
+        ;routeLog(app).warn({ err }, 'Exercise library seed failed for new trainer')
       })
 
       // Issue tokens immediately
@@ -216,7 +217,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         trainer: serializeTrainer(trainer, { lastLoginAt: null }),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to create account' })
     }
   })
@@ -285,7 +286,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         trainer: serializeTrainer(trainer),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Login failed' })
     }
   })
@@ -364,7 +365,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
         trainer: serializeTrainer(trainer),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Token refresh failed' })
     }
   })
@@ -403,7 +404,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
       reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
       return reply.send({ message: 'Logged out successfully' })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Logout failed' })
     }
   })
@@ -429,7 +430,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
       reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
       return reply.send({ message: 'Logged out from all devices' })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Logout failed' })
     }
   })
@@ -464,7 +465,7 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
         ...serializeTrainer(trainer),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch trainer profile' })
     }
   })
@@ -519,7 +520,7 @@ Called once from the onboarding screen after registration. Can be called again t
         ...serializeTrainer(updated),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to complete onboarding' })
     }
   })
@@ -563,7 +564,7 @@ Called once from the onboarding screen after registration. Can be called again t
         ...serializeTrainer(updated),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to update profile' })
     }
   })

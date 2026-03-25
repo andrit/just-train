@@ -1,3 +1,4 @@
+import { routeLog } from '../lib/logger'
 // ------------------------------------------------------------
 // routes/kpis.ts — GET /clients/:id/kpis (v1.6.0)
 //
@@ -321,7 +322,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         avgStressThisMonth:    avg(stressScores),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to compute KPIs' })
     }
   })
@@ -440,7 +441,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(result)
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to compute personal bests' })
     }
   })

@@ -1,3 +1,4 @@
+import { routeLog } from '../lib/logger'
 // ------------------------------------------------------------
 // routes/sessions.ts — Sessions, Workouts, SessionExercises, Sets
 //
@@ -143,7 +144,7 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send(result.map(serializeSession))
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch sessions' })
     }
   })
@@ -202,7 +203,7 @@ This is the primary payload for the active workout view — loaded once when the
 
       return reply.send(serializeSession(result))
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch session' })
     }
   })
@@ -254,7 +255,7 @@ This is the primary payload for the active workout view — loaded once when the
 
       return reply.status(201).send(serializeSession({ ...newSession, client }))
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to create session' })
     }
   })
@@ -309,7 +310,7 @@ This is the primary payload for the active workout view — loaded once when the
 
       return reply.send(serializeSession({ ...updated, client }))
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to update session' })
     }
   })
@@ -361,7 +362,7 @@ This is the primary payload for the active workout view — loaded once when the
 
       return reply.status(204).send()
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to delete session' })
     }
   })
@@ -417,7 +418,7 @@ These are suggestions — the trainer can use any order.`,
         sessionExercises: [],
       }))
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to add workout block' })
     }
   })
@@ -453,7 +454,7 @@ These are suggestions — the trainer can use any order.`,
 
       return reply.status(204).send()
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to remove workout block' })
     }
   })
@@ -508,7 +509,7 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
         sets:     [],
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to add exercise to workout' })
     }
   })
@@ -544,7 +545,7 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
 
       return reply.status(204).send()
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to remove exercise' })
     }
   })
@@ -659,7 +660,7 @@ Which fields you populate depends on the workout type:
         createdAt: newSet.createdAt instanceof Date ? newSet.createdAt.toISOString() : newSet.createdAt,
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to record set' })
     }
   })
@@ -702,7 +703,7 @@ Which fields you populate depends on the workout type:
         createdAt: updated.createdAt instanceof Date ? updated.createdAt.toISOString() : updated.createdAt,
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to update set' })
     }
   })
@@ -738,7 +739,7 @@ Which fields you populate depends on the workout type:
 
       return reply.status(204).send()
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to delete set' })
     }
   })

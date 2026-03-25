@@ -1,3 +1,4 @@
+import { routeLog } from '../lib/logger'
 // ------------------------------------------------------------
 // routes/media.ts — Exercise media upload and delete (Phase 3)
 //
@@ -145,7 +146,7 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
         createdAt: media.createdAt.toISOString(),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Upload failed' })
     }
   })
@@ -197,7 +198,7 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
 
       return reply.status(204).send()
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to delete media' })
     }
   })
@@ -259,7 +260,7 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
         createdAt: updated.createdAt.toISOString(),
       })
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to update primary media' })
     }
   })

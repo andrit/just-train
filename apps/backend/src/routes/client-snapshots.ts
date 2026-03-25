@@ -1,3 +1,4 @@
+import { routeLog } from '../lib/logger'
 // ------------------------------------------------------------
 // routes/client-snapshots.ts — Client Snapshot endpoints (Phase 3C)
 //
@@ -191,7 +192,7 @@ export async function clientSnapshotRoutes(app: FastifyInstance): Promise<void> 
       if (!snapshot) return reply.status(500).send({ error: 'Failed to create snapshot' })
       return reply.status(201).send(serializeSnapshot(snapshot))
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to create snapshot' })
     }
   })
@@ -233,7 +234,7 @@ export async function clientSnapshotRoutes(app: FastifyInstance): Promise<void> 
 
       return reply.send(serializeSnapshot(updated))
     } catch (error) {
-      ;app.log.error(error instanceof Error ? error.message : String(error))
+      ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to update snapshot' })
     }
   })

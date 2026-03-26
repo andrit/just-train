@@ -28,6 +28,15 @@ import { z } from 'zod'
 // Partial schema for PATCH — all fields optional
 const UpdateTemplateSchema = CreateTemplateSchema.partial()
 
+// Serialize dates to ISO strings for all template responses
+function serializeDates<T extends { createdAt: Date | string; updatedAt: Date | string }>(row: T): T {
+  return {
+    ...row,
+    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
+  }
+}
+
 export async function templateRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', authenticate)
 
@@ -52,7 +61,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
         orderBy: templates.name,
       })
 
-      return reply.send(result)
+      return reply.send(result.map(serializeDates))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch templates' })
@@ -105,7 +114,7 @@ Use this to display the template builder/editor and to preview what a session wi
         return reply.status(404).send({ error: 'Template not found' })
       }
 
-      return reply.send(result)
+      return reply.send(serializeDates(result))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch template' })
@@ -141,7 +150,9 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
         .values({ ...body, trainerId: request.trainer.trainerId })
         .returning()
 
-      return reply.status(201).send(newTemplate)
+      if (!newTemplate) return reply.status(500).send({ error: 'Failed to create template' })
+
+      return reply.status(201).send(serializeDates(newTemplate))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to create template' })
@@ -186,7 +197,7 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
         return reply.status(404).send({ error: 'Template not found' })
       }
 
-      return reply.send(updated)
+      return reply.send(serializeDates(updated))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to update template' })

@@ -8,7 +8,7 @@
 //   - New template → opens builder sheet
 // ------------------------------------------------------------
 
-import { useState }                   from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { cn }                          from '@/lib/cn'
 import { interactions }                from '@/lib/interactions'
 import {
@@ -19,10 +19,12 @@ import {
 import { Spinner }                     from '@/components/ui/Spinner'
 import { ConfirmDialog }               from '@/components/ui/ConfirmDialog'
 import { TemplateBuilderSheet }        from '@/components/templates/TemplateBuilderSheet'
+import { toast }                       from '@/store/toastStore'
+import { apiClient }                   from '@/lib/api'
 import type { TemplateSummaryResponse } from '@trainer-app/shared'
 
 export default function TemplatesPage(): React.JSX.Element {
-  const { data: templates, isLoading } = useTemplates()
+  const { data: templates, isLoading, refetch } = useTemplates()
   const deleteTemplate = useDeleteTemplate()
   const forkTemplate   = useForkTemplate()
 
@@ -30,6 +32,21 @@ export default function TemplatesPage(): React.JSX.Element {
   const [builderOpen, setBuilderOpen] = useState(false)
   const [editId,      setEditId]      = useState<string | null>(null)
   const [deleteId,    setDeleteId]    = useState<string | null>(null)
+  const [seeding,     setSeeding]     = useState(false)
+  const seededRef = useRef(false)
+
+  // Auto-seed defaults when the list is empty — fires once per mount
+  useEffect(() => {
+    if (isLoading) return
+    if (seededRef.current) return
+    if ((templates ?? []).length > 0) return
+    seededRef.current = true
+    setSeeding(true)
+    apiClient.post('/auth/seed-templates', {})
+      .then(() => refetch())
+      .catch(() => toast.error('Could not load default templates'))
+      .finally(() => setSeeding(false))
+  }, [isLoading, templates, refetch])
 
   const filtered = (templates ?? []).filter(t =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -38,11 +55,17 @@ export default function TemplatesPage(): React.JSX.Element {
 
   const handleDelete = (): void => {
     if (!deleteId) return
-    deleteTemplate.mutate(deleteId, { onSuccess: () => setDeleteId(null) })
+    deleteTemplate.mutate(deleteId, {
+      onSuccess: () => { setDeleteId(null); toast.success('Template deleted') },
+      onError:   () => toast.error('Failed to delete template'),
+    })
   }
 
   const handleFork = (id: string, name: string): void => {
-    forkTemplate.mutate({ id, name: `${name} (copy)` })
+    forkTemplate.mutate({ id, name: `${name} (copy)` }, {
+      onSuccess: () => toast.success('Template duplicated'),
+      onError:   () => toast.error('Failed to duplicate template'),
+    })
   }
 
   const handleEdit = (id: string): void => {
@@ -94,9 +117,12 @@ export default function TemplatesPage(): React.JSX.Element {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
-        {isLoading ? (
-          <div className="flex justify-center py-12">
+        {isLoading || seeding ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
             <Spinner size="md" className="text-brand-highlight" />
+            {seeding && (
+              <p className="text-xs text-gray-500">Loading default templates…</p>
+            )}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">

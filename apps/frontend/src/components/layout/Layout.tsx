@@ -9,6 +9,7 @@ import { useOverlayStore } from '@/store/overlayStore'
 import { useAuthStore }    from '@/store/authStore'
 import { useSyncStatus }   from '@/hooks/useSyncStatus'
 import { OfflineBanner }   from '@/components/shell/OfflineBanner'
+import { ToastContainer }  from '@/components/ui/ToastContainer'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -137,6 +138,8 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
         <OfflineBanner />
         {children}
       </main>
+
+      <ToastContainer />
 
       {/* ── Bottom tab bar (mobile) ───────────────────────────────────── */}
       <nav

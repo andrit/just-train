@@ -44,6 +44,7 @@ import {
 } from '../services/auth.service'
 import { authenticate } from '../middleware/authenticate'
 import { seedExerciseLibrary } from '../db/seed-exercises'
+import { seedDefaultTemplates } from '../db/seeds/defaultTemplates'
 import {
   CreateTrainerSchema,
   LoginSchema,
@@ -566,6 +567,32 @@ Called once from the onboarding screen after registration. Can be called again t
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to update profile' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // POST /auth/seed-templates — Seed default templates
+  // Seeds the 20 default templates for the logged-in trainer.
+  // Idempotent — skips if trainer already has templates.
+  // Called automatically when the templates page loads empty.
+  // ----------------------------------------------------------
+  app.post('/auth/seed-templates', {
+    schema: {
+      tags:     ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Seed default templates for the current trainer',
+      response: {
+        200: z.object({ seeded: z.boolean() }),
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    try {
+      await seedDefaultTemplates(request.trainer.trainerId)
+      return reply.send({ seeded: true })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to seed templates' })
     }
   })
 }

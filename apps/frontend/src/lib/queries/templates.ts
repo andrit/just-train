@@ -13,15 +13,19 @@ import type {
   TemplateSummaryResponse,
 } from '@trainer-app/shared'
 
+import { useAuthStore } from '@/store/authStore'
+
 export const templateKeys = {
   all:    ()           => ['templates'] as const,
   detail: (id: string) => ['templates', id] as const,
 }
 
 export function useTemplates(): UseQueryResult<TemplateListResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
   return useQuery({
     queryKey: templateKeys.all(),
     queryFn:  () => apiClient.get<TemplateListResponse>('/templates'),
+    enabled:  !!accessToken,
     staleTime: 1000 * 60 * 5,
   })
 }

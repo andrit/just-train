@@ -21,6 +21,7 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query'
 import { apiClient }  from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
 import type {
   ExerciseListResponse,
   ExerciseDetailResponse,
@@ -55,10 +56,12 @@ export interface ExerciseFilters {
  * Body parts change extremely rarely — stale after 24 hours.
  */
 export function useBodyParts(): UseQueryResult<BodyPartListResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
   return useQuery({
     queryKey: exerciseKeys.bodyParts(),
     queryFn:  () => apiClient<BodyPartListResponse>('/body-parts'),
-    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    enabled:  !!accessToken,
+    staleTime: 1000 * 60 * 60 * 24,
   })
 }
 
@@ -69,7 +72,7 @@ export function useBodyParts(): UseQueryResult<BodyPartListResponse> {
  * Re-fetches automatically when filters change.
  */
 export function useExercises(filters?: ExerciseFilters): UseQueryResult<ExerciseListResponse> {
-  // Build query string from filters
+  const accessToken = useAuthStore((s) => s.accessToken)
   const params = new URLSearchParams()
   if (filters?.search)     params.set('search', filters.search)
   if (filters?.bodyPartId) params.set('bodyPartId', filters.bodyPartId)
@@ -82,7 +85,8 @@ export function useExercises(filters?: ExerciseFilters): UseQueryResult<Exercise
   return useQuery({
     queryKey: exerciseKeys.list(filters),
     queryFn:  () => apiClient<ExerciseListResponse>(`/exercises${qs ? `?${qs}` : ''}`),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    enabled:  !!accessToken,
+    staleTime: 1000 * 60 * 2,
   })
 }
 

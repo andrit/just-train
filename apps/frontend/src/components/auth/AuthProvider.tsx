@@ -16,6 +16,8 @@ interface AuthProviderProps {
 /**
  * AuthProvider — runs once on mount to attempt a silent token refresh.
  * Restores auth state from the httpOnly cookie on page load/refresh.
+ * Children are not mounted until initialization completes — this prevents
+ * any query hooks from firing before the access token is available.
  */
 export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
   const isInitializing  = useAuthStore((s) => s.isInitializing)
@@ -26,11 +28,18 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
     if (hasRun.current) return
     hasRun.current = true
 
-    attemptTokenRefresh().finally(() => {
-      setInitializing(false)
-    })
+    attemptTokenRefresh()
+      .then((token) => {
+        // If refresh failed, ensure auth state is fully cleared
+        if (!token) useAuthStore.getState().clearAuth()
+      })
+      .finally(() => {
+        setInitializing(false)
+      })
   }, [setInitializing])
 
+  // Block children from mounting until auth is resolved.
+  // This prevents query hooks from firing before the access token exists.
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-brand-primary flex items-center justify-center">

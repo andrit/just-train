@@ -29,27 +29,55 @@ export class ApiError extends Error {
   }
 }
 
-// ── Token refresh ─────────────────────────────────────────────────────────────
+// ── Token refresh — singleton pattern ────────────────────────────────────────
+// Only one refresh call in flight at a time. All concurrent 401s share the
+// same promise. When the refresh fails, we redirect immediately and set a
+// flag so no further requests are attempted.
+
+let refreshPromise: Promise<string | null> | null = null
+let isRedirectingToLogin = false
 
 export async function attemptTokenRefresh(): Promise<string | null> {
+  // Already redirecting — don't attempt anything
+  if (isRedirectingToLogin) return null
+
+  // Return the in-flight promise if one exists (deduplication)
+  if (refreshPromise) return refreshPromise
+
   const trainerId = useAuthStore.getState().trainer?.id
 
-  try {
-    const response = await fetch(`${BASE_URL}/auth/refresh`, {
-      method:      'POST',
-      credentials: 'include',
-      headers: {
-        'X-Device-ID':   DEVICE_ID,
-        ...(trainerId ? { 'X-Trainer-ID': trainerId } : {}),
-      },
+  refreshPromise = fetch(`${BASE_URL}/auth/refresh`, {
+    method:      'POST',
+    credentials: 'include',
+    headers: {
+      'X-Device-ID':   DEVICE_ID,
+      ...(trainerId ? { 'X-Trainer-ID': trainerId } : {}),
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) return null
+      const data = await response.json()
+      useAuthStore.getState().setAuth(data.accessToken, data.trainer)
+      return data.accessToken as string
     })
-    if (!response.ok) return null
-    const data = await response.json()
-    useAuthStore.getState().setAuth(data.accessToken, data.trainer)
-    return data.accessToken as string
-  } catch {
-    return null
-  }
+    .catch(() => null)
+    .finally(() => {
+      refreshPromise = null  // clear lock so future refreshes can run
+    })
+
+  return refreshPromise
+}
+
+function redirectToLogin(): void {
+  if (isRedirectingToLogin) return
+  isRedirectingToLogin = true
+  useAuthStore.getState().clearAuth()
+  // Do NOT use window.location.href here — that causes a hard reload which
+  // resets all module state (including isRedirectingToLogin) and restarts
+  // the entire 401 loop. Instead, clearAuth() sets isAuthenticated: false
+  // and ProtectedRoute in App.tsx handles the redirect via React Router.
+  // Reset the flag after a tick so future logins work normally.
+  setTimeout(() => { isRedirectingToLogin = false }, 100)
 }
 
 // ── Core request ──────────────────────────────────────────────────────────────
@@ -59,7 +87,17 @@ async function request<T>(
   init:        RequestInit = {},
   isRetry = false,
 ): Promise<T> {
-  const { accessToken } = useAuthStore.getState()
+  // Already redirecting to login — don't fire any more requests
+  if (isRedirectingToLogin) throw new ApiError(401, 'Session expired')
+
+  const { accessToken, isInitializing } = useAuthStore.getState()
+
+  // Don't fire authenticated requests while auth state is still being
+  // restored from the refresh cookie — avoids the 401 storm on startup.
+  // Auth routes are always allowed through.
+  if (isInitializing && !path.includes('/auth/')) {
+    throw new ApiError(0, 'Auth initializing')
+  }
 
   const headers: Record<string, string> = {
     'X-Device-ID': DEVICE_ID,
@@ -84,20 +122,16 @@ async function request<T>(
     credentials: 'include',
   })
 
-  // ── 401 TOKEN_EXPIRED — silent refresh + retry once ───────────────────────
-  if (response.status === 401 && !isRetry) {
-    let errorBody: { code?: string } = {}
-    try { errorBody = await response.clone().json() } catch { /* ignore */ }
-
-    if (errorBody.code === 'TOKEN_EXPIRED') {
-      const newToken = await attemptTokenRefresh()
-      if (newToken) {
-        return request<T>(path, init, true)
-      } else {
-        useAuthStore.getState().clearAuth()
-        window.location.href = '/login'
-        throw new ApiError(401, 'Session expired — please log in again')
-      }
+  // ── 401 — attempt silent refresh + retry once ────────────────────────────
+  // Fires on any 401: expired token, missing token, or invalid token.
+  // Auth routes excluded. Singleton refresh prevents parallel calls.
+  if (response.status === 401 && !isRetry && !path.includes('/auth/')) {
+    const newToken = await attemptTokenRefresh()
+    if (newToken) {
+      return request<T>(path, init, true)
+    } else {
+      redirectToLogin()
+      throw new ApiError(401, 'Session expired — please log in again')
     }
   }
 
@@ -106,8 +140,7 @@ async function request<T>(
     try { errorData = await response.json() } catch { /* ignore */ }
 
     if (response.status === 401) {
-      useAuthStore.getState().clearAuth()
-      window.location.href = '/login'
+      redirectToLogin()
     }
 
     throw new ApiError(

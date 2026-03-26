@@ -20,6 +20,7 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query'
 import { apiClient }        from '@/lib/api'
+import { useAuthStore }     from '@/store/authStore'
 import { offlineAwareApi }  from '@/lib/offlineAwareApi'
 import type {
   SessionDetailResponse,
@@ -48,6 +49,7 @@ export interface SessionFilters {
 // ── Session list ──────────────────────────────────────────────────────────────
 
 export function useSessions(filters?: SessionFilters): UseQueryResult<SessionListResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
   const params = new URLSearchParams()
   if (filters?.clientId) params.set('clientId', filters.clientId)
   if (filters?.status)   params.set('status', filters.status)
@@ -56,7 +58,8 @@ export function useSessions(filters?: SessionFilters): UseQueryResult<SessionLis
   return useQuery({
     queryKey: sessionKeys.list(filters),
     queryFn:  () => apiClient<SessionListResponse>(`/sessions${qs ? `?${qs}` : ''}`),
-    staleTime: 1000 * 30, // 30s — sessions change frequently during active use
+    enabled:  !!accessToken,
+    staleTime: 1000 * 30,
   })
 }
 

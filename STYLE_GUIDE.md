@@ -111,6 +111,19 @@ return (
 - Query hooks live in `src/lib/queries/`
 - No hook calls inside conditions or loops
 - `useEffect` deps arrays must be complete — use `eslint-disable-next-line react-hooks/exhaustive-deps` with a comment when intentionally omitting a dep
+- **All top-level query hooks must have `enabled: !!accessToken`** — this prevents queries from firing before auth initialization completes, avoiding the 401 startup loop
+
+```ts
+// ✅ — query won't fire until the user is authenticated
+export function useClients() {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  return useQuery({
+    queryKey: clientKeys.all(),
+    queryFn:  () => apiClient('/clients'),
+    enabled:  !!accessToken,
+  })
+}
+```
 
 ### No index keys
 Don't use array index as a React key unless the list is static and never reordered.

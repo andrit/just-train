@@ -19,6 +19,7 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
 import type {
   ClientResponse,
   ClientListResponse,
@@ -46,9 +47,11 @@ export const clientKeys = {
 // ── Client list ───────────────────────────────────────────────────────────────
 
 export function useClients(): UseQueryResult<ClientListResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
   return useQuery({
     queryKey: clientKeys.all(),
     queryFn:  () => apiClient<ClientListResponse>('/clients'),
+    enabled:  !!accessToken,
     staleTime: 1000 * 60 * 2,
   })
 }
@@ -56,9 +59,11 @@ export function useClients(): UseQueryResult<ClientListResponse> {
 // ── Self-client ───────────────────────────────────────────────────────────────
 
 export function useSelfClient(): UseQueryResult<ClientResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
   return useQuery({
     queryKey: clientKeys.self(),
     queryFn:  () => apiClient<ClientResponse>('/clients/self'),
+    enabled:  !!accessToken,
     staleTime: 1000 * 60 * 5,
   })
 }

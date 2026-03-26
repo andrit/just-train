@@ -15,17 +15,26 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import App from './App'
 import './index.css'
 import { syncService, SYNC_COMPLETE_EVENT } from './services/syncService'
+import { ApiError } from './lib/api'
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
       gcTime:    1000 * 60 * 30,
-      retry:     2,
+      // Never retry on 401 — the api.ts interceptor handles refresh+retry once.
+      // Retrying 401s causes the rate-limit loop on startup.
+      retry: (failureCount, error) => {
+        if (error instanceof ApiError && (error.status === 401 || error.status === 0)) return false
+        return failureCount < 2
+      },
       refetchOnWindowFocus: false,
     },
     mutations: {
-      retry: 1,
+      retry: (failureCount, error) => {
+        if (error instanceof ApiError && (error.status === 401 || error.status === 0)) return false
+        return failureCount < 1
+      },
     },
   },
 })

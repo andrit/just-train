@@ -450,3 +450,22 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - `apps/backend/package.json` — same
 - `pnpm lint` at root now runs all three packages via `pnpm -r lint`
 
+
+## [v2.7.0] — Template Library
+
+### Backend
+- `POST /sessions` with `templateId` — now actually copies template workout blocks and exercises into the new session (was previously a no-op)
+- `POST /templates/:id/fork` — deep copies a template with all blocks and exercises
+- `POST /templates/:id/workouts` — add a workout block to a template
+- `DELETE /template-workouts/:id` — remove a workout block
+- `POST /template-workouts/:id/exercises` — add an exercise to a template block
+- `DELETE /template-exercises/:id` — remove an exercise from a block
+- `seedDefaultTemplates(trainerId)` — 20 curated default templates seeded on new trainer registration: Push Day A/B, Pull Day A/B, Leg Day A/B, Upper Body, Lower Body, Full Body A/B, PPL Push/Pull/Legs, HIIT Circuit, Steady State Cardio, Cardio + Core, Full Body Stretch, Post-Leg Recovery, Upper Body Mobility
+
+### Frontend
+- `TemplatesPage` — full template library with search, card grid, fork/edit/delete
+- `TemplateBuilderSheet` — create and edit template name/description; shows workout blocks in read-only overview
+- `TemplatePickerSheet` — pick a template to load into a session plan
+- `SessionPlanPanel` — "Load template" button creates a session pre-populated from template; "Save as template" saves the current plan as a new template
+- `lib/queries/templates.ts` — expanded with `useCreateTemplate`, `useUpdateTemplate`, `useDeleteTemplate`, `useForkTemplate`
+

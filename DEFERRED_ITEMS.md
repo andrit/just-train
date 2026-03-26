@@ -242,3 +242,14 @@ What: Add stories for session components, exercise library components, panel/ove
 ### Nutrition Tracking
 When: Only if users consistently request it
 What: Calorie and macro tracking per session/day. Risk of becoming a half-baked MyFitnessPal clone. The lightweight hooks (`caloricGoal`, session notes) already cover what the monthly report needs.
+
+### Post-Session Wrap-Up + Auto-Populate + Drag Reorder (v2.8.0)
+Moved from v2.7.0 to v2.8.0 to make room for the template library.
+- Auto-populate exercise targets from last session history
+- Drag to reorder workouts and exercises in plan builder (@dnd-kit/core)
+- Post-session wrap-up flow (name draft exercises, add notes, preview PRs)
+
+### Hosting Setup (v2.11.0)
+Railway (backend + PostgreSQL) + Vercel (frontend) production deploy.
+Full environment variable config, custom domain, GitHub auto-deploy.
+Slotted before v3.0.0 SaaS work so billing features deploy to a real environment.

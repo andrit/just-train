@@ -239,4 +239,241 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
       return reply.status(500).send({ error: 'Failed to delete template' })
     }
   })
+
+  // ----------------------------------------------------------
+  // POST /templates/:id/fork — Deep-copy a template
+  // Creates a new template owned by the requesting trainer with
+  // all workout blocks and exercises duplicated. The original
+  // template may belong to any trainer (enables sharing defaults).
+  // ----------------------------------------------------------
+  app.post('/templates/:id/fork', {
+    schema: {
+      tags:     ['Templates'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Fork a template',
+      description: 'Creates a deep copy of a template owned by the requesting trainer. All workout blocks and exercises are duplicated. Use this to create a modified version of an existing template.',
+      params:   UuidParamSchema,
+      body:     z.object({ name: z.string().min(1).optional() }).optional(),
+      response: {
+        201: TemplateDetailResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id } = request.params as z.infer<typeof UuidParamSchema>
+    const body = request.body as { name?: string } | undefined
+
+    try {
+      // Load source template
+      const source = await db.query.templates.findFirst({
+        where: eq(templates.id, id),
+        with: {
+          templateWorkouts: {
+            orderBy: templateWorkouts.orderIndex,
+            with: { templateExercises: { orderBy: templateExercises.orderIndex } },
+          },
+        },
+      })
+
+      if (!source) return reply.status(404).send({ error: 'Template not found' })
+
+      // Create new template
+      const [forked] = await db.insert(templates).values({
+        trainerId:   request.trainer.trainerId,
+        name:        body?.name ?? `${source.name} (copy)`,
+        description: source.description ?? null,
+        notes:       source.notes ?? null,
+      }).returning()
+
+      if (!forked) return reply.status(500).send({ error: 'Failed to fork template' })
+
+      // Deep-copy workout blocks and exercises
+      for (const tw of source.templateWorkouts) {
+        const [newWorkout] = await db.insert(templateWorkouts).values({
+          templateId:  forked.id,
+          workoutType: tw.workoutType,
+          orderIndex:  tw.orderIndex,
+          notes:       tw.notes ?? null,
+        }).returning()
+
+        if (!newWorkout) continue
+
+        for (const te of tw.templateExercises) {
+          await db.insert(templateExercises).values({
+            templateWorkoutId:     newWorkout.id,
+            exerciseId:            te.exerciseId,
+            orderIndex:            te.orderIndex,
+            targetSets:            te.targetSets            ?? null,
+            targetReps:            te.targetReps            ?? null,
+            targetWeight:          te.targetWeight          ?? null,
+            targetWeightUnit:      te.targetWeightUnit,
+            targetDurationSeconds: te.targetDurationSeconds ?? null,
+            targetDistance:        te.targetDistance        ?? null,
+            targetIntensity:       te.targetIntensity       ?? null,
+            notes:                 te.notes                 ?? null,
+          })
+        }
+      }
+
+      // Return full detail of forked template
+      const result = await db.query.templates.findFirst({
+        where: eq(templates.id, forked.id),
+        with: {
+          templateWorkouts: {
+            orderBy: templateWorkouts.orderIndex,
+            with: { templateExercises: { orderBy: templateExercises.orderIndex } },
+          },
+        },
+      })
+
+      return reply.status(201).send(result)
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to fork template' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // POST /templates/:id/workouts — Add a workout block
+  // ----------------------------------------------------------
+  app.post('/templates/:id/workouts', {
+    schema: {
+      tags: ['Templates'], security: [{ bearerAuth: [] }],
+      summary: 'Add a workout block to a template',
+      params: UuidParamSchema,
+      body: z.object({
+        workoutType: z.string(),
+        orderIndex:  z.number().int().optional(),
+        notes:       z.string().optional(),
+      }),
+      response: { 201: z.object({ id: z.string().uuid() }), 404: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { id } = request.params as z.infer<typeof UuidParamSchema>
+    const body   = request.body as { workoutType: string; orderIndex?: number; notes?: string }
+
+    try {
+      const template = await db.query.templates.findFirst({
+        where: and(eq(templates.id, id), eq(templates.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!template) return reply.status(404).send({ error: 'Template not found' })
+
+      const existing = await db.query.templateWorkouts.findMany({
+        where: eq(templateWorkouts.templateId, id),
+        columns: { id: true },
+      })
+
+      const [block] = await db.insert(templateWorkouts).values({
+        templateId:  id,
+        workoutType: body.workoutType as never,
+        orderIndex:  body.orderIndex ?? existing.length,
+        notes:       body.notes ?? null,
+      }).returning()
+
+      if (!block) return reply.status(500).send({ error: "Failed to create block" })
+      return reply.status(201).send({ id: block.id })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to add workout block' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // DELETE /template-workouts/:id — Remove a workout block
+  // ----------------------------------------------------------
+  app.delete('/template-workouts/:id', {
+    schema: {
+      tags: ['Templates'], security: [{ bearerAuth: [] }],
+      summary: 'Remove a workout block from a template',
+      params: UuidParamSchema,
+      response: { 204: z.object({}), 404: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { id } = request.params as z.infer<typeof UuidParamSchema>
+    try {
+      await db.delete(templateWorkouts).where(eq(templateWorkouts.id, id))
+      return reply.status(204).send()
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to remove workout block' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // POST /template-workouts/:id/exercises — Add an exercise
+  // ----------------------------------------------------------
+  app.post('/template-workouts/:id/exercises', {
+    schema: {
+      tags: ['Templates'], security: [{ bearerAuth: [] }],
+      summary: 'Add an exercise to a template workout block',
+      params: UuidParamSchema,
+      body: z.object({
+        exerciseId:            z.string().uuid(),
+        orderIndex:            z.number().int().optional(),
+        targetSets:            z.number().int().optional(),
+        targetReps:            z.number().int().optional(),
+        targetWeight:          z.number().optional(),
+        targetDurationSeconds: z.number().int().optional(),
+        targetDistance:        z.number().optional(),
+        notes:                 z.string().optional(),
+      }),
+      response: { 201: z.object({ id: z.string().uuid() }), 404: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { id: templateWorkoutId } = request.params as z.infer<typeof UuidParamSchema>
+    const body = request.body as {
+      exerciseId: string; orderIndex?: number
+      targetSets?: number; targetReps?: number; targetWeight?: number
+      targetDurationSeconds?: number; targetDistance?: number; notes?: string
+    }
+
+    try {
+      const existing = await db.query.templateExercises.findMany({
+        where: eq(templateExercises.templateWorkoutId, templateWorkoutId),
+        columns: { id: true },
+      })
+
+      const [ex] = await db.insert(templateExercises).values({
+        templateWorkoutId,
+        exerciseId:            body.exerciseId,
+        orderIndex:            body.orderIndex ?? existing.length,
+        targetSets:            body.targetSets            ?? null,
+        targetReps:            body.targetReps            ?? null,
+        targetWeight:          body.targetWeight          ?? null,
+        targetWeightUnit:      'lbs',
+        targetDurationSeconds: body.targetDurationSeconds ?? null,
+        targetDistance:        body.targetDistance        ?? null,
+        notes:                 body.notes                 ?? null,
+      }).returning()
+
+      if (!ex) return reply.status(500).send({ error: "Failed to add exercise" })
+      return reply.status(201).send({ id: ex.id })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to add exercise' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // DELETE /template-exercises/:id — Remove an exercise
+  // ----------------------------------------------------------
+  app.delete('/template-exercises/:id', {
+    schema: {
+      tags: ['Templates'], security: [{ bearerAuth: [] }],
+      summary: 'Remove an exercise from a template workout block',
+      params: UuidParamSchema,
+      response: { 204: z.object({}), 404: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { id } = request.params as z.infer<typeof UuidParamSchema>
+    try {
+      await db.delete(templateExercises).where(eq(templateExercises.id, id))
+      return reply.status(204).send()
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to remove exercise' })
+    }
+  })
 }

@@ -33,6 +33,8 @@ import {
 import { WorkoutBlock }                          from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                         from '@/components/session/AddBlockSheet'
 import { Spinner }                               from '@/components/ui/Spinner'
+import { TemplatePickerSheet }                   from '@/components/templates/TemplatePickerSheet'
+import { useCreateTemplate }                     from '@/lib/queries/templates'
 
 interface SessionPlanPanelProps {
   /** If provided, editing an existing planned session */
@@ -60,6 +62,21 @@ export function SessionPlanPanel({
   const executeSession = useExecuteSession()
   const updateName     = useUpdateSessionName()
   const discardSession = useDiscardSession()
+  const createTemplate = useCreateTemplate()
+
+  // ── Save current session plan as a template ───────────────────────────────
+  const handleSaveAsTemplate = async (): Promise<void> => {
+    if (!session || !workouts.length) return
+    setSavingAsTemplate(true)
+    try {
+      await createTemplate.mutateAsync({
+        name:        session.name ?? `Template from session`,
+        description: `Created from session on ${new Date().toLocaleDateString()}`,
+      })
+    } finally {
+      setSavingAsTemplate(false)
+    }
+  }
 
   // ── State ─────────────────────────────────────────────────────────────────
 
@@ -70,6 +87,8 @@ export function SessionPlanPanel({
   const [sessionName,   setSessionName]   = useState('')
   const [nameEditing,   setNameEditing]   = useState(false)
   const [addBlockOpen,  setAddBlockOpen]  = useState(false)
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false)
+  const [savingAsTemplate,   setSavingAsTemplate]   = useState(false)
   const [error,              setError]              = useState<string | null>(null)
   const [creating,           setCreating]           = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
@@ -227,6 +246,53 @@ export function SessionPlanPanel({
                 >
                   Discard
                 </button>
+
+                {/* Load template */}
+                {!sessionId && (
+                  <button
+                    type="button"
+                    onClick={() => setTemplatePickerOpen(true)}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium',
+                      'border border-surface-border text-gray-400',
+                      'hover:border-brand-highlight/40 hover:text-brand-highlight',
+                      interactions.button.base,
+                      interactions.button.press,
+                    )}
+                  >
+                    <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
+                      <rect x="2" y="2" width="12" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                      <rect x="2" y="7" width="12" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                      <rect x="2" y="12" width="6" height="2" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
+                    Load template
+                  </button>
+                )}
+
+                {/* Save as template */}
+                {sessionId && workouts.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSaveAsTemplate}
+                    disabled={savingAsTemplate}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium',
+                      'border border-surface-border text-gray-400',
+                      'hover:border-brand-highlight/40 hover:text-brand-highlight',
+                      interactions.button.base,
+                      interactions.button.press,
+                    )}
+                  >
+                    {savingAsTemplate ? <Spinner size="sm" /> : (
+                      <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
+                        <path d="M3 3h7l3 3v7a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M5 3v4h6V3" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M4 10h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      </svg>
+                    )}
+                    Save as template
+                  </button>
+                )}
 
                 {/* Save Plan — always available once session is created in DB */}
                 {sessionId && (
@@ -412,13 +478,46 @@ export function SessionPlanPanel({
         </button>
       )}
 
-      {/* Add block sheet */}
+      {/* Add block sheet + template picker */}
       {sessionId && (
-        <AddBlockSheet
-          open={addBlockOpen}
-          sessionId={sessionId}
-          onClose={() => setAddBlockOpen(false)}
+        <>
+          <AddBlockSheet
+            open={addBlockOpen}
+            sessionId={sessionId}
+            onClose={() => setAddBlockOpen(false)}
+          />
+
+          <TemplatePickerSheet
+          open={templatePickerOpen}
+          onClose={() => setTemplatePickerOpen(false)}
+          onSelect={async (templateId) => {
+            if (!selectedClientId) return
+            setTemplatePickerOpen(false)
+            setCreating(true)
+            try {
+              const today = new Date().toISOString().split('T')[0] ?? ''
+              const created = await createSession.mutateAsync({
+                clientId:   selectedClientId,
+                date:       today,
+                templateId,
+              })
+              setSessionId(created.id)
+              addPlannedSession({
+                sessionId:  created.id,
+                clientId:   created.clientId,
+                clientName: created.client?.name ?? '',
+                name:       created.name ?? '',
+                createdAt:  created.createdAt,
+              })
+            } catch {
+              setError('Failed to load template')
+            } finally {
+              setCreating(false)
+            }
+          }}
+          loading={creating}
         />
+        </>
       )}
     </div>
   )

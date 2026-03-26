@@ -630,9 +630,11 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v2.4.0 | Offline sync — write queue, prefetch, banner | ✅ |
 | v2.5.0 | UI/UX polish — execution layout, PR system, gamification foundations | ✅ |
 | v2.6.0 | ESLint + code quality | ✅ |
-| **v2.7.0** | **Post-session wrap-up + auto-populate from history + drag reorder** | 🔜 Next |
-| v2.8.0 | Camera / video capture + coach challenges | 🔜 |
-| v2.9.0 | Leaderboards + weekly quests + social share | 🔜 |
+| v2.7.0 | Template library — builder, fork, seeds, session integration | ✅ |
+| v2.8.0 | Auto-populate from history + drag reorder + post-session wrap-up | 🔜 |
+| v2.9.0 | Camera / video capture + coach challenges | 🔜 |
+| v2.10.0 | Leaderboards + weekly quests + social share | 🔜 |
+| v2.11.0 | Hosting setup — Railway + Vercel production deploy | 🔜 |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 | v3.1.0 | Observable navigation — RxJS swap inside navService | 🔜 |
 
@@ -933,4 +935,61 @@ pnpm db:seed    # seeds body parts then all 109 exercises
 | Calisthenics | sets, reps, time | RPE |
 | Stretching | time (hold duration) | side (L/R/both) |
 | Cooldown | time | — |
+
+
+---
+
+## v2.7.0 Spec — Template Library
+
+### What exists (pre-v2.7.0)
+- Schema: `templates` → `templateWorkouts` → `templateExercises` with full target fields
+- Basic CRUD: GET list, GET detail, POST create, PATCH update, DELETE
+- `templateId` stored on sessions but **application never implemented** — no workouts/exercises are copied
+
+### What ships in v2.7.0
+
+#### Backend
+
+**Template application — `POST /sessions` with `templateId`:**
+When a session is created with a `templateId`, copy the template's workout blocks and exercises into the new session as `workouts` + `sessionExercises` with target values. This is the core feature that makes templates useful.
+
+**Fork endpoint — `POST /templates/:id/fork`:**
+Creates a deep copy of a template (all workout blocks and exercises) owned by the requesting trainer. Used for "create modified copy" flow. Returns the new template.
+
+**Default template seeds:**
+20 trainer-curated templates seeded at startup if no templates exist for a new trainer. Categories:
+- Resistance: Push Day A/B, Pull Day A/B, Leg Day A/B, Upper Body, Lower Body, Full Body A/B
+- Cardio: HIIT Circuit, Steady State Cardio, Cardio + Core
+- Mixed: Push/Pull/Legs (3-day), Upper/Lower (4-day), Full Body (3-day)
+- Stretching/Recovery: Full Body Stretch, Post-Leg Recovery, Upper Body Mobility
+
+Each template has 2–4 workout blocks with 3–6 exercises, realistic rep/set/weight targets.
+
+#### Frontend
+
+**TemplatesPage — full UI:**
+- Grid of template cards (name, workout count, exercise count, type badges)
+- Search/filter by workout type
+- "New template" button → opens template builder
+- Each card: Edit, Fork, Delete, Apply to session
+
+**Template builder:**
+- Same layout as session plan builder (vertical blocks, add exercises)
+- Save as new template or update existing
+- Name + description fields
+
+**"Load template" in SessionPlanPanel:**
+- "Load template" button in plan builder header
+- Opens bottom sheet with template list
+- Selecting a template populates the session with blocks and exercises
+- Existing blocks replaced (with confirmation if session has content)
+
+**"Save as template" from session plan:**
+- "Save as template" option in session plan panel overflow menu
+- Prompts for template name
+- Copies current session structure to a new template
+
+**Fork flow:**
+- "Create modified copy" button on template card/detail
+- Forks the template and opens it in the builder immediately
 

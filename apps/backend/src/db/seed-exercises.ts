@@ -11,6 +11,7 @@
 import { db } from '.'
 import { bodyParts, exercises } from './schema/exercises'
 import { eq, and } from 'drizzle-orm'
+import { seedDefaultTemplates } from './seeds/defaultTemplates'
 
 // ── Body part seed (run once — no trainerId needed) ───────────────────────────
 
@@ -785,6 +786,9 @@ export async function seedExerciseLibrary(trainerId: string): Promise<{ seeded: 
 
     seeded++
   }
+
+  // Seed default templates after exercises are available
+  await seedDefaultTemplates(trainerId)
 
   return { seeded, skipped }
 }

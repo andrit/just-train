@@ -22,7 +22,7 @@ import { routeLog } from '../lib/logger'
 
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
-import { db, sessions, workouts, sessionExercises, sets, clients } from '../db'
+import { db, sessions, workouts, sessionExercises, sets, clients, templateWorkouts, templateExercises } from '../db'
 import { eq, and, desc } from 'drizzle-orm'
 import {
   CreateSessionSchema,
@@ -246,6 +246,51 @@ This is the primary payload for the active workout view — loaded once when the
       if (!newSession) {
         return reply.status(500).send({ error: 'Failed to create session' })
       }
+
+      // ── Apply template if provided ───────────────────────────────────────
+      // Deep-copy template workouts + exercises into the new session
+      if (body.templateId) {
+        const templateData = await db.query.templateWorkouts.findMany({
+          where: eq(templateWorkouts.templateId, body.templateId),
+          orderBy: templateWorkouts.orderIndex,
+          with: {
+            templateExercises: {
+              orderBy: templateExercises.orderIndex,
+            },
+          },
+        })
+
+        for (const tw of templateData) {
+          const [newWorkout] = await db
+            .insert(workouts)
+            .values({
+              sessionId:   newSession.id,
+              workoutType: tw.workoutType,
+              orderIndex:  tw.orderIndex,
+              notes:       tw.notes ?? null,
+            })
+            .returning()
+
+          if (!newWorkout) continue
+
+          for (const te of tw.templateExercises) {
+            await db.insert(sessionExercises).values({
+              workoutId:             newWorkout.id,
+              exerciseId:            te.exerciseId,
+              orderIndex:            te.orderIndex,
+              targetSets:            te.targetSets   ?? null,
+              targetReps:            te.targetReps   ?? null,
+              targetWeight:          te.targetWeight ?? null,
+              targetWeightUnit:      te.targetWeightUnit,
+              targetDurationSeconds: te.targetDurationSeconds ?? null,
+              targetDistance:        te.targetDistance        ?? null,
+              targetIntensity:       te.targetIntensity       ?? null,
+              notes:                 te.notes ?? null,
+            })
+          }
+        }
+      }
+      // ── End template application ─────────────────────────────────────────
 
       // Fetch the client for the response (schema requires it)
       const client = await db.query.clients.findFirst({

@@ -7,37 +7,40 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
 import type {
   TemplateListResponse,
   TemplateDetailResponse,
   TemplateSummaryResponse,
 } from '@trainer-app/shared'
 
-import { useAuthStore } from '@/store/authStore'
-
 export const templateKeys = {
   all:    ()           => ['templates'] as const,
   detail: (id: string) => ['templates', id] as const,
 }
 
-export function useTemplates(): UseQueryResult<TemplateListResponse> {
+export function useTemplates(search?: string): UseQueryResult<TemplateListResponse> {
   const accessToken = useAuthStore((s) => s.accessToken)
+  const qs = search ? `?search=${encodeURIComponent(search)}` : ''
   return useQuery({
-    queryKey: templateKeys.all(),
-    queryFn:  () => apiClient.get<TemplateListResponse>('/templates'),
+    queryKey: [...templateKeys.all(), { search }],
+    queryFn:  () => apiClient.get<TemplateListResponse>(`/templates${qs}`),
     enabled:  !!accessToken,
     staleTime: 1000 * 60 * 5,
   })
 }
 
 export function useTemplate(id: string | null): UseQueryResult<TemplateDetailResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
   return useQuery({
     queryKey: templateKeys.detail(id ?? ''),
     queryFn:  () => apiClient.get<TemplateDetailResponse>(`/templates/${id}`),
-    enabled:  !!id,
+    enabled:  !!accessToken && !!id,
     staleTime: 1000 * 60 * 5,
   })
 }
+
+// ── Create ────────────────────────────────────────────────────────────────────
 
 interface CreateTemplateInput {
   name:        string
@@ -53,6 +56,8 @@ export function useCreateTemplate() {
     onSuccess: () => qc.invalidateQueries({ queryKey: templateKeys.all() }),
   })
 }
+
+// ── Update ────────────────────────────────────────────────────────────────────
 
 interface UpdateTemplateInput {
   id:           string
@@ -73,6 +78,8 @@ export function useUpdateTemplate() {
   })
 }
 
+// ── Delete ────────────────────────────────────────────────────────────────────
+
 export function useDeleteTemplate() {
   const qc = useQueryClient()
   return useMutation({
@@ -82,11 +89,44 @@ export function useDeleteTemplate() {
   })
 }
 
+// ── Fork ──────────────────────────────────────────────────────────────────────
+
 export function useForkTemplate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, name }: { id: string; name?: string }) =>
       apiClient.post<TemplateDetailResponse>(`/templates/${id}/fork`, { name }),
     onSuccess: () => qc.invalidateQueries({ queryKey: templateKeys.all() }),
+  })
+}
+
+// ── Add workout block ─────────────────────────────────────────────────────────
+
+export function useAddTemplateBlock() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ templateId, workoutType, orderIndex }: {
+      templateId: string; workoutType: string; orderIndex: number
+    }) =>
+      apiClient.post(`/templates/${templateId}/workouts`, { workoutType, orderIndex }),
+    onSuccess: (_data, { templateId }) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
+  })
+}
+
+// ── Add exercise to block ─────────────────────────────────────────────────────
+
+export function useAddTemplateExercise() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ templateWorkoutId, exerciseId, orderIndex }: {
+      templateId: string; templateWorkoutId: string
+      exerciseId: string; orderIndex: number
+    }) =>
+      apiClient.post(`/template-workouts/${templateWorkoutId}/exercises`, {
+        exerciseId, orderIndex,
+      }),
+    onSuccess: (_data, { templateId }) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
   })
 }

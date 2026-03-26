@@ -1,14 +1,9 @@
 // ------------------------------------------------------------
 // pages/TemplatesPage.tsx (v2.7.0)
-//
-// Full template library:
-//   - Grid of template cards with workout type badges
-//   - Search filter
-//   - Fork, Edit, Delete actions per card
-//   - New template → opens builder sheet
+// Server-side search, debounced, breadcrumb chip, auto-seed
 // ------------------------------------------------------------
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { cn }                          from '@/lib/cn'
 import { interactions }                from '@/lib/interactions'
 import {
@@ -24,21 +19,34 @@ import { apiClient }                   from '@/lib/api'
 import type { TemplateSummaryResponse } from '@trainer-app/shared'
 
 export default function TemplatesPage(): React.JSX.Element {
-  const { data: templates, isLoading, refetch } = useTemplates()
-  const deleteTemplate = useDeleteTemplate()
-  const forkTemplate   = useForkTemplate()
-
+  const [inputValue,  setInputValue]  = useState('')
   const [search,      setSearch]      = useState('')
   const [builderOpen, setBuilderOpen] = useState(false)
   const [editId,      setEditId]      = useState<string | null>(null)
   const [deleteId,    setDeleteId]    = useState<string | null>(null)
   const [seeding,     setSeeding]     = useState(false)
-  const seededRef = useRef(false)
+  const seededRef   = useRef(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Auto-seed defaults when the list is empty — fires once per mount
+  const { data: templates, isLoading, refetch } = useTemplates(search || undefined)
+  const deleteTemplate = useDeleteTemplate()
+  const forkTemplate   = useForkTemplate()
+
+  // Debounce 300ms then send to backend
+  const handleSearchChange = useCallback((value: string): void => {
+    setInputValue(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => setSearch(value), 300)
+  }, [])
+
+  const clearSearch = (): void => {
+    setInputValue('')
+    setSearch('')
+  }
+
+  // Auto-seed defaults when list is empty — once per mount
   useEffect(() => {
-    if (isLoading) return
-    if (seededRef.current) return
+    if (isLoading || search || seededRef.current) return
     if ((templates ?? []).length > 0) return
     seededRef.current = true
     setSeeding(true)
@@ -46,12 +54,7 @@ export default function TemplatesPage(): React.JSX.Element {
       .then(() => refetch())
       .catch(() => toast.error('Could not load default templates'))
       .finally(() => setSeeding(false))
-  }, [isLoading, templates, refetch])
-
-  const filtered = (templates ?? []).filter(t =>
-    t.name.toLowerCase().includes(search.toLowerCase()) ||
-    (t.description ?? '').toLowerCase().includes(search.toLowerCase())
-  )
+  }, [isLoading, templates, search, refetch])
 
   const handleDelete = (): void => {
     if (!deleteId) return
@@ -68,16 +71,6 @@ export default function TemplatesPage(): React.JSX.Element {
     })
   }
 
-  const handleEdit = (id: string): void => {
-    setEditId(id)
-    setBuilderOpen(true)
-  }
-
-  const handleNew = (): void => {
-    setEditId(null)
-    setBuilderOpen(true)
-  }
-
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -88,7 +81,7 @@ export default function TemplatesPage(): React.JSX.Element {
         </div>
         <button
           type="button"
-          onClick={handleNew}
+          onClick={() => { setEditId(null); setBuilderOpen(true) }}
           className={cn(
             'flex items-center gap-1.5 px-3 py-2 rounded-xl',
             'bg-brand-highlight/15 border border-brand-highlight/30',
@@ -105,14 +98,53 @@ export default function TemplatesPage(): React.JSX.Element {
       </div>
 
       {/* Search */}
-      <div className="px-4 py-3 border-b border-surface-border shrink-0">
-        <input
-          type="text"
-          placeholder="Search templates…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-highlight/50"
-        />
+      <div className="px-4 pt-3 pb-2 border-b border-surface-border shrink-0">
+        <div className="relative">
+          <svg viewBox="0 0 16 16" fill="none" className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 pointer-events-none">
+            <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M11 11l2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by name, description, or muscle group…"
+            value={inputValue}
+            onChange={e => handleSearchChange(e.target.value)}
+            className="w-full bg-brand-primary border border-surface-border rounded-xl pl-8 pr-8 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-highlight/50"
+          />
+          {inputValue && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300 transition-colors"
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Active search breadcrumb chip */}
+        {search && (
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-[10px] text-gray-600 uppercase tracking-wider">Searching for</span>
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-highlight/15 border border-brand-highlight/30 text-xs text-brand-highlight"
+            >
+              {search}
+              <svg viewBox="0 0 12 12" fill="none" className="w-2.5 h-2.5">
+                <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+            {!isLoading && (
+              <span className="text-[10px] text-gray-600">
+                {(templates ?? []).length} result{(templates ?? []).length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -120,46 +152,43 @@ export default function TemplatesPage(): React.JSX.Element {
         {isLoading || seeding ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
             <Spinner size="md" className="text-brand-highlight" />
-            {seeding && (
-              <p className="text-xs text-gray-500">Loading default templates…</p>
-            )}
+            {seeding && <p className="text-xs text-gray-500">Loading default templates…</p>}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : (templates ?? []).length === 0 ? (
           <div className="text-center py-12">
             <p className="text-2xl mb-3" aria-hidden>📋</p>
             <p className="text-gray-400 font-medium">
-              {search ? 'No templates match your search' : 'No templates yet'}
+              {search ? `No templates found for "${search}"` : 'No templates yet'}
             </p>
-            {!search && (
-              <p className="text-gray-600 text-sm mt-1">
-                Create your first template or fork one of the defaults
-              </p>
+            {search ? (
+              <button type="button" onClick={clearSearch} className="text-sm text-brand-highlight mt-2">
+                Clear search
+              </button>
+            ) : (
+              <p className="text-gray-600 text-sm mt-1">Tap "+ New template" to get started</p>
             )}
           </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map(t => (
+            {(templates ?? []).map(t => (
               <TemplateCard
                 key={t.id}
                 template={t}
-                onEdit={() => handleEdit(t.id)}
+                onEdit={() => { setEditId(t.id); setBuilderOpen(true) }}
                 onFork={() => handleFork(t.id, t.name)}
                 onDelete={() => setDeleteId(t.id)}
-                forking={forkTemplate.isPending}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Template builder sheet */}
       <TemplateBuilderSheet
         open={builderOpen}
         templateId={editId}
         onClose={() => { setBuilderOpen(false); setEditId(null) }}
       />
 
-      {/* Delete confirm */}
       <ConfirmDialog
         open={!!deleteId}
         title="Delete template?"
@@ -175,15 +204,12 @@ export default function TemplatesPage(): React.JSX.Element {
 
 // ── Template card ─────────────────────────────────────────────────────────────
 
-interface TemplateCardProps {
-  template:  TemplateSummaryResponse
-  onEdit:    () => void
-  onFork:    () => void
-  onDelete:  () => void
-  forking:   boolean
-}
-
-function TemplateCard({ template, onEdit, onFork, onDelete }: TemplateCardProps): React.JSX.Element {
+function TemplateCard({ template, onEdit, onFork, onDelete }: {
+  template: TemplateSummaryResponse
+  onEdit:   () => void
+  onFork:   () => void
+  onDelete: () => void
+}): React.JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -195,8 +221,6 @@ function TemplateCard({ template, onEdit, onFork, onDelete }: TemplateCardProps)
             <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{template.description}</p>
           )}
         </div>
-
-        {/* Actions menu */}
         <div className="relative shrink-0">
           <button
             type="button"
@@ -209,30 +233,20 @@ function TemplateCard({ template, onEdit, onFork, onDelete }: TemplateCardProps)
               <circle cx="8" cy="13" r="1.2" />
             </svg>
           </button>
-
           {menuOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-8 z-50 w-44 bg-brand-primary border border-surface-border rounded-xl shadow-lg overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => { onEdit(); setMenuOpen(false) }}
-                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors"
-                >
+                <button type="button" onClick={() => { onEdit(); setMenuOpen(false) }}
+                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors">
                   Edit template
                 </button>
-                <button
-                  type="button"
-                  onClick={() => { onFork(); setMenuOpen(false) }}
-                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors border-t border-surface-border"
-                >
+                <button type="button" onClick={() => { onFork(); setMenuOpen(false) }}
+                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors border-t border-surface-border">
                   Duplicate
                 </button>
-                <button
-                  type="button"
-                  onClick={() => { onDelete(); setMenuOpen(false) }}
-                  className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-surface-border/30 transition-colors border-t border-surface-border"
-                >
+                <button type="button" onClick={() => { onDelete(); setMenuOpen(false) }}
+                  className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-surface-border/30 transition-colors border-t border-surface-border">
                   Delete
                 </button>
               </div>
@@ -240,8 +254,6 @@ function TemplateCard({ template, onEdit, onFork, onDelete }: TemplateCardProps)
           )}
         </div>
       </div>
-
-      {/* Created date */}
       <p className="text-[10px] text-gray-700 mt-3">
         Created {new Date(template.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
       </p>

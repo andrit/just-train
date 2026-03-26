@@ -586,6 +586,7 @@ Called once from the onboarding screen after registration. Can be called again t
         500: ErrorResponseSchema,
       },
     },
+    preHandler: [authenticate],
   }, async (request, reply) => {
     try {
       await seedDefaultTemplates(request.trainer.trainerId)

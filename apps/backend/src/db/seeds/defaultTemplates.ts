@@ -336,18 +336,22 @@ const DEFAULT_TEMPLATES: TemplateDef[] = [
 // ── Seed function ─────────────────────────────────────────────────────────────
 
 export async function seedDefaultTemplates(trainerId: string): Promise<void> {
-  // Check if trainer already has templates
-  const existing = await db.query.templates.findFirst({
-    where: eq(templates.trainerId, trainerId),
-    columns: { id: true },
+  // Get names of templates the trainer already has
+  const existingRows = await db.query.templates.findMany({
+    where:   eq(templates.trainerId, trainerId),
+    columns: { name: true },
   })
-  if (existing) return  // already seeded — skip
+  const existingNames = new Set(existingRows.map(r => r.name))
 
-  console.log(`  📋 Seeding ${DEFAULT_TEMPLATES.length} default templates…`)
+  // Only seed defaults the trainer doesn't already have by name
+  const toSeed = DEFAULT_TEMPLATES.filter(t => !existingNames.has(t.name))
+  if (toSeed.length === 0) return
+
+  console.log(`  📋 Seeding ${toSeed.length} default templates…`)
 
   // Collect all exercise names we need
   const allNames = new Set<string>()
-  for (const t of DEFAULT_TEMPLATES) {
+  for (const t of toSeed) {
     for (const block of t.blocks) {
       for (const ex of block.exercises) {
         allNames.add(ex.name)
@@ -365,7 +369,7 @@ export async function seedDefaultTemplates(trainerId: string): Promise<void> {
   let seeded = 0
   let skipped = 0
 
-  for (const def of DEFAULT_TEMPLATES) {
+  for (const def of toSeed) {
     const [template] = await db.insert(templates).values({
       trainerId,
       name:        def.name,
@@ -411,5 +415,5 @@ export async function seedDefaultTemplates(trainerId: string): Promise<void> {
     }
   }
 
-  console.log(`  ✅ Templates seeded: ${DEFAULT_TEMPLATES.length} templates, ${seeded} exercises (${skipped} skipped — exercise name not found)`)
+  console.log(`  ✅ Templates seeded: ${toSeed.length} templates, ${seeded} exercises (${skipped} skipped — exercise name not found)`)
 }

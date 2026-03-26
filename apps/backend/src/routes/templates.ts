@@ -13,7 +13,7 @@ import { routeLog } from '../lib/logger'
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
 import { db, templates, templateWorkouts, templateExercises } from '../db'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, ilike, or } from 'drizzle-orm'
 import {
   CreateTemplateSchema,
   TemplateListResponseSchema,
@@ -48,16 +48,30 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
       tags: ['Templates'],
       security: [{ bearerAuth: [] }],
       summary: 'List templates',
-      description: 'Returns all workout templates for the trainer ordered by name. Use templates to pre-build session structures that can be applied to any client.',
+      description: 'Returns all workout templates for the trainer ordered by name. Supports ?search= for case-insensitive search across name, description and notes.',
+      querystring: z.object({ search: z.string().optional() }),
       response: {
         200: TemplateListResponseSchema,
         500: ErrorResponseSchema,
       },
     },
   }, async (request, reply) => {
+    const { search } = request.query as { search?: string }
     try {
+      const baseCondition = eq(templates.trainerId, request.trainer.trainerId)
+      const whereCondition = search
+        ? and(
+            baseCondition,
+            or(
+              ilike(templates.name,        `%${search}%`),
+              ilike(templates.description, `%${search}%`),
+              ilike(templates.notes,       `%${search}%`),
+            )
+          )
+        : baseCondition
+
       const result = await db.query.templates.findMany({
-        where: eq(templates.trainerId, request.trainer.trainerId),
+        where:   whereCondition,
         orderBy: templates.name,
       })
 

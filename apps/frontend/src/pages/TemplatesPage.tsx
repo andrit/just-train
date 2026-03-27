@@ -24,7 +24,6 @@ export default function TemplatesPage(): React.JSX.Element {
   const [builderOpen, setBuilderOpen] = useState(false)
   const [editId,      setEditId]      = useState<string | null>(null)
   const [deleteId,    setDeleteId]    = useState<string | null>(null)
-  const [seeding,     _setSeeding]    = useState(false)
   const seededRef   = useRef(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -147,10 +146,9 @@ export default function TemplatesPage(): React.JSX.Element {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
-        {isLoading || seeding ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
             <Spinner size="md" className="text-brand-highlight" />
-            {seeding && <p className="text-xs text-gray-500">Loading default templates…</p>}
           </div>
         ) : (templates ?? []).length === 0 ? (
           <div className="text-center py-12">

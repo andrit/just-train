@@ -17,6 +17,7 @@ import {
 }                                       from '@/lib/queries/templates'
 import { toast }                        from '@/store/toastStore'
 import { WORKOUT_TYPE_LABEL, WORKOUT_TYPE_COLOR } from '@/lib/exerciseLabels'
+import { TemplateExercisePickerSheet }  from './TemplateExercisePickerSheet'
 import type { TemplateDetailResponse }  from '@trainer-app/shared'
 
 interface TemplateBuilderSheetProps {
@@ -167,7 +168,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                     </p>
                   ) : (
                     existing?.templateWorkouts.map(block => (
-                      <TemplateBlockCard key={block.id} block={block} />
+                      <TemplateBlockCard key={block.id} block={block} templateId={activeId ?? ''} />
                     ))
                   )}
                 </div>
@@ -204,40 +205,65 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
   )
 }
 
-// ── Block card (read-only overview) ──────────────────────────────────────────
+// ── Block card with exercise picker ──────────────────────────────────────────
 
-function TemplateBlockCard({ block }: {
-  block: TemplateDetailResponse['templateWorkouts'][number]
+function TemplateBlockCard({ block, templateId }: {
+  block:      TemplateDetailResponse['templateWorkouts'][number]
+  templateId: string
 }): React.JSX.Element {
+  const [pickerOpen, setPickerOpen] = useState(false)
   const colorClass = WORKOUT_TYPE_COLOR[block.workoutType]?.split(' ')[0] ?? 'text-gray-400'
   const typeLabel  = WORKOUT_TYPE_LABEL[block.workoutType] ?? block.workoutType
 
   return (
-    <div className="bg-brand-primary rounded-xl border border-surface-border p-3">
-      <p className={cn('text-[10px] uppercase tracking-widest font-medium mb-2.5', colorClass)}>
-        {typeLabel}
-      </p>
-      {block.templateExercises.length === 0 ? (
-        <p className="text-xs text-gray-600 py-1">No exercises yet</p>
-      ) : (
-        <div className="space-y-1.5">
-          {block.templateExercises.map(ex => (
-            <div key={ex.id} className="flex items-center justify-between">
-              <p className="text-sm text-gray-300 truncate flex-1">{ex.exercise?.name ?? 'Unknown'}</p>
-              <p className="text-xs text-gray-600 font-mono ml-3 shrink-0">
-                {ex.targetSets ? `${ex.targetSets}×` : ''}
-                {ex.targetReps
-                  ? ex.targetReps
-                  : ex.targetDurationSeconds
-                    ? `${ex.targetDurationSeconds}s`
-                    : '—'}
-                {ex.targetWeight ? ` · ${ex.targetWeight}` : ''}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <>
+      <div className="bg-brand-primary rounded-xl border border-surface-border p-3">
+        <p className={cn('text-[10px] uppercase tracking-widest font-medium mb-2.5', colorClass)}>
+          {typeLabel}
+        </p>
+        {block.templateExercises.length === 0 ? (
+          <p className="text-xs text-gray-600 py-1 mb-2">No exercises yet</p>
+        ) : (
+          <div className="space-y-1.5 mb-3">
+            {block.templateExercises.map(ex => (
+              <div key={ex.id} className="flex items-center justify-between">
+                <p className="text-sm text-gray-300 truncate flex-1">{ex.exercise?.name ?? 'Unknown'}</p>
+                <p className="text-xs text-gray-600 font-mono ml-3 shrink-0">
+                  {ex.targetSets ? `${ex.targetSets}×` : ''}
+                  {ex.targetReps
+                    ? ex.targetReps
+                    : ex.targetDurationSeconds
+                      ? `${ex.targetDurationSeconds}s`
+                      : '—'}
+                  {ex.targetWeight ? ` · ${ex.targetWeight}` : ''}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className={cn(
+            'flex items-center gap-1.5 text-xs text-gray-500 hover:text-brand-highlight transition-colors',
+            interactions.button.base,
+          )}
+        >
+          <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+            <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          Add exercise
+        </button>
+      </div>
+
+      <TemplateExercisePickerSheet
+        open={pickerOpen}
+        templateId={templateId}
+        templateWorkoutId={block.id}
+        currentCount={block.templateExercises.length}
+        onClose={() => setPickerOpen(false)}
+      />
+    </>
   )
 }
 

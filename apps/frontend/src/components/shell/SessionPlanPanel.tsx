@@ -256,11 +256,17 @@ export function SessionPlanPanel({
                   Discard
                 </button>
 
-                {/* Load template */}
+                {/* Load template — available before session is created */}
                 {!sessionId && (
                   <button
                     type="button"
-                    onClick={() => setTemplatePickerOpen(true)}
+                    onClick={() => {
+                      if (!selectedClientId) {
+                        setError('Select a client first, then load a template')
+                        return
+                      }
+                      setTemplatePickerOpen(true)
+                    }}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium',
                       'border border-surface-border text-gray-400',

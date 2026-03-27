@@ -126,7 +126,7 @@ export function useAddTemplateExercise() {
       apiClient.post(`/template-workouts/${templateWorkoutId}/exercises`, {
         exerciseId, orderIndex,
       }),
-    onSuccess: (_data, { templateId }) =>
-      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
+    onSuccess: (_data, vars) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(vars.templateId) }),
   })
 }

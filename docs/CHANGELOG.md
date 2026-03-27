@@ -469,3 +469,30 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - `SessionPlanPanel` — "Load template" button creates a session pre-populated from template; "Save as template" saves the current plan as a new template
 - `lib/queries/templates.ts` — expanded with `useCreateTemplate`, `useUpdateTemplate`, `useDeleteTemplate`, `useForkTemplate`
 
+
+## [v2.7.0] — Template Library (final)
+
+### Backend
+- `GET /templates?search=` — server-side ILIKE search across name, description, notes, and exercise names (EXISTS subquery)
+- `POST /auth/seed-templates` — seeds 20 default templates for logged-in trainer; idempotent per-name
+- `POST /auth/logout` — revokes refresh token; frontend now calls this on logout
+- Template detail query — added `media: true` to exercise join (was causing ResponseValidationError)
+- Default template seed — changed all-or-nothing check to per-name so existing trainers get defaults seeded alongside their own templates
+
+### Frontend
+- `TemplatesPage` — server-side debounced search (300ms), active search breadcrumb chip with result count, auto-seeds defaults on mount
+- `TemplateBuilderSheet` — full block builder: add blocks by type, add exercises via `TemplateExercisePickerSheet`
+- `TemplateExercisePickerSheet` — searchable exercise picker for template blocks
+- `SessionPlanPanel` — "Add exercise block" + "Load session template" buttons in empty state; template picker no longer gated behind `sessionId`
+- `Layout` — fixed sidebar (viewport height, never grows with content); athlete mode shows "My Training" nav; logout button with `qc.clear()` + `clearAuth()`
+- `LoginPage` — `qc.clear()` on login to flush stale cache from previous session
+- `MyTrainingPage` — resolves self-client via `GET /clients/self` then redirects; avoids stale ID cache issue
+- `App.tsx` — `/my-training` route registered
+- `docs/` folder — all markdown docs moved from root; README updated with table of links
+
+### Bug fixes
+- Auth loop — `window.location.href` replaced with `clearAuth()` + React Router redirect
+- Template `GET :id` — added `media: true` to exercise join
+- TanStack Query cache — cleared on login and logout to prevent stale cross-session data
+- Sidebar height — `md:fixed md:inset-y-0` so content scrolls independently
+

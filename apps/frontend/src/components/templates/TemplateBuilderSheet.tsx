@@ -38,16 +38,25 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
   const createTemplate = useCreateTemplate()
   const updateTemplate = useUpdateTemplate()
 
+  // Sync activeId when the prop changes (e.g. switching from new → edit)
   useEffect(() => {
     setActiveId(templateId)
-    if (existing) {
-      setName(existing.name)
-      setDescription(existing.description ?? '')
-    } else if (!templateId) {
-      setName('')
-      setDescription('')
-    }
-  }, [existing, templateId])
+  }, [templateId])
+
+  // Populate fields when existing data loads
+  useEffect(() => {
+    if (!existing) return
+    setName(existing.name)
+    setDescription(existing.description ?? '')
+  }, [existing])
+
+  // Reset fields when opening as new template
+  useEffect(() => {
+    if (!open || templateId) return
+    setName('')
+    setDescription('')
+    setActiveId(null)
+  }, [open, templateId])
 
   const isDirty = templateId
     ? name !== (existing?.name ?? '') || description !== (existing?.description ?? '')

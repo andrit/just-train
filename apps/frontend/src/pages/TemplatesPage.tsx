@@ -24,7 +24,7 @@ export default function TemplatesPage(): React.JSX.Element {
   const [builderOpen, setBuilderOpen] = useState(false)
   const [editId,      setEditId]      = useState<string | null>(null)
   const [deleteId,    setDeleteId]    = useState<string | null>(null)
-  const [seeding,     setSeeding]     = useState(false)
+  const [seeding,     _setSeeding]    = useState(false)
   const seededRef   = useRef(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -44,17 +44,15 @@ export default function TemplatesPage(): React.JSX.Element {
     setSearch('')
   }
 
-  // Auto-seed defaults when list is empty — once per mount
+  // Auto-seed defaults once per mount — backend handles per-name idempotency
+  // so this is safe to call even if the trainer already has templates
   useEffect(() => {
     if (isLoading || search || seededRef.current) return
-    if ((templates ?? []).length > 0) return
     seededRef.current = true
-    setSeeding(true)
     apiClient.post('/auth/seed-templates', {})
       .then(() => refetch())
-      .catch(() => toast.error('Could not load default templates'))
-      .finally(() => setSeeding(false))
-  }, [isLoading, templates, search, refetch])
+      .catch(() => { /* silent — don't error if user already has all defaults */ })
+  }, [isLoading, search, refetch])
 
   const handleDelete = (): void => {
     if (!deleteId) return

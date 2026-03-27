@@ -12,8 +12,8 @@ import { routeLog } from '../lib/logger'
 
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
-import { db, templates, templateWorkouts, templateExercises } from '../db'
-import { eq, and, ilike, or } from 'drizzle-orm'
+import { db, templates, templateWorkouts, templateExercises, exercises } from '../db'
+import { eq, and, ilike, or, exists, sql } from 'drizzle-orm'
 import {
   CreateTemplateSchema,
   TemplateListResponseSchema,
@@ -66,6 +66,19 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
               ilike(templates.name,        `%${search}%`),
               ilike(templates.description, `%${search}%`),
               ilike(templates.notes,       `%${search}%`),
+              // Search exercise names within the template's blocks
+              exists(
+                db.select({ one: sql`1` })
+                  .from(templateWorkouts)
+                  .innerJoin(templateExercises, eq(templateExercises.templateWorkoutId, templateWorkouts.id))
+                  .innerJoin(exercises, eq(exercises.id, templateExercises.exerciseId))
+                  .where(
+                    and(
+                      eq(templateWorkouts.templateId, templates.id),
+                      ilike(exercises.name, `%${search}%`),
+                    )
+                  )
+              ),
             )
           )
         : baseCondition

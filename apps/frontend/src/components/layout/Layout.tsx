@@ -59,7 +59,8 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
     <div className="flex flex-col min-h-screen md:flex-row">
 
       {/* ── Sidebar (desktop) ─────────────────────────────────────────── */}
-      <aside className="hidden md:flex md:flex-col md:w-56 md:min-h-screen bg-brand-accent border-r border-surface-border">
+      {/* fixed: always viewport height, never grows with content */}
+      <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-56 bg-brand-accent border-r border-surface-border z-20">
 
         {/* Logo */}
         <div className="px-5 py-5 border-b border-surface-border flex items-center gap-2">
@@ -134,7 +135,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────── */}
-      <main className="flex-1 pb-20 md:pb-0 min-h-screen overflow-y-auto">
+      <main className="flex-1 pb-20 md:pb-0 md:ml-56 min-h-screen overflow-y-auto">
         <OfflineBanner />
         {children}
       </main>

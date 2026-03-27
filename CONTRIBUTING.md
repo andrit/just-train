@@ -60,7 +60,22 @@ When adding a field to any `*ResponseSchema` in `packages/shared`:
 
 ---
 
-## Hotfix checklist
+## Joining exercises in Drizzle queries
+
+**Always include `media: true` when joining exercises.** The `ExerciseSummaryResponseSchema` requires a `media` array — omitting it causes a `ResponseValidationError` at runtime even though the DB query succeeds.
+
+```ts
+// ✅ Correct
+with: { exercise: { with: { bodyPart: true, media: true } } }
+
+// ❌ Will cause ResponseValidationError — media field missing
+with: { exercise: { with: { bodyPart: true } } }
+with: { exercise: true }
+```
+
+This applies everywhere an exercise is joined: session detail, template detail, fork endpoint, any future route that returns exercise data nested inside another resource.
+
+---
 
 Before pushing a hotfix with schema changes:
 

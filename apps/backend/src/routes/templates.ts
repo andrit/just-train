@@ -130,7 +130,7 @@ Use this to display the template builder/editor and to preview what a session wi
             with: {
               templateExercises: {
                 orderBy: templateExercises.orderIndex,
-                with: { exercise: { with: { bodyPart: true } } },
+                with: { exercise: { with: { bodyPart: true, media: true } } },
               },
             },
           },
@@ -360,7 +360,12 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
         with: {
           templateWorkouts: {
             orderBy: templateWorkouts.orderIndex,
-            with: { templateExercises: { orderBy: templateExercises.orderIndex } },
+            with: {
+              templateExercises: {
+                orderBy: templateExercises.orderIndex,
+                with: { exercise: { with: { bodyPart: true, media: true } } },
+              },
+            },
           },
         },
       })

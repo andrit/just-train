@@ -256,34 +256,6 @@ export function SessionPlanPanel({
                   Discard
                 </button>
 
-                {/* Load template — available before session is created */}
-                {!sessionId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!selectedClientId) {
-                        setError('Select a client first, then load a template')
-                        return
-                      }
-                      setTemplatePickerOpen(true)
-                    }}
-                    className={cn(
-                      'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium',
-                      'border border-surface-border text-gray-400',
-                      'hover:border-brand-highlight/40 hover:text-brand-highlight',
-                      interactions.button.base,
-                      interactions.button.press,
-                    )}
-                  >
-                    <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
-                      <rect x="2" y="2" width="12" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                      <rect x="2" y="7" width="12" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                      <rect x="2" y="12" width="6" height="2" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
-                    Load template
-                  </button>
-                )}
-
                 {/* Save as template */}
                 {sessionId && workouts.length > 0 && (
                   <button
@@ -434,26 +406,56 @@ export function SessionPlanPanel({
             <p className="text-3xl mb-4" aria-hidden>📋</p>
             <p className="text-gray-300 font-medium mb-1">Plan your session</p>
             <p className="text-gray-600 text-sm mb-6">
-              Add blocks and exercises with targets. The plan saves automatically when you add your first block.
+              Build from scratch or load a saved template.
             </p>
-            <button
-              type="button"
-              onClick={handleAddBlock}
-              disabled={!selectedClientId}
-              className={cn(
-                'flex items-center gap-2 px-5 py-3 rounded-xl font-medium',
-                interactions.button.base,
-                interactions.button.press,
-                selectedClientId
-                  ? 'bg-brand-highlight text-white'
-                  : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
-              )}
-            >
-              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
-                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              {selectedClientId ? 'Add Block' : 'Select a client first'}
-            </button>
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <button
+                type="button"
+                onClick={handleAddBlock}
+                disabled={!selectedClientId}
+                className={cn(
+                  'flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium',
+                  interactions.button.base,
+                  interactions.button.press,
+                  selectedClientId
+                    ? 'bg-brand-highlight text-white'
+                    : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
+                )}
+              >
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                  <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                {selectedClientId ? 'Add exercise block' : 'Select a client first'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!selectedClientId) {
+                    setError('Select a client first, then load a template')
+                    return
+                  }
+                  setTemplatePickerOpen(true)
+                }}
+                disabled={!selectedClientId}
+                className={cn(
+                  'flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium',
+                  'border border-surface-border text-sm',
+                  interactions.button.base,
+                  interactions.button.press,
+                  selectedClientId
+                    ? 'text-gray-300 hover:border-brand-highlight/40 hover:text-brand-highlight'
+                    : 'text-gray-600 cursor-not-allowed',
+                )}
+              >
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                  <rect x="2" y="2" width="12" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                  <rect x="2" y="7" width="12" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                  <rect x="2" y="12" width="6" height="2" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+                Load session template
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -493,47 +495,46 @@ export function SessionPlanPanel({
         </button>
       )}
 
-      {/* Add block sheet + template picker */}
+      {/* Add block sheet */}
       {sessionId && (
-        <>
-          <AddBlockSheet
-            open={addBlockOpen}
-            sessionId={sessionId}
-            onClose={() => setAddBlockOpen(false)}
-          />
-
-          <TemplatePickerSheet
-          open={templatePickerOpen}
-          onClose={() => setTemplatePickerOpen(false)}
-          onSelect={async (templateId) => {
-            if (!selectedClientId) return
-            setTemplatePickerOpen(false)
-            setCreating(true)
-            try {
-              const today = new Date().toISOString().split('T')[0] ?? ''
-              const created = await createSession.mutateAsync({
-                clientId:   selectedClientId,
-                date:       today,
-                templateId,
-              })
-              setSessionId(created.id)
-              addPlannedSession({
-                sessionId:  created.id,
-                clientId:   created.clientId,
-                clientName: created.client?.name ?? '',
-                name:       created.name ?? '',
-                createdAt:  created.createdAt,
-              })
-            } catch {
-              setError('Failed to load template')
-            } finally {
-              setCreating(false)
-            }
-          }}
-          loading={creating}
+        <AddBlockSheet
+          open={addBlockOpen}
+          sessionId={sessionId}
+          onClose={() => setAddBlockOpen(false)}
         />
-        </>
       )}
+
+      {/* Template picker — rendered always so it works before session exists */}
+      <TemplatePickerSheet
+        open={templatePickerOpen}
+        onClose={() => setTemplatePickerOpen(false)}
+        onSelect={async (templateId) => {
+          if (!selectedClientId) return
+          setTemplatePickerOpen(false)
+          setCreating(true)
+          try {
+            const today = new Date().toISOString().split('T')[0] ?? ''
+            const created = await createSession.mutateAsync({
+              clientId:   selectedClientId,
+              date:       today,
+              templateId,
+            })
+            setSessionId(created.id)
+            addPlannedSession({
+              sessionId:  created.id,
+              clientId:   created.clientId,
+              clientName: created.client?.name ?? '',
+              name:       created.name ?? '',
+              createdAt:  created.createdAt,
+            })
+          } catch {
+            setError('Failed to load template')
+          } finally {
+            setCreating(false)
+          }
+        }}
+        loading={creating}
+      />
 
       <NamePromptModal
         open={namePromptOpen}

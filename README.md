@@ -212,3 +212,20 @@ pnpm --filter backend test
 pnpm --filter backend test:watch
 pnpm --filter backend test:coverage
 ```
+
+---
+
+## Documentation
+
+All project documentation lives in [`./docs`](./docs):
+
+| File | Purpose |
+|---|---|
+| `CONTRIBUTING.md` | Column checklist, exercise join rules, hotfix/release workflow |
+| `STYLE_GUIDE.md` | Functional patterns, pre-commit checklist, React/backend conventions |
+| `SQL_COMMANDS.md` | Common SQL for templates, sessions, exercises, PRs |
+| `CHANGELOG.md` | Version history |
+| `PROJECT_STATE.md` | Current version, roadmap, active spec |
+| `DEFERRED_ITEMS.md` | Intentionally deferred features with context |
+| `DATA_FLOW.md` | Auth, session, and data flow diagrams |
+| `TESTING.md` | Test setup and patterns |

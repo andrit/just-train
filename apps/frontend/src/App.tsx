@@ -44,6 +44,7 @@ import SessionLauncherPage                 from '@/pages/SessionLauncherPage'
 import LiveSessionPage                     from '@/pages/LiveSessionPage'
 import SessionSummaryPage                  from '@/pages/SessionSummaryPage'
 import SessionHistoryPage                  from '@/pages/SessionHistoryPage'
+import MyTrainingPage                      from '@/pages/MyTrainingPage'
 import NotFoundPage                        from '@/pages/NotFoundPage'
 
 // ── Onboarding gate ───────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export default function App(): React.JSX.Element {
                       <Route path="/"                        element={<DashboardPage />} />
                       <Route path="/clients"                 element={<ClientsPage />} />
                       <Route path="/clients/:id"             element={<ClientProfilePage />} />
+                      <Route path="/my-training"             element={<MyTrainingPage />} />
                       <Route path="/exercises"               element={<ExercisesPage />} />
                       <Route path="/sessions"                element={<SessionsPage />} />
                       <Route path="/session/new"             element={<SessionLauncherPage />} />

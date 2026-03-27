@@ -11,6 +11,7 @@
 
 import { useState }          from 'react'
 import { useNavigate }       from 'react-router-dom'
+import { useQueryClient }    from '@tanstack/react-query'
 import { apiClient }         from '@/lib/api'
 import { useAuthStore }      from '@/store/authStore'
 import { Input }             from '@/components/ui/Input'
@@ -30,6 +31,7 @@ export default function LoginPage(): React.JSX.Element {
 
   const { setAuth } = useAuthStore()
   const navigate    = useNavigate()
+  const qc          = useQueryClient()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
@@ -45,6 +47,8 @@ export default function LoginPage(): React.JSX.Element {
         data = await apiClient.post<AuthResponse>('/auth/register', { name, email, password })
       }
 
+      // Clear stale cache from any previous session before setting new auth
+      qc.clear()
       setAuth(data.accessToken, data.trainer)
       navigate('/', { replace: true })
     } catch (err: unknown) {

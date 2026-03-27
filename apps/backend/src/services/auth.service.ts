@@ -266,11 +266,16 @@ export const REFRESH_TOKEN_COOKIE = 'trainer_refresh_token'
  * sameSite: strict — not sent on cross-site requests (CSRF protection).
  */
 export function refreshTokenCookieOptions() {
+  const isProd = process.env.NODE_ENV === 'production'
   return {
     httpOnly: true,
-    secure:   process.env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
-    path:     '/api/v1/auth',    // Cookie is only sent to auth endpoints
-    maxAge:   REFRESH_TOKEN_TTL_MS / 1000,  // In seconds for cookie
+    // In production the frontend (Vercel) and backend (Railway) are on
+    // different domains. SameSite must be 'none' + secure:true for the
+    // browser to send the cookie cross-origin. In dev, 'lax' works fine
+    // since both run on localhost.
+    secure:   isProd,
+    sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
+    path:     '/api/v1/auth',
+    maxAge:   REFRESH_TOKEN_TTL_MS / 1000,
   }
 }

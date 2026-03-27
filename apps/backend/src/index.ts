@@ -71,9 +71,21 @@ app.setSerializerCompiler(serializerCompiler)
 // ------------------------------------------------------------
 // CORS
 // credentials: true required for httpOnly cookie on refresh endpoint
+// CORS_ORIGIN can be a comma-separated list for multiple origins:
+//   e.g. "https://app.vercel.app,http://localhost:5173"
 // ------------------------------------------------------------
+const corsOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean)
+
 app.register(cors, {
-  origin:      process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+  origin: (origin, cb) => {
+    // Allow requests with no origin (mobile apps, curl, Swagger)
+    if (!origin) return cb(null, true)
+    if (corsOrigins.includes(origin)) return cb(null, true)
+    cb(new Error(`Origin ${origin} not allowed by CORS`), false)
+  },
   methods:     ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,  // Required — allows browser to send/receive the httpOnly cookie
 })

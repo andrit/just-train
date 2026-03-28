@@ -445,4 +445,94 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(500).send({ error: 'Failed to compute personal bests' })
     }
   })
+
+  // ----------------------------------------------------------
+  // GET /clients/:id/exercise-history/:exerciseId
+  //
+  // Returns the most recent sets for a given exercise across
+  // all completed sessions for this client.
+  // Used by the session UI to auto-populate set inputs with
+  // the last weight/reps the client performed.
+  //
+  // Returns up to 5 most recent sessions, max 10 sets each.
+  // ----------------------------------------------------------
+  app.get('/clients/:id/exercise-history/:exerciseId', {
+    schema: {
+      tags:     ['Clients'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Get recent sets for an exercise',
+      description: 'Returns the most recent logged sets for a specific exercise across completed sessions. Used to auto-populate set inputs during live sessions.',
+      params: z.object({
+        id:         z.string().uuid(),
+        exerciseId: z.string().uuid(),
+      }),
+      response: {
+        200: z.object({
+          lastSets: z.array(z.object({
+            sessionDate: z.string(),
+            setNumber:   z.number().int(),
+            reps:        z.number().int().nullable(),
+            weight:      z.number().nullable(),
+            weightUnit:  z.string(),
+            durationSeconds: z.number().int().nullable(),
+          })).describe('Sets from the most recent session this exercise was performed, ordered by set number'),
+        }),
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: clientId, exerciseId } = request.params as { id: string; exerciseId: string }
+
+    try {
+      // Verify client belongs to this trainer
+      const client = await db.query.clients.findFirst({
+        where: and(
+          eq(clients.id, clientId),
+          eq(clients.trainerId, request.trainer.trainerId),
+        ),
+        columns: { id: true },
+      })
+      if (!client) return reply.status(404).send({ error: 'Client not found' })
+
+      // Find the most recent completed session where this exercise was logged
+      const recentSets = await db
+        .select({
+          sessionDate: sessions.date,
+          setNumber:   sets.setNumber,
+          reps:        sets.reps,
+          weight:      sets.weight,
+          weightUnit:  sets.weightUnit,
+          durationSeconds: sets.durationSeconds,
+        })
+        .from(sets)
+        .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
+        .innerJoin(workouts,         eq(sessionExercises.workoutId, workouts.id))
+        .innerJoin(sessions,         eq(workouts.sessionId, sessions.id))
+        .where(
+          and(
+            eq(sessions.clientId, clientId),
+            eq(sessionExercises.exerciseId, exerciseId),
+            eq(sessions.status, 'completed'),
+          )
+        )
+        .orderBy(desc(sessions.date), sets.setNumber)
+        .limit(20)
+
+      // Group by session date and return only the most recent session's sets
+      if (recentSets.length === 0) {
+        return reply.send({ lastSets: [] })
+      }
+
+      const mostRecentDate = recentSets[0]!.sessionDate
+      const lastSets = recentSets
+        .filter(s => s.sessionDate === mostRecentDate)
+        .slice(0, 10)
+
+      return reply.send({ lastSets })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to fetch exercise history' })
+    }
+  })
 }

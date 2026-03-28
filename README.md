@@ -171,7 +171,7 @@ GitHub Actions runs on every push to `main`:
 | v2.5.0 | UI/UX polish — execution layout, PR system, gamification | ✅ |
 | v2.6.0 | ESLint + code quality | ✅ |
 | v2.7.0 | Template library — builder, fork, seeds, session integration | ✅ |
-| v2.8.0 | Auto-populate from history + drag reorder + post-session wrap-up | 🔜 Next |
+| v2.8.0 | Auto-populate from history + drag reorder + post-session wrap-up | ✅ |
 | v2.9.0 | Camera / video capture + coach challenges | 🔜 |
 | v2.10.0 | Leaderboards + weekly quests + social share | 🔜 |
 | v2.11.0 | Hosting — Railway + Vercel production deploy | 🔜 |

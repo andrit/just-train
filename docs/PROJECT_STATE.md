@@ -631,7 +631,7 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v2.5.0 | UI/UX polish — execution layout, PR system, gamification foundations | ✅ |
 | v2.6.0 | ESLint + code quality | ✅ |
 | v2.7.0 | Template library — builder, fork, seeds, session integration | ✅ |
-| **v2.8.0** | **Auto-populate from history + drag reorder + post-session wrap-up** | 🔜 Next |
+| v2.8.0 | Auto-populate from history + drag reorder + post-session wrap-up | ✅ |
 | v2.9.0 | Camera / video capture + coach challenges | 🔜 |
 | v2.10.0 | Leaderboards + weekly quests + social share | 🔜 |
 | v2.11.0 | Hosting setup — Railway + Vercel production deploy | 🔜 |

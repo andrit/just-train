@@ -371,3 +371,27 @@ export function useDiscardSession(): UseMutationResult<void, Error, { id: string
     },
   })
 }
+
+// ── Reorder workout blocks ────────────────────────────────────────────────────
+
+export function useReorderWorkouts() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ sessionId, orderedIds }: { sessionId: string; orderedIds: string[] }) =>
+      apiClient.patch(`/sessions/${sessionId}/workouts/reorder`, { orderedIds }),
+    onSuccess: (_data, { sessionId }) =>
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) }),
+  })
+}
+
+// ── Reorder exercises within a workout block ──────────────────────────────────
+
+export function useReorderExercises() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ sessionId, workoutId, orderedIds }: { sessionId: string; workoutId: string; orderedIds: string[] }) =>
+      apiClient.patch(`/workouts/${workoutId}/exercises/reorder`, { orderedIds }),
+    onSuccess: (_data, { sessionId }) =>
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) }),
+  })
+}

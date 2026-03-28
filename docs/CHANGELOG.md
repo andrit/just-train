@@ -496,3 +496,16 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - TanStack Query cache — cleared on login and logout to prevent stale cross-session data
 - Sidebar height — `md:fixed md:inset-y-0` so content scrolls independently
 
+
+## [v2.8.0] — Auto-populate + Drag Reorder + Post-session Wrap-up
+
+### Backend
+- `GET /clients/:id/exercise-history/:exerciseId` — returns last session's sets for any exercise; used by live session UI to pre-fill inputs
+- `PATCH /sessions/:id/workouts/reorder` — persist new workout block order after drag
+- `PATCH /workouts/:workoutId/exercises/reorder` — persist new exercise order after drag
+
+### Frontend
+- **Auto-populate from history** — live session inputs now pre-fill with last session's weight/reps for each set. Priority: target → last session set → empty. `ExerciseBlock` and `WorkoutBlock` now accept `clientId` and fetch history via `useExerciseHistory`
+- **Drag-to-reorder** — `SortableWorkoutList` component using `@dnd-kit/sortable`. Drag handles appear on workout blocks in plan builder. Order persists to backend on drop
+- **Post-session wrap-up** — `PostSessionWrapUp` sheet shown after ending a session. Displays: exercises completed, sets logged, total volume, PR count with exercise callouts. Lets trainer name/rename the session before navigating to summary
+

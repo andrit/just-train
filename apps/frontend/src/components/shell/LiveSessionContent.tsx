@@ -21,10 +21,11 @@ import { useRestTimer }                   from '@/hooks/useRestTimer'
 import { useAuthStore }                   from '@/store/authStore'
 import { useSessionStore }                from '@/store/sessionStore'
 import { useOverlayStore }                from '@/store/overlayStore'
-import { useSession, useEndSession, useDiscardSession } from '@/lib/queries/sessions'
+import { useSession, useEndSession, useDiscardSession, useUpdateSession } from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
 import { EndSessionModal }                from '@/components/session/EndSessionModal'
+import { PostSessionWrapUp }              from '@/components/session/PostSessionWrapUp'
 import { Spinner }                        from '@/components/ui/Spinner'
 
 interface LiveSessionContentProps {
@@ -46,12 +47,14 @@ export default function LiveSessionContent({
   const { data: session, isLoading, error } = useSession(sessionId)
   const endSession                           = useEndSession()
   const discardSession                       = useDiscardSession()
+  const updateSession                        = useUpdateSession()
   const { endSession: clearSessionStore }    = useSessionStore()
 
   const [showEndModal,     setShowEndModal]     = useState(false)
   const [showDiscardMenu,  setShowDiscardMenu]  = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [addBlockOpen,     setAddBlockOpen]     = useState(false)
+  const [showWrapUp,       setShowWrapUp]       = useState(false)
 
   const weightUnit = trainer?.weightUnitPreference ?? 'lbs'
 
@@ -84,11 +87,23 @@ export default function LiveSessionContent({
         onSuccess: () => {
           if (session?.clientId) clearSessionStore(session.clientId)
           fire('session_end', { entityId: sessionId })
-          // Navigate to summary — works in both overlay and page context
-          navigate(`/session/${sessionId}/summary`)
+          // Show wrap-up before navigating to summary
+          setShowEndModal(false)
+          setShowWrapUp(true)
         },
       },
     )
+  }
+
+  const handleWrapUpDone = (name?: string): void => {
+    if (name && session?.id) {
+      updateSession.mutate(
+        { id: session.id, name },
+        { onSuccess: () => navigate(`/session/${sessionId}/summary`) },
+      )
+    } else {
+      navigate(`/session/${sessionId}/summary`)
+    }
   }
 
   if (isLoading) {
@@ -252,6 +267,7 @@ export default function LiveSessionContent({
                     sessionId={sessionId}
                     weightUnit={weightUnit}
                     layout="horizontal"
+                    clientId={session.clientId}
                     onSetLogged={handleSetLogged}
                     onAddBlock={() => setAddBlockOpen(true)}
                     restDurationSeconds={restDurationSeconds}
@@ -270,6 +286,7 @@ export default function LiveSessionContent({
                 sessionId={sessionId}
                 weightUnit={weightUnit}
                 layout="vertical"
+                clientId={session.clientId}
                 onSetLogged={handleSetLogged}
                 onAddBlock={() => setAddBlockOpen(true)}
                 restDurationSeconds={restDurationSeconds}
@@ -316,6 +333,14 @@ export default function LiveSessionContent({
         loading={endSession.isPending || discardSession.isPending}
         hasWork={(workouts ?? []).some(w => w.sessionExercises.some(se => se.sets.length > 0))}
       />
+
+      {showWrapUp && session && (
+        <PostSessionWrapUp
+          session={session}
+          onDone={handleWrapUpDone}
+          isSaving={updateSession.isPending}
+        />
+      )}
     </>
   )
 }

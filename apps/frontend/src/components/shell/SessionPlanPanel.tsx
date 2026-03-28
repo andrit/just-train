@@ -30,10 +30,10 @@ import {
   useUpdateSessionName,
   useDiscardSession,
 } from '@/lib/queries/sessions'
-import { WorkoutBlock }                          from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                         from '@/components/session/AddBlockSheet'
 import { Spinner }                               from '@/components/ui/Spinner'
 import { NamePromptModal }                       from '@/components/ui/NamePromptModal'
+import { SortableWorkoutList }                       from '@/components/session/SortableWorkoutList'
 import { TemplatePickerSheet }                   from '@/components/templates/TemplatePickerSheet'
 import { useCreateTemplate }                     from '@/lib/queries/templates'
 import { toast }                                 from '@/store/toastStore'
@@ -458,18 +458,12 @@ export function SessionPlanPanel({
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            {workouts.map((workout) => (
-              <WorkoutBlock
-                key={workout.id}
-                workout={workout}
-                sessionId={sessionId ?? ""}
-                weightUnit={weightUnit}
-                layout="vertical"
-                onSetLogged={() => {}}  // no-op — planning mode, no logging
-              />
-            ))}
-          </div>
+          <SortableWorkoutList
+            workouts={workouts}
+            sessionId={sessionId ?? ''}
+            weightUnit={weightUnit}
+            clientId={selectedClientId}
+          />
         )}
       </div>
 

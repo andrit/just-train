@@ -34,6 +34,7 @@ interface WorkoutBlockProps {
   sessionId:          string
   weightUnit:         string
   layout:             'horizontal' | 'vertical'
+  clientId:           string | null
   onSetLogged:        (restSeconds?: number) => void
   onAddBlock?:        () => void
   restDurationSeconds?: number
@@ -45,7 +46,7 @@ interface WorkoutBlockProps {
 }
 
 export function WorkoutBlock({
-  workout, sessionId, weightUnit, layout, onSetLogged, onAddBlock, restDurationSeconds = 90, restTimer,
+  workout, sessionId, weightUnit, layout, clientId, onSetLogged, onAddBlock, restDurationSeconds = 90, restTimer,
 }: WorkoutBlockProps): React.JSX.Element {
   const [exerciseIndex,   setExerciseIndex]   = useState(0)
   const [addExerciseOpen, setAddExerciseOpen] = useState(false)
@@ -214,6 +215,7 @@ export function WorkoutBlock({
                     workoutId={workout.id}
                     workoutType={workout.workoutType}
                     weightUnit={weightUnit}
+                    clientId={clientId}
                     restDurationSeconds={restDurationSeconds}
                     onSetLogged={handleSetLoggedWithPR}
                   />

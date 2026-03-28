@@ -788,4 +788,73 @@ Which fields you populate depends on the workout type:
       return reply.status(500).send({ error: 'Failed to delete set' })
     }
   })
+
+  // ----------------------------------------------------------
+  // PATCH /sessions/:id/workouts/reorder
+  // Accepts an ordered array of workout IDs and updates their
+  // orderIndex values. Used by drag-to-reorder in plan builder.
+  // ----------------------------------------------------------
+  app.patch('/sessions/:id/workouts/reorder', {
+    schema: {
+      tags: ['Sessions'], security: [{ bearerAuth: [] }],
+      summary: 'Reorder workout blocks',
+      params: z.object({ id: z.string().uuid() }),
+      body:   z.object({ orderedIds: z.array(z.string().uuid()) }),
+      response: { 204: z.object({}), 403: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { id: sessionId }  = request.params as { id: string }
+    const { orderedIds }     = request.body as { orderedIds: string[] }
+    try {
+      // Verify session belongs to this trainer
+      const session = await db.query.sessions.findFirst({
+        where: and(eq(sessions.id, sessionId), eq(sessions.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!session) return reply.status(403).send({ error: 'Not authorised' })
+
+      // Update each workout's orderIndex in parallel
+      await Promise.all(
+        orderedIds.map((workoutId, index) =>
+          db.update(workouts)
+            .set({ orderIndex: index })
+            .where(and(eq(workouts.id, workoutId), eq(workouts.sessionId, sessionId)))
+        )
+      )
+      return reply.status(204).send()
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to reorder workout blocks' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // PATCH /workouts/:workoutId/exercises/reorder
+  // Accepts an ordered array of session exercise IDs.
+  // ----------------------------------------------------------
+  app.patch('/workouts/:workoutId/exercises/reorder', {
+    schema: {
+      tags: ['Sessions'], security: [{ bearerAuth: [] }],
+      summary: 'Reorder exercises within a workout block',
+      params: z.object({ workoutId: z.string().uuid() }),
+      body:   z.object({ orderedIds: z.array(z.string().uuid()) }),
+      response: { 204: z.object({}), 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { workoutId } = request.params as { workoutId: string }
+    const { orderedIds } = request.body as { orderedIds: string[] }
+    try {
+      await Promise.all(
+        orderedIds.map((exId, index) =>
+          db.update(sessionExercises)
+            .set({ orderIndex: index })
+            .where(and(eq(sessionExercises.id, exId), eq(sessionExercises.workoutId, workoutId)))
+        )
+      )
+      return reply.status(204).send()
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to reorder exercises' })
+    }
+  })
 }

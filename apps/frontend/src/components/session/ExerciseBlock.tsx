@@ -19,6 +19,7 @@ import { useState, useEffect }    from 'react'
 import { cn }                      from '@/lib/cn'
 import { interactions }            from '@/lib/interactions'
 import { useLogSet, useDeleteSessionExercise } from '@/lib/queries/sessions'
+import { useExerciseHistory }      from '@/lib/queries/clients'
 import { useUXEventRef }           from '@/hooks/useUXEvent'
 import type { SessionExerciseResponse, SetResponse } from '@trainer-app/shared'
 
@@ -433,15 +434,23 @@ interface ExerciseBlockProps {
   workoutId:           string
   workoutType:         string
   weightUnit:          string
+  clientId:            string | null   // for exercise history auto-populate
   restDurationSeconds?: number
   onSetLogged:         (restSeconds?: number, pr?: { isPR: boolean; isPRVolume: boolean; weight?: number | null; reps?: number | null }) => void
 }
 
 export function ExerciseBlock({
-  sessionExercise, sessionId, workoutId, workoutType, weightUnit, restDurationSeconds = 90, onSetLogged,
+  sessionExercise, sessionId, workoutId, workoutType, weightUnit, clientId, restDurationSeconds = 90, onSetLogged,
 }: ExerciseBlockProps): React.JSX.Element {
   const logSet         = useLogSet()
   const deleteExercise = useDeleteSessionExercise()
+
+  // Fetch last session's sets for this exercise — used to pre-fill inputs
+  const { data: historyData } = useExerciseHistory(
+    clientId,
+    sessionExercise.exerciseId,
+  )
+  const lastSessionSets = historyData?.lastSets ?? []
 
   const loggedSets  = sessionExercise.sets
   const loggedCount = loggedSets.length
@@ -519,7 +528,27 @@ export function ExerciseBlock({
             sessionExercise={sessionExercise}
             workoutType={workoutType}
             weightUnit={weightUnit}
-            lastSet={loggedSets[loggedSets.length - 1] ?? null}
+            lastSet={
+              // In-session: use the most recently logged set (shows progression)
+              loggedSets.length > 0
+                ? (loggedSets[loggedSets.length - 1] ?? null)
+                // No sets yet this session: use the matching set from last session
+                // so inputs start pre-filled (e.g. set 1 → last session's set 1)
+                : (lastSessionSets[loggedCount] != null ? {
+                    id:              '',
+                    sessionExerciseId: sessionExercise.id,
+                    setNumber:       lastSessionSets[loggedCount]!.setNumber,
+                    reps:            lastSessionSets[loggedCount]!.reps,
+                    weight:          lastSessionSets[loggedCount]!.weight,
+                    weightUnit:      lastSessionSets[loggedCount]!.weightUnit,
+                    durationSeconds: lastSessionSets[loggedCount]!.durationSeconds,
+                    distance:        null,
+                    intensity:       null,
+                    isPR:            false,
+                    isPRVolume:      false,
+                    createdAt:       '',
+                  } as SetResponse : null)
+            }
             onLog={handleLog}
             isLogging={logSet.isPending}
           />

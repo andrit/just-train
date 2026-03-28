@@ -289,3 +289,30 @@ export function useClientPersonalBests(clientId: string | null): UseQueryResult<
     staleTime: 1000 * 60 * 5,
   })
 }
+
+// ── Exercise history (last session sets for auto-populate) ────────────────────
+
+export interface ExerciseHistorySet {
+  sessionDate:     string
+  setNumber:       number
+  reps:            number | null
+  weight:          number | null
+  weightUnit:      string
+  durationSeconds: number | null
+}
+
+export function useExerciseHistory(
+  clientId: string | null,
+  exerciseId: string | null,
+): UseQueryResult<{ lastSets: ExerciseHistorySet[] }> {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  return useQuery({
+    queryKey: ['exercise-history', clientId, exerciseId],
+    queryFn:  () =>
+      apiClient<{ lastSets: ExerciseHistorySet[] }>(
+        `/clients/${clientId}/exercise-history/${exerciseId}`
+      ),
+    enabled:  !!accessToken && !!clientId && !!exerciseId,
+    staleTime: 1000 * 60 * 5,
+  })
+}

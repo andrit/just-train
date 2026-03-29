@@ -524,7 +524,9 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         return reply.send({ lastSets: [] })
       }
 
-      const mostRecentDate = recentSets[0]!.sessionDate
+      const mostRecentDate = recentSets[0]?.sessionDate
+      if (!mostRecentDate) return reply.send({ lastSets: [] })
+
       const lastSets = recentSets
         .filter(s => s.sessionDate === mostRecentDate)
         .slice(0, 10)

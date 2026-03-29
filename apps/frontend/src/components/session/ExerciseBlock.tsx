@@ -534,20 +534,24 @@ export function ExerciseBlock({
                 ? (loggedSets[loggedSets.length - 1] ?? null)
                 // No sets yet this session: use the matching set from last session
                 // so inputs start pre-filled (e.g. set 1 → last session's set 1)
-                : (lastSessionSets[loggedCount] != null ? {
-                    id:              '',
-                    sessionExerciseId: sessionExercise.id,
-                    setNumber:       lastSessionSets[loggedCount]!.setNumber,
-                    reps:            lastSessionSets[loggedCount]!.reps,
-                    weight:          lastSessionSets[loggedCount]!.weight,
-                    weightUnit:      lastSessionSets[loggedCount]!.weightUnit,
-                    durationSeconds: lastSessionSets[loggedCount]!.durationSeconds,
-                    distance:        null,
-                    intensity:       null,
-                    isPR:            false,
-                    isPRVolume:      false,
-                    createdAt:       '',
-                  } as SetResponse : null)
+                : (() => {
+                    const h = lastSessionSets[loggedCount]
+                    if (!h) return null
+                    return {
+                      id:              '',
+                      sessionExerciseId: sessionExercise.id,
+                      setNumber:       h.setNumber,
+                      reps:            h.reps,
+                      weight:          h.weight,
+                      weightUnit:      h.weightUnit,
+                      durationSeconds: h.durationSeconds,
+                      distance:        null,
+                      intensity:       null,
+                      isPR:            false,
+                      isPRVolume:      false,
+                      createdAt:       '',
+                    } as SetResponse
+                  })()
             }
             onLog={handleLog}
             isLogging={logSet.isPending}

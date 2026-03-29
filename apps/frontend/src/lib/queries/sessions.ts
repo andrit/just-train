@@ -389,7 +389,7 @@ export function useReorderWorkouts() {
 export function useReorderExercises() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ sessionId, workoutId, orderedIds }: { sessionId: string; workoutId: string; orderedIds: string[] }) =>
+    mutationFn: ({ workoutId, orderedIds }: { sessionId: string; workoutId: string; orderedIds: string[] }) =>
       apiClient.patch(`/workouts/${workoutId}/exercises/reorder`, { orderedIds }),
     onSuccess: (_data, { sessionId }) =>
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) }),

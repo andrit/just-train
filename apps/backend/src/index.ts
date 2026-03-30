@@ -271,7 +271,9 @@ app.get('/health', {
 // ------------------------------------------------------------
 const start = async (): Promise<void> => {
   const port = parseInt(process.env.PORT ?? '3001', 10)
-  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
+  // Always bind to 0.0.0.0 in production so Railway's healthcheck can reach it.
+  // Fall back to localhost only when explicitly in development.
+  const host = process.env.NODE_ENV === 'development' ? 'localhost' : '0.0.0.0'
 
   try {
     // Configure Cloudinary — will throw if env vars are missing in production

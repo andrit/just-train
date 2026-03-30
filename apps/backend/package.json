@@ -5,7 +5,7 @@
   "description": "Trainer App — Fastify + Drizzle backend API",
   "scripts": {
     "dev":          "tsx watch --env-file=.env src/index.ts",
-    "build":        "tsc --outDir dist",
+    "build":        "node build.mjs",
     "start":        "node dist/index.js",
     "typecheck":    "tsc --noEmit",
     "lint":         "NODE_NO_WARNINGS=1 eslint . --max-warnings 0",
@@ -41,6 +41,7 @@
     "pino-pretty":             "^11.0.0"
   },
   "devDependencies": {
+    "esbuild":                 "^0.21.0",
     "@types/jsonwebtoken":      "^9.0.6",
     "@types/node":              "^20.12.12",
     "@types/pg":                "^8.11.6",

@@ -4,14 +4,14 @@
   "private": true,
   "description": "Professional fitness trainer PWA — monorepo root",
   "scripts": {
-    "dev":          "pnpm --parallel -r dev",
-    "build":        "pnpm -r build",
-    "lint":         "pnpm -r lint",
-    "typecheck":    "pnpm -r typecheck",
-    "test":         "pnpm -r test",
-    "db:generate":  "pnpm --filter backend db:generate",
-    "db:migrate":   "pnpm --filter backend db:migrate",
-    "db:studio":    "pnpm --filter backend db:studio"
+    "dev": "pnpm --parallel -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter backend db:generate",
+    "db:migrate": "pnpm --filter backend db:migrate",
+    "db:studio": "pnpm --filter backend db:studio"
   },
   "devDependencies": {
     "typescript": "^5.4.5"
@@ -19,5 +19,19 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "zod": "^3.23.8",
+      "workbox-build": "^7.3.0"
+    },
+    "ignoredBuiltDependencies": [
+      "es5-ext",
+      "msgpackr-extract"
+    ],
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild"
+    ]
   }
 }

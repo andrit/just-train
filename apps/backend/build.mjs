@@ -5,9 +5,10 @@
 // The @trainer-app/shared workspace package is inlined (bundled)
 // so Node.js never tries to resolve its TypeScript source at runtime.
 //
-// Native modules (argon2, pg, bullmq, ioredis, cloudinary) are
-// marked external — esbuild leaves them as require() calls and
-// they are resolved from node_modules at runtime as normal.
+// Key principle: packages that use class instances or plugin systems
+// MUST be external so all code shares the same instance from node_modules.
+// Bundling them creates duplicate instances that fail identity checks
+// (e.g. schema.safeParse is not a function, hook not registered, etc.)
 // ------------------------------------------------------------
 
 import { build } from 'esbuild'
@@ -21,58 +22,61 @@ await build({
   bundle:      true,
   platform:    'node',
   target:      'node20',
-  format:      'cjs',         // CommonJS — matches tsconfig "module": "CommonJS"
+  format:      'cjs',
   outfile:     resolve(__dirname, 'dist/index.js'),
   sourcemap:   true,
 
-  // Path alias — mirrors tsconfig paths
+  // Resolve @trainer-app/shared to TypeScript source — esbuild handles
+  // the directory imports that plain node cannot resolve at runtime.
   alias: {
     '@trainer-app/shared': resolve(__dirname, '../../packages/shared/src/index.ts'),
   },
 
-  // Native modules and large packages that should not be bundled.
-  // They are resolved from node_modules at runtime.
+  // External packages — resolved from node_modules at runtime.
+  // Rule: anything that uses class identity checks, plugin systems,
+  // or serves static assets must be external to avoid duplicate instances.
   external: [
     // Native addons
     'argon2',
+
     // Database
     'pg',
     'pg-native',
+    'drizzle-orm',
+
     // Queue / Redis
     'bullmq',
     'ioredis',
-    // Media
+
+    // Media / email
     'cloudinary',
-    // Email
     'resend',
-    // Swagger UI — serves static assets from its own node_modules dir;
-    // must stay external so its __dirname resolves correctly at runtime.
-    // Only loaded in development via dynamic import anyway.
+
+    // Zod — must be external so fastify-type-provider-zod and app schemas
+    // share the exact same Zod instance. Bundling separately causes
+    // "schema.safeParse is not a function" at serialization time.
+    'zod',
+    'fastify-type-provider-zod',
+
+    // Fastify core and all plugins — must share one instance so hooks,
+    // decorators, and the plugin system work correctly.
+    'fastify',
+    '@fastify/cookie',
+    '@fastify/cors',
+    '@fastify/helmet',
+    '@fastify/multipart',
+    '@fastify/rate-limit',
+    '@fastify/swagger',
     '@fastify/swagger-ui',
-    // Swagger UI — not used in production, references static files
-    '@fastify/swagger-ui',
-    // Node built-ins (esbuild handles these automatically with platform:node
-    // but listing explicitly for clarity)
-    'crypto',
-    'fs',
-    'path',
-    'os',
-    'stream',
-    'events',
-    'util',
-    'http',
-    'https',
-    'net',
-    'tls',
-    'child_process',
-    'worker_threads',
-    'url',
-    'querystring',
-    'zlib',
-    'buffer',
+
+    // JWT / crypto
+    'jsonwebtoken',
+
+    // Logging
+    'pino',
+    'pino-pretty',
   ],
 
-  // Suppress warnings about dynamic require (Drizzle uses them internally)
   logLevel: 'info',
 })
 

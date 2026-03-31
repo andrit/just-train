@@ -28,7 +28,6 @@ import cookie        from '@fastify/cookie'
 import multipart     from '@fastify/multipart'
 import rateLimit     from '@fastify/rate-limit'
 import swagger       from '@fastify/swagger'
-import swaggerUi     from '@fastify/swagger-ui'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import * as dotenv   from 'dotenv'
 
@@ -216,18 +215,10 @@ Cardio → Stretching → Calisthenics/Resistance → Cooldown *(editable per se
 
 // ------------------------------------------------------------
 // SWAGGER UI — interactive docs at /documentation
+// Only enabled in development — not exposed in production.
 // persistAuthorization keeps the bearer token across page reloads
 // ------------------------------------------------------------
-app.register(swaggerUi, {
-  routePrefix: '/documentation',
-  uiConfig: {
-    docExpansion:           'list',
-    displayRequestDuration: true,
-    persistAuthorization:   true,   // Keeps the JWT token across page reloads
-    filter:                 true,   // Enables search/filter in the sidebar
-  },
-  staticCSP: true,
-})
+// Swagger UI registered inside start() for dev only — see below
 
 // ------------------------------------------------------------
 // ROUTES
@@ -274,6 +265,23 @@ const start = async (): Promise<void> => {
   // Always bind to 0.0.0.0 in production so Railway's healthcheck can reach it.
   // Fall back to localhost only when explicitly in development.
   const host = process.env.NODE_ENV === 'development' ? 'localhost' : '0.0.0.0'
+
+  // Swagger UI — dev only, loaded dynamically so the module never loads in production.
+  // This prevents @fastify/swagger-ui from registering static file handlers that
+  // reference paths (logo.svg) which don't exist in the production bundle.
+  if (process.env.NODE_ENV !== 'production') {
+    const { default: swaggerUi } = await import('@fastify/swagger-ui')
+    await app.register(swaggerUi, {
+      routePrefix: '/documentation',
+      uiConfig: {
+        docExpansion:           'list',
+        displayRequestDuration: true,
+        persistAuthorization:   true,
+        filter:                 true,
+      },
+      staticCSP: true,
+    })
+  }
 
   try {
     // Configure Cloudinary — will throw if env vars are missing in production

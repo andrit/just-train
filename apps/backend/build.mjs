@@ -45,6 +45,12 @@ await build({
     'cloudinary',
     // Email
     'resend',
+    // Swagger UI — serves static assets from its own node_modules dir;
+    // must stay external so its __dirname resolves correctly at runtime.
+    // Only loaded in development via dynamic import anyway.
+    '@fastify/swagger-ui',
+    // Swagger UI — not used in production, references static files
+    '@fastify/swagger-ui',
     // Node built-ins (esbuild handles these automatically with platform:node
     // but listing explicitly for clarity)
     'crypto',

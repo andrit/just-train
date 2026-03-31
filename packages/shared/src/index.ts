@@ -6,7 +6,7 @@
 // ------------------------------------------------------------
 
 // All enums as Zod schemas + inferred TypeScript types
-export * from './enums'
+export * from './enums/index'
 
 // Input schemas (request bodies) + inferred types
 export * from './schemas/index'

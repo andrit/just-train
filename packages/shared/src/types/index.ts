@@ -20,7 +20,7 @@ import type {
   Difficulty,
   MediaType,
   TrainerRole,
-} from '../enums'
+} from '../enums/index'
 
 // ============================================================
 // TRAINER

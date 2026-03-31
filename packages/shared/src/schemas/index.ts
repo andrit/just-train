@@ -22,7 +22,7 @@ import {
   ClientFocusEnum,
   ProgressionStateEnum,
   TrainerModeEnum,
-} from '../enums'
+} from '../enums/index'
 
 // ============================================================
 // TRAINER

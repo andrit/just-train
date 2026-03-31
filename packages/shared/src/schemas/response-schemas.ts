@@ -32,7 +32,7 @@ import {
   SubscriptionStatusEnum,
   TrainerModeEnum,
   ExerciseCategoryEnum,
-} from '../enums'
+} from '../enums/index'
 
 // ============================================================
 // SHARED UTILITY

@@ -6,7 +6,7 @@
  * so conversions are always for display purposes — historical records are never mutated.
  */
 
-import type { WeightUnit } from "../enums";
+import type { WeightUnit } from "../enums/index";
 
 const LBS_PER_KG = 2.20462;
 const KG_PER_LB = 0.453592;

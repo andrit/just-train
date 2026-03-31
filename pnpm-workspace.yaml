@@ -5,6 +5,6 @@ packages:
   - "packages/*"
 allowBuilds:
   argon2: true
-  es5-ext: true
-  esbuild: false
+  es5-ext: false
+  esbuild: true
   msgpackr-extract: false

@@ -4,14 +4,14 @@
   "private": true,
   "description": "Professional fitness trainer PWA — monorepo root",
   "scripts": {
-    "dev": "pnpm --parallel -r dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test",
-    "db:generate": "pnpm --filter backend db:generate",
-    "db:migrate": "pnpm --filter backend db:migrate",
-    "db:studio": "pnpm --filter backend db:studio"
+    "dev":          "pnpm --parallel -r dev",
+    "build":        "pnpm -r build",
+    "lint":         "pnpm -r lint",
+    "typecheck":    "pnpm -r typecheck",
+    "test":         "pnpm -r test",
+    "db:generate":  "pnpm --filter backend db:generate",
+    "db:migrate":   "pnpm --filter backend db:migrate",
+    "db:studio":    "pnpm --filter backend db:studio"
   },
   "devDependencies": {
     "typescript": "^5.4.5"

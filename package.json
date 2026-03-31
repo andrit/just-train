@@ -19,5 +19,18 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "zod": "^3.23.8"
+    },
+    "ignoredBuiltDependencies": [
+      "es5-ext",
+      "msgpackr-extract"
+    ],
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild"
+    ]
   }
 }

@@ -159,3 +159,17 @@ Redeploy the backend after updating the variable.
 
 **CORS error in browser console**
 → The `CORS_ORIGIN` env var is wrong or not yet deployed — check Railway variables
+
+---
+
+## Local dev after this change
+
+The shared package now needs to be compiled before the backend can start in production mode. For local dev, `tsx` reads TypeScript directly so it still works. But if you ever run `node dist/index.js` locally:
+
+```bash
+pnpm --filter @trainer-app/shared build
+pnpm --filter backend build
+pnpm --filter backend start
+```
+
+The `pnpm dev` command (uses `tsx`) is unaffected.

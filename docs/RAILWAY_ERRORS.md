@@ -377,3 +377,38 @@ apps/frontend/dist/
 Combined effect: one physical copy of zod at workspace root. All `require('zod')` calls — from shared's compiled dist, from backend routes, from fastify-type-provider-zod — resolve to the same instance.
 
 **Status: PENDING DEPLOY**
+
+---
+
+### Error 11 — ACTUAL ROOT CAUSE OF safeParse: Plain JSON Schema on health route
+
+**Finding:** All previous analysis about Zod instances was wrong. The `safeParse is not a function` error was being thrown on the `/health` endpoint — a route that has nothing to do with `@trainer-app/shared`.
+
+The health route response schema was defined as a plain JSON Schema object:
+```ts
+response: {
+  200: {
+    type: 'object',
+    properties: {
+      status: { type: 'string' },
+      timestamp: { type: 'string' },
+    }
+  }
+}
+```
+
+`fastify-type-provider-zod` is registered as the global serializer via `setSerializerCompiler`. It expects **every** response schema to be a Zod schema and calls `.safeParse()` on it. A plain JS object has no `.safeParse()` method — hence the error.
+
+**Fix:** Convert to a proper Zod schema:
+```ts
+response: {
+  200: z.object({
+    status:    z.string(),
+    timestamp: z.string(),
+  })
+}
+```
+
+**Lesson:** When using `fastify-type-provider-zod`, ALL response schemas across the entire app must be Zod schemas. Plain JSON Schema objects will cause `safeParse is not a function` at runtime.
+
+**Status: PENDING DEPLOY**

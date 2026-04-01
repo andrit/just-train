@@ -29,6 +29,7 @@ import multipart     from '@fastify/multipart'
 import rateLimit     from '@fastify/rate-limit'
 import swagger       from '@fastify/swagger'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
+import { z }          from 'zod'
 import * as dotenv   from 'dotenv'
 
 dotenv.config()
@@ -246,13 +247,10 @@ app.get('/health', {
     summary: 'Server health check',
     description: 'Returns 200 OK when the server is running. No auth required.',
     response: {
-      200: {
-        type: 'object',
-        properties: {
-          status:    { type: 'string', example: 'ok' },
-          timestamp: { type: 'string', format: 'date-time' },
-        },
-      },
+      200: z.object({
+        status:    z.string(),
+        timestamp: z.string(),
+      }),
     },
   },
 }, async () => ({ status: 'ok', timestamp: new Date().toISOString() }))

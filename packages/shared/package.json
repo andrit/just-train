@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "lint":      "echo 'shared: no lint needed (tsc covers it)'"
   },
-  "dependencies": {
+  "dependencies": {},
+  "peerDependencies": {
     "zod": "^3.23.8"
   },
   "devDependencies": {

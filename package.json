@@ -22,8 +22,7 @@
   },
   "pnpm": {
     "overrides": {
-      "zod": "^3.23.8",
-      "workbox-build": "^7.3.0"
+      "zod": "^3.23.8"
     },
     "ignoredBuiltDependencies": [
       "es5-ext",

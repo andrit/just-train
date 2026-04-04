@@ -1,7 +1,7 @@
 {
-  "buildCommand": "pnpm --filter frontend build",
-  "outputDirectory": "apps/frontend/dist",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm --filter frontend build",
+  "outputDirectory": "dist",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "framework": null,
   "rewrites": [
     {

@@ -330,3 +330,33 @@ WHERE te_name NOT IN (
   SELECT name FROM exercises WHERE trainer_id = '<trainer_id>'
 );
 ```
+
+---
+
+## Exercise Data Fixes (hotfix — run on production DB)
+
+Before running deletes, check which duplicate has session data:
+```sql
+SELECT e.name, e.id, COUNT(se.id) as sets_logged
+FROM exercises e
+LEFT JOIN session_exercises se ON se.exercise_id = e.id
+WHERE e.name IN (
+  'Decline BArbell Bench Press',
+  'Decline Barbell Bench Press',
+  'Dumbbell Bench Press',
+  'Pec Deck',
+  'Dumbbell Fly',
+  'Dumbbell Flye'
+)
+GROUP BY e.name, e.id
+ORDER BY e.name;
+```
+
+Then delete the duplicate without data (keep whichever has sets_logged > 0):
+```sql
+-- Delete the typo/duplicate with no session data (confirm ID first)
+DELETE FROM exercises WHERE id = '<id-of-empty-duplicate>';
+
+-- Rename Dumbbell Fly → Dumbbell Flye (if old name still exists)
+UPDATE exercises SET name = 'Dumbbell Flye' WHERE name = 'Dumbbell Fly';
+```

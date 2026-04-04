@@ -92,7 +92,7 @@ export function SelfTrainingWidget({
 
         {/* Profile link */}
         <Link
-          to={`/clients/${selfClient.id}`}
+          to="/my-training"
           className={cn(
             'px-3 py-2.5 rounded-xl text-sm font-medium',
             'bg-surface border border-surface-border text-gray-300',

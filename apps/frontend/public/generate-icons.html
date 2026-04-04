@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TrainerApp Icon Generator</title>
+  <style>
+    body { font-family: sans-serif; background: #1a1a2e; color: white; padding: 40px; }
+    button { background: #ff4b6e; color: white; border: none; padding: 12px 24px;
+             border-radius: 8px; font-size: 16px; cursor: pointer; margin: 8px; }
+    canvas { display: block; margin: 20px 0; border-radius: 12px; }
+    .preview { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+  </style>
+</head>
+<body>
+  <h1>💪 TrainerApp Icon Generator</h1>
+  <p>Click the button to generate and download all PWA icon sizes.</p>
+  <div class="preview" id="preview"></div>
+  <br>
+  <button onclick="generateAll()">Download All Icons</button>
+
+  <script>
+    const sizes = [72, 96, 128, 144, 152, 192, 384, 512]
+    const BG = '#1a1a2e'
+    const EMOJI = '💪'
+
+    function generateIcon(size) {
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')
+
+      // Background
+      ctx.fillStyle = BG
+      ctx.fillRect(0, 0, size, size)
+
+      // Emoji centered
+      const fontSize = Math.floor(size * 0.68)
+      ctx.font = `${fontSize}px serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(EMOJI, size / 2, size / 2 + fontSize * 0.05)
+
+      return canvas
+    }
+
+    function generateAll() {
+      sizes.forEach(size => {
+        const canvas = generateIcon(size)
+        const link = document.createElement('a')
+        link.download = `icon-${size}x${size}.png`
+        link.href = canvas.toDataURL('image/png')
+        link.click()
+      })
+    }
+
+    // Show previews
+    const preview = document.getElementById('preview')
+    ;[72, 192, 512].forEach(size => {
+      const canvas = generateIcon(size)
+      canvas.title = `${size}x${size}`
+      const label = document.createElement('div')
+      label.style.textAlign = 'center'
+      label.innerHTML = `<div style="font-size:12px;color:#888">${size}x${size}</div>`
+      label.prepend(canvas)
+      preview.appendChild(label)
+    })
+  </script>
+</body>
+</html>

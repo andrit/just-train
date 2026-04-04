@@ -5,7 +5,7 @@
 
 ---
 
-## Current Status: UNRESOLVED
+## Current Status: ✅ RESOLVED
 
 **Latest error (still occurring):**
 ```
@@ -376,7 +376,7 @@ apps/frontend/dist/
 
 Combined effect: one physical copy of zod at workspace root. All `require('zod')` calls — from shared's compiled dist, from backend routes, from fastify-type-provider-zod — resolve to the same instance.
 
-**Status: PENDING DEPLOY**
+**Status: ✅ RESOLVED — plain JSON Schema on /health was the root cause**
 
 ---
 
@@ -411,4 +411,4 @@ response: {
 
 **Lesson:** When using `fastify-type-provider-zod`, ALL response schemas across the entire app must be Zod schemas. Plain JSON Schema objects will cause `safeParse is not a function` at runtime.
 
-**Status: PENDING DEPLOY**
+**Status: ✅ RESOLVED — plain JSON Schema on /health was the root cause**

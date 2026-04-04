@@ -58,7 +58,7 @@ const DEFAULT_TEMPLATES: TemplateDef[] = [
       type: 'resistance',
       exercises: [
         { name: 'Dumbbell Bench Press',        sets: 4, reps: 10, weight: 30 },
-        { name: 'Incline Dumbbell Fly',        sets: 3, reps: 12, weight: 15 },
+        { name: 'Incline Dumbbell Flye',        sets: 3, reps: 12, weight: 15 },
         { name: 'Dumbbell Shoulder Press',     sets: 3, reps: 10, weight: 20 },
         { name: 'Front Raise',                 sets: 3, reps: 12, weight: 10 },
         { name: 'Overhead Tricep Extension',   sets: 3, reps: 12, weight: 20 },
@@ -245,7 +245,7 @@ const DEFAULT_TEMPLATES: TemplateDef[] = [
       exercises: [
         { name: 'Barbell Bench Press',        sets: 4, reps: 8,  weight: 80 },
         { name: 'Overhead Press',             sets: 3, reps: 8,  weight: 50 },
-        { name: 'Incline Dumbbell Fly',       sets: 3, reps: 12, weight: 20 },
+        { name: 'Incline Dumbbell Flye',       sets: 3, reps: 12, weight: 20 },
         { name: 'Lateral Raise',              sets: 4, reps: 15, weight: 10 },
         { name: 'Tricep Pushdown',            sets: 3, reps: 12, weight: 30 },
         { name: 'Overhead Tricep Extension',  sets: 3, reps: 12, weight: 20 },

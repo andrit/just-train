@@ -36,6 +36,21 @@ export default function LoginPage(): React.JSX.Element {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
     setError(null)
+
+    // Explicit validation — browser 'required' attr unreliable on installed PWAs
+    if (mode === 'register' && !name.trim()) {
+      setError('Name is required')
+      return
+    }
+    if (!email.trim()) {
+      setError('Email is required')
+      return
+    }
+    if (!password || password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+
     setLoading(true)
 
     try {

@@ -139,7 +139,9 @@ async function request<T>(
     let errorData: { error?: string; code?: string; details?: unknown } = {}
     try { errorData = await response.json() } catch { /* ignore */ }
 
-    if (response.status === 401) {
+    // Don't redirect to login on auth routes — the login page needs to
+    // display the error message itself (e.g. "Invalid email or password")
+    if (response.status === 401 && !path.includes('/auth/')) {
       redirectToLogin()
     }
 

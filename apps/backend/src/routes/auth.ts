@@ -142,6 +142,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   // This self-client is the foundation of "train yourself" mode.
   // ──────────────────────────────────────────────────────────────────────────
   app.post('/auth/register', {
+    config: { rateLimit: { max: 5, timeWindow: '15 minutes' } },
     schema: {
       tags: ['Auth'],
       summary: 'Register a trainer account',

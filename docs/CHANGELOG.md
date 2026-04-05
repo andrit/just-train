@@ -509,3 +509,69 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - **Drag-to-reorder** — `SortableWorkoutList` component using `@dnd-kit/sortable`. Drag handles appear on workout blocks in plan builder. Order persists to backend on drop
 - **Post-session wrap-up** — `PostSessionWrapUp` sheet shown after ending a session. Displays: exercises completed, sets logged, total volume, PR count with exercise callouts. Lets trainer name/rename the session before navigating to summary
 
+
+## [v2.8.x hotfixes] — Post-hosting fixes
+
+### Bug fixes
+- `SelfTrainingWidget` — profile link changed from `/clients/${selfClient.id}` to `/my-training`; fixes "Client not found" in athlete mode on dashboard
+- `api.ts` — `redirectToLogin()` now excluded for `/auth/` routes; fixes blank error message on login failure
+- `LoginPage` — added explicit JS validation before submit; fixes no error shown on empty fields in installed PWA (iOS bypasses HTML5 `required`)
+- `POST /auth/register` — added rate limit (5 attempts / 15 minutes); was previously unlimited
+- `POST /auth/login` — temporary debug logs removed
+- `verifyPassword` — temporary debug logs removed
+
+### Exercise data
+- `exercises-library.json` — renamed `Dumbbell Fly` → `Dumbbell Flye`
+- `exercises-library.json` — added `Incline Dumbbell Flye` to isolation chest exercises
+- `defaultTemplates.ts` — updated `Incline Dumbbell Fly` → `Incline Dumbbell Flye` in two templates
+- SQL fix instructions added to `docs/SQL_COMMANDS.md` for production DB duplicate cleanup
+
+### Hosting
+- `vercel.json` — updated for `apps/frontend` root directory deployment; `buildCommand` uses `cd ../..` to reach monorepo root
+- `railway.json` — healthcheck timeout tuned; host binding fixed (`0.0.0.0` default)
+- `packages/shared` — `prepare` script auto-compiles shared to CJS on `pnpm install`; `main` points to `dist/index.js`
+- `packages/shared/tsconfig.build.json` — added for CJS compilation
+- `pnpm.overrides` — `zod` hoisted to root; `workbox-build` pinned to avoid `assignWith` bug
+- `.npmrc` — `hoist-pattern[]=zod` added
+
+### Docs added
+- `docs/RAILWAY_ERRORS.md` — full error log from Railway deploy debugging
+- `docs/SECURITY.md` — security assessment across all 6 areas
+- `PWA_DEBUG_GUIDE.md` — PWA debugging guide (kept outside version control)
+- `docs/SQL_COMMANDS.md` — production DB exercise fix queries added
+
+### PWA icons
+- `public/icons/` — all 8 required sizes generated (72–512px)
+- `public/generate-icons.html` — browser tool for regenerating emoji icons locally
+
+
+## [v2.10.0] — Template Builder UX
+
+### Backend
+- `PATCH /templates/:id/workouts/reorder` — accepts ordered array of template workout IDs, updates `orderIndex` values. Same pattern as session workout reorder. Trainer-scoped with ownership verification.
+
+### Frontend
+
+**Feature 1 — Filter exercises by workout type in template picker:**
+- `TemplateExercisePickerSheet` now receives `workoutType` from the parent block
+- Exercise list pre-filtered to match block type (resistance block → resistance exercises only)
+- "All types" chip to override the filter — same UX as `AddExerciseSheet`
+- Empty state: "No exercises found for {type}" when no matches
+
+**Feature 2 — Delete block + drag reorder blocks:**
+- `TemplateBlockCard` — trash icon at top-right of each block card; removes block + exercises via `DELETE /template-workouts/:id`
+- `SortableBlockList` — `@dnd-kit/sortable` wraps block list in `DndContext + SortableContext`; 6-dot drag handle on each block (same pattern as `SortableWorkoutList` in session plan); optimistic reorder on drop, persisted via `PATCH /templates/:id/workouts/reorder`
+- `useDeleteTemplateWorkout` + `useReorderTemplateWorkouts` query hooks added to `lib/queries/templates.ts`
+
+**Feature 3 — Exercise accordion + swipe to add:**
+- `ExerciseAccordionRow` — new shared component (`components/exercises/ExerciseAccordionRow.tsx`):
+  - Collapsed: exercise name + body part tag + difficulty badge + chevron
+  - Expanded: lazy-loads exercise detail (description, instructions, equipment/type tags), smooth height animation
+  - Only one accordion open at a time (parent controls `expandedId`)
+  - Swipe-right gesture (~80px threshold) to add exercise immediately; green flash confirms
+  - "Add to block" button inside accordion (belt and suspenders with swipe)
+  - Optional `renderActions` prop for custom action buttons (used by `AddExerciseSheet` for "Quick add" + "Set targets →" dual buttons)
+- `TemplateExercisePickerSheet` — exercise list uses `ExerciseAccordionRow` with swipe enabled
+- `AddExerciseSheet` — exercise list uses `ExerciseAccordionRow` with swipe (quick-add with defaults) + "Set targets →" for full target config flow
+- `ExercisesPage` — no change; grid + BottomSheet detail already provides equivalent UX for browse-only context
+

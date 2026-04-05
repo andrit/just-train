@@ -114,7 +114,31 @@ export function useAddTemplateBlock() {
   })
 }
 
-// ── Add exercise to block ─────────────────────────────────────────────────────
+// ── Delete workout block ──────────────────────────────────────────────────
+
+export function useDeleteTemplateWorkout() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ workoutId }: { templateId: string; workoutId: string }) =>
+      apiClient.delete(`/template-workouts/${workoutId}`),
+    onSuccess: (_data, { templateId }) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
+  })
+}
+
+// ── Reorder workout blocks ───────────────────────────────────────────────
+
+export function useReorderTemplateWorkouts() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ templateId, orderedIds }: { templateId: string; orderedIds: string[] }) =>
+      apiClient.patch(`/templates/${templateId}/workouts/reorder`, { orderedIds }),
+    onSuccess: (_data, { templateId }) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
+  })
+}
+
+// ── Add exercise to block ────────────────────────────────────────────────
 
 export function useAddTemplateExercise() {
   const qc = useQueryClient()

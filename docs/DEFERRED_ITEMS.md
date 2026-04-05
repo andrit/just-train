@@ -249,14 +249,13 @@ Moved from v2.7.0 to v2.8.0 to make room for the template library.
 - Drag to reorder workouts and exercises in plan builder (@dnd-kit/core)
 - Post-session wrap-up flow (name draft exercises, add notes, preview PRs)
 
-### Hosting Setup (v2.11.0)
-Railway (backend + PostgreSQL) + Vercel (frontend) production deploy.
-Full environment variable config, custom domain, GitHub auto-deploy.
-Slotted before v3.0.0 SaaS work so billing features deploy to a real environment.
+### Hosting Setup (v2.9.0) ✅ COMPLETE
+Railway (backend + PostgreSQL) + Vercel (frontend) deployed.
+GitHub auto-deploy active. Custom domain pending.
 
 ---
 
-## v2.9.0 UX — Exercise Detail Page
+## v2.11.0 UX — Exercise Detail Page
 
 ### Hide media placeholder when no image/video exists
 Currently shows a large empty placeholder with "Visual coming in Phase 9" text even when there's no media. Should be hidden entirely — only show the media section when `demonstration` or `visualization` is present.

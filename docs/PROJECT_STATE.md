@@ -632,9 +632,12 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v2.6.0 | ESLint + code quality | ✅ |
 | v2.7.0 | Template library — builder, fork, seeds, session integration | ✅ |
 | v2.8.0 | Auto-populate from history + drag reorder + post-session wrap-up | ✅ |
-| v2.9.0 | Camera / video capture + coach challenges | 🔜 |
-| v2.10.0 | Leaderboards + weekly quests + social share | 🔜 |
-| v2.11.0 | Hosting setup — Railway + Vercel production deploy | 🔜 |
+| v2.9.0 | Hosting — Railway + Vercel production deploy | ✅ |
+| v2.10.0 | Template builder UX — workout type filter, delete/reorder blocks, exercise accordion + swipe | ✅ |
+| v2.11.0 | Session + exercise detail UX — slide-in, single scroll, hide empty media | 🔜 Next |
+| v2.12.0 | Camera / video capture + coach challenges | 🔜 |
+| v2.13.0 | Leaderboards + weekly quests + social share | 🔜 |
+| v2.14.0 | Security hardening — CSP headers, service worker cache, rate limit review | 🔜 |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 | v3.1.0 | Observable navigation — RxJS swap inside navService | 🔜 |
 

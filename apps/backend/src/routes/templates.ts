@@ -424,6 +424,45 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
   })
 
   // ----------------------------------------------------------
+  // PATCH /templates/:id/workouts/reorder
+  // Accepts an ordered array of template workout IDs and updates
+  // their orderIndex values. Used by drag-to-reorder in builder.
+  // ----------------------------------------------------------
+  app.patch('/templates/:id/workouts/reorder', {
+    schema: {
+      tags: ['Templates'], security: [{ bearerAuth: [] }],
+      summary: 'Reorder workout blocks in a template',
+      params: z.object({ id: z.string().uuid() }),
+      body:   z.object({ orderedIds: z.array(z.string().uuid()) }),
+      response: { 204: z.object({}), 403: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { id: templateId } = request.params as { id: string }
+    const { orderedIds }     = request.body as { orderedIds: string[] }
+    try {
+      // Verify template belongs to this trainer
+      const template = await db.query.templates.findFirst({
+        where: and(eq(templates.id, templateId), eq(templates.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!template) return reply.status(403).send({ error: 'Not authorised' })
+
+      // Update each workout block's orderIndex in parallel
+      await Promise.all(
+        orderedIds.map((workoutId, index) =>
+          db.update(templateWorkouts)
+            .set({ orderIndex: index })
+            .where(and(eq(templateWorkouts.id, workoutId), eq(templateWorkouts.templateId, templateId)))
+        )
+      )
+      return reply.status(204).send()
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to reorder workout blocks' })
+    }
+  })
+
+  // ----------------------------------------------------------
   // DELETE /template-workouts/:id — Remove a workout block
   // ----------------------------------------------------------
   app.delete('/template-workouts/:id', {

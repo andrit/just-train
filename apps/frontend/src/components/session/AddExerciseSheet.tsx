@@ -30,6 +30,7 @@ import {
 }                                from '@/lib/queries/exercises'
 import { useAddExercise }        from '@/lib/queries/sessions'
 import { useAuthStore }          from '@/store/authStore'
+import { ExerciseAccordionRow }  from '@/components/exercises/ExerciseAccordionRow'
 import type { ExerciseSummaryResponse } from '@trainer-app/shared'
 import type { AddExerciseInput } from '@/lib/queries/sessions'
 
@@ -258,6 +259,7 @@ export function AddExerciseSheet({
   const [search,        setSearch]        = useState('')
   const [selected,      setSelected]      = useState<ExerciseSummaryResponse | null>(null)
   const [isConfirming,  setIsConfirming]  = useState(false)
+  const [expandedId,    setExpandedId]    = useState<string | null>(null)
 
   // Resistance
   const [targetSets,    setTargetSets]    = useState(3)
@@ -307,13 +309,28 @@ export function AddExerciseSheet({
   const showQuickAdd = search.trim().length > 1 && filtered.length === 0
 
   const handleClose = (): void => {
-    setSearch(''); setSelected(null); setIsConfirming(false); setShowAllTypes(false)
+    setSearch(''); setSelected(null); setIsConfirming(false); setShowAllTypes(false); setExpandedId(null)
     onClose()
   }
 
   const handleSelect = (exercise: ExerciseSummaryResponse): void => {
     setSelected(exercise)
     setIsConfirming(true)
+  }
+
+  // Quick-add with default targets (swipe-to-add or "Add with defaults" button)
+  const handleSwipeAdd = (exercise: ExerciseSummaryResponse): void => {
+    const defaults: Omit<AddExerciseInput, 'workoutId' | 'sessionId' | 'exerciseId'> =
+      workoutType === 'resistance'   ? { targetSets: 3, targetReps: 10 }
+      : workoutType === 'cardio'     ? { targetSets: 4, targetDurationSeconds: 60 }
+      : workoutType === 'calisthenics' ? { targetSets: 3, targetReps: 15 }
+      : workoutType === 'stretching' ? { targetSets: 2, targetDurationSeconds: 30 }
+      : workoutType === 'cooldown'   ? { targetDurationSeconds: 120 }
+      : { targetSets: 3, targetReps: 10 }
+    addExercise.mutate(
+      { workoutId, sessionId, exerciseId: exercise.id, ...defaults },
+      { onSuccess: handleClose },
+    )
   }
 
   // Build the AddExerciseInput based on workout type
@@ -439,32 +456,47 @@ export function AddExerciseSheet({
             )}
 
             {filtered.map((exercise) => (
-              <button
+              <ExerciseAccordionRow
                 key={exercise.id}
-                type="button"
-                onClick={() => handleSelect(exercise)}
-                className={cn(
-                  'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left',
-                  'bg-surface border border-surface-border',
-                  'hover:border-brand-highlight/30 hover:bg-brand-highlight/5',
-                  'transition-all duration-100',
-                  interactions.button.base,
-                  interactions.button.press,
-                  exercise.isDraft && 'border-dashed',
+                exercise={exercise}
+                expanded={expandedId === exercise.id}
+                onToggle={() => setExpandedId(prev => prev === exercise.id ? null : exercise.id)}
+                swipeEnabled
+                onAdd={() => handleSwipeAdd(exercise)}
+                disabled={isPending}
+                renderActions={() => (
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleSwipeAdd(exercise) }}
+                      disabled={isPending}
+                      className={cn(
+                        'flex-1 py-2 rounded-lg text-xs font-medium',
+                        'bg-brand-highlight/10 text-brand-highlight border border-brand-highlight/30',
+                        'hover:bg-brand-highlight/20 transition-colors',
+                        interactions.button.base,
+                        isPending && 'opacity-50 pointer-events-none',
+                      )}
+                    >
+                      Quick add
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleSelect(exercise) }}
+                      disabled={isPending}
+                      className={cn(
+                        'flex-1 py-2 rounded-lg text-xs font-medium',
+                        'text-gray-400 border border-surface-border',
+                        'hover:text-gray-200 hover:border-gray-500 transition-colors',
+                        interactions.button.base,
+                        isPending && 'opacity-50 pointer-events-none',
+                      )}
+                    >
+                      Set targets →
+                    </button>
+                  </div>
                 )}
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-200 truncate">{exercise.name}</p>
-                  {exercise.bodyPart && (
-                    <p className="text-xs text-gray-500 mt-0.5">{exercise.bodyPart.name}</p>
-                  )}
-                </div>
-                {exercise.isDraft && (
-                  <span className="text-[10px] uppercase tracking-wider text-amber-500/70 border border-amber-500/30 px-1.5 py-0.5 rounded shrink-0">
-                    Draft
-                  </span>
-                )}
-              </button>
+              />
             ))}
 
             {showQuickAdd && (

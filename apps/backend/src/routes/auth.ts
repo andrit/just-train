@@ -254,10 +254,14 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     const { email, password } = request.body as z.infer<typeof LoginSchema>
     const { deviceId, deviceName } = extractDeviceInfo(request as FastifyRequest)
 
+    console.log('[login] attempt for:', email.toLowerCase(), '| body keys:', Object.keys(request.body as Record<string, unknown>))
+
     try {
       const trainer = await db.query.trainers.findFirst({
         where: eq(trainers.email, email.toLowerCase()),
       })
+
+      console.log('[login] trainer found:', !!trainer, trainer ? `id=${trainer.id}` : 'null')
 
       // Use the same error message whether email or password is wrong —
       // prevents email enumeration attacks
@@ -266,6 +270,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const valid = await verifyPassword(password, trainer.passwordHash)
+      console.log('[login] password valid:', valid)
       if (!valid) {
         return reply.status(401).send({ error: 'Invalid email or password' })
       }

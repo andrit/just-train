@@ -71,19 +71,50 @@ app.setSerializerCompiler(serializerCompiler)
 // ------------------------------------------------------------
 // CORS
 // credentials: true required for httpOnly cookie on refresh endpoint
-// CORS_ORIGIN can be a comma-separated list for multiple origins:
-//   e.g. "https://app.vercel.app,http://localhost:5173"
+//
+// Three layers of origin matching (checked in order):
+//   1. Exact match against CORS_ORIGIN (comma-separated)
+//   2. Vercel preview deploys: any *.vercel.app subdomain containing
+//      the VERCEL_PROJECT_SLUG (e.g. "just-train-frontend")
+//   3. localhost on any port (dev only, when NODE_ENV !== 'production')
 // ------------------------------------------------------------
-const corsOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+const corsExactOrigins = (process.env.CORS_ORIGIN ?? '')
   .split(',')
   .map(o => o.trim())
   .filter(Boolean)
+
+const vercelSlug = process.env.VERCEL_PROJECT_SLUG ?? ''
+const isDev      = process.env.NODE_ENV !== 'production'
+
+function isAllowedOrigin(origin: string): boolean {
+  // 1. Exact match (production domain, custom domains)
+  if (corsExactOrigins.includes(origin)) return true
+
+  // 2. Vercel preview/branch deploys — match project slug inside *.vercel.app
+  //    e.g. https://just-train-frontend-abc123-team.vercel.app
+  if (vercelSlug && origin.endsWith('.vercel.app')) {
+    try {
+      const hostname = new URL(origin).hostname
+      if (hostname.includes(vercelSlug)) return true
+    } catch { /* malformed URL — reject */ }
+  }
+
+  // 3. Dev: allow localhost on any port
+  if (isDev) {
+    try {
+      const url = new URL(origin)
+      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true
+    } catch { /* malformed URL — reject */ }
+  }
+
+  return false
+}
 
 app.register(cors, {
   origin: (origin, cb) => {
     // Allow requests with no origin (mobile apps, curl, Swagger)
     if (!origin) return cb(null, true)
-    if (corsOrigins.includes(origin)) return cb(null, true)
+    if (isAllowedOrigin(origin)) return cb(null, true)
     cb(new Error(`Origin ${origin} not allowed by CORS`), false)
   },
   methods:     ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

@@ -70,7 +70,8 @@ export async function hashPassword(password: string): Promise<string> {
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   try {
     return await argon2.verify(hash, password)
-  } catch {
+  } catch (error){
+    console.error(error);
     // argon2.verify throws on malformed hash — treat as mismatch
     return false
   }

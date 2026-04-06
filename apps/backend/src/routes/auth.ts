@@ -28,7 +28,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { db, trainers, clients } from '../db'
 import type { Trainer } from '../db/schema/trainers'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import {
   hashPassword,
   verifyPassword,
@@ -257,6 +257,10 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     console.log('[login] attempt for:', email.toLowerCase(), '| body keys:', Object.keys(request.body as Record<string, unknown>))
 
     try {
+      // DEBUG: raw SQL to compare with Drizzle result
+      const rawResult = await db.execute(sql`SELECT id, email FROM trainers WHERE email = ${email.toLowerCase()} LIMIT 1`)
+      console.log('[login] raw SQL result:', JSON.stringify(rawResult.rows))
+
       const trainer = await db.query.trainers.findFirst({
         where: eq(trainers.email, email.toLowerCase()),
       })

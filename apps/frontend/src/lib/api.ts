@@ -147,7 +147,7 @@ async function request<T>(
 
     throw new ApiError(
       response.status,
-      errorData.error ?? response.statusText,
+      errorData.error || response.statusText || `Request failed (${response.status})`,
       errorData.code,
       errorData.details,
     )

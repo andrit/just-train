@@ -67,7 +67,15 @@ export default function LoginPage(): React.JSX.Element {
       setAuth(data.accessToken, data.trainer)
       navigate('/', { replace: true })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong — please try again')
+      let msg = 'Something went wrong — please try again'
+      if (err instanceof Error && err.message) {
+        msg = err.message
+      }
+      // ApiError carries the HTTP status — surface it if the message is generic
+      if ('status' in (err as Record<string, unknown>) && msg === 'Unauthorized') {
+        msg = 'Invalid email or password'
+      }
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -148,7 +156,7 @@ export default function LoginPage(): React.JSX.Element {
           />
 
           {/* Server error */}
-          {error != null && (
+          {error != null && error.length > 0 && (
             <div
               role="alert"
               className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"

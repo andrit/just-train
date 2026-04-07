@@ -70,9 +70,8 @@ export async function hashPassword(password: string): Promise<string> {
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   try {
     return await argon2.verify(hash, password)
-  } catch (err) {
-    // argon2.verify throws on malformed hash or native module issues
-    console.error('[auth] argon2.verify threw:', err)
+  } catch {
+    // argon2.verify throws on malformed hash — treat as mismatch
     return false
   }
 }

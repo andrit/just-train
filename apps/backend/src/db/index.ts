@@ -26,7 +26,7 @@ const pool = new Pool({
 })
 
 // Drizzle client — schema passed in for the relational query API
-export const db = drizzle(pool, { schema })
+export const db = drizzle(pool, { schema, logger: true })
 
 // ── Table exports ─────────────────────────────────────────────────────────────
 // Re-export all tables so routes can do: import { db, clients } from '../db'

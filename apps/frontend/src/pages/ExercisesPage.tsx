@@ -285,7 +285,7 @@ export default function ExercisesPage(): React.JSX.Element {
         onClose={() => setActiveExerciseId(null)}
         maxHeight="95vh"
       >
-        <div className="overflow-y-auto px-4 pt-2" style={{ maxHeight: 'calc(95vh - 60px)' }}>
+        <div className="px-4 pt-2">
           {activeExerciseId && (
             <ExerciseDetailPanel
               exerciseId={activeExerciseId}

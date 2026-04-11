@@ -143,7 +143,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
   if (state === 'minimised') {
     return (
       <div
-        className="fixed bottom-[72px] left-0 right-0 z-[25] flex justify-center gap-2 px-4 pb-2"
+        className="fixed bottom-[72px] left-0 right-0 md:left-56 z-[25] flex justify-center gap-2 px-4 pb-2"
         style={{ pointerEvents: 'none' }}
       >
         {sessionList.map((session) => (
@@ -165,7 +165,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
 
   return (
     <div
-      className="fixed inset-0 z-[20] bg-brand-primary flex flex-col"
+      className="fixed inset-0 md:left-56 z-[20] bg-brand-primary flex flex-col"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >

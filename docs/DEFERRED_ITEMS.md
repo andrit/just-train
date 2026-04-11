@@ -255,10 +255,10 @@ GitHub auto-deploy active. Custom domain pending.
 
 ---
 
-## v2.11.0 UX — Exercise Detail Page
+## v2.11.0 UX — Exercise Detail Page ✅ COMPLETE
 
-### Hide media placeholder when no image/video exists
-Currently shows a large empty placeholder with "Visual coming in Phase 9" text even when there's no media. Should be hidden entirely — only show the media section when `demonstration` or `visualization` is present.
+### Hide media placeholder when no image/video exists ✅
+`ExerciseHero` returns null when no media — placeholder removed entirely.
 
-### Single scroll on exercise detail
-Currently two separate scroll containers create double-scroll UX. The entire exercise detail (media, tags, description, instructions, etc.) should be one unified scrollable module — no nested scrolls.
+### Single scroll on exercise detail ✅
+Removed nested `overflow-y-auto` wrapper in `ExercisesPage` BottomSheet usage. Single scroll container now.

@@ -575,3 +575,14 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - `AddExerciseSheet` — exercise list uses `ExerciseAccordionRow` with swipe (quick-add with defaults) + "Set targets →" for full target config flow
 - `ExercisesPage` — no change; grid + BottomSheet detail already provides equivalent UX for browse-only context
 
+
+## [v2.11.0] — Session + Exercise Detail UX
+
+### Session overlay — desktop sidebar offset
+- `ActiveSessionOverlay` — expanded overlay now uses `md:left-56` to sit alongside the desktop sidebar instead of hiding behind it. Minimised pill also offset on desktop.
+
+### Exercise detail — hide empty media
+- `ExerciseHero` — returns nothing when no visualization or demonstration exists. Removes the "Visual coming in Phase 9" placeholder that took up space for every exercise.
+
+### Exercise detail — single scroll
+- `ExercisesPage` — removed nested `overflow-y-auto` wrapper around `ExerciseDetailPanel` inside the BottomSheet. The BottomSheet already has its own scroll container — the extra wrapper caused double-scroll UX on mobile.

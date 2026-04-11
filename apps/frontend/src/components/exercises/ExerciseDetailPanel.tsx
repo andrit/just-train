@@ -59,18 +59,14 @@ function ExerciseHero({
   const hasDemonstration = !!demonstration
   const hasAny           = hasVisualization || hasDemonstration
 
+  // No media at all — hide the section entirely
+  if (!hasAny) return <></>
+
   return (
     <div className="relative">
       {/* Media area */}
       <div className="h-36 bg-brand-accent rounded-xl overflow-hidden">
-        {!hasAny && (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-            <span className="text-5xl opacity-20" aria-hidden>💪</span>
-            <p className="text-xs text-gray-600">Visual coming in Phase 9</p>
-          </div>
-        )}
-
-        {hasAny && mode === 'visualization' && visualization && (
+        {mode === 'visualization' && visualization && (
           <img
             src={visualization}
             alt={`Muscle diagram for ${name}`}
@@ -78,7 +74,7 @@ function ExerciseHero({
           />
         )}
 
-        {hasAny && mode === 'demonstration' && demonstration && (
+        {mode === 'demonstration' && demonstration && (
           <video
             src={demonstration}
             controls
@@ -89,12 +85,12 @@ function ExerciseHero({
         )}
 
         {/* Placeholder when one type is selected but not available */}
-        {hasAny && mode === 'visualization' && !visualization && (
+        {mode === 'visualization' && !visualization && (
           <div className="w-full h-full flex items-center justify-center">
             <p className="text-sm text-gray-600">Diagram coming soon</p>
           </div>
         )}
-        {hasAny && mode === 'demonstration' && !demonstration && (
+        {mode === 'demonstration' && !demonstration && (
           <div className="w-full h-full flex items-center justify-center">
             <p className="text-sm text-gray-600">Video coming soon</p>
           </div>

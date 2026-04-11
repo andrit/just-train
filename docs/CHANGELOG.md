@@ -578,11 +578,15 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 
 ## [v2.11.0] — Session + Exercise Detail UX
 
-### Session overlay — desktop sidebar offset
-- `ActiveSessionOverlay` — expanded overlay now uses `md:left-56` to sit alongside the desktop sidebar instead of hiding behind it. Minimised pill also offset on desktop.
+### Session overlay + panels — desktop sidebar offset
+- `ActiveSessionOverlay` — expanded overlay and minimised pill now use `md:left-56` to sit alongside the desktop sidebar instead of hiding behind it.
+- `AppShell` — all three slide-in panels (client profile, session plan, session history) now use `md:left-56` to respect the sidebar on desktop.
 
 ### Exercise detail — hide empty media
 - `ExerciseHero` — returns nothing when no visualization or demonstration exists. Removes the "Visual coming in Phase 9" placeholder that took up space for every exercise.
 
 ### Exercise detail — single scroll
 - `ExercisesPage` — removed nested `overflow-y-auto` wrapper around `ExerciseDetailPanel` inside the BottomSheet. The BottomSheet already has its own scroll container — the extra wrapper caused double-scroll UX on mobile.
+
+### Vercel SPA routing fix
+- `apps/frontend/vercel.json` — created in the frontend root directory where Vercel actually looks for it (Root Directory is `apps/frontend`). The repo-root `vercel.json` was not being applied, causing 404 on hard refresh and page reload logout.

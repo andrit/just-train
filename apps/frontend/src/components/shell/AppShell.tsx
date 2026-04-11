@@ -77,7 +77,7 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
       {/* ── Client profile panel ─────────────────────────────────────────── */}
       <div
         className={cn(
-          'fixed inset-0 z-[10] bg-brand-primary',
+          'fixed inset-0 md:left-56 z-[10] bg-brand-primary',
           'transition-transform duration-300 ease-out',
           currentPanel?.panel === 'clientProfile'
             ? 'translate-x-0'
@@ -96,7 +96,7 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
       {/* ── Session plan panel ───────────────────────────────────────────── */}
       <div
         className={cn(
-          'fixed inset-0 z-[10] bg-brand-primary',
+          'fixed inset-0 md:left-56 z-[10] bg-brand-primary',
           'transition-transform duration-300 ease-out',
           currentPanel?.panel === 'sessionPlan'
             ? 'translate-x-0'
@@ -116,7 +116,7 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
       {/* ── Session history panel ────────────────────────────────────────── */}
       <div
         className={cn(
-          'fixed inset-0 z-[10] bg-brand-primary',
+          'fixed inset-0 md:left-56 z-[10] bg-brand-primary',
           'transition-transform duration-300 ease-out',
           currentPanel?.panel === 'sessionHistory'
             ? 'translate-x-0'

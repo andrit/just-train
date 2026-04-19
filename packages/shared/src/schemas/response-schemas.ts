@@ -32,6 +32,10 @@ import {
   SubscriptionStatusEnum,
   TrainerModeEnum,
   ExerciseCategoryEnum,
+  SnapshotPoseEnum,
+  PhotoSharingPreferenceEnum,
+  ChallengeMetricTypeEnum,
+  ChallengeStatusEnum,
 } from '../enums/index'
 
 // ============================================================
@@ -117,6 +121,8 @@ export const TrainerResponseSchema = z.object({
     .describe('Which PR type triggers in-session flash/badge. 1rm = Epley estimate, volume = weight×reps, both = either'),
   restDurationSeconds: z.number().int().default(90)
     .describe('Default rest timer duration after a logged set. Options: 30 | 60 | 90'),
+  photoSharingPreference: PhotoSharingPreferenceEnum.default('private')
+    .describe('Controls which progress photos are eligible for social sharing'),
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -190,6 +196,8 @@ export const ClientResponseSchema = z.object({
     .describe('Whether to show Epley 1RM estimates for this client'),
   autoReport: z.boolean()
     .describe('Whether to automatically send this client a monthly report on the 1st'),
+  progressPhotosOptedOut: z.boolean().default(false)
+    .describe('true = client declined progress photos — photo capture hidden in snapshot form'),
   lastReportSentAt: z.string().datetime().nullable()
     .describe('When the last monthly report was sent — null if never sent'),
 
@@ -600,3 +608,86 @@ export const ClientKpiResponseSchema = z.object({
     .describe('Average stressLevel score (1–10) across sessions this month'),
 })
 export type ClientKpiResponse = z.infer<typeof ClientKpiResponseSchema>
+
+// ============================================================
+// SNAPSHOT MEDIA (v2.12.0) — progress photos attached to snapshots
+// ============================================================
+
+export const SnapshotMediaResponseSchema = z.object({
+  id:                 z.string().uuid(),
+  snapshotId:         z.string().uuid(),
+  pose:               SnapshotPoseEnum,
+  cloudinaryUrl:      z.string().describe('Full Cloudinary URL — use directly in <img> src'),
+  cloudinaryPublicId: z.string().describe('Cloudinary public ID — required to delete'),
+  width:              z.number().int().nullable(),
+  height:             z.number().int().nullable(),
+  caption:            z.string().nullable(),
+  shareable:          z.boolean().describe('true = eligible for social sharing when preference allows'),
+  orderIndex:         z.number().int(),
+  createdAt:          z.string().datetime(),
+})
+export type SnapshotMediaResponse = z.infer<typeof SnapshotMediaResponseSchema>
+
+// Grouped view for the progress-photos timeline endpoint.
+// Returns photos bucketed by snapshot date so the comparison UI
+// doesn't need to load full body comp data per snapshot.
+export const ProgressPhotoGroupResponseSchema = z.object({
+  snapshotId:  z.string().uuid(),
+  capturedAt:  z.string().datetime(),
+  photos:      z.array(SnapshotMediaResponseSchema),
+})
+export type ProgressPhotoGroupResponse = z.infer<typeof ProgressPhotoGroupResponseSchema>
+
+export const ProgressPhotoGroupListResponseSchema = z.array(ProgressPhotoGroupResponseSchema)
+  .describe('Progress photos grouped by snapshot date, ordered by capturedAt descending')
+export type ProgressPhotoGroupListResponse = z.infer<typeof ProgressPhotoGroupListResponseSchema>
+
+// ============================================================
+// SESSION EXERCISE MEDIA (v2.12.0) — form check clips/photos
+// ============================================================
+
+export const SessionExerciseMediaResponseSchema = z.object({
+  id:                 z.string().uuid(),
+  sessionExerciseId:  z.string().uuid(),
+  mediaType:          MediaTypeEnum,
+  cloudinaryUrl:      z.string().describe('Full Cloudinary URL'),
+  cloudinaryPublicId: z.string().describe('Cloudinary public ID — required to delete'),
+  durationSeconds:    z.number().int().nullable().describe('Video duration — null for images'),
+  caption:            z.string().nullable(),
+  createdAt:          z.string().datetime(),
+})
+export type SessionExerciseMediaResponse = z.infer<typeof SessionExerciseMediaResponseSchema>
+
+export const SessionExerciseMediaListResponseSchema = z.array(SessionExerciseMediaResponseSchema)
+  .describe('All media for a session exercise, ordered by createdAt')
+export type SessionExerciseMediaListResponse = z.infer<typeof SessionExerciseMediaListResponseSchema>
+
+// ============================================================
+// CHALLENGE (v2.12.0) — measurable goals with deadlines
+// ============================================================
+
+export const ChallengeResponseSchema = z.object({
+  id:           z.string().uuid(),
+  clientId:     z.string().uuid(),
+  trainerId:    z.string().uuid(),
+  title:        z.string(),
+  description:  z.string().nullable(),
+  metricType:   ChallengeMetricTypeEnum,
+  exerciseId:   z.string().uuid().nullable()
+    .describe('null for sessions_completed and qualitative challenges'),
+  exercise:     ExerciseSummaryResponseSchema.nullable()
+    .describe('Joined exercise summary — null when exerciseId is null'),
+  targetValue:  z.number(),
+  targetUnit:   z.string().nullable(),
+  currentValue: z.number(),
+  deadline:     z.string().describe('YYYY-MM-DD'),
+  status:       ChallengeStatusEnum,
+  completedAt:  z.string().datetime().nullable(),
+  createdAt:    z.string().datetime(),
+  updatedAt:    z.string().datetime(),
+})
+export type ChallengeResponse = z.infer<typeof ChallengeResponseSchema>
+
+export const ChallengeListResponseSchema = z.array(ChallengeResponseSchema)
+  .describe('Challenges for a client, ordered by status (active first) then deadline')
+export type ChallengeListResponse = z.infer<typeof ChallengeListResponseSchema>

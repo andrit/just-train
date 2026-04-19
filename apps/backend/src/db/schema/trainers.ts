@@ -130,6 +130,12 @@ export const trainers = pgTable('trainers', {
   // 30 | 60 | 90 seconds. Default 90.
   restDurationSeconds: integer('rest_duration_seconds').notNull().default(90),
 
+  // v2.12.0: controls which progress photos are eligible for social sharing
+  // 'private'        — no photos shareable (default)
+  // 'share_selected' — only photos explicitly flagged as shareable
+  // 'share_all'      — all photos available for sharing
+  photoSharingPreference: text('photo_sharing_preference').notNull().default('private'),
+
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
@@ -191,6 +197,9 @@ export const clients = pgTable('clients', {
   // Overridden by trainer.autoReportEnabled master switch
   autoReport:          boolean('auto_report').notNull().default(true),
   lastReportSentAt:    timestamp('last_report_sent_at'),
+
+  // v2.12.0: client can opt out of progress photos in snapshots
+  progressPhotosOptedOut: boolean('progress_photos_opted_out').notNull().default(false),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),

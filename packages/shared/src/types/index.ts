@@ -20,6 +20,10 @@ import type {
   Difficulty,
   MediaType,
   TrainerRole,
+  SnapshotPose,
+  PhotoSharingPreference,
+  ChallengeMetricType,
+  ChallengeStatus,
 } from '../enums/index'
 
 // ============================================================
@@ -222,4 +226,60 @@ export interface SyncLogEntry {
   payload: Record<string, unknown>
   createdLocallyAt: string
   syncedAt?: string // null = still pending
+}
+
+// ============================================================
+// SNAPSHOT MEDIA (v2.12.0) — progress photos on client snapshots
+// ============================================================
+
+export interface SnapshotMedia {
+  id: string
+  snapshotId: string
+  pose: SnapshotPose
+  cloudinaryUrl: string
+  cloudinaryPublicId: string
+  width?: number
+  height?: number
+  caption?: string
+  shareable: boolean
+  orderIndex: number
+  createdAt: string
+}
+
+// ============================================================
+// SESSION EXERCISE MEDIA (v2.12.0) — form check clips/photos
+// ============================================================
+
+export interface SessionExerciseMedia {
+  id: string
+  sessionExerciseId: string
+  mediaType: MediaType
+  cloudinaryUrl: string
+  cloudinaryPublicId: string
+  durationSeconds?: number
+  caption?: string
+  createdAt: string
+}
+
+// ============================================================
+// CHALLENGE (v2.12.0) — measurable goals with deadlines
+// ============================================================
+
+export interface Challenge {
+  id: string
+  clientId: string
+  trainerId: string
+  title: string
+  description?: string
+  metricType: ChallengeMetricType
+  exerciseId?: string
+  exercise?: Exercise // joined
+  targetValue: number
+  targetUnit?: string
+  currentValue: number
+  deadline: string
+  status: ChallengeStatus
+  completedAt?: string
+  createdAt: string
+  updatedAt: string
 }

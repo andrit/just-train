@@ -31,6 +31,7 @@ const makeClient = (overrides: Partial<ClientResponse> = {}): ClientResponse => 
   show1rmEstimate:     false,
   lastReportSentAt:    null,
   autoReport:          true,
+  progressPhotosOptedOut: false,
   lastActiveAt:     new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   createdAt:        '2024-01-01T00:00:00Z',
   updatedAt:        '2024-01-01T00:00:00Z',

@@ -108,6 +108,7 @@ function serializeTrainer(
     timezone:             trainer.timezone,
     prNotifyType:         (trainer.prNotifyType ?? '1rm') as '1rm' | 'volume' | 'both',
     restDurationSeconds:  trainer.restDurationSeconds ?? 90,
+    photoSharingPreference: (trainer.photoSharingPreference ?? 'private') as 'private' | 'share_selected' | 'share_all',
     createdAt:            trainer.createdAt.toISOString(),
     updatedAt:            trainer.updatedAt.toISOString(),
   }

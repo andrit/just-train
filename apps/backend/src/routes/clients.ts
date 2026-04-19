@@ -272,6 +272,7 @@ function serializeClient(c: typeof clients.$inferSelect) {
     weeklySessionTarget: c.weeklySessionTarget,
     show1rmEstimate:     c.show1rmEstimate,
     autoReport:          c.autoReport,
+    progressPhotosOptedOut: c.progressPhotosOptedOut ?? false,
     lastReportSentAt:    c.lastReportSentAt?.toISOString() ?? null,
     createdAt:        c.createdAt.toISOString(),
     updatedAt:        c.updatedAt.toISOString(),

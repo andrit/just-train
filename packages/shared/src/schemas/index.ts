@@ -22,6 +22,10 @@ import {
   ClientFocusEnum,
   ProgressionStateEnum,
   TrainerModeEnum,
+  PhotoSharingPreferenceEnum,
+  SnapshotPoseEnum,
+  ChallengeMetricTypeEnum,
+  ChallengeStatusEnum,
 } from '../enums/index'
 
 // ============================================================
@@ -74,6 +78,8 @@ export const UpdateTrainerSchema = z.object({
     .describe('Master switch for scheduled monthly reports'),
   timezone: z.string().optional()
     .describe('IANA timezone string e.g. America/New_York'),
+  photoSharingPreference: PhotoSharingPreferenceEnum.optional()
+    .describe('Controls which progress photos are eligible for social sharing: private | share_selected | share_all'),
 })
 export type UpdateTrainerInput = z.infer<typeof UpdateTrainerSchema>
 
@@ -126,6 +132,8 @@ export const UpdateClientSchema = CreateClientSchema.partial().extend({
     .describe('Whether to auto-send monthly reports for this client'),
   active: z.boolean().optional()
     .describe('false = soft-delete'),
+  progressPhotosOptedOut: z.boolean().optional()
+    .describe('true = client has declined progress photos — photo capture hidden in snapshot form'),
 })
 export type UpdateClientInput = z.infer<typeof UpdateClientSchema>
 
@@ -372,3 +380,52 @@ export const AddTemplateExerciseSchema = z.object({
   notes: z.string().max(1000).optional(),
 })
 export type AddTemplateExerciseInput = z.infer<typeof AddTemplateExerciseSchema>
+
+// ============================================================
+// SNAPSHOT MEDIA (v2.12.0) — progress photos on client snapshots
+// Upload is multipart (no body schema needed). These cover updates.
+// ============================================================
+
+export const UpdateSnapshotMediaSchema = z.object({
+  caption: z.string().max(500).optional()
+    .describe('Optional note — e.g. "Week 4, post-cut"'),
+  shareable: z.boolean().optional()
+    .describe('true = photo eligible for social sharing when photoSharingPreference = share_selected'),
+  pose: SnapshotPoseEnum.optional()
+    .describe('Pose type — correctable after upload'),
+})
+export type UpdateSnapshotMediaInput = z.infer<typeof UpdateSnapshotMediaSchema>
+
+// ============================================================
+// CHALLENGE (v2.12.0) — measurable goals with deadlines
+// ============================================================
+
+export const CreateChallengeSchema = z.object({
+  title: z.string().min(1).max(200)
+    .describe('Short challenge statement — e.g. "10 unassisted pull-ups"'),
+  description: z.string().max(2000).optional()
+    .describe('Optional context, instructions, or motivation'),
+  metricType: ChallengeMetricTypeEnum
+    .describe('How progress is measured — determines auto-detection behavior'),
+  exerciseId: z.string().uuid().optional()
+    .describe('Ties challenge to a specific exercise — required for weight_lifted, reps_achieved, distance, duration'),
+  targetValue: z.number().positive()
+    .describe('The number to hit — interpretation depends on metricType and targetUnit'),
+  targetUnit: z.string().max(20).optional()
+    .describe('Unit for the target — e.g. lbs, kg, reps, km, mi, seconds, sessions'),
+  deadline: z.string()
+    .describe('YYYY-MM-DD — challenge expires if not completed by this date'),
+})
+export type CreateChallengeInput = z.infer<typeof CreateChallengeSchema>
+
+export const UpdateChallengeSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional(),
+  currentValue: z.number().min(0).optional()
+    .describe('Manual progress update — used for qualitative challenges or corrections'),
+  deadline: z.string().optional()
+    .describe('YYYY-MM-DD — can extend or shorten the deadline'),
+  status: ChallengeStatusEnum.optional()
+    .describe('Manual status override — e.g. cancel a challenge'),
+})
+export type UpdateChallengeInput = z.infer<typeof UpdateChallengeSchema>

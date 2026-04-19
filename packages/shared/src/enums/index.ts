@@ -91,3 +91,39 @@ export type SubscriptionStatus = z.infer<typeof SubscriptionStatusEnum>
 // Both modes can be free or paid — mode and tier are orthogonal.
 export const TrainerModeEnum = z.enum(['athlete', 'trainer'])
 export type TrainerMode = z.infer<typeof TrainerModeEnum>
+
+// ── Progress media (v2.12.0) ────────────────────────────────────────────────
+
+// Standard poses for progress photos — attached to client snapshots.
+// 'custom' covers any non-standard angle the trainer wants to capture.
+export const SnapshotPoseEnum = z.enum(['front', 'side_left', 'side_right', 'back', 'custom'])
+export type SnapshotPose = z.infer<typeof SnapshotPoseEnum>
+
+// Controls which progress photos are eligible for social sharing (v2.13.0).
+//   private        — no photos shareable (default)
+//   share_selected — only photos explicitly flagged as shareable
+//   share_all      — all photos available for sharing
+export const PhotoSharingPreferenceEnum = z.enum(['private', 'share_selected', 'share_all'])
+export type PhotoSharingPreference = z.infer<typeof PhotoSharingPreferenceEnum>
+
+// ── Coach challenges (v2.12.0) ──────────────────────────────────────────────
+
+// How challenge progress is measured.
+//   weight_lifted      — heaviest single lift for an exercise
+//   reps_achieved      — max reps in one set for an exercise
+//   distance           — total or single-effort distance
+//   duration           — time-based (plank hold, mile time)
+//   sessions_completed — count of completed sessions in the challenge period
+//   qualitative        — manual judgment-based progress (e.g. "improve squat depth")
+export const ChallengeMetricTypeEnum = z.enum([
+  'weight_lifted',
+  'reps_achieved',
+  'distance',
+  'duration',
+  'sessions_completed',
+  'qualitative',
+])
+export type ChallengeMetricType = z.infer<typeof ChallengeMetricTypeEnum>
+
+export const ChallengeStatusEnum = z.enum(['active', 'completed', 'expired', 'cancelled'])
+export type ChallengeStatus = z.infer<typeof ChallengeStatusEnum>

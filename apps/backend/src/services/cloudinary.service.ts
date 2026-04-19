@@ -43,6 +43,17 @@ export function configureCloudinary(): void {
   cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret })
 }
 
+// ── Folder paths ─────────────────────────────────────────────────────────────
+// Centralised folder structure — all Cloudinary assets follow this pattern.
+
+export function exerciseFolder(exerciseId: string): string {
+  return `trainer-app/exercises/${exerciseId}`
+}
+
+export function snapshotFolder(clientId: string, snapshotId: string): string {
+  return `trainer-app/clients/${clientId}/snapshots/${snapshotId}`
+}
+
 // ── Upload ────────────────────────────────────────────────────────────────────
 
 export interface UploadResult {
@@ -56,14 +67,14 @@ export interface UploadResult {
 /**
  * Upload a file buffer to Cloudinary.
  *
- * @param buffer     Raw file data from the multipart upload
- * @param exerciseId UUID of the exercise — used as folder path
- * @param mimeType   e.g. 'image/jpeg', 'video/mp4' — determines resource_type
+ * @param buffer   Raw file data from the multipart upload
+ * @param folder   Cloudinary folder path — use exerciseFolder() or snapshotFolder()
+ * @param mimeType e.g. 'image/jpeg', 'video/mp4' — determines resource_type
  */
 export async function uploadBuffer(
-  buffer:     Buffer,
-  exerciseId: string,
-  mimeType:   string,
+  buffer:   Buffer,
+  folder:   string,
+  mimeType: string,
 ): Promise<UploadResult> {
   const resourceType = mimeType.startsWith('video/') ? 'video' : 'image'
 
@@ -72,7 +83,7 @@ export async function uploadBuffer(
       const stream = cloudinary.uploader.upload_stream(
         {
           resource_type: resourceType,
-          folder:        `trainer-app/exercises/${exerciseId}`,
+          folder:        folder,
           // Auto-detect format and quality — Cloudinary picks the best compression
           format:        resourceType === 'image' ? 'webp' : undefined,
           quality:       'auto',

@@ -62,4 +62,7 @@ export const {
   sessionExercises,
   sets,
   syncLog,
+
+  // v2.12.0: progress photos
+  snapshotMedia,
 } = schema

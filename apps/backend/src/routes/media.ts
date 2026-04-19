@@ -34,6 +34,7 @@ import {
   uploadBuffer,
   deleteByPublicId,
   validateMediaFile,
+  exerciseFolder,
 } from '../services/cloudinary.service'
 
 // ── Params schema ─────────────────────────────────────────────────────────────
@@ -115,7 +116,7 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
 
     try {
       // Upload to Cloudinary
-      const uploaded = await uploadBuffer(fileBuffer, exerciseId, mimeType)
+      const uploaded = await uploadBuffer(fileBuffer, exerciseFolder(exerciseId), mimeType)
 
       // If this is the first media or isPrimary was requested,
       // unset any existing primary flag first

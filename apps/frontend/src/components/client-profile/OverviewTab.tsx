@@ -28,6 +28,7 @@ import {
   lastSessionLabel,
   isAtRisk,
 } from '@/components/clients/utils'
+import { ProgressPhotoTimeline } from '@/components/progress-photos/ProgressPhotoTimeline'
 import type { ClientGoalResponse, ClientResponse } from '@trainer-app/shared'
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
@@ -118,6 +119,7 @@ interface OverviewTabProps {
   secondaryFocus?:  string | null
   startDate?:       string | null
   lastActiveAt?:    string | null
+  progressPhotosOptedOut?: boolean
 }
 
 export function OverviewTab({
@@ -127,6 +129,7 @@ export function OverviewTab({
   secondaryFocus,
   startDate,
   lastActiveAt,
+  progressPhotosOptedOut = false,
 }: OverviewTabProps): React.JSX.Element {
   const { data: goals, isLoading } = useClientGoals(clientId)
   const [newGoal,      setNewGoal]     = useState('')
@@ -208,6 +211,12 @@ export function OverviewTab({
           </div>
         </section>
       )}
+
+      {/* Progress Photos */}
+      <ProgressPhotoTimeline
+        clientId={clientId}
+        optedOut={progressPhotosOptedOut}
+      />
 
       {/* Goals */}
       <section>

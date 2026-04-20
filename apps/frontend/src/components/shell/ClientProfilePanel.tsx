@@ -274,6 +274,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
             secondaryFocus={client.secondaryFocus}
             startDate={client.startDate}
             lastActiveAt={client.lastActiveAt}
+            progressPhotosOptedOut={client.progressPhotosOptedOut}
           />
         )}
         {tab === 'timeline' && <TimelineTab clientId={client.id} clientName={client.name} />}

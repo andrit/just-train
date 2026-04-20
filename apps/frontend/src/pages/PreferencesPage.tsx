@@ -281,6 +281,7 @@ export default function PreferencesPage(): React.JSX.Element {
     alertTone,
     widgetOrder,
     trainerMode,
+    photoSharingPreference,
     updatePreference,
     updateWidgetOrder,
   } = usePreferences()
@@ -791,6 +792,54 @@ export default function PreferencesPage(): React.JSX.Element {
               </div>
             </>
           )}
+        </Section>
+
+        {/* ── Privacy ────────────────────────────────────────────────── */}
+        <Section
+          title="Privacy"
+          description="Controls what progress photos are eligible for sharing"
+        >
+          <div className="card p-4">
+            <p className="text-sm font-medium text-gray-200 mb-1">Progress photo sharing</p>
+            <p className="text-xs text-gray-500 mb-3">
+              Controls which progress photos can be shared on social media (when that feature launches)
+            </p>
+            <div className="space-y-2">
+              {([
+                { value: 'private',        label: 'Private',        desc: 'No photos are shareable' },
+                { value: 'share_selected', label: 'Share selected', desc: 'Only photos you explicitly mark' },
+                { value: 'share_all',      label: 'Share all',      desc: 'All progress photos are shareable' },
+              ] as const).map((opt) => (
+                <label
+                  key={opt.value}
+                  className={cn(
+                    'flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                    photoSharingPreference === opt.value
+                      ? 'border-brand-highlight/40 bg-brand-highlight/5'
+                      : 'border-surface-border hover:border-gray-500',
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="photoSharingPreference"
+                    value={opt.value}
+                    checked={photoSharingPreference === opt.value}
+                    onChange={() => save('photoSharingPreference', opt.value)}
+                    className="mt-0.5 accent-brand-highlight"
+                  />
+                  <div>
+                    <p className="text-sm text-gray-200">{opt.label}</p>
+                    <p className="text-xs text-gray-500">{opt.desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+            {saving.photoSharingPreference && (
+              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                <Spinner size="sm" /> Saving…
+              </p>
+            )}
+          </div>
         </Section>
 
       </div>

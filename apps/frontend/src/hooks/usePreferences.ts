@@ -42,6 +42,8 @@ export interface Preferences {
   // 'both'   — either type
   prNotifyType:        '1rm' | 'volume' | 'both'
   restDurationSeconds: number
+  // v2.12.0: controls which progress photos are eligible for social sharing
+  photoSharingPreference: 'private' | 'share_selected' | 'share_all'
 }
 
 export function usePreferences(): Preferences & {
@@ -67,6 +69,7 @@ export function usePreferences(): Preferences & {
     trainerMode:         mode,
     prNotifyType:        (trainer?.prNotifyType as Preferences['prNotifyType']) ?? '1rm',
     restDurationSeconds: trainer?.restDurationSeconds ?? 90,
+    photoSharingPreference: (trainer?.photoSharingPreference as Preferences['photoSharingPreference']) ?? 'private',
   }
 
   const updatePreference = useCallback(async <K extends keyof UpdateablePrefs>(
@@ -102,4 +105,5 @@ interface UpdateablePrefs {
   widgetProgression:   string | null
   prNotifyType:        '1rm' | 'volume' | 'both'
   restDurationSeconds: number
+  photoSharingPreference: 'private' | 'share_selected' | 'share_all'
 }

@@ -284,6 +284,7 @@ export default function ClientProfilePage(): React.JSX.Element {
             secondaryFocus={client.secondaryFocus}
             startDate={client.startDate}
             lastActiveAt={client.lastActiveAt}
+            progressPhotosOptedOut={client.progressPhotosOptedOut}
           />
         )}
         {tab === 'timeline' && <TimelineTab clientId={client.id} clientName={client.name} />}

@@ -21,4 +21,5 @@ export * from './exercises'
 export * from './templates'
 export * from './sessions'
 export * from './snapshot-media' // v2.12.0: progress photos
+export * from './session-exercise-media' // v2.12.0: form check clips
 export * from './auth'       // Phase 2: refresh tokens

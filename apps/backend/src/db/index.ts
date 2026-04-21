@@ -65,4 +65,7 @@ export const {
 
   // v2.12.0: progress photos
   snapshotMedia,
+
+  // v2.12.0: form check clips
+  sessionExerciseMedia,
 } = schema

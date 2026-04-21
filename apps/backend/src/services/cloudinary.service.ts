@@ -54,6 +54,10 @@ export function snapshotFolder(clientId: string, snapshotId: string): string {
   return `trainer-app/clients/${clientId}/snapshots/${snapshotId}`
 }
 
+export function sessionExerciseFolder(clientId: string, sessionId: string, sessionExerciseId: string): string {
+  return `trainer-app/clients/${clientId}/sessions/${sessionId}/${sessionExerciseId}`
+}
+
 // ── Upload ────────────────────────────────────────────────────────────────────
 
 export interface UploadResult {

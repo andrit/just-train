@@ -45,6 +45,7 @@ import { templateRoutes }        from './routes/templates'
 import { kpiRoutes }             from './routes/kpis'
 import { reportRoutes }          from './routes/reports'
 import { snapshotMediaRoutes }   from './routes/snapshot-media'
+import { sessionExerciseMediaRoutes } from './routes/session-exercise-media'
 import { configureCloudinary }   from './services/cloudinary.service'
 import { startScheduler }        from './queues/scheduler'
 import { startReportWorker, startAlertWorker } from './queues/workers'
@@ -269,6 +270,7 @@ app.register(kpiRoutes,            { prefix: '/api/v1' })
 app.register(reportRoutes,         { prefix: '/api/v1' })
 app.register(templateRoutes,       { prefix: '/api/v1' })
 app.register(snapshotMediaRoutes,  { prefix: '/api/v1' })
+app.register(sessionExerciseMediaRoutes, { prefix: '/api/v1' })
 
 // ------------------------------------------------------------
 // HEALTH CHECK — public, no auth required

@@ -11,8 +11,10 @@ import { useState }             from 'react'
 import { cn }                  from '@/lib/cn'
 import { interactions }        from '@/lib/interactions'
 import { useSession }          from '@/lib/queries/sessions'
+import { useSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { formatDate, formatDuration, formatTotalVolume } from '@/lib/formatters'
 import { Spinner }             from '@/components/ui/Spinner'
+import { MediaPlaybackModal }  from '@/components/session/MediaPlaybackModal'
 
 function ScoreRow({ label, value }: { label: string; value: number }): React.JSX.Element {
   return (
@@ -34,6 +36,7 @@ interface SessionHistoryPanelProps {
 export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelProps): React.JSX.Element {
   const { data: session, isLoading } = useSession(sessionId)
   const [prFilterOn, setPrFilterOn]  = useState(false)
+  const [mediaViewer, setMediaViewer] = useState<{ sessionExerciseId: string; startIdx: number } | null>(null)
 
   if (isLoading) {
     return (
@@ -147,9 +150,15 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
             <div className="space-y-2">
               {workout.sessionExercises.map((se) => (
                 <div key={se.id} className="bg-surface rounded-xl px-3 py-3 border border-surface-border">
-                  <p className="font-medium text-sm text-gray-200 mb-2">
-                    {se.exercise?.name ?? 'Unknown'}
-                  </p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="font-medium text-sm text-gray-200">
+                      {se.exercise?.name ?? 'Unknown'}
+                    </p>
+                    <ExerciseMediaThumbs
+                      sessionExerciseId={se.id}
+                      onTap={(idx) => setMediaViewer({ sessionExerciseId: se.id, startIdx: idx })}
+                    />
+                  </div>
                   <div className="space-y-1">
                     {se.sets
                       .filter(set => !prFilterOn || set.isPR || set.isPRVolume)
@@ -222,6 +231,75 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
           </div>
         )}
       </div>
+
+      {/* Media playback modal */}
+      {mediaViewer && (
+        <ExerciseMediaViewer
+          sessionExerciseId={mediaViewer.sessionExerciseId}
+          startIdx={mediaViewer.startIdx}
+          onClose={() => setMediaViewer(null)}
+        />
+      )}
     </div>
+  )
+}
+
+// ── Sub-components ───────────────────────────────────────────────────────────
+
+/** Inline media thumbnails for a session exercise in the history view */
+function ExerciseMediaThumbs({
+  sessionExerciseId,
+  onTap,
+}: {
+  sessionExerciseId: string
+  onTap: (idx: number) => void
+}): React.JSX.Element | null {
+  const { data: media } = useSessionExerciseMedia(sessionExerciseId)
+  if (!media || media.length === 0) return null
+
+  return (
+    <div className="flex items-center gap-1">
+      {media.slice(0, 3).map((m, i) => (
+        <button
+          key={m.id}
+          type="button"
+          onClick={() => onTap(i)}
+          className="w-6 h-6 rounded overflow-hidden border border-surface-border hover:border-brand-highlight/30 transition-colors"
+        >
+          {m.mediaType === 'image' ? (
+            <img src={m.cloudinaryUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+          ) : (
+            <div className="w-full h-full bg-brand-accent flex items-center justify-center">
+              <span className="text-[8px]" aria-hidden>▶</span>
+            </div>
+          )}
+        </button>
+      ))}
+      {media.length > 3 && (
+        <span className="text-[10px] text-gray-600">+{media.length - 3}</span>
+      )}
+    </div>
+  )
+}
+
+/** Wrapper that fetches media and renders MediaPlaybackModal */
+function ExerciseMediaViewer({
+  sessionExerciseId,
+  startIdx,
+  onClose,
+}: {
+  sessionExerciseId: string
+  startIdx: number
+  onClose: () => void
+}): React.JSX.Element | null {
+  const { data: media } = useSessionExerciseMedia(sessionExerciseId)
+  if (!media || media.length === 0) return null
+
+  return (
+    <MediaPlaybackModal
+      media={media}
+      startIdx={startIdx}
+      onClose={onClose}
+    />
   )
 }

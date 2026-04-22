@@ -20,7 +20,10 @@ import { cn }                      from '@/lib/cn'
 import { interactions }            from '@/lib/interactions'
 import { useLogSet, useDeleteSessionExercise } from '@/lib/queries/sessions'
 import { useExerciseHistory }      from '@/lib/queries/clients'
+import { useSessionExerciseMedia, useUploadSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { useUXEventRef }           from '@/hooks/useUXEvent'
+import { InlineCameraSheet }       from '@/components/session/InlineCameraSheet'
+import { FormCheckBadge }          from '@/components/session/FormCheckBadge'
 import type { SessionExerciseResponse, SetResponse } from '@trainer-app/shared'
 
 const DEFAULT_TARGET_SETS = 3
@@ -444,6 +447,11 @@ export function ExerciseBlock({
 }: ExerciseBlockProps): React.JSX.Element {
   const logSet         = useLogSet()
   const deleteExercise = useDeleteSessionExercise()
+  const uploadMedia    = useUploadSessionExerciseMedia()
+  const { data: mediaList } = useSessionExerciseMedia(sessionExercise.id)
+  const [cameraOpen, setCameraOpen] = useState(false)
+
+  const mediaCount = mediaList?.length ?? 0
 
   // Fetch last session's sets for this exercise — used to pre-fill inputs
   const { data: historyData } = useExerciseHistory(
@@ -488,25 +496,42 @@ export function ExerciseBlock({
     <div className="relative">
       {/* Exercise header */}
       <div className="flex items-start justify-between mb-2 px-1">
-        <div>
+        <div className="flex items-center gap-2">
           <h3 className="font-display text-xl uppercase tracking-wide text-white leading-tight">
             {sessionExercise.exercise?.name ?? 'Unknown Exercise'}
           </h3>
-          {sessionExercise.notes && (
-            <p className="text-xs text-gray-600 mt-0.5">{sessionExercise.notes}</p>
-          )}
+          <FormCheckBadge count={mediaCount} />
         </div>
-        <button
-          type="button"
-          onClick={() => deleteExercise.mutate({ sessionExerciseId: sessionExercise.id, workoutId, sessionId })}
-          aria-label="Remove exercise"
-          className="text-gray-600 hover:text-red-400 transition-colors p-1 ml-2 shrink-0"
-        >
-          <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-1 shrink-0 ml-2">
+          {/* Camera — form check capture */}
+          <button
+            type="button"
+            onClick={() => setCameraOpen(true)}
+            aria-label="Capture form check"
+            className="text-gray-600 hover:text-brand-highlight transition-colors p-1"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+              <rect x="1" y="4" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+              <circle cx="8" cy="9" r="3" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M5.5 4V3a.5.5 0 01.5-.5h4a.5.5 0 01.5.5v1" stroke="currentColor" strokeWidth="1.2" />
+            </svg>
+          </button>
+          {/* Delete exercise */}
+          <button
+            type="button"
+            onClick={() => deleteExercise.mutate({ sessionExerciseId: sessionExercise.id, workoutId, sessionId })}
+            aria-label="Remove exercise"
+            className="text-gray-600 hover:text-red-400 transition-colors p-1"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
       </div>
+      {sessionExercise.notes && (
+        <p className="text-xs text-gray-600 mb-2 px-1">{sessionExercise.notes}</p>
+      )}
 
       {/* Spine + sets */}
       <div className="relative pl-0">
@@ -575,6 +600,20 @@ export function ExerciseBlock({
           </div>
         )}
       </div>
+
+      {/* Form check camera */}
+      <InlineCameraSheet
+        open={cameraOpen}
+        onClose={() => setCameraOpen(false)}
+        onCapture={(blob, duration) => {
+          uploadMedia.mutate({
+            sessionExerciseId: sessionExercise.id,
+            file: blob,
+            durationSeconds: duration,
+          })
+          setCameraOpen(false)
+        }}
+      />
     </div>
   )
 }

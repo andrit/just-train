@@ -24,6 +24,7 @@ import {
 } from './index'
 import { db, clients, trainers } from '../db'
 import { eq, and, isNotNull } from 'drizzle-orm'
+import { expireOverdueChallenges } from '../services/challenge.service'
 
 const SCHEDULER_QUEUE = 'scheduler'
 
@@ -74,12 +75,20 @@ export async function startScheduler(): Promise<void> {
     { name: 'alert-fanout', data: {} },
   )
 
+  // Challenge expiry: daily at midnight UTC
+  await schedulerQueue.upsertJobScheduler(
+    'challenge-expiry-daily',
+    { pattern: '0 0 * * *' },
+    { name: 'challenge-expiry', data: {} },
+  )
+
   new Worker(SCHEDULER_QUEUE, async (job) => {
-    if (job.name === 'report-fanout') await fanOutScheduledReports()
-    if (job.name === 'alert-fanout')  await fanOutAtRiskAlerts()
+    if (job.name === 'report-fanout')     await fanOutScheduledReports()
+    if (job.name === 'alert-fanout')      await fanOutAtRiskAlerts()
+    if (job.name === 'challenge-expiry')  await runChallengeExpiry()
   }, { connection: getRedisConnection() })
 
-  console.log('[Scheduler] Started — reports (hourly on 1st), alerts (hourly)')
+  console.log('[Scheduler] Started — reports (hourly on 1st), alerts (hourly), challenge expiry (daily)')
 }
 
 // ── Fan-out: scheduled reports ─────────────────────────────────────────────────
@@ -160,4 +169,13 @@ async function fanOutAtRiskAlerts(): Promise<void> {
   )
 
   console.log(`[Scheduler] Enqueued ${ready.length} at-risk alert jobs`)
+}
+
+// ── Challenge expiry ────────────────────────────────────────────────────────
+
+async function runChallengeExpiry(): Promise<void> {
+  const expired = await expireOverdueChallenges()
+  if (expired > 0) {
+    console.log(`[Scheduler] Expired ${expired} overdue challenges`)
+  }
 }

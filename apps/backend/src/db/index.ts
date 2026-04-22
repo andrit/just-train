@@ -68,4 +68,7 @@ export const {
 
   // v2.12.0: form check clips
   sessionExerciseMedia,
+
+  // v2.12.0: coach challenges
+  challenges,
 } = schema

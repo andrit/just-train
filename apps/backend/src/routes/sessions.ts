@@ -24,6 +24,7 @@ import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
 import { db, sessions, workouts, sessionExercises, sets, clients, templateWorkouts, templateExercises } from '../db'
 import { eq, and, desc } from 'drizzle-orm'
+import { updateChallengesForSet, updateChallengesForSessionComplete } from '../services/challenge.service'
 import {
   CreateSessionSchema,
   UpdateSessionSchema,
@@ -353,6 +354,12 @@ This is the primary payload for the active workout view — loaded once when the
         columns: { id: true, name: true, photoUrl: true },
       }).catch(() => null)
 
+      // ── Challenge: sessions_completed auto-progress ──────────────────
+      if (body.status === 'completed') {
+        updateChallengesForSessionComplete(updated.clientId)
+          .catch(() => { /* challenge update failure is non-critical */ })
+      }
+
       return reply.send(serializeSession({ ...updated, client }))
     } catch (error) {
       ;routeLog(app).error(error)
@@ -634,6 +641,21 @@ Which fields you populate depends on the workout type:
     const body = request.body as Omit<z.infer<typeof CreateSetSchema>, 'sessionExerciseId'>
 
     try {
+      // ── Fetch session exercise context ────────────────────────────────
+      // Needed for both PR detection and challenge auto-progress
+      const seRow = await db.query.sessionExercises.findFirst({
+        where: eq(sessionExercises.id, sessionExerciseId),
+        with: {
+          workout: {
+            with: {
+              session: {
+                columns: { clientId: true },
+              },
+            },
+          },
+        },
+      })
+
       // ── PR detection ────────────────────────────────────────────────────
       // Only meaningful for resistance sets with both weight and reps
       let isPR       = false
@@ -643,20 +665,6 @@ Which fields you populate depends on the workout type:
         const epley = (w: number, r: number): number => w * (1 + r / 30)
         const newEpley  = epley(body.weight, body.reps)
         const newVolume = body.weight * body.reps
-
-        // Find the exercise for this sessionExercise
-        const seRow = await db.query.sessionExercises.findFirst({
-          where: eq(sessionExercises.id, sessionExerciseId),
-          with: {
-            workout: {
-              with: {
-                session: {
-                  columns: { clientId: true },
-                },
-              },
-            },
-          },
-        })
 
         if (seRow) {
           const clientId    = seRow.workout.session.clientId
@@ -698,6 +706,21 @@ Which fields you populate depends on the workout type:
 
       if (!newSet) {
         return reply.status(500).send({ error: 'Failed to record set' })
+      }
+
+      // ── Challenge auto-progress ─────────────────────────────────────────
+      // Fire-and-forget — don't block the set response on challenge updates
+      if (seRow) {
+        updateChallengesForSet(
+          seRow.workout.session.clientId,
+          seRow.exerciseId,
+          {
+            weight:          body.weight,
+            reps:            body.reps,
+            distance:        body.distance,
+            durationSeconds: body.durationSeconds,
+          },
+        ).catch(() => { /* challenge update failure is non-critical */ })
       }
 
       return reply.status(201).send({

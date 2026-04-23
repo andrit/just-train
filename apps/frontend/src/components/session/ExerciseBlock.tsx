@@ -464,7 +464,11 @@ export function ExerciseBlock({
   const loggedCount = loggedSets.length
   const targetSets  = sessionExercise.targetSets ?? DEFAULT_TARGET_SETS
   const futureSets  = Math.max(0, targetSets - loggedCount - 1)
-  const isDone      = loggedCount >= targetSets
+  const hitTarget   = loggedCount >= targetSets
+
+  // Allow logging beyond target — trainer can always add more sets
+  const [keepGoing, setKeepGoing] = useState(false)
+  const isDone = hitTarget && !keepGoing
 
   const handleLog = (data: LogData): void => {
     logSet.mutate(
@@ -481,6 +485,8 @@ export function ExerciseBlock({
       },
       {
         onSuccess: (newSet) => {
+          // Reset keepGoing so UI returns to complete state with updated count
+          if (keepGoing) setKeepGoing(false)
           onSetLogged(restDurationSeconds, {
             isPR:       newSet?.isPR       ?? false,
             isPRVolume: newSet?.isPRVolume ?? false,
@@ -588,15 +594,29 @@ export function ExerciseBlock({
         ))}
 
         {isDone && (
-          <div className="flex items-center gap-2 py-2 px-1">
-            <div className="w-5 flex justify-center shrink-0">
-              <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5 text-emerald-400">
-                  <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+          <div className="flex items-center justify-between py-2 px-1">
+            <div className="flex items-center gap-2">
+              <div className="w-5 flex justify-center shrink-0">
+                <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5 text-emerald-400">
+                    <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
               </div>
+              <span className="text-sm text-emerald-400">{loggedCount} / {targetSets} sets</span>
             </div>
-            <span className="text-sm text-emerald-400">Exercise complete</span>
+            <button
+              type="button"
+              onClick={() => setKeepGoing(true)}
+              className={cn(
+                'text-xs text-gray-500 hover:text-brand-highlight px-2 py-1 rounded',
+                'border border-dashed border-surface-border hover:border-brand-highlight/30',
+                'transition-colors',
+                interactions.button.base,
+              )}
+            >
+              + Add set
+            </button>
           </div>
         )}
       </div>

@@ -138,12 +138,11 @@ Schema: ready. Natural home for PR celebration on session complete.
 When: v2.7.0 alongside post-session wrap-up
 What: `trainer_milestones` table. Auto-detection job on session complete. Milestone types: first session, 10/50/100 sessions, first PR, volume milestones, streak milestones. Display on client profile and in post-session wrap-up.
 
-### Coach Challenges (v2.8.0)
-When: v2.8.0 alongside video capture
-What: Trainer sets a challenge for a client ("10 pull-ups unassisted by end of month"). Progress tracked automatically from session data. `challenges` table (trainer creates, client assigned, metric + deadline + completion detection).
+### Coach Challenges (v2.8.0) ✅ COMPLETE (v2.12.0)
+Shipped: `challenges` table, CRUD routes, auto-progress on set/session, daily expiry job, ChallengeForm, ChallengeProgressCard, Challenges tab on client profile, athlete dashboard section.
 
 ### Leaderboards + Weekly Quests (v2.9.0)
-When: v2.9.0 — needs meaningful user base, privacy design, opt-in consent
+When: v2.13.0 — needs meaningful user base, privacy design, opt-in consent
 What: King/Queen of the Gym leaderboards (trainer-scoped first, not global). Weekly/monthly quests tied to performance metrics. Anti-gaming considerations. Global leaderboards deferred to v3.x behind subscription gate.
 
 ### Social Share — Athlete Tier (v2.9.0)
@@ -262,3 +261,35 @@ GitHub auto-deploy active. Custom domain pending.
 
 ### Single scroll on exercise detail ✅
 Removed nested `overflow-y-auto` wrapper in `ExercisesPage` BottomSheet usage. Single scroll container now.
+
+---
+
+## v2.12.0 Deferrals
+
+### Video Annotation / Drawing on Form Checks
+When: Premium trainer feature, separate version
+What: Circle the knee caving in, draw the bar path on a form check clip. Overlay drawing tools on the `MediaPlaybackModal`. Trainer-only tier feature.
+
+### Challenge Templates
+When: After observing what trainers and athletes actually create
+What: Pre-built challenge templates ("30-day pull-up challenge"). Build the primitive first, template the patterns that emerge from real usage.
+
+### Challenge Dashboard Widget
+When: v2.12.1 if needed
+What: A `challenges-summary` widget showing total active / completed this month across all clients. Athlete mode shows personal challenges.
+
+### Social Share Cards
+When: v2.13.0
+What: Share session summary / PR achievement card / progress photo comparison as image. Native share sheet via Web Share API. Privacy controls (photoSharingPreference) are built in v2.12.0; share UI is v2.13.0.
+
+### Client Self-Upload of Progress Photos
+When: Post-SaaS — requires client portal
+What: Currently only the trainer (or athlete for self) can upload. A client portal would allow clients to upload their own photos between sessions.
+
+### AI Body Composition Analysis
+When: Future exploration
+What: AI-powered body composition estimation from progress photos. The photos are already stored in Cloudinary — analysis can be layered on without schema changes.
+
+### SnapshotPhotoCapture → InlineCameraSheet Migration
+When: UX polish pass
+What: Progress photo capture currently uses `<input type="file" capture>`. Could migrate to the `InlineCameraSheet` (MediaStream API) for a more seamless experience. Lower priority since progress photos are taken less frequently than form check clips.

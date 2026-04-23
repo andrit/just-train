@@ -32,6 +32,15 @@ export interface ReportGoal {
   achievedAt: string | null
 }
 
+export interface ReportChallenge {
+  title:        string
+  currentValue: number
+  targetValue:  number
+  targetUnit:   string | null
+  status:       string
+  deadline:     string
+}
+
 export interface ReportData {
   // Recipients
   clientName:    string
@@ -47,6 +56,7 @@ export interface ReportData {
   // Content
   sessions:      ReportSession[]
   goals:         ReportGoal[]
+  challenges:    ReportChallenge[]
   weeklyTarget:  number
 
   // KPIs
@@ -135,7 +145,7 @@ function scoreBar(value: number, max = 10): string {
 export function buildReportHtml(data: ReportData): string {
   const {
     clientName, trainerName, periodLabel,
-    sessions, goals, weeklyTarget,
+    sessions, goals, challenges, weeklyTarget,
     avgEnergyLevel, avgStressLevel, totalVolumeLbs,
     focusKpiLabel, trainerNote,
   } = data
@@ -294,6 +304,34 @@ export function buildReportHtml(data: ReportData): string {
       </td>
     </tr>` : ''}
 
+    <!-- Challenges -->
+    ${challenges.length > 0 ? `
+    <tr>
+      <td style="background:#ffffff;padding:24px 32px;border-bottom:1px solid #f3f4f6;">
+        <p style="margin:0 0 12px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;">Challenges</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${challenges.map(c => {
+            const pct = c.targetValue > 0 ? Math.min(100, Math.round((c.currentValue / c.targetValue) * 100)) : 0
+            const statusColor = c.status === 'completed' ? '#10b981' : c.status === 'expired' ? '#f59e0b' : '#3b82f6'
+            const statusLabel = c.status === 'completed' ? '✓ Completed' : c.status === 'expired' ? 'Expired' : `${pct}%`
+            return `
+          <tr>
+            <td style="padding:8px 0;border-bottom:1px solid #f3f4f6;">
+              <p style="margin:0 0 4px;font-size:13px;color:#374151;font-weight:600;">${esc(c.title)}</p>
+              <div style="background:#e5e7eb;border-radius:4px;height:6px;margin-bottom:4px;">
+                <div style="background:${statusColor};border-radius:4px;height:6px;width:${pct}%;"></div>
+              </div>
+              <p style="margin:0;font-size:11px;color:#6b7280;">
+                ${c.currentValue}${c.targetUnit ? ' ' + esc(c.targetUnit) : ''} / ${c.targetValue}${c.targetUnit ? ' ' + esc(c.targetUnit) : ''}
+                <span style="margin-left:8px;color:${statusColor};font-weight:600;">${statusLabel}</span>
+              </p>
+            </td>
+          </tr>`
+          }).join('')}
+        </table>
+      </td>
+    </tr>` : ''}
+
     <!-- Trainer note -->
     ${trainerNote ? `
     <tr>
@@ -346,7 +384,7 @@ export async function sendReport(data: ReportData): Promise<{ id: string }> {
 
 // ── buildReportData — exported for use by workers ─────────────────────────────
 
-import { db, clients, sessions, trainers, clientGoals } from '../db'
+import { db, clients, sessions, trainers, clientGoals, challenges } from '../db'
 import { eq, and, desc } from 'drizzle-orm'
 
 export async function buildReportData(
@@ -409,6 +447,22 @@ export async function buildReportData(
     where: eq(clientGoals.clientId, clientId),
   }).catch(() => [])
 
+  // v2.12.0: fetch challenges for report
+  const clientChallenges = await db.query.challenges.findMany({
+    where: eq(challenges.clientId, clientId),
+  }).catch(() => [])
+
+  const reportChallenges: ReportChallenge[] = clientChallenges
+    .filter(c => c.status === 'active' || c.status === 'completed')
+    .map(c => ({
+      title:        c.title,
+      currentValue: c.currentValue,
+      targetValue:  c.targetValue,
+      targetUnit:   c.targetUnit,
+      status:       c.status,
+      deadline:     c.deadline,
+    }))
+
   const energyScores = periodSessions.map(s => s.energyLevel).filter((e): e is number => e != null)
   const stressScores = periodSessions.map(s => s.stressLevel).filter((e): e is number => e != null)
   const avg = (arr: number[]) => arr.length > 0
@@ -427,6 +481,7 @@ export async function buildReportData(
     periodEnd:      period.end.toISOString().split('T')[0] ?? '',
     sessions:       reportSessions,
     goals:          goals.map(g => ({ goal: g.goal, achievedAt: g.achievedAt?.toISOString() ?? null })),
+    challenges:     reportChallenges,
     weeklyTarget:   client.weeklySessionTarget,
     avgEnergyLevel: avg(energyScores),
     avgStressLevel: avg(stressScores),

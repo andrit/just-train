@@ -590,3 +590,66 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 
 ### Vercel SPA routing fix
 - `apps/frontend/vercel.json` — created in the frontend root directory where Vercel actually looks for it (Root Directory is `apps/frontend`). The repo-root `vercel.json` was not being applied, causing 404 on hard refresh and page reload logout.
+
+## [v2.12.0] — Progress Media + Coach Challenges
+
+### Backend
+
+**Progress photos (snapshot media):**
+- `snapshot_media` table — photos attached to client snapshots with pose enum (front, side_left, side_right, back, custom) and shareable flag for social sharing gate
+- `snapshot_pose` pgEnum added
+- Routes: `POST /snapshots/:id/media` (upload), `PATCH /snapshot-media/:id` (caption/shareable), `DELETE /snapshot-media/:id`, `GET /clients/:clientId/progress-photos` (grouped by snapshot date)
+- Client opt-out enforcement — upload returns 403 when `progressPhotosOptedOut = true`
+- Cloudinary folder: `trainer-app/clients/<clientId>/snapshots/<snapshotId>/`
+
+**Session form check clips:**
+- `session_exercise_media` table — photos and short video clips (≤30s) attached to session exercises
+- Routes: `POST /session-exercises/:id/media`, `DELETE /session-exercise-media/:id`, `GET /session-exercises/:id/media`
+- 30-second video cap enforced server-side — overlong uploads cleaned from Cloudinary and rejected
+- Cloudinary folder: `trainer-app/clients/<clientId>/sessions/<sessionId>/<sessionExerciseId>/`
+
+**Coach challenges:**
+- `challenges` table with `challenge_metric_type` and `challenge_status` pgEnums
+- Routes: `GET /clients/:clientId/challenges`, `POST /clients/:clientId/challenges`, `PATCH /challenges/:id`, `DELETE /challenges/:id` (soft-cancel)
+- Auto-progress: set logging route checks for active challenges tied to the exercise and updates `currentValue` via max(). Session completion increments `sessions_completed` challenges. Both fire-and-forget.
+- Daily expiry job in BullMQ scheduler — flips overdue active challenges to expired
+
+**Cloudinary service refactor:**
+- `uploadBuffer()` now takes a `folder` string instead of `exerciseId` — three folder helpers: `exerciseFolder()`, `snapshotFolder()`, `sessionExerciseFolder()`
+
+**Monthly report:**
+- `ReportData` extended with `challenges: ReportChallenge[]`
+- New "Challenges" HTML section with inline progress bars per challenge
+- `buildReportData()` fetches active/completed challenges for the client
+
+**Schema additions:**
+- `trainers.photo_sharing_preference` — `text NOT NULL DEFAULT 'private'`
+- `clients.progress_photos_opted_out` — `boolean NOT NULL DEFAULT false`
+
+### Frontend
+
+**Progress photos:**
+- `SnapshotPhotoCapture` — 4 pose camera buttons, upload to Cloudinary, thumbnail grid, retake/delete, shareable toggle (when pref = share_selected)
+- `ProgressPhotoTimeline` — client profile overview tab, latest + older snapshots, opens comparison slider
+- `PhotoComparisonSlider` — full-screen before/after with draggable divider, date/pose selectors
+- `ProgressPhotoModal` — full-screen viewer with arrow navigation
+- Photo sharing preference radio group in Preferences → Privacy section
+
+**Session form check clips:**
+- `InlineCameraSheet` — bottom sheet with live `getUserMedia` viewfinder, photo capture via canvas, video recording via `MediaRecorder` (30s auto-stop), preview/confirm, camera flip, fallback to file input
+- Camera icon on exercise header in live session + `FormCheckBadge` with media count
+- Inline media thumbnails in `SessionHistoryPanel` with full-screen `MediaPlaybackModal`
+
+**Coach challenges:**
+- `ChallengeForm` — bottom sheet with metric-type-aware fields, exercise selector, target/unit/deadline
+- `ChallengeProgressCard` — progress bar, status badge, urgency indicator, days remaining
+- `ChallengesTab` — new 5th tab on client profile with active/completed/expired sections
+- Athlete dashboard — active challenges section + "+ Set a challenge" CTA
+- Post-session wrap-up shows active challenge progress bars
+
+### Shared package
+- New enums: `SnapshotPoseEnum`, `PhotoSharingPreferenceEnum`, `ChallengeMetricTypeEnum`, `ChallengeStatusEnum`
+- New input schemas: `UpdateSnapshotMediaSchema`, `CreateChallengeSchema`, `UpdateChallengeSchema`
+- New response schemas: `SnapshotMediaResponseSchema`, `ProgressPhotoGroupResponseSchema`, `SessionExerciseMediaResponseSchema`, `ChallengeResponseSchema` + list variants
+- New type interfaces: `SnapshotMedia`, `SessionExerciseMedia`, `Challenge`
+- Updated: `TrainerResponseSchema` (+photoSharingPreference), `ClientResponseSchema` (+progressPhotosOptedOut)

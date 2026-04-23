@@ -26,6 +26,7 @@ import { OverviewTab }                       from '@/components/client-profile/O
 import { TimelineTab }                       from '@/components/client-profile/TimelineTab'
 import { BaselineTab }                       from '@/components/client-profile/BaselineTab'
 import { PersonalBestsTab }                  from '@/components/client-profile/PersonalBestsTab'
+import { ChallengesTab }                     from '@/components/client-profile/ChallengesTab'
 import { ReportPreviewModal }                from '@/components/reports/ReportPreviewModal'
 import {
   useClient, useClientSnapshots,
@@ -43,7 +44,7 @@ import {
 
 // ── Tab types ─────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'timeline' | 'baseline' | 'prs'
+type Tab = 'overview' | 'timeline' | 'baseline' | 'prs' | 'challenges'
 
 // ── Tab button ────────────────────────────────────────────────────────────────
 
@@ -271,6 +272,7 @@ export default function ClientProfilePage(): React.JSX.Element {
           <TabButton id="timeline" label="Timeline" active={tab === 'timeline'} onClick={() => setTab('timeline')} />
           <TabButton id="baseline" label="Baseline" active={tab === 'baseline'} incomplete={baselineIncomplete} onClick={() => setTab('baseline')} />
           <TabButton id="prs" label="PRs" active={tab === 'prs'} onClick={() => setTab('prs')} />
+          <TabButton id="challenges" label="Challenges" active={tab === 'challenges'} onClick={() => setTab('challenges')} />
         </div>
       </div>
 
@@ -290,6 +292,7 @@ export default function ClientProfilePage(): React.JSX.Element {
         {tab === 'timeline' && <TimelineTab clientId={client.id} clientName={client.name} />}
         {tab === 'baseline' && <BaselineTab clientId={client.id} />}
         {tab === 'prs'      && <PersonalBestsTab clientId={client.id} />}
+        {tab === 'challenges' && <ChallengesTab clientId={client.id} clientName={client.name} isSelf={client.isSelf} />}
       </div>
 
       {/* Edit drawer */}

@@ -16,7 +16,10 @@
 import { useState, useMemo, useEffect } from 'react'
 import { usePreferences }       from '@/hooks/usePreferences'
 import { useClients, useSelfClient, useClientGoals } from '@/lib/queries/clients'
+import { useChallenges }        from '@/lib/queries/challenges'
 import { WidgetRenderer }       from '@/components/dashboard/WidgetRenderer'
+import { ChallengeProgressCard } from '@/components/challenges/ChallengeProgressCard'
+import { ChallengeForm }        from '@/components/challenges/ChallengeForm'
 import { Spinner }              from '@/components/ui/Spinner'
 import { useAuthStore }         from '@/store/authStore'
 import { useUXEvent }           from '@/hooks/useUXEvent'
@@ -50,6 +53,10 @@ export default function DashboardPage(): React.JSX.Element {
   // We aggregate goals from the client list for the goals count
   // Phase 7: this will be a dedicated aggregate endpoint
   const allGoals: ClientGoalResponse[] = [] // placeholder until Phase 7 aggregate
+
+  // v2.12.0: Challenges for self-client (athlete dashboard section)
+  const { data: selfChallenges } = useChallenges(selfClient?.id ?? null, 'active')
+  const [challengeFormOpen, setChallengeFormOpen] = useState(false)
 
   const isLoading = clientsLoading || selfLoading
 
@@ -127,6 +134,39 @@ export default function DashboardPage(): React.JSX.Element {
             </button>
           </p>
         </div>
+      )}
+
+      {/* v2.12.0: Active challenges section */}
+      {selfClient && (selfChallenges?.length ?? 0) > 0 && (
+        <div className="mt-6 space-y-3 animate-slide-up" style={{ animationDelay: `${visibleWidgets.length * 50 + 100}ms` }}>
+          <h2 className="font-display text-lg uppercase tracking-wide text-white">
+            Active Challenges
+          </h2>
+          <div className="space-y-2">
+            {(selfChallenges ?? []).map((c) => (
+              <ChallengeProgressCard key={c.id} challenge={c} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* v2.12.0: New Challenge CTA for athletes */}
+      {selfClient && trainerMode === 'athlete' && (
+        <>
+          <button
+            type="button"
+            onClick={() => setChallengeFormOpen(true)}
+            className="mt-4 w-full text-center text-sm text-brand-highlight hover:text-brand-highlight/80 py-2"
+          >
+            + Set a challenge
+          </button>
+          <ChallengeForm
+            open={challengeFormOpen}
+            onClose={() => setChallengeFormOpen(false)}
+            clientId={selfClient.id}
+            contextLabel="Set a challenge"
+          />
+        </>
       )}
 
     </div>

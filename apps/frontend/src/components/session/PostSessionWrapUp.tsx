@@ -10,6 +10,7 @@ import { useState }                           from 'react'
 import { cn }                                 from '@/lib/cn'
 import { interactions }                       from '@/lib/interactions'
 import { Spinner }                            from '@/components/ui/Spinner'
+import { useChallenges }                      from '@/lib/queries/challenges'
 import type { SessionDetailResponse }         from '@trainer-app/shared'
 
 interface PostSessionWrapUpProps {
@@ -22,6 +23,9 @@ export function PostSessionWrapUp({
   session, onDone, isSaving = false,
 }: PostSessionWrapUpProps): React.JSX.Element {
   const [name, setName] = useState(session.name ?? '')
+
+  // v2.12.0: fetch active challenges for the client to show progress
+  const { data: activeChallenges } = useChallenges(session.clientId, 'active')
 
   // ── Compute stats ───────────────────────────────────────────────────────────
   const allSets = session.workouts.flatMap(w =>
@@ -86,6 +90,34 @@ export function PostSessionWrapUp({
                     {se.exercise?.name ?? 'Exercise'} — new {se.sets.some(s => s.isPR) ? '1RM' : 'volume'} PR
                   </p>
                 ))}
+            </div>
+          </div>
+        )}
+
+        {/* v2.12.0: Challenge progress updates */}
+        {activeChallenges && activeChallenges.length > 0 && (
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-3">
+            <p className="text-xs text-blue-400 font-medium mb-1.5">Challenge progress</p>
+            <div className="space-y-2">
+              {activeChallenges.map(c => {
+                const pct = c.targetValue > 0 ? Math.min(100, Math.round((c.currentValue / c.targetValue) * 100)) : 0
+                return (
+                  <div key={c.id}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm text-blue-300 truncate mr-2">{c.title}</p>
+                      <span className="text-xs text-blue-400 font-mono shrink-0">
+                        {c.currentValue} / {c.targetValue}{c.targetUnit ? ` ${c.targetUnit}` : ''}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-blue-900/50 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-400 rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

@@ -24,6 +24,7 @@ import { OverviewTab }                       from '@/components/client-profile/O
 import { TimelineTab }                       from '@/components/client-profile/TimelineTab'
 import { BaselineTab }                       from '@/components/client-profile/BaselineTab'
 import { PersonalBestsTab }                  from '@/components/client-profile/PersonalBestsTab'
+import { ChallengesTab }                     from '@/components/client-profile/ChallengesTab'
 import { ReportPreviewModal }                from '@/components/reports/ReportPreviewModal'
 import { useClient, useClientSnapshots, useClientKpis } from '@/lib/queries/clients'
 import { SilhouetteAvatar }                  from '@/components/clients/SilhouetteAvatar'
@@ -36,7 +37,7 @@ import {
   isBaselineIncomplete,
 } from '@/components/clients/utils'
 
-type Tab = 'overview' | 'timeline' | 'baseline' | 'prs'
+type Tab = 'overview' | 'timeline' | 'baseline' | 'prs' | 'challenges'
 
 function TabButton({ id: _id, label, active, incomplete, onClick }: {
   id: Tab; label: string; active: boolean; incomplete?: boolean; onClick: () => void
@@ -261,6 +262,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
           <TabButton id="timeline" label="Timeline" active={tab === 'timeline'} onClick={() => setTab('timeline')} />
           <TabButton id="baseline" label="Baseline" active={tab === 'baseline'} incomplete={baselineIncomplete} onClick={() => setTab('baseline')} />
           <TabButton id="prs" label="PRs" active={tab === 'prs'} onClick={() => setTab('prs')} />
+          <TabButton id="challenges" label="Challenges" active={tab === 'challenges'} onClick={() => setTab('challenges')} />
         </div>
       </div>
 
@@ -280,6 +282,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
         {tab === 'timeline' && <TimelineTab clientId={client.id} clientName={client.name} />}
         {tab === 'baseline' && <BaselineTab clientId={client.id} />}
         {tab === 'prs'      && <PersonalBestsTab clientId={client.id} />}
+        {tab === 'challenges' && <ChallengesTab clientId={client.id} clientName={client.name} isSelf={client.isSelf} />}
       </div>
 
       {/* Edit drawer */}

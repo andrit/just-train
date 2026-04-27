@@ -1,0 +1,4 @@
+# Dockerfile.claude
+FROM node:20-slim
+RUN npm install -g @anthropic-ai/claude-code
+RUN mkdir -p /root/.claude && chmod 700 /root/.claude

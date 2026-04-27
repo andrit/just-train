@@ -269,12 +269,10 @@ export function refreshTokenCookieOptions() {
   const isProd = process.env.NODE_ENV === 'production'
   return {
     httpOnly: true,
-    // In production the frontend (Vercel) and backend (Railway) are on
-    // different domains. SameSite must be 'none' + secure:true for the
-    // browser to send the cookie cross-origin. In dev, 'lax' works fine
-    // since both run on localhost.
     secure:   isProd,
-    sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
+    // Vercel proxies /api/* to Railway, so the cookie is first-party on the
+    // Vercel domain. SameSite=Lax works in both prod and dev.
+    sameSite: 'lax' as const,
     path:     '/api/v1/auth',
     maxAge:   REFRESH_TOKEN_TTL_MS / 1000,
   }

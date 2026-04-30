@@ -152,6 +152,7 @@ Use this to display the template builder/editor and to preview what a session wi
   // POST /templates — Create a new template
   // ----------------------------------------------------------
   app.post('/templates', {
+    config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
     schema: {
       tags: ['Templates'],
       security: [{ bearerAuth: [] }],
@@ -285,6 +286,7 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
   // template may belong to any trainer (enables sharing defaults).
   // ----------------------------------------------------------
   app.post('/templates/:id/fork', {
+    config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
     schema: {
       tags:     ['Templates'],
       security: [{ bearerAuth: [] }],

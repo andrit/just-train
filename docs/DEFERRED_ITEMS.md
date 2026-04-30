@@ -46,6 +46,30 @@ What: List active sessions by device, with individual revoke buttons. Infrastruc
 When: If cookie behaviour needs precise local testing
 What: `mkcert` for locally-trusted TLS. The dev workaround (`secure: NODE_ENV === 'production'`) is safe and well-understood.
 
+### SameSite Cookie: 'lax' not 'strict' (intentional trade-off)
+When: Revisit only if cross-site CSRF becomes a demonstrated risk
+What: The refresh token cookie uses `sameSite: 'lax'` rather than `'strict'`.
+Why accepted: The app deploys across two origins (Vercel frontend → Railway backend). Vercel preview deploys need the cookie to be sent on the top-level navigation that lands on the preview URL. `'strict'` would break token refresh for any preview deploy that isn't on a custom domain. The risk from `'lax'` is mild — it allows cross-site requests on top-level navigations, but the refresh endpoint already validates the token and rotates it; a CSRF attack would need to also intercept the rotated token to do any damage. This is documented, understood, and acceptable until a custom domain is set for both origins, at which point `'strict'` is a one-line change in `auth.service.ts`.
+
+### MIME Type Validation: Client-Supplied Header (intentional trade-off)
+When: Revisit if Cloudinary is removed or media handling becomes a higher-risk surface
+What: File upload routes read MIME type from the client's `Content-Type` header rather than inspecting file magic bytes server-side.
+Why accepted: Cloudinary performs its own server-side validation on every upload and rejects files that don't match the declared type. A lying client would have their upload rejected by Cloudinary regardless. Adding a magic-number check (e.g. `file-type` npm package) before the Cloudinary call would provide defence-in-depth but is low priority given the secondary validation already in place.
+
+### Account Lockout / CAPTCHA (requires product decisions before implementing)
+When: Schedule a dedicated session before or alongside the v3.0.0 SaaS work — this matters more once registration is open to paying strangers
+What: Two related but independent mechanisms:
+  1. **Account lockout** — temporarily block login after N consecutive failures for a given email. Requires a `failed_login_attempts` counter + `locked_until` timestamp on the `trainers` table, or a Redis key for transient state.
+  2. **CAPTCHA / bot detection** — challenge on `POST /auth/register` and `POST /auth/login` to block automated credential stuffing and bulk account creation. Cloudflare Turnstile is the preferred option (free tier, privacy-respecting, no image puzzles).
+
+Product decisions needed before building:
+  - **Lockout threshold** — how many failures before lockout? (5 is standard; stricter hurts trainers who mistype). 
+  - **Lockout duration** — fixed (15 min) or exponential backoff?
+  - **Lockout scope** — per email, per IP, or both? Per-email protects against targeted attacks on a known account; per-IP protects against distributed credential stuffing across many accounts.
+  - **Notification** — does the trainer get an email when their account is locked? (Good for awareness; adds Resend dependency to the auth flow.)
+  - **CAPTCHA gate** — register only, or also login? Login CAPTCHA adds friction for every user on every session; register-only is a lighter touch.
+  - **CAPTCHA in PWA context** — Turnstile requires a browser widget; needs design consideration for the installed PWA experience (non-issue for web, but test on iOS standalone mode).
+
 ---
 
 ## Trainer Profile & Settings
@@ -142,7 +166,7 @@ What: `trainer_milestones` table. Auto-detection job on session complete. Milest
 Shipped: `challenges` table, CRUD routes, auto-progress on set/session, daily expiry job, ChallengeForm, ChallengeProgressCard, Challenges tab on client profile, athlete dashboard section.
 
 ### Leaderboards + Weekly Quests (v2.9.0)
-When: v2.13.0 — needs meaningful user base, privacy design, opt-in consent
+When: v2.14.0 — needs meaningful user base, privacy design, opt-in consent
 What: King/Queen of the Gym leaderboards (trainer-scoped first, not global). Weekly/monthly quests tied to performance metrics. Anti-gaming considerations. Global leaderboards deferred to v3.x behind subscription gate.
 
 ### Social Share — Athlete Tier (v2.9.0)
@@ -279,8 +303,8 @@ When: v2.12.1 if needed
 What: A `challenges-summary` widget showing total active / completed this month across all clients. Athlete mode shows personal challenges.
 
 ### Social Share Cards
-When: v2.13.0
-What: Share session summary / PR achievement card / progress photo comparison as image. Native share sheet via Web Share API. Privacy controls (photoSharingPreference) are built in v2.12.0; share UI is v2.13.0.
+When: v2.14.0
+What: Share session summary / PR achievement card / progress photo comparison as image. Native share sheet via Web Share API. Privacy controls (photoSharingPreference) are built in v2.12.0; share UI is v2.14.0.
 
 ### Client Self-Upload of Progress Photos
 When: Post-SaaS — requires client portal

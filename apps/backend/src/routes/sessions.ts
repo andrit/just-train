@@ -213,6 +213,7 @@ This is the primary payload for the active workout view — loaded once when the
   // POST /sessions — Create a new session
   // ----------------------------------------------------------
   app.post('/sessions', {
+    config: { rateLimit: { max: 100, timeWindow: '1 hour' } },
     schema: {
       tags: ['Sessions'],
       security: [{ bearerAuth: [] }],

@@ -103,16 +103,27 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
 
         // Runtime caching strategies for different types of requests:
+        //
+        // Only cache reference data that is safe to serve offline:
+        //   - exercises: exercise library (changes rarely, no PII)
+        //   - body-parts: static taxonomy (never changes)
+        //   - templates: workout blueprints (no PII)
+        //
+        // Explicitly NOT cached (sensitive or auth-bearing):
+        //   - /auth/* — tokens and session data
+        //   - /clients/* — PII (client roster, health data)
+        //   - /sessions/* — training records
+        //   - /snapshots/* — body measurements
+        //   - /kpis/* — computed from health data
+        //   - /reports/* — client-facing documents
         runtimeCaching: [
           {
-            // API requests — NetworkFirst strategy:
-            // Try the network first (latest data), fall back to cache if offline
-            urlPattern: /^https?:\/\/.*\/api\//,
+            urlPattern: /\/api\/v1\/(exercises|body-parts|templates)(\?|\/|$)/,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'api-cache',
+              cacheName: 'api-reference-cache',
               expiration: {
-                maxEntries: 100,
+                maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24, // 24 hours
               },
             },

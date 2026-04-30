@@ -188,6 +188,7 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
   // POST /exercises — Create a full exercise in the library
   // ----------------------------------------------------------
   app.post('/exercises', {
+    config: { rateLimit: { max: 30, timeWindow: '1 hour' } },
     schema: {
       tags: ['Exercises'],
       security: [{ bearerAuth: [] }],
@@ -232,6 +233,7 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
   // The trainer is shown a badge in the library to enrich it later.
   // ----------------------------------------------------------
   app.post('/exercises/quick-add', {
+    config: { rateLimit: { max: 50, timeWindow: '1 hour' } },
     schema: {
       tags: ['Exercises'],
       security: [{ bearerAuth: [] }],

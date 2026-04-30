@@ -92,6 +92,7 @@ export async function reportRoutes(app: FastifyInstance): Promise<void> {
   // ── POST /clients/:id/report ──────────────────────────────────────────────
 
   app.post('/clients/:id/report', {
+    config: { rateLimit: { max: 10, timeWindow: '1 hour' } },
     schema: {
       tags:     ['Reports'],
       security: [{ bearerAuth: [] }],

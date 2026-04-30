@@ -93,6 +93,7 @@ export async function snapshotMediaRoutes(app: FastifyInstance): Promise<void> {
   // Query params: pose (required), caption (optional)
   // ──────────────────────────────────────────────────────────────────────────
   app.post('/snapshots/:id/media', {
+    config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
     schema: {
       tags:     ['Snapshot Media'],
       summary:  'Upload a progress photo',

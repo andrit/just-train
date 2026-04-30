@@ -141,6 +141,7 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
   //   if trainer.subscriptionTier === 'free' → 402 SUBSCRIPTION_REQUIRED
   // ────────────────────────────────────────────────────────────────────────
   app.post('/clients', {
+    config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
     schema: {
       tags: ['Clients'],
       summary: 'Create a client',

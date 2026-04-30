@@ -5,6 +5,47 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v2.13.0] — Security Hardening
+
+### CSP headers
+- Production CSP no longer uses `'unsafe-inline'` for scripts or styles — Swagger UI is dev-only so unsafe-inline is now gated to `NODE_ENV !== 'production'`
+- Added `object-src: 'none'` — blocks Flash, Java applets, and browser plugins
+- Added `base-uri: 'self'` — prevents base-tag injection attacks
+- Added `form-action: 'self'` — restricts where forms can POST
+- Added `frame-ancestors: 'none'` — equivalent to `X-Frame-Options: DENY`, hardened from Helmet default
+
+### Service worker cache
+- Workbox runtime caching narrowed from `.*\/api\/` (all API responses) to `\/api\/v1\/(exercises|body-parts|templates)` only
+- Routes no longer cached: `/auth/*`, `/clients/*`, `/sessions/*`, `/snapshots/*`, `/kpis/*`, `/reports/*`, `/challenges/*`
+- Cache name changed from `api-cache` to `api-reference-cache` to force a cold cache on deploy
+
+### Cache-Control headers
+- All `/api/*` responses now send `Cache-Control: no-store, must-revalidate` via a global `onSend` hook — prevents browser native HTTP cache from storing API responses, independent of service worker behaviour
+
+### Rate limiting — per-route limits added
+Previously only `/auth/register` (5/15min) and `/auth/login` (10/15min) had custom limits. The following routes now have explicit per-route limits on top of the global 100/min:
+
+| Route | Limit | Reason |
+|---|---|---|
+| `POST /clients` | 20/hour | Roster creation |
+| `POST /sessions` | 100/hour | Session creation |
+| `POST /exercises` | 30/hour | Library creation |
+| `POST /exercises/quick-add` | 50/hour | Mid-session draft creation |
+| `POST /templates` | 20/hour | Template creation |
+| `POST /templates/:id/fork` | 20/hour | Template forking |
+| `POST /exercises/:id/media` | 20/hour | Cloudinary upload cost |
+| `POST /session-exercises/:id/media` | 30/hour | Cloudinary upload cost |
+| `POST /snapshots/:id/media` | 20/hour | Cloudinary upload cost |
+| `POST /clients/:id/report` | 10/hour | Email sending (Resend) |
+| `POST /auth/seed-templates` | 5/hour | One-time seeding operation |
+
+### Deferred (documented in DEFERRED_ITEMS.md)
+- `sameSite: 'lax'` on refresh cookie — intentional trade-off for Vercel preview deploys, documented
+- Client-supplied MIME type — Cloudinary provides secondary validation, documented
+- Account lockout + CAPTCHA — requires product decisions before implementing, documented with decision points
+
+---
+
 ## [v2.4.0] — Offline Sync
 
 ### Added

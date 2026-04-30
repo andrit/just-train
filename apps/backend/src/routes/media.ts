@@ -57,6 +57,7 @@ export async function mediaRoutes(app: FastifyInstance): Promise<void> {
   // Optional: isPrimary=true query param to mark as thumbnail immediately
   // ──────────────────────────────────────────────────────────────────────────
   app.post('/exercises/:id/media', {
+    config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
     schema: {
       tags:     ['Exercises'],
       summary:  'Upload exercise media',

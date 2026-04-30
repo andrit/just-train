@@ -126,17 +126,44 @@ app.register(cors, {
 
 // ------------------------------------------------------------
 // HELMET — secure HTTP response headers
-// CSP relaxed to allow Swagger UI to load its own assets.
+//
+// CSP is environment-aware:
+//   Production — no unsafe-inline (Swagger UI is dev-only)
+//   Development — unsafe-inline allowed for Swagger UI assets
+//
+// Additional directives added for hardening:
+//   object-src: 'none'   — blocks Flash, Java applets, plugins
+//   base-uri: 'self'     — prevents base-tag injection attacks
+//   form-action: 'self'  — restricts where forms can POST
+//   frame-ancestors: 'none' — equivalent to X-Frame-Options: DENY
 // ------------------------------------------------------------
 app.register(helmet, {
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc:  ["'self'", "'unsafe-inline'"],
-      styleSrc:   ["'self'", "'unsafe-inline'", 'https:'],
-      imgSrc:     ["'self'", 'data:', 'https:'],
+      defaultSrc:     ["'self'"],
+      scriptSrc:      isDev ? ["'self'", "'unsafe-inline'"] : ["'self'"],
+      styleSrc:       isDev ? ["'self'", "'unsafe-inline'", 'https:'] : ["'self'"],
+      imgSrc:         ["'self'", 'data:', 'https:'],
+      objectSrc:      ["'none'"],
+      baseUri:        ["'self'"],
+      formAction:     ["'self'"],
+      frameAncestors: ["'none'"],
     },
   },
+})
+
+// ------------------------------------------------------------
+// CACHE CONTROL — prevent browsers and proxies from caching
+// API responses. Workbox runtime caching (service worker) is
+// configured separately in vite.config.ts to cache only the
+// exercise library and reference data — everything else is
+// excluded there too. This header is defence-in-depth for the
+// browser's native HTTP cache.
+// ------------------------------------------------------------
+app.addHook('onSend', async (request, reply) => {
+  if (request.url.startsWith('/api/')) {
+    reply.header('Cache-Control', 'no-store, must-revalidate')
+  }
 })
 
 // ------------------------------------------------------------

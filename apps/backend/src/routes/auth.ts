@@ -579,6 +579,7 @@ Called once from the onboarding screen after registration. Can be called again t
   // Called automatically when the templates page loads empty.
   // ----------------------------------------------------------
   app.post('/auth/seed-templates', {
+    config: { rateLimit: { max: 5, timeWindow: '1 hour' } },
     schema: {
       tags:     ['Auth'],
       security: [{ bearerAuth: [] }],

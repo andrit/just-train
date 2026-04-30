@@ -102,6 +102,7 @@ export async function sessionExerciseMediaRoutes(app: FastifyInstance): Promise<
   // Optional query: caption
   // ──────────────────────────────────────────────────────────────────────────
   app.post('/session-exercises/:id/media', {
+    config: { rateLimit: { max: 30, timeWindow: '1 hour' } },
     schema: {
       tags:     ['Session Exercise Media'],
       summary:  'Upload form check clip or photo',

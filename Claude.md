@@ -100,6 +100,11 @@ pnpm lint
 pnpm test
 ```
 
-## Active known bug
+## Production architecture — Vercel proxy (important)
 
-Refresh token cookie doesn't survive page reload in production (cross-origin Vercel→Railway). Proactive refresh timer (12min) mitigates mid-session logout. Proper fix: Vercel rewrite proxy — see docs/v2.12.0-SCOPE.md Appendix A.
+All `/api/*` requests in production route through a Vercel rewrite (see `apps/frontend/vercel.json`) to the Railway backend. This means:
+- **Do NOT set `VITE_API_URL` in Vercel** — leave unset so the frontend defaults to `/api/v1` (same-origin via proxy)
+- **Set `RAILWAY_BACKEND_URL`** in Vercel (hostname only, no https://) — the rewrite needs this
+- **Set `CORS_ORIGIN`** and **`VERCEL_PROJECT_SLUG`** on Railway — needed for local dev and fallback
+
+Setting `VITE_API_URL` to the Railway URL directly bypasses the proxy → CORS errors + broken refresh cookies.

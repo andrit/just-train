@@ -797,6 +797,7 @@ pnpm typecheck                    # run from monorepo root. Silence = success.
 
 # Tests
 pnpm --filter backend test
+pnpm --filter backend test:watch  # watch mode during TDD
 
 # Ship a hotfix (no tag — dev iteration)
 ./hotfix.sh "fix: description"
@@ -804,6 +805,22 @@ pnpm --filter backend test
 # Ship a release (commits + tags + pushes)
 ./release.sh v1.9.0 "feat: exercise library UI"
 ```
+
+### TDD workflow for new backend routes
+
+Write tests before implementation. The test infrastructure is in place — follow this order:
+
+1. Create `apps/backend/src/__tests__/routes/<name>.test.ts`
+2. Write failing tests (401, happy path, 404, bad input, business rules)
+3. Run `pnpm --filter backend test:watch` — tests are red
+4. Implement the route until tests go green
+5. Keep `factories.ts` updated for any new response shapes
+
+**Scope:** backend routes only. Frontend has no component test infrastructure —
+E2E via Playwright is the plan, deferred to a dedicated phase.
+
+**Retroactive tests:** write them only when actively modifying an existing untested
+route. Don't stop feature work to backfill — that's low ROI.
 
 ---
 

@@ -38,6 +38,7 @@ In the Railway backend service → **Variables** tab, add:
 NODE_ENV              = production
 PORT                  = 3001
 CORS_ORIGIN           = https://your-app.vercel.app   ← update after Vercel step
+VERCEL_PROJECT_SLUG   = your-vercel-project-name      ← e.g. just-train-frontend
 JWT_SECRET            = <generate below>
 JWT_ACCESS_TTL        = 15m
 JWT_REFRESH_TTL_MS    = 604800000
@@ -46,6 +47,11 @@ CLOUDINARY_CLOUD_NAME = <from Cloudinary dashboard>
 CLOUDINARY_API_KEY    = <from Cloudinary dashboard>
 CLOUDINARY_API_SECRET = <from Cloudinary dashboard>
 ```
+
+`CORS_ORIGIN` is the exact Vercel production URL (no trailing slash).
+`VERCEL_PROJECT_SLUG` is the project name portion of your Vercel URL — e.g. if your URL is
+`https://just-train-frontend.vercel.app`, the slug is `just-train-frontend`. This lets Railway
+accept CORS requests from Vercel preview/branch deploy URLs automatically.
 
 **Generate secrets:**
 ```bash
@@ -95,9 +101,20 @@ It will look like: `https://trainerapp-production.up.railway.app`
 In Vercel → **Project Settings** → **Environment Variables**, add:
 
 ```
-VITE_API_URL = https://trainerapp-production.up.railway.app/api/v1
+RAILWAY_BACKEND_URL = your-app-production.up.railway.app
 ```
-(Use your actual Railway URL from Step 1e)
+Use the hostname only from Step 1e — **no `https://`, no trailing slash**.
+For example: `just-train-production.up.railway.app`
+
+This variable powers the rewrite rule in `vercel.json` that proxies all `/api/*`
+requests through Vercel to Railway. Routing through the proxy means:
+- No CORS — browser sees requests as same-origin (both on `your-app.vercel.app`)
+- Refresh token cookie works on page reload (same origin, no cross-site restrictions)
+
+**Do NOT set `VITE_API_URL` in Vercel.** Leaving it unset causes the frontend to
+default to `/api/v1`, which the Vercel proxy rewrites to your Railway backend.
+Setting `VITE_API_URL` to the Railway URL directly bypasses the proxy, breaks
+refresh token cookies, and causes CORS errors.
 
 ### 2c. Deploy
 
@@ -113,15 +130,16 @@ It will look like: `https://trainerapp.vercel.app`
 
 ### Update CORS on Railway
 
-Go back to Railway → backend service → **Variables** → update:
+Go back to Railway → backend service → **Variables** → update `CORS_ORIGIN` to your
+exact Vercel production URL (no trailing slash):
 ```
-CORS_ORIGIN = https://trainerapp.vercel.app
+CORS_ORIGIN = https://your-app.vercel.app
 ```
 
-If you want to keep local dev working alongside production:
-```
-CORS_ORIGIN = https://trainerapp.vercel.app,http://localhost:5173
-```
+The `CORS_ORIGIN` setting is used for local development and as a fallback.
+In production, API requests from the frontend travel through the Vercel proxy
+(same origin) so CORS is not triggered — but the env var must still be set
+correctly for the Railway CORS config to initialise properly.
 
 Redeploy the backend after updating the variable.
 
@@ -158,7 +176,10 @@ Redeploy the backend after updating the variable.
 → Railway uses `--frozen-lockfile` — the lockfile must be up to date
 
 **CORS error in browser console**
-→ The `CORS_ORIGIN` env var is wrong or not yet deployed — check Railway variables
+→ `VITE_API_URL` is set in Vercel — remove it. The frontend must use the Vercel proxy.
+→ `RAILWAY_BACKEND_URL` is not set in Vercel — add it (hostname only, no https://).
+→ `CORS_ORIGIN` is missing or wrong on Railway — set it to your exact Vercel URL.
+→ After any env var change, redeploy both services.
 
 ---
 

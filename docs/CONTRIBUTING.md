@@ -86,6 +86,51 @@ pnpm typecheck                     # must pass before push
 
 ---
 
+## Test-driven development (backend routes)
+
+New backend routes use TDD. Write the test file before the implementation.
+
+**The rule:** if you're adding a new route file, create `__tests__/routes/<name>.test.ts` first.
+If you're adding an endpoint to an existing route file, add its test cases first.
+
+**What to cover per endpoint (minimum):**
+
+- [ ] 401 with no auth token
+- [ ] Happy path — correct input → expected response shape
+- [ ] 404 when resource doesn't exist or belongs to another trainer
+- [ ] 400 / 422 for invalid input (missing required fields, wrong types)
+- [ ] Any business rule the route enforces (ownership check, status transition, etc.)
+
+**How to start a new route test file:**
+
+```ts
+// __tests__/routes/things.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { build<Thing>TestApp } from '../helpers/buildApp'  // or add to buildApp.ts
+import { makeTrainer, makeThing } from '../helpers/factories'
+
+vi.mock('../../db', async (importOriginal) => { /* see auth.test.ts for pattern */ })
+vi.mock('../../services/auth.service', async (importOriginal) => { /* ... */ })
+
+describe('GET /things', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns 401 without auth', async () => { /* ... */ })
+  it('returns the thing list for the authenticated trainer', async () => { /* ... */ })
+})
+```
+
+See `TESTING.md` for the full mock setup and `buildApp.ts` for the app builder pattern.
+
+**When touching an existing untested route:** write characterization tests first (tests
+that assert the current correct behaviour), then make your change. This is the boy-scout
+rule — don't leave an area less tested than you found it.
+
+**Frontend:** no component unit tests for now. E2E via Playwright is deferred to a
+dedicated phase. Don't invest in React Testing Library infrastructure yet.
+
+---
+
 ## Release checklist
 
 Before tagging a release:

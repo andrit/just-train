@@ -29,3 +29,6 @@ npm-debug.log*
 # PWA generated files
 sw.js
 workbox-*.js
+
+# Errors for claude to view
+errors/

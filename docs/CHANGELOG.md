@@ -5,6 +5,26 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v2.14.0] — Color System
+
+### Defined
+- `docs/COLOR_SYSTEM.md` — formal palette with names, hex values, color theory, and usage rules
+- Six named tokens: Forge Black `#000000`, Chalk White `#FFFFFF`, Iron Grey `#8A9099`, Ember Red `#D91B1B`, Command Blue `#1B50D9`, Signal Yellow `#FFE200`
+- Triadic primary structure (Red/Blue/Yellow) with equal HSL saturation and lightness on Ember Red and Command Blue — intentional visual parity
+
+### Changed
+- `tailwind.config.js` — `brand-highlight` (`#e94560`) removed entirely; six named tokens added; background palette shifted from dark navy (`#1a1a2e`) to Iron Grey (`#8A9099`) base; FAB pulse animation updated to Command Blue
+- `index.css` — field focus ring and offset updated from `brand-highlight` to `command-blue`
+
+### Component sweep — 79 files
+- All `brand-highlight` references replaced with intent-appropriate tokens:
+  - `ember-red` — resistance workout type badge, rest timer last-3s urgency flash, danger dialog icon, required field asterisks, destructive hover states
+  - `command-blue` — all primary actions (Log Set, primary buttons, nav active states, focus rings, selected filter chips, spinners, sync banner, progress indicators)
+- `lib/exerciseLabels.ts` — resistance type color updated to `ember-red` (intensity); all other types unchanged (sky=cardio, emerald=calisthenics, violet=stretching, gray=cooldown)
+- `lib/interactions.ts` — FAB hover shadow updated to `command-blue`
+
+---
+
 ## [v2.13.0] — Security Hardening
 
 ### CSP headers

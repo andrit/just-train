@@ -165,13 +165,15 @@ What: `trainer_milestones` table. Auto-detection job on session complete. Milest
 ### Coach Challenges (v2.8.0) ✅ COMPLETE (v2.12.0)
 Shipped: `challenges` table, CRUD routes, auto-progress on set/session, daily expiry job, ChallengeForm, ChallengeProgressCard, Challenges tab on client profile, athlete dashboard section.
 
-### Leaderboards + Weekly Quests (v2.9.0)
-When: v2.14.0 — needs meaningful user base, privacy design, opt-in consent
+### Leaderboards + Weekly Quests
+When: Post-SaaS — needs meaningful user base, privacy design, opt-in consent
 What: King/Queen of the Gym leaderboards (trainer-scoped first, not global). Weekly/monthly quests tied to performance metrics. Anti-gaming considerations. Global leaderboards deferred to v3.x behind subscription gate.
 
-### Social Share — Athlete Tier (v2.9.0)
-When: v2.9.0 alongside leaderboards
-What: Share session summary / PR achievement card as image. Native share sheet on mobile (Web Share API). Augments athlete subscription value. Depends partly on video capture scope from v2.8.0.
+### Social Share — Athlete Tier
+When: After leaderboards — share UI is the surface; leaderboards provide the context that makes sharing meaningful
+What: Share session summary / PR achievement card / progress photo comparison as image. Native share sheet via Web Share API (mobile).
+**Foundation already built (v2.12.0):** `photoSharingPreference` on trainers, `shareable` flag on `snapshot_media`, per-photo shareable toggle in `SnapshotPhotoCapture`, preference UI in PreferencesPage → Privacy. PreferencesPage copy reads *"when that feature launches"* — the dead control is clearly labelled and non-breaking.
+Needs: share card image generation, Web Share API call, share button surfaces on session summary and progress photo comparison.
 
 ---
 
@@ -303,8 +305,8 @@ When: v2.12.1 if needed
 What: A `challenges-summary` widget showing total active / completed this month across all clients. Athlete mode shows personal challenges.
 
 ### Social Share Cards
-When: v2.14.0
-What: Share session summary / PR achievement card / progress photo comparison as image. Native share sheet via Web Share API. Privacy controls (photoSharingPreference) are built in v2.12.0; share UI is v2.14.0.
+When: Post-leaderboards (see Social Share — Athlete Tier above)
+What: Share session summary / PR achievement card / progress photo comparison as image. Native share sheet via Web Share API. Privacy controls and `shareable` flag already built (v2.12.0) — only the share UI surface remains.
 
 ### Client Self-Upload of Progress Photos
 When: Post-SaaS — requires client portal

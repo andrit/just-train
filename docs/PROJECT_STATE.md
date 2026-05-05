@@ -638,7 +638,7 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v2.12.0 | Camera / video capture + coach challenges | ✅ |
 | v2.13.0 | Security hardening — CSP headers, service worker cache, rate limit review | ✅ |
 | v2.14.0 | Color system — named palette, semantic tokens, full component sweep | ✅ |
-| v2.15.0 | Leaderboards + weekly quests + social share | 🔜 Next |
+| v2.15.0 | Leaderboards + weekly quests + social share | ⏸ Deferred |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 | v3.1.0 | Observable navigation — RxJS swap inside navService | 🔜 |
 

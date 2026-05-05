@@ -50,9 +50,9 @@ function TabButton({ id: _id, label, active, incomplete, onClick }: {
       onClick={onClick}
       className={cn(
         'relative flex-1 py-3 text-sm font-medium transition-colors duration-150',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
         active
-          ? 'text-white border-b-2 border-brand-highlight'
+          ? 'text-white border-b-2 border-command-blue'
           : 'text-gray-500 hover:text-gray-300 border-b-2 border-transparent',
       )}
     >
@@ -97,7 +97,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full pt-20">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }
@@ -106,7 +106,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
     return (
       <div className="p-6 text-center pt-20">
         <p className="text-gray-400">Client not found.</p>
-        <button type="button" onClick={onClose} className="mt-4 text-sm text-brand-highlight hover:underline">
+        <button type="button" onClick={onClose} className="mt-4 text-sm text-command-blue hover:underline">
           Go back
         </button>
       </div>
@@ -146,7 +146,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm',
                 'bg-surface border border-surface-border',
                 (kpis?.sessionsThisMonth ?? 0) > 0
-                  ? 'text-gray-300 hover:border-brand-highlight/40 hover:text-white'
+                  ? 'text-gray-300 hover:border-command-blue/40 hover:text-white'
                   : 'text-gray-600 cursor-not-allowed opacity-50',
                 interactions.button.base,
                 interactions.button.press,
@@ -166,7 +166,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium',
                 sessionActive
                   ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
-                  : 'bg-brand-highlight text-white',
+                  : 'bg-command-blue text-white',
                 interactions.button.base,
                 interactions.button.press,
               )}
@@ -193,7 +193,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm',
                 'bg-surface border border-surface-border text-gray-300',
-                'hover:border-brand-highlight/40 hover:text-white',
+                'hover:border-command-blue/40 hover:text-white',
                 interactions.button.base,
                 interactions.button.press,
               )}
@@ -221,7 +221,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
                 {PROGRESSION_STATE_LABEL[client.progressionState]}
               </span>
               {client.isSelf && (
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-brand-highlight/30 text-brand-highlight/80 uppercase tracking-wider">
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-command-blue/30 text-command-blue/80 uppercase tracking-wider">
                   My Training
                 </span>
               )}

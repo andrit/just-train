@@ -81,7 +81,7 @@ export function TemplateExercisePickerSheet({
             value={search}
             onChange={e => setSearch(e.target.value)}
             autoFocus
-            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-highlight/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
           />
           <div className="flex gap-2">
             <button
@@ -90,7 +90,7 @@ export function TemplateExercisePickerSheet({
               className={cn(
                 'px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize',
                 !showAllTypes
-                  ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                  ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                   : 'border-surface-border text-gray-500 hover:text-gray-300',
               )}
             >
@@ -102,7 +102,7 @@ export function TemplateExercisePickerSheet({
               className={cn(
                 'px-3 py-1 rounded-full text-xs font-medium border transition-all',
                 showAllTypes
-                  ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                  ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                   : 'border-surface-border text-gray-500 hover:text-gray-300',
               )}
             >
@@ -114,7 +114,7 @@ export function TemplateExercisePickerSheet({
         {/* List */}
         <div className="flex-1 overflow-y-auto p-3">
           {isLoading ? (
-            <div className="flex justify-center py-8"><Spinner size="md" className="text-brand-highlight" /></div>
+            <div className="flex justify-center py-8"><Spinner size="md" className="text-command-blue" /></div>
           ) : filtered.length === 0 ? (
             <p className="text-center text-gray-500 text-sm py-8">
               {search

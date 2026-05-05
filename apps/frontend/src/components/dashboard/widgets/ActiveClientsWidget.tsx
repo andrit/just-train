@@ -37,7 +37,7 @@ export function ActiveClientsWidget({ clients }: ActiveClientsWidgetProps): Reac
         interactions.card.base,
         interactions.card.hover,
         interactions.card.press,
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
       )}
       aria-label={`${total} clients — view all`}
     >

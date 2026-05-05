@@ -27,7 +27,7 @@ export const Large: Story  = { args: { size: 'lg' } }
 export const InheritedColour: Story = {
   render: () => (
     <div className="flex gap-6 items-center p-4">
-      <span className="text-brand-highlight"><Spinner size="md" /></span>
+      <span className="text-command-blue"><Spinner size="md" /></span>
       <span className="text-green-400"><Spinner size="md" /></span>
       <span className="text-amber-400"><Spinner size="md" /></span>
       <span className="text-gray-400"><Spinner size="md" /></span>

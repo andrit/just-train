@@ -137,7 +137,7 @@ export function ExerciseAccordionRow({
       <div
         className={cn(
           'relative bg-brand-primary border border-surface-border rounded-xl transition-transform',
-          expanded && 'border-brand-highlight/20',
+          expanded && 'border-command-blue/20',
         )}
         style={{
           transform: translateX > 0 ? `translateX(${translateX}px)` : undefined,
@@ -252,8 +252,8 @@ export function ExerciseAccordionRow({
                     disabled={disabled}
                     className={cn(
                       'w-full mt-1 py-2 rounded-lg text-xs font-medium',
-                      'bg-brand-highlight/10 text-brand-highlight border border-brand-highlight/30',
-                      'hover:bg-brand-highlight/20 transition-colors',
+                      'bg-command-blue/10 text-command-blue border border-command-blue/30',
+                      'hover:bg-command-blue/20 transition-colors',
                       interactions.button.base,
                       disabled && 'opacity-50 pointer-events-none',
                     )}

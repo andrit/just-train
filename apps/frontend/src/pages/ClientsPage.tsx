@@ -54,12 +54,12 @@ export default function ClientsPage(): React.JSX.Element {
             aria-label="Add new client"
             className={cn(
               'flex items-center gap-2 px-4 py-2 rounded-xl',
-              'bg-brand-highlight text-white text-sm font-medium',
+              'bg-command-blue text-white text-sm font-medium',
               interactions.button.base,
               interactions.fab.hover,
               interactions.button.press,
               interactions.fab.pulse,   // ← remove to disable pulse on header button
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
             )}
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4" aria-hidden>
@@ -72,7 +72,7 @@ export default function ClientsPage(): React.JSX.Element {
 
       {isLoading ? (
         <div className="flex justify-center py-16">
-          <Spinner size="lg" className="text-brand-highlight" />
+          <Spinner size="lg" className="text-command-blue" />
         </div>
       ) : (
         <div className="space-y-3">
@@ -83,7 +83,7 @@ export default function ClientsPage(): React.JSX.Element {
               type="button"
               onClick={() => nav.openClientProfile(selfClient.id)}
               className={cn(
-                'card block p-4 border-brand-highlight/20 w-full text-left',
+                'card block p-4 border-command-blue/20 w-full text-left',
                 interactions.card.base,
                 interactions.card.hover,
                 interactions.card.press,
@@ -95,10 +95,10 @@ export default function ClientsPage(): React.JSX.Element {
                     name={selfClient.name}
                     photoUrl={selfClient.photoUrl}
                     size="md"
-                    className="ring-2 ring-brand-highlight/30"
+                    className="ring-2 ring-command-blue/30"
                   />
                   {/* "Me" badge */}
-                  <span className="absolute -bottom-1 -right-1 bg-brand-highlight text-white text-[9px] font-bold px-1 py-0.5 rounded uppercase leading-none">
+                  <span className="absolute -bottom-1 -right-1 bg-command-blue text-white text-[9px] font-bold px-1 py-0.5 rounded uppercase leading-none">
                     Me
                   </span>
                 </div>

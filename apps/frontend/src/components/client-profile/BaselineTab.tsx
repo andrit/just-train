@@ -94,7 +94,7 @@ export function BaselineTab({ clientId }: { clientId: string }): React.JSX.Eleme
   if (isLoading) {
     return (
       <div className="flex justify-center py-12" role="tabpanel" id="panel-baseline" aria-labelledby="tab-baseline">
-        <Spinner size="md" className="text-brand-highlight" />
+        <Spinner size="md" className="text-command-blue" />
       </div>
     )
   }
@@ -111,14 +111,14 @@ export function BaselineTab({ clientId }: { clientId: string }): React.JSX.Eleme
         type="button"
         className={cn(
           'w-full card p-4 text-left border-dashed',
-          'hover:border-brand-highlight/30 hover:bg-surface',
+          'hover:border-command-blue/30 hover:bg-surface',
           interactions.card.base,
           interactions.card.hover,
           interactions.card.press,
         )}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-highlight/10 border border-brand-highlight/20 flex items-center justify-center text-brand-highlight">
+          <div className="w-10 h-10 rounded-xl bg-command-blue/10 border border-command-blue/20 flex items-center justify-center text-command-blue">
             <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5" aria-hidden>
               <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
               <path d="M10 7v6M7 10h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

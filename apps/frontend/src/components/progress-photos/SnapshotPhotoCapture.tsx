@@ -214,13 +214,13 @@ export function SnapshotPhotoCapture({
                 className={cn(
                   'aspect-[3/4] w-full rounded-lg border-2 border-dashed border-surface-border',
                   'flex flex-col items-center justify-center gap-1',
-                  'hover:border-brand-highlight/30 hover:bg-surface',
+                  'hover:border-command-blue/30 hover:bg-surface',
                   'transition-colors duration-150',
                   interactions.button.base,
                 )}
               >
                 {isUploading ? (
-                  <Spinner size="sm" className="text-brand-highlight" />
+                  <Spinner size="sm" className="text-command-blue" />
                 ) : (
                   <>
                     <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-gray-600" aria-hidden>

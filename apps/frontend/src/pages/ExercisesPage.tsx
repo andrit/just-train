@@ -33,7 +33,7 @@ import type { ExerciseFilters }              from '@/lib/queries/exercises'
 
 const WORKOUT_TYPES = [
   { value: '',             label: 'All',          color: 'text-gray-300  border-gray-500/60' },
-  { value: 'resistance',   label: 'Resistance',   color: 'text-brand-highlight border-brand-highlight/60' },
+  { value: 'resistance',   label: 'Resistance',   color: 'text-command-blue border-command-blue/60' },
   { value: 'cardio',       label: 'Cardio',       color: 'text-sky-400   border-sky-500/60' },
   { value: 'calisthenics', label: 'Calisthenics', color: 'text-emerald-400 border-emerald-500/60' },
   { value: 'stretching',   label: 'Stretching',   color: 'text-violet-400 border-violet-500/60' },
@@ -145,7 +145,7 @@ export default function ExercisesPage(): React.JSX.Element {
               className={cn(
                 'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium capitalize transition-all duration-150',
                 bodyPartId === bp.id
-                  ? 'border-brand-highlight/60 text-brand-highlight bg-brand-highlight/10'
+                  ? 'border-command-blue/60 text-command-blue bg-command-blue/10'
                   : 'border-surface-border text-gray-600 hover:border-gray-500 hover:text-gray-400',
               )}
             >
@@ -195,7 +195,7 @@ export default function ExercisesPage(): React.JSX.Element {
         {/* Loading */}
         {isLoading && (
           <div className="flex items-center justify-center py-24">
-            <Spinner size="lg" className="text-brand-highlight" />
+            <Spinner size="lg" className="text-command-blue" />
           </div>
         )}
 
@@ -245,7 +245,7 @@ export default function ExercisesPage(): React.JSX.Element {
                     setCategory('')
                     setDraftsOnly(false)
                   }}
-                  className="mt-4 text-sm text-brand-highlight hover:underline"
+                  className="mt-4 text-sm text-command-blue hover:underline"
                 >
                   Clear filters
                 </button>

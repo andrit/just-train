@@ -37,9 +37,9 @@ export function SelfTrainingWidget({
             name={selfClient.name}
             photoUrl={selfClient.photoUrl}
             size="md"
-            className="ring-2 ring-brand-highlight/20"
+            className="ring-2 ring-command-blue/20"
           />
-          <span className="absolute -bottom-1 -right-1 bg-brand-highlight text-white text-[9px] font-bold px-1 py-0.5 rounded uppercase leading-none">
+          <span className="absolute -bottom-1 -right-1 bg-command-blue text-white text-[9px] font-bold px-1 py-0.5 rounded uppercase leading-none">
             Me
           </span>
         </div>
@@ -79,12 +79,12 @@ export function SelfTrainingWidget({
           to={`/session/new?clientId=${selfClient.id}`}
           className={cn(
             'flex-1 py-2.5 rounded-xl text-sm font-medium text-center',
-            'bg-brand-highlight text-white',
+            'bg-command-blue text-white',
             interactions.button.base,
             interactions.fab.hover,
             interactions.button.press,
             interactions.fab.pulse,
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
           )}
         >
           {ctaLabel}
@@ -96,11 +96,11 @@ export function SelfTrainingWidget({
           className={cn(
             'px-3 py-2.5 rounded-xl text-sm font-medium',
             'bg-surface border border-surface-border text-gray-300',
-            'hover:border-brand-highlight/30 hover:text-white',
+            'hover:border-command-blue/30 hover:text-white',
             interactions.button.base,
             interactions.button.hover,
             interactions.button.press,
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
           )}
           aria-label="View my training profile"
         >

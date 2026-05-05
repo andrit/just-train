@@ -140,13 +140,13 @@ export function SessionLauncherSheet({
                     'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left',
                     'border transition-all duration-150',
                     selectedClientId === client.id
-                      ? 'border-brand-highlight/60 bg-brand-highlight/10 text-white'
-                      : 'border-surface-border bg-surface text-gray-300 hover:border-brand-highlight/30',
+                      ? 'border-command-blue/60 bg-command-blue/10 text-white'
+                      : 'border-surface-border bg-surface text-gray-300 hover:border-command-blue/30',
                   )}
                 >
                   <span className="text-sm font-medium truncate">{client.name}</span>
                   {client.isSelf && (
-                    <span className="text-[10px] text-brand-highlight/70 border border-brand-highlight/30 px-1.5 py-0.5 rounded ml-auto shrink-0">
+                    <span className="text-[10px] text-command-blue/70 border border-command-blue/30 px-1.5 py-0.5 rounded ml-auto shrink-0">
                       Me
                     </span>
                   )}
@@ -177,7 +177,7 @@ export function SessionLauncherSheet({
             selectedClientId
               ? sessionActive
                 ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
-                : 'bg-brand-highlight text-white'
+                : 'bg-command-blue text-white'
               : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
             isLoading && 'opacity-50',
           )}
@@ -208,7 +208,7 @@ export function SessionLauncherSheet({
                   className={cn(
                     'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left',
                     'border border-surface-border bg-surface',
-                    'hover:border-brand-highlight/30',
+                    'hover:border-command-blue/30',
                     'transition-all duration-150',
                     interactions.button.base,
                     interactions.button.press,

@@ -1,6 +1,6 @@
 # TrainerApp — Project State Document
 
-> **Last updated:** v1.7.5
+> **Last updated:** v2.14.0
 > **Purpose:** Living reference for architecture decisions, design principles, progress, and direction.
 > Updated at the end of every versioned release. Review this at the start of each new phase.
 
@@ -635,9 +635,10 @@ client portal magic link (read-only report access), multi-trainer studio account
 | v2.9.0 | Hosting — Railway + Vercel production deploy | ✅ |
 | v2.10.0 | Template builder UX — workout type filter, delete/reorder blocks, exercise accordion + swipe | ✅ |
 | v2.11.0 | Session + exercise detail UX — slide-in, single scroll, hide empty media | ✅ |
-| v2.12.0 | Camera / video capture + coach challenges | 🔜 Next |
+| v2.12.0 | Camera / video capture + coach challenges | ✅ |
 | v2.13.0 | Security hardening — CSP headers, service worker cache, rate limit review | ✅ |
-| v2.14.0 | Leaderboards + weekly quests + social share | 🔜 Next |
+| v2.14.0 | Color system — named palette, semantic tokens, full component sweep | ✅ |
+| v2.15.0 | Leaderboards + weekly quests + social share | 🔜 Next |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 | v3.1.0 | Observable navigation — RxJS swap inside navService | 🔜 |
 

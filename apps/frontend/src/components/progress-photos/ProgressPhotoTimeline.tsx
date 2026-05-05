@@ -65,7 +65,7 @@ export function ProgressPhotoTimeline({
               type="button"
               onClick={() => setComparing(true)}
               className={cn(
-                'text-xs text-brand-highlight hover:text-brand-highlight/80',
+                'text-xs text-command-blue hover:text-command-blue/80',
                 interactions.button.base,
               )}
             >
@@ -89,7 +89,7 @@ export function ProgressPhotoTimeline({
                 onClick={() => setViewPhoto(photo)}
                 className={cn(
                   'aspect-[3/4] rounded-lg overflow-hidden border border-surface-border',
-                  'hover:border-brand-highlight/30 transition-colors',
+                  'hover:border-command-blue/30 transition-colors',
                   interactions.button.base,
                 )}
               >

@@ -41,10 +41,10 @@ export default function ExerciseCard({
       onClick={onClick}
       className={cn(
         'card w-full text-left group cursor-pointer overflow-hidden',
-        'hover:bg-surface-raised hover:border-brand-highlight/30',
+        'hover:bg-surface-raised hover:border-command-blue/30',
         'transition-all duration-200',
         'focus-visible:outline-none focus-visible:ring-2',
-        'focus-visible:ring-brand-highlight focus-visible:ring-offset-2',
+        'focus-visible:ring-command-blue focus-visible:ring-offset-2',
         'focus-visible:ring-offset-brand-primary',
       )}
     >

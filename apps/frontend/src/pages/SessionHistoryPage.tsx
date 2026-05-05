@@ -31,7 +31,7 @@ function ScoreRow({ label, value }: { label: string; value: number }): React.JSX
       <span className="text-xs text-gray-500 w-16 shrink-0">{label}</span>
       <div className="flex-1 h-1.5 bg-surface-border rounded-full overflow-hidden">
         <div
-          className="h-full bg-brand-highlight rounded-full"
+          className="h-full bg-command-blue rounded-full"
           style={{ width: `${value * 10}%` }}
         />
       </div>
@@ -73,7 +73,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }
@@ -82,7 +82,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
     return (
       <div className="p-6 text-center">
         <p className="text-gray-400">Session not found.</p>
-        <button type="button" onClick={handleBack} className="mt-4 text-sm text-brand-highlight hover:underline">
+        <button type="button" onClick={handleBack} className="mt-4 text-sm text-command-blue hover:underline">
           Go back
         </button>
       </div>

@@ -34,7 +34,7 @@ export const WORKOUT_TYPE_COLOR: Record<string, string> = {
   cardio:       'text-sky-400   border-sky-500/60',
   stretching:   'text-violet-400 border-violet-500/60',
   calisthenics: 'text-emerald-400 border-emerald-500/60',
-  resistance:   'text-brand-highlight border-brand-highlight/60',
+  resistance:   'text-ember-red border-ember-red/60',
   cooldown:     'text-gray-400  border-gray-500/60',
 }
 

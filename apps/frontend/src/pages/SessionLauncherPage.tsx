@@ -43,7 +43,7 @@ function TemplateCard({
         interactions.card.base,
         interactions.card.hover,
         interactions.card.press,
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
       )}
     >
       <p className="font-display text-lg uppercase tracking-wide text-white">
@@ -91,7 +91,7 @@ function ClientSelector({
             'w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left',
             'transition-all duration-150',
             selected === c.id
-              ? 'border-brand-highlight/50 bg-brand-highlight/5'
+              ? 'border-command-blue/50 bg-command-blue/5'
               : 'border-surface-border bg-surface hover:border-gray-500',
             interactions.button.base,
             interactions.button.press,
@@ -109,7 +109,7 @@ function ClientSelector({
             <p className="text-xs text-gray-600">{c.progressionState}</p>
           </div>
           {selected === c.id && (
-            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-brand-highlight shrink-0">
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-command-blue shrink-0">
               <path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
@@ -285,7 +285,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
 
         {templatesLoading ? (
           <div className="flex justify-center py-12">
-            <Spinner size="lg" className="text-brand-highlight" />
+            <Spinner size="lg" className="text-command-blue" />
           </div>
         ) : !templates || templates.length === 0 ? (
           <div className="text-center py-12">
@@ -310,7 +310,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         {isLoading && (
           <div className="fixed inset-0 bg-brand-primary/80 flex items-center justify-center z-50">
             <div className="text-center">
-              <Spinner size="lg" className="text-brand-highlight mx-auto" />
+              <Spinner size="lg" className="text-command-blue mx-auto" />
               <p className="text-gray-300 text-sm mt-4">Loading template…</p>
             </div>
           </div>
@@ -369,7 +369,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
                 'px-3 py-1.5 rounded-lg border text-sm transition-all duration-150',
                 selectedClientId
                   ? 'border-surface-border text-gray-400 hover:text-gray-200'
-                  : 'border-brand-highlight/40 text-brand-highlight',
+                  : 'border-command-blue/40 text-command-blue',
                 interactions.button.base,
                 interactions.button.press,
               )}
@@ -394,12 +394,12 @@ export default function SessionLauncherPage(): React.JSX.Element {
           disabled={isLoading}
           className={cn(
             'w-full py-5 rounded-2xl text-lg font-display uppercase tracking-wide',
-            'bg-brand-highlight text-white',
+            'bg-command-blue text-white',
             interactions.button.base,
             interactions.fab.hover,
             interactions.button.press,
             interactions.fab.pulse,
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
             isLoading && 'opacity-60 cursor-not-allowed',
           )}
         >
@@ -428,11 +428,11 @@ export default function SessionLauncherPage(): React.JSX.Element {
           className={cn(
             'w-full py-4 rounded-2xl text-sm font-medium',
             'bg-surface border border-surface-border text-gray-300',
-            'hover:border-brand-highlight/30 hover:text-white',
+            'hover:border-command-blue/30 hover:text-white',
             interactions.button.base,
             interactions.button.hover,
             interactions.button.press,
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
           )}
         >
           <div className="flex items-center justify-center gap-2">

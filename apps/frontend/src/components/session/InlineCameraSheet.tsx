@@ -257,7 +257,7 @@ export function InlineCameraSheet({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className={cn(
-                'px-6 py-3 rounded-xl bg-brand-highlight text-white font-medium',
+                'px-6 py-3 rounded-xl bg-command-blue text-white font-medium',
                 interactions.button.base,
                 interactions.button.press,
               )}
@@ -279,7 +279,7 @@ export function InlineCameraSheet({
         {/* Loading */}
         {state === 'loading' && open && (
           <div className="flex justify-center py-12">
-            <Spinner size="md" className="text-brand-highlight" />
+            <Spinner size="md" className="text-command-blue" />
           </div>
         )}
 
@@ -411,8 +411,8 @@ export function InlineCameraSheet({
                 type="button"
                 onClick={confirmCapture}
                 className={cn(
-                  'flex-1 py-3 rounded-xl bg-brand-highlight text-white font-medium',
-                  'hover:bg-brand-highlight/90 transition-colors',
+                  'flex-1 py-3 rounded-xl bg-command-blue text-white font-medium',
+                  'hover:bg-command-blue/90 transition-colors',
                   interactions.button.base,
                   interactions.button.press,
                 )}

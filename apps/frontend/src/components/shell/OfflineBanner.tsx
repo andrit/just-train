@@ -32,7 +32,7 @@ export function OfflineBanner(): React.JSX.Element | null {
 
   if (isSyncing) {
     message  = `Syncing ${pending} write${pending !== 1 ? 's' : ''}…`
-    bgClass  = 'bg-brand-highlight/10 border-brand-highlight/30 text-brand-highlight'
+    bgClass  = 'bg-command-blue/10 border-command-blue/30 text-command-blue'
   } else if (hasError) {
     message  = `${pending} write${pending !== 1 ? 's' : ''} failed to sync — tap to retry`
     bgClass  = 'bg-red-500/10 border-red-500/30 text-red-400'

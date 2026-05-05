@@ -21,7 +21,7 @@ function ScoreBar({ label, value }: { label: string; value: number }): React.JSX
       </div>
       <div className="h-1.5 bg-surface-border rounded-full overflow-hidden">
         <div
-          className="h-full bg-brand-highlight rounded-full transition-all duration-700"
+          className="h-full bg-command-blue rounded-full transition-all duration-700"
           style={{ width: `${value * 10}%` }}
         />
       </div>
@@ -38,7 +38,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }
@@ -47,7 +47,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
     return (
       <div className="p-6 text-center">
         <p className="text-gray-400">Session not found.</p>
-        <button type="button" onClick={() => navigate('/')} className="mt-4 text-sm text-brand-highlight hover:underline">
+        <button type="button" onClick={() => navigate('/')} className="mt-4 text-sm text-command-blue hover:underline">
           Go home
         </button>
       </div>
@@ -140,7 +140,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
             className={cn(
               'block w-full py-3 rounded-xl text-center text-sm font-medium',
               'bg-surface border border-surface-border text-gray-300',
-              'hover:border-brand-highlight/30 hover:text-white',
+              'hover:border-command-blue/30 hover:text-white',
               interactions.button.base,
               interactions.button.hover,
               interactions.button.press,
@@ -155,7 +155,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
           onClick={() => navigate('/')}
           className={cn(
             'w-full py-3 rounded-xl text-sm font-medium',
-            'bg-brand-highlight text-white',
+            'bg-command-blue text-white',
             interactions.button.base,
             interactions.fab.hover,
             interactions.button.press,

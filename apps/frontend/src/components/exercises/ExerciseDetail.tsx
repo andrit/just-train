@@ -44,7 +44,7 @@ export default function ExerciseDetail({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }

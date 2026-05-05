@@ -94,7 +94,7 @@ export default function LoginPage(): React.JSX.Element {
         <div className="text-center mb-8">
           <h1 className="font-display text-4xl tracking-wider uppercase">
             <span className="text-white">Trainer</span>
-            <span className="text-brand-highlight">App</span>
+            <span className="text-command-blue">App</span>
           </h1>
           <p className="text-gray-500 mt-2 text-sm">
             {mode === 'login' ? 'Sign in to your account' : 'Create your account'}
@@ -111,7 +111,7 @@ export default function LoginPage(): React.JSX.Element {
               className={cn(
                 'flex-1 py-2 text-sm font-medium rounded-lg transition-colors capitalize',
                 mode === m
-                  ? 'bg-brand-highlight text-white shadow-sm'
+                  ? 'bg-command-blue text-white shadow-sm'
                   : 'text-gray-500 hover:text-gray-300',
               )}
             >

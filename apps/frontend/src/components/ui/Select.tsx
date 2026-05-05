@@ -55,7 +55,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <label htmlFor={inputId} className="field-label">
             {label}
             {props.required && (
-              <span className="text-brand-highlight ml-0.5" aria-hidden>
+              <span className="text-ember-red ml-0.5" aria-hidden>
                 *
               </span>
             )}

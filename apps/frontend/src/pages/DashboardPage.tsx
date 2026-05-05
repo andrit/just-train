@@ -81,7 +81,7 @@ export default function DashboardPage(): React.JSX.Element {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }
@@ -127,7 +127,7 @@ export default function DashboardPage(): React.JSX.Element {
             Your dashboard is empty.{' '}
             <button
               type="button"
-              className="text-brand-highlight hover:underline"
+              className="text-command-blue hover:underline"
               onClick={() => {/* Phase 4.5: open preferences */}}
             >
               Customize widgets
@@ -156,7 +156,7 @@ export default function DashboardPage(): React.JSX.Element {
           <button
             type="button"
             onClick={() => setChallengeFormOpen(true)}
-            className="mt-4 w-full text-center text-sm text-brand-highlight hover:text-brand-highlight/80 py-2"
+            className="mt-4 w-full text-center text-sm text-command-blue hover:text-command-blue/80 py-2"
           >
             + Set a challenge
           </button>

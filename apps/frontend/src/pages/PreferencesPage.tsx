@@ -104,8 +104,8 @@ function Toggle({
       onClick={() => onChange(!checked)}
       className={cn(
         'relative inline-flex w-11 h-6 rounded-full transition-colors duration-200',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
-        checked ? 'bg-brand-highlight' : 'bg-surface-border',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+        checked ? 'bg-command-blue' : 'bg-surface-border',
         interactions.button.base,
       )}
     >
@@ -190,7 +190,7 @@ function TonePicker({
             'w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-left',
             'transition-all duration-150',
             value === opt.value
-              ? 'border-brand-highlight/50 bg-brand-highlight/5'
+              ? 'border-command-blue/50 bg-command-blue/5'
               : 'border-surface-border bg-surface hover:border-gray-500',
             interactions.button.base,
             interactions.button.press,
@@ -228,7 +228,7 @@ function WidgetRow({
       className={cn(
         'flex items-center gap-3 p-3 rounded-xl border transition-all duration-150',
         isDragging
-          ? 'border-brand-highlight/30 bg-brand-highlight/5 shadow-lg shadow-black/20 scale-[1.02]'
+          ? 'border-command-blue/30 bg-command-blue/5 shadow-lg shadow-black/20 scale-[1.02]'
           : enabled
           ? 'border-surface-border bg-surface'
           : 'border-surface-border/50 bg-brand-primary opacity-50',
@@ -241,7 +241,7 @@ function WidgetRow({
           'flex flex-col gap-[3px] p-1.5 rounded-lg shrink-0',
           'text-gray-600 hover:text-gray-400 hover:bg-surface-raised',
           'transition-colors duration-150',
-          'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-highlight',
+          'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-command-blue',
         )}
       >
         {[0, 1, 2].map((i) => (
@@ -379,7 +379,7 @@ export default function PreferencesPage(): React.JSX.Element {
                     className={cn(
                       'px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150',
                       trainer?.weightUnitPreference === unit
-                        ? 'bg-brand-highlight text-white'
+                        ? 'bg-command-blue text-white'
                         : 'text-gray-500 hover:text-gray-300',
                       interactions.button.base,
                       interactions.button.press,
@@ -412,7 +412,7 @@ export default function PreferencesPage(): React.JSX.Element {
                 'text-xs px-2 py-1 rounded border uppercase tracking-wider font-medium',
                 trainerMode === 'athlete'
                   ? 'border-sky-500/30 text-sky-400 bg-sky-500/10'
-                  : 'border-brand-highlight/30 text-brand-highlight/80 bg-brand-highlight/10',
+                  : 'border-command-blue/30 text-command-blue/80 bg-command-blue/10',
               )}>
                 {trainerMode}
               </span>
@@ -441,14 +441,14 @@ export default function PreferencesPage(): React.JSX.Element {
                   className={cn(
                     'px-3 py-2 rounded-xl border text-sm text-left transition-all duration-150',
                     ctaLabel === label
-                      ? 'border-brand-highlight/50 bg-brand-highlight/10 text-white'
+                      ? 'border-command-blue/50 bg-command-blue/10 text-white'
                       : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
                     interactions.button.base,
                     interactions.button.press,
                   )}
                 >
                   {ctaLabel === label && (
-                    <span className="mr-1.5 text-brand-highlight" aria-hidden>✓</span>
+                    <span className="mr-1.5 text-command-blue" aria-hidden>✓</span>
                   )}
                   {label}
                 </button>
@@ -480,7 +480,7 @@ export default function PreferencesPage(): React.JSX.Element {
                     className={cn(
                       'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 capitalize',
                       (trainer?.sessionLayout ?? 'horizontal') === layout
-                        ? 'bg-brand-highlight text-white'
+                        ? 'bg-command-blue text-white'
                         : 'text-gray-500 hover:text-gray-300',
                       interactions.button.base,
                       interactions.button.press,
@@ -537,7 +537,7 @@ export default function PreferencesPage(): React.JSX.Element {
                   onClick={() => save('show1rmEstimate', !(trainer?.show1rmEstimate ?? false))}
                   className={cn(
                     'relative w-10 h-5 rounded-full transition-colors duration-200',
-                    (trainer?.show1rmEstimate ?? false) ? 'bg-brand-highlight' : 'bg-surface-border',
+                    (trainer?.show1rmEstimate ?? false) ? 'bg-command-blue' : 'bg-surface-border',
                     interactions.button.base,
                     interactions.button.press,
                   )}
@@ -574,13 +574,13 @@ export default function PreferencesPage(): React.JSX.Element {
                     className={cn(
                       'flex-1 px-3 py-2.5 rounded-xl border text-left transition-all duration-150',
                       current === value
-                        ? 'border-brand-highlight/50 bg-brand-highlight/10'
+                        ? 'border-command-blue/50 bg-command-blue/10'
                         : 'border-surface-border bg-surface hover:border-gray-500',
                       interactions.button.base,
                       interactions.button.press,
                     )}
                   >
-                    <p className={cn('text-xs font-medium', current === value ? 'text-brand-highlight' : 'text-gray-300')}>
+                    <p className={cn('text-xs font-medium', current === value ? 'text-command-blue' : 'text-gray-300')}>
                       {current === value && <span className="mr-1">✓</span>}{label}
                     </p>
                     <p className="text-[10px] text-gray-600 mt-0.5">{desc}</p>
@@ -615,13 +615,13 @@ export default function PreferencesPage(): React.JSX.Element {
                     className={cn(
                       'flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all duration-150',
                       current === seconds
-                        ? 'border-brand-highlight/50 bg-brand-highlight/10 text-brand-highlight'
+                        ? 'border-command-blue/50 bg-command-blue/10 text-command-blue'
                         : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
                       interactions.button.base,
                       interactions.button.press,
                     )}
                   >
-                    {current === seconds && <span className="mr-1 text-brand-highlight">✓</span>}
+                    {current === seconds && <span className="mr-1 text-command-blue">✓</span>}
                     {label}
                   </button>
                 )
@@ -650,7 +650,7 @@ export default function PreferencesPage(): React.JSX.Element {
                 onClick={() => save('autoReportEnabled', !(trainer?.autoReportEnabled ?? true))}
                 className={cn(
                   'relative w-10 h-5 rounded-full transition-colors duration-200',
-                  (trainer?.autoReportEnabled ?? true) ? 'bg-brand-highlight' : 'bg-surface-border',
+                  (trainer?.autoReportEnabled ?? true) ? 'bg-command-blue' : 'bg-surface-border',
                   interactions.button.base,
                   interactions.button.press,
                 )}
@@ -815,7 +815,7 @@ export default function PreferencesPage(): React.JSX.Element {
                   className={cn(
                     'flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
                     photoSharingPreference === opt.value
-                      ? 'border-brand-highlight/40 bg-brand-highlight/5'
+                      ? 'border-command-blue/40 bg-command-blue/5'
                       : 'border-surface-border hover:border-gray-500',
                   )}
                 >
@@ -825,7 +825,7 @@ export default function PreferencesPage(): React.JSX.Element {
                     value={opt.value}
                     checked={photoSharingPreference === opt.value}
                     onChange={() => save('photoSharingPreference', opt.value)}
-                    className="mt-0.5 accent-brand-highlight"
+                    className="mt-0.5 accent-command-blue"
                   />
                   <div>
                     <p className="text-sm text-gray-200">{opt.label}</p>

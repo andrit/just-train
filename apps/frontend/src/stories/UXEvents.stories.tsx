@@ -33,13 +33,13 @@ function AnimationDemo(): React.JSX.Element {
         </h2>
         <p className="text-xs text-gray-500">
           Click each button to fire the event and see the animation play on the target element.
-          Animations are one-shot — the class is removed on <code className="text-brand-highlight">animationend</code>.
+          Animations are one-shot — the class is removed on <code className="text-command-blue">animationend</code>.
         </p>
       </div>
 
       {lastFired && (
         <div className="text-xs text-gray-600 font-mono bg-surface border border-surface-border rounded px-3 py-2">
-          Last fired: <span className="text-brand-highlight">{lastFired}</span>
+          Last fired: <span className="text-command-blue">{lastFired}</span>
         </div>
       )}
 
@@ -85,8 +85,8 @@ function EventAnimationRow({
         onClick={handleFire}
         className={cn(
           'shrink-0 px-3 py-1.5 rounded-lg text-xs font-mono',
-          'bg-brand-highlight/10 border border-brand-highlight/20 text-brand-highlight',
-          'hover:bg-brand-highlight/20',
+          'bg-command-blue/10 border border-command-blue/20 text-command-blue',
+          'hover:bg-command-blue/20',
           interactions.button.base,
           interactions.button.press,
         )}
@@ -201,7 +201,7 @@ function RefHelperDemo(): React.JSX.Element {
         useUXEventRef
       </h2>
       <p className="text-xs text-gray-500 mb-4">
-        The <code className="text-brand-highlight">useUXEventRef</code> helper binds a ref and
+        The <code className="text-command-blue">useUXEventRef</code> helper binds a ref and
         fire function together. The animation plays on the button itself.
       </p>
 
@@ -210,7 +210,7 @@ function RefHelperDemo(): React.JSX.Element {
         type="button"
         onClick={() => fireOnCreate('create', { entity: 'client' })}
         className={cn(
-          'w-full px-4 py-2.5 rounded-xl text-sm bg-brand-highlight text-white',
+          'w-full px-4 py-2.5 rounded-xl text-sm bg-command-blue text-white',
           interactions.button.base, interactions.button.press,
         )}
       >
@@ -263,7 +263,7 @@ export const EventTaxonomy: StoryObj = {
             >
               <code className="text-xs text-gray-300">{et}</code>
               {anim ? (
-                <code className="text-[10px] text-brand-highlight/70 ml-2 truncate max-w-[120px]">
+                <code className="text-[10px] text-command-blue/70 ml-2 truncate max-w-[120px]">
                   {anim.replace('animate-', '')}
                 </code>
               ) : (

@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-brand-primary flex items-center justify-center">
-        <Spinner size="lg" className="text-brand-highlight" label="Initialising app" />
+        <Spinner size="lg" className="text-command-blue" label="Initialising app" />
       </div>
     )
   }

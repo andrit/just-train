@@ -68,7 +68,7 @@ function BigInput({ label, value, onChange, placeholder, mode = 'decimal', onEnt
         className={cn(
           'w-full text-center text-3xl font-mono font-bold py-3 rounded-xl',
           'bg-brand-primary border-2 border-surface-border text-white placeholder-gray-700',
-          'focus:outline-none focus:border-brand-highlight transition-colors',
+          'focus:outline-none focus:border-command-blue transition-colors',
         )}
       />
     </div>
@@ -104,7 +104,7 @@ function IntensityPicker({ value, onChange }: { value: string; onChange: (v: str
             className={cn(
               'flex-1 py-3 rounded-xl text-sm font-medium capitalize border transition-all',
               value === level
-                ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                 : 'border-surface-border text-gray-500 hover:text-gray-300',
             )}
           >
@@ -221,13 +221,13 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
     <div className="flex items-start gap-3 py-3">
       {/* Spine dot */}
       <div className="flex flex-col items-center w-5 shrink-0 pt-1">
-        <div className="w-4 h-4 rounded-full bg-brand-highlight/20 border-2 border-brand-highlight flex items-center justify-center">
-          <div className="w-1.5 h-1.5 rounded-full bg-brand-highlight animate-pulse" />
+        <div className="w-4 h-4 rounded-full bg-command-blue/20 border-2 border-command-blue flex items-center justify-center">
+          <div className="w-1.5 h-1.5 rounded-full bg-command-blue animate-pulse" />
         </div>
       </div>
 
       <div className="flex-1">
-        <p className="text-[10px] uppercase tracking-widest text-brand-highlight/70 mb-3">
+        <p className="text-[10px] uppercase tracking-widest text-command-blue/70 mb-3">
           Set {setNumber}
         </p>
 
@@ -317,7 +317,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
           disabled={isLogging || !canLog()}
           className={cn(
             'w-full py-4 rounded-xl font-display text-lg uppercase tracking-wide',
-            'bg-brand-highlight text-white',
+            'bg-command-blue text-white',
             interactions.button.base,
             interactions.button.press,
             (isLogging || !canLog()) && 'opacity-50 cursor-not-allowed',
@@ -514,7 +514,7 @@ export function ExerciseBlock({
             type="button"
             onClick={() => setCameraOpen(true)}
             aria-label="Capture form check"
-            className="text-gray-600 hover:text-brand-highlight transition-colors p-1"
+            className="text-gray-600 hover:text-command-blue transition-colors p-1"
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
               <rect x="1" y="4" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
@@ -609,8 +609,8 @@ export function ExerciseBlock({
               type="button"
               onClick={() => setKeepGoing(true)}
               className={cn(
-                'text-xs text-gray-500 hover:text-brand-highlight px-2 py-1 rounded',
-                'border border-dashed border-surface-border hover:border-brand-highlight/30',
+                'text-xs text-gray-500 hover:text-command-blue px-2 py-1 rounded',
+                'border border-dashed border-surface-border hover:border-command-blue/30',
                 'transition-colors',
                 interactions.button.base,
               )}

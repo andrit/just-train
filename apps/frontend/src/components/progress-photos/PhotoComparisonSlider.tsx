@@ -145,7 +145,7 @@ export function PhotoComparisonSlider({
             className={cn(
               'px-3 py-1 rounded-full text-xs capitalize whitespace-nowrap transition-colors',
               poseFilter === pose
-                ? 'bg-brand-highlight text-white'
+                ? 'bg-command-blue text-white'
                 : 'bg-surface border border-surface-border text-gray-400 hover:text-gray-200',
             )}
           >

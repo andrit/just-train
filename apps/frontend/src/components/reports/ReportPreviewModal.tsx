@@ -132,7 +132,7 @@ export function ReportPreviewModal({
         >
           {isLoading && (
             <div className="flex items-center justify-center py-16">
-              <Spinner size="md" className="text-brand-highlight" />
+              <Spinner size="md" className="text-command-blue" />
             </div>
           )}
 

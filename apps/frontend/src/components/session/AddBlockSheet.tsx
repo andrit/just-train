@@ -11,7 +11,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet'
 import { useAddWorkout } from '@/lib/queries/sessions'
 
 const BLOCK_TYPES = [
-  { type: 'resistance',   label: 'Resistance',   icon: '🏋️', desc: 'Free weights, machines, cables',  color: 'border-brand-highlight/40 text-brand-highlight' },
+  { type: 'resistance',   label: 'Resistance',   icon: '🏋️', desc: 'Free weights, machines, cables',  color: 'border-ember-red/40 text-ember-red' },
   { type: 'cardio',       label: 'Cardio',        icon: '🏃', desc: 'Running, cycling, rowing',         color: 'border-sky-500/40 text-sky-400' },
   { type: 'calisthenics', label: 'Calisthenics',  icon: '💪', desc: 'Bodyweight movements',            color: 'border-emerald-500/40 text-emerald-400' },
   { type: 'stretching',   label: 'Stretching',    icon: '🧘', desc: 'Mobility and flexibility work',   color: 'border-violet-500/40 text-violet-400' },

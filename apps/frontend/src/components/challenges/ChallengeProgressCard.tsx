@@ -59,7 +59,7 @@ export function ChallengeProgressCard({
       ? 'bg-emerald-600'
       : isUrgent
         ? 'bg-amber-500'
-        : 'bg-brand-highlight'
+        : 'bg-command-blue'
 
   return (
     <button

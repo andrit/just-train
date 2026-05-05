@@ -6,7 +6,7 @@
  * the last one wins, e.g. `p-4 p-8` → `p-8`).
  *
  * Usage:
- *   cn('px-4 py-2', isActive && 'bg-brand-highlight', className)
+ *   cn('px-4 py-2', isActive && 'bg-command-blue', className)
  *   cn({ 'opacity-50': disabled }, 'text-sm')
  */
 

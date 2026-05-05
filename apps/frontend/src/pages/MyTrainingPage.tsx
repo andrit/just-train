@@ -29,7 +29,7 @@ export default function MyTrainingPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="mt-4 text-sm text-brand-highlight hover:underline"
+          className="mt-4 text-sm text-command-blue hover:underline"
         >
           Go to Dashboard
         </button>
@@ -39,7 +39,7 @@ export default function MyTrainingPage(): React.JSX.Element {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <Spinner size="lg" className="text-brand-highlight" />
+      <Spinner size="lg" className="text-command-blue" />
     </div>
   )
 }

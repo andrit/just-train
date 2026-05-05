@@ -98,13 +98,13 @@ function SessionCard({
         'transition-all duration-150',
         isCompleted && [interactions.card.base, interactions.card.hover, interactions.card.press, 'cursor-pointer'],
         isPlanned    && 'border-surface-border',
-        isInProgress && 'border-brand-highlight/30',
+        isInProgress && 'border-command-blue/30',
         isCompleted  && 'border-surface-border',
       )}
     >
       {/* In-progress accent */}
       {isInProgress && (
-        <div className="h-0.5 bg-brand-highlight w-full" />
+        <div className="h-0.5 bg-command-blue w-full" />
       )}
 
       <div className="px-4 py-3.5">
@@ -123,8 +123,8 @@ function SessionCard({
             {/* Meta row */}
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               {isInProgress && (
-                <span className="flex items-center gap-1.5 text-xs text-brand-highlight font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-highlight animate-pulse" />
+                <span className="flex items-center gap-1.5 text-xs text-command-blue font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-command-blue animate-pulse" />
                   In progress
                 </span>
               )}
@@ -166,7 +166,7 @@ function SessionCard({
                   disabled={isExecuting}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium',
-                    'bg-brand-highlight text-white',
+                    'bg-command-blue text-white',
                     interactions.button.base,
                     interactions.button.press,
                     isExecuting && 'opacity-50',
@@ -190,7 +190,7 @@ function SessionCard({
                 onClick={onResume}
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium',
-                  'bg-brand-highlight/20 border border-brand-highlight/40 text-brand-highlight',
+                  'bg-command-blue/20 border border-command-blue/40 text-command-blue',
                   interactions.button.base,
                   interactions.button.press,
                 )}
@@ -299,7 +299,7 @@ export default function SessionsPage(): React.JSX.Element {
             onClick={() => nav.openSessionPlan()}
             className={cn(
               'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium',
-              'bg-brand-highlight text-white',
+              'bg-command-blue text-white',
               interactions.button.base,
               interactions.button.press,
             )}
@@ -338,7 +338,7 @@ export default function SessionsPage(): React.JSX.Element {
               className={cn(
                 'shrink-0 px-4 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
                 tab === id
-                  ? 'bg-brand-highlight text-white border-brand-highlight'
+                  ? 'bg-command-blue text-white border-command-blue'
                   : 'border-surface-border text-gray-500 hover:border-gray-500 hover:text-gray-300',
               )}
             >
@@ -358,7 +358,7 @@ export default function SessionsPage(): React.JSX.Element {
                   className={cn(
                     'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
                     clientFilter === client.id
-                      ? 'bg-brand-highlight/20 border-brand-highlight/60 text-brand-highlight'
+                      ? 'bg-command-blue/20 border-command-blue/60 text-command-blue'
                       : 'border-surface-border text-gray-500 hover:border-gray-500 hover:text-gray-300',
                   )}
                 >
@@ -375,7 +375,7 @@ export default function SessionsPage(): React.JSX.Element {
 
         {isLoading && (
           <div className="flex justify-center py-16">
-            <Spinner size="lg" className="text-brand-highlight" />
+            <Spinner size="lg" className="text-command-blue" />
           </div>
         )}
 
@@ -396,7 +396,7 @@ export default function SessionsPage(): React.JSX.Element {
               <button
                 type="button"
                 onClick={() => nav.openSessionPlan()}
-                className="mt-4 text-sm text-brand-highlight hover:underline"
+                className="mt-4 text-sm text-command-blue hover:underline"
               >
                 Plan a session
               </button>

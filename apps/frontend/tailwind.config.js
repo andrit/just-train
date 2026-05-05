@@ -8,17 +8,29 @@ export default {
     extend: {
       // ── Color palette ──────────────────────────────────────────────────────
       colors: {
+        // ── Semantic design system tokens (COLOR_SYSTEM.md) ──────────────────
+        // Neutral foundation — no semantic meaning, structural only
+        'forge-black':   '#000000',  // absolute ground
+        'chalk-white':   '#FFFFFF',  // absolute light
+        'iron-grey':     '#8A9099',  // cold steel — page background
+
+        // Chromatic accents — one job each, never decorative
+        'ember-red':     '#D91B1B',  // intensity: PRs, destructive, threshold moments
+        'command-blue':  '#1B50D9',  // action: primary buttons, active states, navigation
+        'signal-yellow': '#FFE200',  // notification: badges, alerts, achievements
+
+        // ── Structural tokens (mapped to design system) ───────────────────────
         brand: {
-          primary:   '#1a1a2e',   // dark navy — page background
-          secondary: '#16213e',   // slightly lighter navy — card backgrounds
-          accent:    '#0f3460',   // deep blue — sidebar, panels
-          highlight: '#e94560',   // red — CTAs, active states, danger
+          primary:   '#8A9099',   // iron grey — page background
+          secondary: '#1C1C1C',   // near-black — card backgrounds
+          accent:    '#111111',   // deep black — sidebar, panels
+          // highlight removed — use ember-red, command-blue, or signal-yellow by intent
         },
         // Functional shades used in the UI
         surface: {
-          DEFAULT: '#1e2235',     // card surface
-          raised:  '#252a40',     // elevated card (hover, focused)
-          border:  '#2e3455',     // subtle borders between surfaces
+          DEFAULT: '#1E1E1E',     // dark card surface
+          raised:  '#282828',     // elevated card (hover, focused)
+          border:  '#404040',     // borders between surfaces
         },
       },
 
@@ -68,8 +80,8 @@ export default {
         },
         // FAB pulse — expanding ring to draw attention to primary action
         'fab-pulse': {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(233, 69, 96, 0.4)' },
-          '50%':      { boxShadow: '0 0 0 8px rgba(233, 69, 96, 0)' },
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(27, 80, 217, 0.4)' },
+          '50%':      { boxShadow: '0 0 0 8px rgba(27, 80, 217, 0)' },
         },
         // Shake — used on destructive hover to signal danger
         'shake': {

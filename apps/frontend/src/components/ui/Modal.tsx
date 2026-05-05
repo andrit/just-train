@@ -120,7 +120,7 @@ export function Modal({
                 'w-8 h-8 flex items-center justify-center rounded-lg',
                 'text-gray-500 hover:text-gray-300 hover:bg-surface-raised',
                 'transition-colors focus-visible:outline-none',
-                'focus-visible:ring-2 focus-visible:ring-brand-highlight',
+                'focus-visible:ring-2 focus-visible:ring-command-blue',
               )}
             >
               ✕

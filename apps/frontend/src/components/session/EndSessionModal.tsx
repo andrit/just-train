@@ -45,7 +45,7 @@ function SliderRow({ label, hint, value, onChange, lowLabel, highLabel }: Slider
           [&::-webkit-slider-thumb]:w-5
           [&::-webkit-slider-thumb]:h-5
           [&::-webkit-slider-thumb]:rounded-full
-          [&::-webkit-slider-thumb]:bg-brand-highlight
+          [&::-webkit-slider-thumb]:bg-command-blue
           [&::-webkit-slider-thumb]:cursor-pointer
           [&::-webkit-slider-thumb]:shadow-md"
         aria-label={`${label}: ${value} out of 10`}

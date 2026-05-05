@@ -159,7 +159,7 @@ export function WorkoutBlock({
                     className={cn(
                       'rounded-full transition-all duration-150',
                       i === clampedIdx
-                        ? 'w-3 h-1.5 bg-brand-highlight'
+                        ? 'w-3 h-1.5 bg-command-blue'
                         : 'w-1.5 h-1.5 bg-surface-border hover:bg-gray-500',
                     )}
                     aria-label={`Exercise ${i + 1}`}
@@ -299,11 +299,11 @@ export function WorkoutBlock({
             /* Rest timer replaces footer while counting down */
             <div className="flex items-center overflow-hidden rounded-b-2xl">
               <div className="flex-1 flex items-center justify-center gap-2 py-3 px-4">
-                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-brand-highlight shrink-0">
+                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-command-blue shrink-0">
                   <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
                   <path d="M8 5v3l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                <span className="text-sm font-mono font-medium text-brand-highlight">
+                <span className="text-sm font-mono font-medium text-command-blue">
                   {formatSeconds(restTimer?.remaining ?? 0)}
                 </span>
                 <span className="text-xs text-gray-500">rest</span>

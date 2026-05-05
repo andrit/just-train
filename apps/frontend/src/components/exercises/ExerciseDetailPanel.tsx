@@ -106,7 +106,7 @@ function ExerciseHero({
             className={cn(
               'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
               mode === 'visualization'
-                ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                 : 'border-surface-border text-gray-500 hover:text-gray-300',
             )}
           >
@@ -118,7 +118,7 @@ function ExerciseHero({
             className={cn(
               'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
               mode === 'demonstration'
-                ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                 : 'border-surface-border text-gray-500 hover:text-gray-300',
             )}
           >
@@ -154,13 +154,13 @@ function SessionPickerSheet({
             className={cn(
               'w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left',
               'bg-surface border border-surface-border',
-              'hover:border-brand-highlight/40 hover:bg-brand-highlight/5',
+              'hover:border-command-blue/40 hover:bg-command-blue/5',
               'transition-all duration-150',
               interactions.button.base,
               interactions.button.press,
             )}
           >
-            <div className="w-2 h-2 rounded-full bg-brand-highlight shrink-0 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-command-blue shrink-0 animate-pulse" />
             <div>
               <p className="text-sm font-medium text-gray-200">{session.clientName}</p>
               <p className="text-xs text-gray-500 mt-0.5">Active session</p>
@@ -251,7 +251,7 @@ function AddToWorkoutSheet({
           }}
           className={cn(
             'w-full py-4 rounded-xl font-display text-lg uppercase tracking-wide',
-            'bg-brand-highlight text-white',
+            'bg-command-blue text-white',
             interactions.button.base,
             interactions.button.press,
           )}
@@ -323,7 +323,7 @@ export default function ExerciseDetailPanel({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }
@@ -474,7 +474,7 @@ export default function ExerciseDetailPanel({
               interactions.button.base,
               interactions.button.press,
               sessionCount > 0
-                ? 'bg-brand-highlight text-white'
+                ? 'bg-command-blue text-white'
                 : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
             )}
           >

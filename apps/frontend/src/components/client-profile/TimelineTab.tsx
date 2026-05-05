@@ -31,7 +31,7 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
   if (isLoading) {
     return (
       <div className="flex justify-center py-12" role="tabpanel" id="panel-timeline" aria-labelledby="tab-timeline">
-        <Spinner size="md" className="text-brand-highlight" />
+        <Spinner size="md" className="text-command-blue" />
       </div>
     )
   }
@@ -59,12 +59,12 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
 
   // Dot color per event type — data-type attribute ready for future filter
   const DOT_BORDER: Record<TimelineEvent['type'], string> = {
-    session:  'border-brand-highlight',
+    session:  'border-command-blue',
     goal:     'border-emerald-500',
     snapshot: 'border-sky-500',
   }
   const DOT_INNER: Record<TimelineEvent['type'], string> = {
-    session:  'bg-brand-highlight',
+    session:  'bg-command-blue',
     goal:     'bg-emerald-500',
     snapshot: 'bg-sky-500',
   }
@@ -117,13 +117,13 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
                 onClick={() => handleSessionTap(event.session.id)}
                 className={cn(
                   'w-full card p-3 text-left',
-                  'hover:border-brand-highlight/30 hover:bg-brand-highlight/5',
+                  'hover:border-command-blue/30 hover:bg-command-blue/5',
                   'transition-all duration-150 active:scale-[0.99]',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-brand-highlight uppercase tracking-wider mb-1">
+                  <p className="text-xs text-command-blue uppercase tracking-wider mb-1">
                     {event.session.status === 'completed' ? 'Session' : event.session.status}
                   </p>
                   <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-gray-600">

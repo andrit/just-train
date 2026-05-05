@@ -38,11 +38,11 @@ export function AddClientCard({ onClick }: AddClientCardProps): React.JSX.Elemen
       className={cn(
         'card w-full p-4 text-left relative overflow-hidden',
         'border-dashed border-surface-border',
-        'hover:border-brand-highlight/40 hover:bg-surface',
+        'hover:border-command-blue/40 hover:bg-surface',
         interactions.card.base,
         interactions.card.hover,
         interactions.card.press,
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
       )}
     >
       <div className="flex items-center gap-3">
@@ -64,12 +64,12 @@ export function AddClientCard({ onClick }: AddClientCardProps): React.JSX.Elemen
           </div>
 
           {/* Animated + badge — overlaid on the head area */}
-          {/* To tweak: change size (w-5 h-5), color (bg-brand-highlight), or remove animate-fab-pulse */}
+          {/* To tweak: change size (w-5 h-5), color (bg-command-blue), or remove animate-fab-pulse */}
           <div
             className={cn(
               'absolute -top-0.5 -right-0.5',
               'w-5 h-5 rounded-full',
-              'bg-brand-highlight text-white',
+              'bg-command-blue text-white',
               'flex items-center justify-center',
               'animate-fab-pulse',    // ← remove this line to disable pulse
               'shadow-sm',

@@ -160,7 +160,7 @@ export function ChallengeForm({
                 className={cn(
                   'px-3 py-2 rounded-lg text-xs text-left border transition-colors',
                   metricType === opt.value
-                    ? 'border-brand-highlight/40 bg-brand-highlight/5 text-white'
+                    ? 'border-command-blue/40 bg-command-blue/5 text-white'
                     : 'border-surface-border text-gray-400 hover:text-gray-200 hover:border-gray-500',
                   interactions.button.base,
                 )}

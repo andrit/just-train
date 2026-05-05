@@ -21,7 +21,7 @@ function ScoreRow({ label, value }: { label: string; value: number }): React.JSX
     <div className="flex items-center gap-3">
       <span className="text-xs text-gray-500 w-20 shrink-0">{label}</span>
       <div className="flex-1 h-1.5 bg-surface-border rounded-full overflow-hidden">
-        <div className="h-full bg-brand-highlight rounded-full" style={{ width: `${value * 10}%` }} />
+        <div className="h-full bg-command-blue rounded-full" style={{ width: `${value * 10}%` }} />
       </div>
       <span className="font-mono text-xs text-gray-300 w-6 text-right">{value}</span>
     </div>
@@ -41,7 +41,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full pt-20">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }
@@ -50,7 +50,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
     return (
       <div className="p-6 text-center pt-20">
         <p className="text-gray-400">Session not found.</p>
-        <button type="button" onClick={onClose} className="mt-4 text-sm text-brand-highlight hover:underline">
+        <button type="button" onClick={onClose} className="mt-4 text-sm text-command-blue hover:underline">
           Go back
         </button>
       </div>
@@ -186,7 +186,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
                               </span>
                             )}
                             {set.isPRVolume && (
-                              <span className="text-[9px] font-medium bg-brand-highlight/10 border border-brand-highlight/30 text-brand-highlight px-1.5 py-0.5 rounded-full">
+                              <span className="text-[9px] font-medium bg-command-blue/10 border border-command-blue/30 text-command-blue px-1.5 py-0.5 rounded-full">
                                 Vol
                               </span>
                             )}
@@ -264,7 +264,7 @@ function ExerciseMediaThumbs({
           key={m.id}
           type="button"
           onClick={() => onTap(i)}
-          className="w-6 h-6 rounded overflow-hidden border border-surface-border hover:border-brand-highlight/30 transition-colors"
+          className="w-6 h-6 rounded overflow-hidden border border-surface-border hover:border-command-blue/30 transition-colors"
         >
           {m.mediaType === 'image' ? (
             <img src={m.cloudinaryUrl} alt="" className="w-full h-full object-cover" loading="lazy" />

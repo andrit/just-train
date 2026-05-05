@@ -65,9 +65,9 @@ function TabButton({ id, label, active, incomplete, onClick }: {
       onClick={onClick}
       className={cn(
         'relative flex-1 py-3 text-sm font-medium transition-colors duration-150',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
         active
-          ? 'text-white border-b-2 border-brand-highlight'
+          ? 'text-white border-b-2 border-command-blue'
           : 'text-gray-500 hover:text-gray-300 border-b-2 border-transparent',
       )}
     >
@@ -108,7 +108,7 @@ export default function ClientProfilePage(): React.JSX.Element {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }
@@ -117,7 +117,7 @@ export default function ClientProfilePage(): React.JSX.Element {
     return (
       <div className="p-6 text-center">
         <p className="text-gray-400">Client not found.</p>
-        <button type="button" onClick={() => navigate('/clients')} className="mt-4 text-sm text-brand-highlight hover:underline">
+        <button type="button" onClick={() => navigate('/clients')} className="mt-4 text-sm text-command-blue hover:underline">
           Back to clients
         </button>
       </div>
@@ -158,7 +158,7 @@ export default function ClientProfilePage(): React.JSX.Element {
                 'bg-surface border border-surface-border',
                 'transition-all duration-150',
                 (kpis?.sessionsThisMonth ?? 0) > 0
-                  ? 'text-gray-300 hover:border-brand-highlight/40 hover:text-white'
+                  ? 'text-gray-300 hover:border-command-blue/40 hover:text-white'
                   : 'text-gray-600 cursor-not-allowed opacity-50',
                 interactions.button.base,
                 interactions.button.press,
@@ -175,11 +175,11 @@ export default function ClientProfilePage(): React.JSX.Element {
               to={`/session/new?clientId=${client.id}`}
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium',
-                'bg-brand-highlight text-white',
+                'bg-command-blue text-white',
                 interactions.button.base,
                 interactions.fab.hover,
                 interactions.button.press,
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
               )}
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5" aria-hidden>
@@ -196,11 +196,11 @@ export default function ClientProfilePage(): React.JSX.Element {
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm',
                 'bg-surface border border-surface-border text-gray-300',
-                'hover:border-brand-highlight/40 hover:text-white',
+                'hover:border-command-blue/40 hover:text-white',
                 interactions.button.base,
                 interactions.button.hover,
                 interactions.button.press,
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
               )}
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5" aria-hidden>
@@ -226,7 +226,7 @@ export default function ClientProfilePage(): React.JSX.Element {
                 {PROGRESSION_STATE_LABEL[client.progressionState]}
               </span>
               {client.isSelf && (
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-brand-highlight/30 text-brand-highlight/80 uppercase tracking-wider">
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-command-blue/30 text-command-blue/80 uppercase tracking-wider">
                   My Training
                 </span>
               )}

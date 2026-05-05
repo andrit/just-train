@@ -222,7 +222,7 @@ export function ClientForm({
                 onClick={() => setShow1rm(!show1rm)}
                 className={cn(
                   'relative w-10 h-5 rounded-full transition-colors duration-200',
-                  show1rm ? 'bg-brand-highlight' : 'bg-surface-border',
+                  show1rm ? 'bg-command-blue' : 'bg-surface-border',
                 )}
               >
                 <span className={cn(
@@ -245,7 +245,7 @@ export function ClientForm({
                 onClick={() => setAutoReport(!autoReport)}
                 className={cn(
                   'relative w-10 h-5 rounded-full transition-colors duration-200',
-                  autoReport ? 'bg-brand-highlight' : 'bg-surface-border',
+                  autoReport ? 'bg-command-blue' : 'bg-surface-border',
                 )}
               >
                 <span className={cn(

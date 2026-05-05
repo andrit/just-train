@@ -258,7 +258,7 @@ export function OverviewTab({
                 className={cn(
                   'flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300 py-1',
                   interactions.button.base,
-                  'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-highlight rounded',
+                  'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-command-blue rounded',
                 )}
               >
                 <span className="w-5 h-5 rounded-full border border-dashed border-gray-600 flex items-center justify-center text-xs" aria-hidden>+</span>

@@ -20,8 +20,8 @@ function Toggle({
       aria-label={label} onClick={() => onChange(!checked)}
       className={cn(
         'relative inline-flex w-11 h-6 rounded-full transition-colors duration-200',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
-        checked ? 'bg-brand-highlight' : 'bg-surface-border',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+        checked ? 'bg-command-blue' : 'bg-surface-border',
         interactions.button.base,
       )}
     >
@@ -67,7 +67,7 @@ export const ColorSchemePicker: StoryObj = {
       return (
         <div className="p-6 space-y-3">
           <p className="text-xs text-gray-500">
-            Selected: <span className="text-brand-highlight">{scheme}</span>
+            Selected: <span className="text-command-blue">{scheme}</span>
           </p>
           <div className="flex gap-2">
             {Object.entries(SCHEME_COLORS).map(([s, c]) => (
@@ -117,7 +117,7 @@ export const TonePicker: StoryObj = {
                 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-left',
                 'transition-all duration-150',
                 tone === opt.value
-                  ? 'border-brand-highlight/50 bg-brand-highlight/5'
+                  ? 'border-command-blue/50 bg-command-blue/5'
                   : 'border-surface-border bg-surface hover:border-gray-500',
                 interactions.button.base, interactions.button.press,
               )}
@@ -145,7 +145,7 @@ export const CTALabelPicker: StoryObj = {
       return (
         <div className="p-6 max-w-xs space-y-3">
           <p className="text-xs text-gray-500 mb-4">
-            Selected: <span className="text-brand-highlight font-medium">{cta}</span>
+            Selected: <span className="text-command-blue font-medium">{cta}</span>
           </p>
           <div className="grid grid-cols-2 gap-2">
             {CTA_LABEL_OPTIONS.map((label) => (
@@ -156,12 +156,12 @@ export const CTALabelPicker: StoryObj = {
                 className={cn(
                   'px-3 py-2 rounded-xl border text-sm text-left transition-all duration-150',
                   cta === label
-                    ? 'border-brand-highlight/50 bg-brand-highlight/10 text-white'
+                    ? 'border-command-blue/50 bg-command-blue/10 text-white'
                     : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
                   interactions.button.base, interactions.button.press,
                 )}
               >
-                {cta === label && <span className="mr-1 text-brand-highlight" aria-hidden>✓</span>}
+                {cta === label && <span className="mr-1 text-command-blue" aria-hidden>✓</span>}
                 {label}
               </button>
             ))}
@@ -190,7 +190,7 @@ export const WidgetRow: StoryObj = {
           className={cn(
             'flex items-center gap-3 p-3 rounded-xl border transition-all duration-150',
             dragging
-              ? 'border-brand-highlight/30 bg-brand-highlight/5 shadow-lg scale-[1.02]'
+              ? 'border-command-blue/30 bg-command-blue/5 shadow-lg scale-[1.02]'
               : enabled
               ? 'border-surface-border bg-surface'
               : 'border-surface-border/50 bg-brand-primary opacity-50',

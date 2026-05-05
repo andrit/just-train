@@ -95,7 +95,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
         <div className="px-5 py-5 border-b border-surface-border flex items-center gap-2">
           <span className="font-display text-2xl tracking-wider uppercase">
             <span className="text-white">Trainer</span>
-            <span className="text-brand-highlight">App</span>
+            <span className="text-command-blue">App</span>
           </span>
           {pendingSyncCount > 0 && (
             <span className="text-xs bg-amber-500 text-black rounded-full px-2 py-0.5 font-medium">
@@ -115,9 +115,9 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                 cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium',
                   'transition-colors duration-150',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
                   isActive
-                    ? 'bg-brand-highlight text-white'
+                    ? 'bg-command-blue text-white'
                     : 'text-gray-400 hover:bg-brand-primary/50 hover:text-gray-100',
                 )
               }
@@ -134,9 +134,9 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
             <div className="flex items-center gap-3 mb-2">
               <div
                 aria-hidden
-                className="w-8 h-8 rounded-full bg-brand-highlight/20 border border-brand-highlight/30 flex items-center justify-center shrink-0"
+                className="w-8 h-8 rounded-full bg-command-blue/20 border border-command-blue/30 flex items-center justify-center shrink-0"
               >
-                <span className="text-xs font-bold text-brand-highlight">{initials}</span>
+                <span className="text-xs font-bold text-command-blue">{initials}</span>
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-200 truncate">{trainer.name}</p>
@@ -149,9 +149,9 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                 cn(
                   'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium w-full',
                   'transition-colors duration-150',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
                   isActive
-                    ? 'bg-brand-highlight text-white'
+                    ? 'bg-command-blue text-white'
                     : 'text-gray-500 hover:bg-brand-primary/50 hover:text-gray-300',
                 )
               }
@@ -204,8 +204,8 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               cn(
                 'flex flex-col items-center gap-0.5 py-2.5 px-3',
                 'text-xs font-medium transition-colors duration-150',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
-                isActive ? 'text-brand-highlight' : 'text-gray-500',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+                isActive ? 'text-command-blue' : 'text-gray-500',
               )
             }
           >

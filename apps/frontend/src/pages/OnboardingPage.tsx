@@ -111,14 +111,14 @@ function ChoiceCard({
         'relative flex flex-col items-center text-center w-full',
         'rounded-2xl border-2 p-8 md:p-10',
         'transition-all duration-300 ease-out',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
         // Default state
         'bg-brand-secondary border-surface-border',
-        'hover:border-brand-highlight/40 hover:bg-surface',
+        'hover:border-command-blue/40 hover:bg-surface',
         // Selected state
         selected && [
-          'border-brand-highlight bg-brand-secondary',
-          'shadow-[0_0_40px_-8px] shadow-brand-highlight/25',
+          'border-command-blue bg-brand-secondary',
+          'shadow-[0_0_40px_-8px] shadow-command-blue/25',
         ],
         // Loading
         loading && !selected && 'opacity-40 cursor-not-allowed',
@@ -129,13 +129,13 @@ function ChoiceCard({
         className={cn(
           'mb-6 w-28 h-28 md:w-36 md:h-36 flex items-center justify-center rounded-2xl transition-colors duration-300',
           selected
-            ? 'text-brand-highlight bg-brand-highlight/10'
+            ? 'text-command-blue bg-command-blue/10'
             : 'text-gray-400 bg-brand-accent/30',
         )}
       >
         {isLoading
           ? (
-            <svg className="w-10 h-10 animate-spin text-brand-highlight" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <svg className="w-10 h-10 animate-spin text-command-blue" viewBox="0 0 24 24" fill="none" aria-hidden>
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
@@ -165,7 +165,7 @@ function ChoiceCard({
             <span
               className={cn(
                 'mt-0.5 w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-colors duration-300',
-                selected ? 'bg-brand-highlight/20 text-brand-highlight' : 'bg-surface-border text-gray-500',
+                selected ? 'bg-command-blue/20 text-command-blue' : 'bg-surface-border text-gray-500',
               )}
               aria-hidden
             >
@@ -182,7 +182,7 @@ function ChoiceCard({
 
       {/* Selection indicator */}
       {selected && (
-        <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-brand-highlight flex items-center justify-center animate-fade-in">
+        <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-command-blue flex items-center justify-center animate-fade-in">
           <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3" aria-hidden>
             <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -227,7 +227,7 @@ export default function OnboardingPage(): React.JSX.Element {
         <div className="text-center">
           <span className="font-display text-3xl tracking-widest uppercase">
             <span className="text-white">Trainer</span>
-            <span className="text-brand-highlight">App</span>
+            <span className="text-command-blue">App</span>
           </span>
         </div>
       </header>
@@ -241,7 +241,7 @@ export default function OnboardingPage(): React.JSX.Element {
           <div className="text-center mb-10 animate-slide-up">
             <h1 className="font-display text-4xl md:text-5xl text-white uppercase tracking-wide mb-3">
               How will you use
-              <span className="text-brand-highlight block">TrainerApp?</span>
+              <span className="text-command-blue block">TrainerApp?</span>
             </h1>
             <p className="text-gray-400 text-sm">
               Choose your path — you can always change this in settings later.

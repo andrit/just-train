@@ -155,13 +155,13 @@ export default function MediaUploader({
           'rounded-xl border-2 border-dashed p-6 text-center cursor-pointer',
           'transition-colors duration-150',
           isDragging
-            ? 'border-brand-highlight bg-brand-highlight/5'
+            ? 'border-command-blue bg-command-blue/5'
             : 'border-surface-border hover:border-gray-500 hover:bg-surface-raised',
         )}
       >
         {uploadMutation.isPending ? (
           <div className="flex flex-col items-center gap-2">
-            <Spinner size="md" className="text-brand-highlight" />
+            <Spinner size="md" className="text-command-blue" />
             <p className="text-sm text-gray-400">Uploading…</p>
           </div>
         ) : (
@@ -169,7 +169,7 @@ export default function MediaUploader({
             <p className="text-2xl mb-2 opacity-40" aria-hidden>📎</p>
             <p className="text-sm text-gray-400">
               Drop a file or{' '}
-              <span className="text-brand-highlight">click to upload</span>
+              <span className="text-command-blue">click to upload</span>
             </p>
             <p className="text-xs text-gray-600 mt-1">
               Images (JPEG, PNG, WebP — 10 MB) · Videos (MP4, WebM — 100 MB)

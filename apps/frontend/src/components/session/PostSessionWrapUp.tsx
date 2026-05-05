@@ -132,7 +132,7 @@ export function PostSessionWrapUp({
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="e.g. Push Day, Monday Strength…"
-            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-highlight/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
           />
         </div>
 
@@ -143,7 +143,7 @@ export function PostSessionWrapUp({
           disabled={isSaving}
           className={cn(
             'w-full py-4 rounded-2xl font-semibold text-white',
-            'bg-brand-highlight',
+            'bg-command-blue',
             interactions.button.base,
             interactions.button.press,
             isSaving && 'opacity-60',

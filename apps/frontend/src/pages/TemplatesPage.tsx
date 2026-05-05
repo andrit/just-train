@@ -81,8 +81,8 @@ export default function TemplatesPage(): React.JSX.Element {
           onClick={() => { setEditId(null); setBuilderOpen(true) }}
           className={cn(
             'flex items-center gap-1.5 px-3 py-2 rounded-xl',
-            'bg-brand-highlight/15 border border-brand-highlight/30',
-            'text-xs font-medium text-brand-highlight',
+            'bg-command-blue/15 border border-command-blue/30',
+            'text-xs font-medium text-command-blue',
             interactions.button.base,
             interactions.button.press,
           )}
@@ -106,7 +106,7 @@ export default function TemplatesPage(): React.JSX.Element {
             placeholder="Search by name, description, or muscle group…"
             value={inputValue}
             onChange={e => handleSearchChange(e.target.value)}
-            className="w-full bg-brand-primary border border-surface-border rounded-xl pl-8 pr-8 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-highlight/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl pl-8 pr-8 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
           />
           {inputValue && (
             <button
@@ -128,7 +128,7 @@ export default function TemplatesPage(): React.JSX.Element {
             <button
               type="button"
               onClick={clearSearch}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-highlight/15 border border-brand-highlight/30 text-xs text-brand-highlight"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-command-blue/15 border border-command-blue/30 text-xs text-command-blue"
             >
               {search}
               <svg viewBox="0 0 12 12" fill="none" className="w-2.5 h-2.5">
@@ -148,7 +148,7 @@ export default function TemplatesPage(): React.JSX.Element {
       <div className="flex-1 overflow-y-auto p-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <Spinner size="md" className="text-brand-highlight" />
+            <Spinner size="md" className="text-command-blue" />
           </div>
         ) : (templates ?? []).length === 0 ? (
           <div className="text-center py-12">
@@ -157,7 +157,7 @@ export default function TemplatesPage(): React.JSX.Element {
               {search ? `No templates found for "${search}"` : 'No templates yet'}
             </p>
             {search ? (
-              <button type="button" onClick={clearSearch} className="text-sm text-brand-highlight mt-2">
+              <button type="button" onClick={clearSearch} className="text-sm text-command-blue mt-2">
                 Clear search
               </button>
             ) : (

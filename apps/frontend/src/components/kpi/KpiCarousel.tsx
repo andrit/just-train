@@ -117,7 +117,7 @@ export function KpiCarousel({ cards, isLoading }: KpiCarouselProps): React.JSX.E
               className={cn(
                 'rounded-full transition-all duration-200',
                 i === page
-                  ? 'w-4 h-1.5 bg-brand-highlight'
+                  ? 'w-4 h-1.5 bg-command-blue'
                   : 'w-1.5 h-1.5 bg-surface-border hover:bg-gray-500',
               )}
             />

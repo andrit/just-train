@@ -42,14 +42,14 @@ export const ButtonInteractions: StoryObj = {
         Button Interactions
       </h2>
       <p className="text-xs text-gray-500 mb-6">
-        All values come from <code className="text-brand-highlight">src/lib/interactions.ts</code>.
+        All values come from <code className="text-command-blue">src/lib/interactions.ts</code>.
         Edit that file to change durations, scales, and pulse behavior globally.
       </p>
 
       <div className="space-y-5">
         <Demo label="base + press" note="active:scale-95">
           <button className={cn(
-            'px-4 py-2 rounded-lg bg-brand-highlight text-white text-sm',
+            'px-4 py-2 rounded-lg bg-command-blue text-white text-sm',
             interactions.button.base,
             interactions.button.press,
           )}>
@@ -69,7 +69,7 @@ export const ButtonInteractions: StoryObj = {
 
         <Demo label="FAB hover" note="hover:scale-110 + shadow">
           <button className={cn(
-            'px-4 py-2 rounded-xl bg-brand-highlight text-white text-sm',
+            'px-4 py-2 rounded-xl bg-command-blue text-white text-sm',
             interactions.button.base,
             interactions.fab.hover,
             interactions.button.press,
@@ -80,7 +80,7 @@ export const ButtonInteractions: StoryObj = {
 
         <Demo label="FAB pulse" note="continuous pulse ring — animate-fab-pulse">
           <button className={cn(
-            'px-4 py-2 rounded-xl bg-brand-highlight text-white text-sm',
+            'px-4 py-2 rounded-xl bg-command-blue text-white text-sm',
             interactions.button.base,
             interactions.fab.hover,
             interactions.button.press,
@@ -139,7 +139,7 @@ export const Animations: StoryObj = {
         Animation Keyframes
       </h2>
       <p className="text-xs text-gray-500 mb-6">
-        All keyframes defined in <code className="text-brand-highlight">tailwind.config.js</code>.
+        All keyframes defined in <code className="text-command-blue">tailwind.config.js</code>.
         Re-trigger by switching away from this story and back.
       </p>
 

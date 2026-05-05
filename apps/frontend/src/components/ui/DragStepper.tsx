@@ -143,9 +143,9 @@ export function DragStepper({
           'font-mono font-bold text-2xl text-white',
           'border-2 transition-all duration-100 cursor-ns-resize',
           isDragging
-            ? 'border-brand-highlight bg-brand-highlight/10 scale-105'
-            : 'border-surface-border bg-surface hover:border-brand-highlight/40',
-          'focus-visible:outline-none focus-visible:border-brand-highlight',
+            ? 'border-command-blue bg-command-blue/10 scale-105'
+            : 'border-surface-border bg-surface hover:border-command-blue/40',
+          'focus-visible:outline-none focus-visible:border-command-blue',
         )}
       >
         {value}

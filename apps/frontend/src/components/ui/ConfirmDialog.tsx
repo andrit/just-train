@@ -74,7 +74,7 @@ export function ConfirmDialog({
         <div
           className={
             'w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl ' +
-            (danger ? 'bg-red-500/15' : 'bg-brand-highlight/15')
+            (danger ? 'bg-ember-red/15' : 'bg-command-blue/15')
           }
           aria-hidden
         >

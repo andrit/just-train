@@ -54,7 +54,7 @@ export function TemplatePickerSheet({
             placeholder="Search templates…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-highlight/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
           />
         </div>
 
@@ -62,7 +62,7 @@ export function TemplatePickerSheet({
         <div className="flex-1 overflow-y-auto p-4">
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <Spinner size="md" className="text-brand-highlight" />
+              <Spinner size="md" className="text-command-blue" />
             </div>
           ) : filtered.length === 0 ? (
             <p className="text-center text-gray-500 text-sm py-8">
@@ -99,7 +99,7 @@ function TemplateRow({ template, onSelect, loading }: {
       className={cn(
         'w-full text-left bg-brand-secondary rounded-xl border border-surface-border',
         'px-4 py-3 transition-colors',
-        'hover:border-brand-highlight/30 hover:bg-brand-secondary/80',
+        'hover:border-command-blue/30 hover:bg-brand-secondary/80',
         interactions.button.base,
         interactions.button.press,
       )}

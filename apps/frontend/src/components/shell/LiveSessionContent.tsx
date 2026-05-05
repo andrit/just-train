@@ -109,7 +109,7 @@ export default function LiveSessionContent({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <Spinner size="lg" className="text-brand-highlight" />
+        <Spinner size="lg" className="text-command-blue" />
       </div>
     )
   }
@@ -121,7 +121,7 @@ export default function LiveSessionContent({
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="mt-4 text-sm text-brand-highlight hover:underline"
+          className="mt-4 text-sm text-command-blue hover:underline"
         >
           Go home
         </button>
@@ -210,8 +210,8 @@ export default function LiveSessionContent({
                   onClick={() => setShowEndModal(true)}
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-sm font-medium',
-                    'bg-brand-highlight/10 border border-brand-highlight/30 text-brand-highlight',
-                    'hover:bg-brand-highlight/20',
+                    'bg-command-blue/10 border border-command-blue/30 text-command-blue',
+                    'hover:bg-command-blue/20',
                     interactions.button.base,
                     interactions.button.press,
                   )}
@@ -235,7 +235,7 @@ export default function LiveSessionContent({
                 onClick={() => setAddBlockOpen(true)}
                 className={cn(
                   'flex items-center gap-2 px-5 py-3 rounded-xl mx-auto',
-                  'bg-brand-highlight text-white font-medium',
+                  'bg-command-blue text-white font-medium',
                   interactions.button.base,
                   interactions.button.press,
                 )}
@@ -306,7 +306,7 @@ export default function LiveSessionContent({
           className={cn(
             'fixed bottom-6 right-4 z-30',
             'flex items-center gap-2 px-4 h-12 rounded-full',
-            'bg-brand-highlight text-white shadow-lg',
+            'bg-command-blue text-white shadow-lg',
             interactions.button.base,
             interactions.fab.hover,
             interactions.button.press,

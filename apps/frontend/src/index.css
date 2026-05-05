@@ -38,7 +38,7 @@
 
   /* Focus ring — keyboard accessibility */
   :focus-visible {
-    @apply outline-none ring-2 ring-brand-highlight ring-offset-2 ring-offset-brand-primary;
+    @apply outline-none ring-2 ring-command-blue ring-offset-2 ring-offset-iron-grey;
   }
 }
 
@@ -72,7 +72,7 @@
   .field {
     @apply w-full bg-brand-primary border border-surface-border rounded-lg
            px-3 py-2.5 text-sm text-gray-100 placeholder-gray-500
-           focus:outline-none focus:ring-2 focus:ring-brand-highlight/50 focus:border-brand-highlight
+           focus:outline-none focus:ring-2 focus:ring-command-blue/50 focus:border-command-blue
            transition-colors;
   }
 

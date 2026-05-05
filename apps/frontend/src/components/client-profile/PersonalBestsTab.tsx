@@ -56,7 +56,7 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner size="md" className="text-brand-highlight" />
+        <Spinner size="md" className="text-command-blue" />
       </div>
     )
   }
@@ -120,8 +120,8 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
 
               {/* Volume */}
               <div className="flex-1 bg-brand-primary rounded-lg px-2.5 py-2">
-                <p className="text-[10px] text-brand-highlight/70 uppercase tracking-wider mb-0.5">Volume</p>
-                <p className="font-mono text-base font-medium text-brand-highlight">
+                <p className="text-[10px] text-command-blue/70 uppercase tracking-wider mb-0.5">Volume</p>
+                <p className="font-mono text-base font-medium text-command-blue">
                   {pr.bestVolume.toLocaleString()}
                 </p>
                 <p className="text-[10px] text-gray-600 mt-0.5 font-mono">

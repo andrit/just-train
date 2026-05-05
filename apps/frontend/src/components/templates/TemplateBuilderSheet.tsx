@@ -128,7 +128,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
               type="button"
               onClick={handleSave}
               disabled={!name.trim() || saving}
-              className={cn('text-sm font-medium transition-colors', name.trim() ? 'text-brand-highlight' : 'text-gray-600')}
+              className={cn('text-sm font-medium transition-colors', name.trim() ? 'text-command-blue' : 'text-gray-600')}
             >
               {saving ? <Spinner size="sm" /> : (activeId ? 'Update' : 'Create')}
             </button>
@@ -136,7 +136,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
 
           {/* Body */}
           {isLoading && templateId ? (
-            <div className="flex justify-center py-12"><Spinner size="md" className="text-brand-highlight" /></div>
+            <div className="flex justify-center py-12"><Spinner size="md" className="text-command-blue" /></div>
           ) : (
             <div className="flex-1 overflow-y-auto p-4 space-y-5">
               {/* Name */}
@@ -147,7 +147,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. Push Day A, Full Body Strength…"
-                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-highlight/50"
+                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
                 />
               </div>
 
@@ -161,7 +161,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                   onChange={e => setDescription(e.target.value)}
                   placeholder="What's this template for?"
                   rows={2}
-                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-highlight/50 resize-none"
+                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50 resize-none"
                 />
               </div>
 
@@ -175,7 +175,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                       onClick={() => setAddBlockOpen(true)}
                       className={cn(
                         'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs',
-                        'text-brand-highlight border border-brand-highlight/30',
+                        'text-command-blue border border-command-blue/30',
                         interactions.button.base,
                       )}
                     >
@@ -410,7 +410,7 @@ function TemplateBlockCard({ block, templateId }: {
           type="button"
           onClick={() => setPickerOpen(true)}
           className={cn(
-            'flex items-center gap-1.5 text-xs text-gray-500 hover:text-brand-highlight transition-colors',
+            'flex items-center gap-1.5 text-xs text-gray-500 hover:text-command-blue transition-colors',
             interactions.button.base,
           )}
         >

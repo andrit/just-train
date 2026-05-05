@@ -265,7 +265,7 @@ export function SessionPlanPanel({
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium',
                       'border border-surface-border text-gray-400',
-                      'hover:border-brand-highlight/40 hover:text-brand-highlight',
+                      'hover:border-command-blue/40 hover:text-command-blue',
                       interactions.button.base,
                       interactions.button.press,
                     )}
@@ -289,7 +289,7 @@ export function SessionPlanPanel({
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium',
                       'border border-surface-border text-gray-300',
-                      'hover:border-brand-highlight/40 hover:text-white',
+                      'hover:border-command-blue/40 hover:text-white',
                       interactions.button.base,
                       interactions.button.press,
                     )}
@@ -309,7 +309,7 @@ export function SessionPlanPanel({
                     disabled={executeSession.isPending}
                     className={cn(
                       'flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium',
-                      'bg-brand-highlight text-white',
+                      'bg-command-blue text-white',
                       interactions.button.base,
                       interactions.button.press,
                       executeSession.isPending && 'opacity-50',
@@ -377,7 +377,7 @@ export function SessionPlanPanel({
                 className={cn(
                   'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                   selectedClientId === client.id
-                    ? 'bg-brand-highlight text-white border-brand-highlight'
+                    ? 'bg-command-blue text-white border-command-blue'
                     : 'border-surface-border text-gray-500 hover:border-gray-400 hover:text-gray-300',
                 )}
               >
@@ -399,7 +399,7 @@ export function SessionPlanPanel({
       <div className="flex-1 overflow-y-auto p-4 pb-24">
         {sessionLoading || creating ? (
           <div className="flex justify-center py-12">
-            <Spinner size="lg" className="text-brand-highlight" />
+            <Spinner size="lg" className="text-command-blue" />
           </div>
         ) : workouts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -418,7 +418,7 @@ export function SessionPlanPanel({
                   interactions.button.base,
                   interactions.button.press,
                   selectedClientId
-                    ? 'bg-brand-highlight text-white'
+                    ? 'bg-command-blue text-white'
                     : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
                 )}
               >
@@ -444,7 +444,7 @@ export function SessionPlanPanel({
                   interactions.button.base,
                   interactions.button.press,
                   selectedClientId
-                    ? 'text-gray-300 hover:border-brand-highlight/40 hover:text-brand-highlight'
+                    ? 'text-gray-300 hover:border-command-blue/40 hover:text-command-blue'
                     : 'text-gray-600 cursor-not-allowed',
                 )}
               >
@@ -476,7 +476,7 @@ export function SessionPlanPanel({
           className={cn(
             'fixed bottom-6 right-4 z-30',
             'w-12 h-12 rounded-full',
-            'bg-brand-highlight text-white shadow-lg',
+            'bg-command-blue text-white shadow-lg',
             'flex items-center justify-center',
             interactions.button.base,
             interactions.fab.hover,

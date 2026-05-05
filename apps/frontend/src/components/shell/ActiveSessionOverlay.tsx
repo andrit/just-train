@@ -64,7 +64,7 @@ function SessionPill({
       onClick={onExpand}
       className={cn(
         'flex items-center gap-3 px-4 py-2.5 rounded-2xl',
-        'bg-brand-secondary border border-brand-highlight/30',
+        'bg-brand-secondary border border-command-blue/30',
         'shadow-lg shadow-black/40',
         'transition-all duration-200',
         interactions.button.base,
@@ -73,8 +73,8 @@ function SessionPill({
     >
       {/* Pulse indicator */}
       <div className="relative shrink-0 w-2 h-2">
-        <div className="w-2 h-2 rounded-full bg-brand-highlight" />
-        <div className="absolute inset-0 rounded-full bg-brand-highlight animate-ping opacity-60" />
+        <div className="w-2 h-2 rounded-full bg-command-blue" />
+        <div className="absolute inset-0 rounded-full bg-command-blue animate-ping opacity-60" />
       </div>
 
       <div className="text-left">
@@ -185,7 +185,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
               className={cn(
                 'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                 session.clientId === focusedSession.clientId
-                  ? 'bg-brand-highlight text-white border-brand-highlight'
+                  ? 'bg-command-blue text-white border-command-blue'
                   : 'border-surface-border text-gray-500 hover:text-gray-300',
               )}
             >

@@ -104,7 +104,7 @@ function CardioTargets({
               className={cn(
                 'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
                 metric === m
-                  ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                  ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                   : 'border-surface-border text-gray-500 hover:text-gray-300',
               )}
             >
@@ -148,7 +148,7 @@ function CardioTargets({
                 className={cn(
                   'flex-1 py-2.5 rounded-xl text-xs font-medium border capitalize transition-all',
                   intensity === level
-                    ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                    ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                     : 'border-surface-border text-gray-500 hover:text-gray-300',
                 )}
               >
@@ -180,7 +180,7 @@ function CalisthenicsTargets({
           className={cn(
             'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
             mode === 'reps'
-              ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+              ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
               : 'border-surface-border text-gray-500 hover:text-gray-300',
           )}
         >
@@ -192,7 +192,7 @@ function CalisthenicsTargets({
           className={cn(
             'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
             mode === 'time'
-              ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+              ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
               : 'border-surface-border text-gray-500 hover:text-gray-300',
           )}
         >
@@ -427,7 +427,7 @@ export function AddExerciseSheet({
                 className={cn(
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize',
                   !showAllTypes
-                    ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                    ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                     : 'border-surface-border text-gray-500 hover:text-gray-300',
                 )}
               >
@@ -439,7 +439,7 @@ export function AddExerciseSheet({
                 className={cn(
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all',
                   showAllTypes
-                    ? 'bg-brand-highlight/10 border-brand-highlight/40 text-brand-highlight'
+                    ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                     : 'border-surface-border text-gray-500 hover:text-gray-300',
                 )}
               >
@@ -472,8 +472,8 @@ export function AddExerciseSheet({
                       disabled={isPending}
                       className={cn(
                         'flex-1 py-2 rounded-lg text-xs font-medium',
-                        'bg-brand-highlight/10 text-brand-highlight border border-brand-highlight/30',
-                        'hover:bg-brand-highlight/20 transition-colors',
+                        'bg-command-blue/10 text-command-blue border border-command-blue/30',
+                        'hover:bg-command-blue/20 transition-colors',
                         interactions.button.base,
                         isPending && 'opacity-50 pointer-events-none',
                       )}
@@ -506,19 +506,19 @@ export function AddExerciseSheet({
                 disabled={isPending}
                 className={cn(
                   'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left',
-                  'border border-dashed border-brand-highlight/40 bg-brand-highlight/5',
-                  'hover:bg-brand-highlight/10 transition-all duration-100',
+                  'border border-dashed border-command-blue/40 bg-command-blue/5',
+                  'hover:bg-command-blue/10 transition-all duration-100',
                   interactions.button.base,
                   interactions.button.press,
                 )}
               >
-                <div className="w-8 h-8 rounded-lg bg-brand-highlight/20 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-brand-highlight">
+                <div className="w-8 h-8 rounded-lg bg-command-blue/20 flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-command-blue">
                     <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-brand-highlight">Create "{search.trim()}"</p>
+                  <p className="text-sm font-medium text-command-blue">Create "{search.trim()}"</p>
                   <p className="text-xs text-gray-500 mt-0.5">Added as a draft — fill in details after your session</p>
                 </div>
               </button>
@@ -588,7 +588,7 @@ export function AddExerciseSheet({
             disabled={isPending}
             className={cn(
               'w-full py-4 rounded-xl font-display text-lg uppercase tracking-wide',
-              'bg-brand-highlight text-white',
+              'bg-command-blue text-white',
               interactions.button.base,
               interactions.button.press,
               isPending && 'opacity-50',

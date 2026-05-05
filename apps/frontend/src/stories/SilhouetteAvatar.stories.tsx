@@ -71,7 +71,7 @@ export const WithMeBadge: Story = {
       {(['sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="relative">
           <SilhouetteAvatar name="Me" size={size} />
-          <span className="absolute -bottom-1 -right-1 bg-brand-highlight text-white text-[9px] font-bold px-1 py-0.5 rounded uppercase leading-none">
+          <span className="absolute -bottom-1 -right-1 bg-command-blue text-white text-[9px] font-bold px-1 py-0.5 rounded uppercase leading-none">
             Me
           </span>
         </div>

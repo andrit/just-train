@@ -28,7 +28,7 @@ export const interactions = {
   // Gentle continuous pulse to draw attention. Scale on hover.
   fab: {
     base:   'transition-all duration-200 ease-out',
-    hover:  'hover:scale-110 hover:shadow-lg hover:shadow-brand-highlight/30',
+    hover:  'hover:scale-110 hover:shadow-lg hover:shadow-command-blue/30',
     press:  'active:scale-95',
     // Pulse ring — concentric expanding ring around the button
     // Controlled via CSS animation in index.css (@keyframes fab-pulse)

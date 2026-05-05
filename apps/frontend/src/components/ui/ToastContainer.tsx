@@ -28,7 +28,7 @@ export function ToastContainer(): React.JSX.Element {
             'animate-slide-up',
             t.variant === 'success' && 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300',
             t.variant === 'error'   && 'bg-red-500/20    border border-red-500/40    text-red-300',
-            t.variant === 'info'    && 'bg-brand-highlight/15 border border-brand-highlight/30 text-brand-highlight',
+            t.variant === 'info'    && 'bg-command-blue/15 border border-command-blue/30 text-command-blue',
           )}
         >
           {t.variant === 'success' && (

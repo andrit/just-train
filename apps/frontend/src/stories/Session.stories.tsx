@@ -251,7 +251,7 @@ export const EndSession_Modal: StoryObj = {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="px-4 py-2 bg-brand-highlight text-white rounded-lg text-sm"
+            className="px-4 py-2 bg-command-blue text-white rounded-lg text-sm"
           >
             Open modal
           </button>

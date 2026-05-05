@@ -41,7 +41,7 @@ export function RestTimerBanner({ timer }: RestTimerBannerProps): React.JSX.Elem
         'flex items-center justify-between px-4 py-2.5',
         'border-b transition-colors duration-500',
         isVeryLow
-          ? 'bg-brand-highlight border-brand-highlight/50'
+          ? 'bg-ember-red border-ember-red/50'
           : isLow
           ? 'bg-amber-500/20 border-amber-500/30'
           : 'bg-brand-accent/95 border-surface-border',
@@ -54,7 +54,7 @@ export function RestTimerBanner({ timer }: RestTimerBannerProps): React.JSX.Elem
         <div
           className={cn(
             'h-full transition-all duration-1000 ease-linear',
-            isVeryLow ? 'bg-white' : isLow ? 'bg-amber-400' : 'bg-brand-highlight',
+            isVeryLow ? 'bg-white' : isLow ? 'bg-amber-400' : 'bg-command-blue',
           )}
           style={{ width: `${100 - timer.progressPct}%` }}
         />

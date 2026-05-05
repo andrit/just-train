@@ -184,12 +184,12 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
       {showTip && (
         <div className={cn(
           'flex items-start gap-2 mb-3 px-3 py-2.5 rounded-xl',
-          'bg-brand-highlight/5 border border-brand-highlight/20',
+          'bg-command-blue/5 border border-command-blue/20',
         )}>
           <TipIcon size="sm" className="mt-0.5 shrink-0" />
           <p className="text-xs text-gray-400 flex-1">
             Enable 1RM estimates in{' '}
-            <Link to="/preferences" className="text-brand-highlight hover:underline">
+            <Link to="/preferences" className="text-command-blue hover:underline">
               Preferences
             </Link>{' '}
             to see your estimated max lifts.

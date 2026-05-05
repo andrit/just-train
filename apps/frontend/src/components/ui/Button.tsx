@@ -38,13 +38,13 @@ export interface ButtonProps
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-brand-highlight text-white border-transparent hover:bg-brand-highlight/90',
+    'bg-command-blue text-white border-transparent hover:bg-command-blue/90',
   secondary:
     'bg-surface-raised text-gray-200 border-surface-border hover:bg-surface-border',
   ghost:
     'bg-transparent text-gray-400 border-transparent hover:text-gray-100 hover:bg-surface-raised',
   danger:
-    'bg-red-600/15 text-red-400 border-red-600/20 hover:bg-red-600/25',
+    'bg-ember-red/15 text-ember-red border-ember-red/20 hover:bg-ember-red/25',
 }
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -84,8 +84,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           // Base
           'inline-flex items-center justify-center font-medium rounded-lg border',
           'transition-colors duration-150 focus-visible:outline-none',
-          'focus-visible:ring-2 focus-visible:ring-brand-highlight focus-visible:ring-offset-2',
-          'focus-visible:ring-offset-brand-primary',
+          'focus-visible:ring-2 focus-visible:ring-command-blue focus-visible:ring-offset-2',
+          'focus-visible:ring-offset-iron-grey',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           // Variant + size
           variantClasses[variant],

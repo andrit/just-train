@@ -156,11 +156,11 @@ function ActiveSetRow({
 
   return (
     <div className={cn(
-      'rounded-2xl border-2 border-brand-highlight/40 bg-brand-highlight/5 p-4',
+      'rounded-2xl border-2 border-command-blue/40 bg-command-blue/5 p-4',
       'animate-slide-up',
     )}>
       {/* Set label */}
-      <p className="text-xs uppercase tracking-widest text-brand-highlight/70 mb-4">
+      <p className="text-xs uppercase tracking-widest text-command-blue/70 mb-4">
         Set {setNumber}
       </p>
 
@@ -180,7 +180,7 @@ function ActiveSetRow({
               'w-full text-center text-3xl font-mono font-bold',
               'bg-brand-primary border-2 border-surface-border rounded-xl py-3',
               'text-white placeholder-gray-700',
-              'focus:outline-none focus:border-brand-highlight',
+              'focus:outline-none focus:border-command-blue',
               'transition-colors duration-150',
             )}
           />
@@ -204,7 +204,7 @@ function ActiveSetRow({
               'w-full text-center text-3xl font-mono font-bold',
               'bg-brand-primary border-2 border-surface-border rounded-xl py-3',
               'text-white placeholder-gray-700',
-              'focus:outline-none focus:border-brand-highlight',
+              'focus:outline-none focus:border-command-blue',
               'transition-colors duration-150',
             )}
           />
@@ -227,11 +227,11 @@ function ActiveSetRow({
         disabled={isLogging || !reps}
         className={cn(
           'w-full py-3.5 rounded-xl font-display text-lg uppercase tracking-wide',
-          'bg-brand-highlight text-white',
+          'bg-command-blue text-white',
           'transition-all duration-150',
           interactions.button.base,
           interactions.button.press,
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-highlight',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
           (isLogging || !reps) && 'opacity-50 cursor-not-allowed',
         )}
       >

@@ -8,7 +8,7 @@
   "scripts": {
     "build":     "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "lint":      "echo 'shared: no lint needed (bc tsc covers it)'"
+    "lint":      "echo 'shared: no lint needed (tsc covers it)'"
   },
   "dependencies": {},
   "peerDependencies": {

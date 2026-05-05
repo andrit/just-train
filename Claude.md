@@ -7,7 +7,7 @@
 
 TrainerApp is a mobile-first PWA for fitness trainers and athletes. Progress narrative engine — logging is the input, the output is "Is this client moving forward?" Two user types (trainer mode, athlete mode), one shared infrastructure.
 
-**Current version:** v2.12.0
+**Current version:** v2.14.0
 
 ## Key docs — read before making changes
 
@@ -40,9 +40,10 @@ TrainerApp is a mobile-first PWA for fitness trainers and athletes. Progress nar
 
 ## Critical build rules
 
-1. `packages/shared` has a `prepare` script that compiles to CJS. The `main` field points to `dist/index.js`. Never revert to ESM-only — Railway breaks.
+1. `packages/shared` compiles to CJS via `pnpm build`. The `main` field points to `dist/index.js`. Never revert to ESM-only — Railway breaks.
 2. Vercel root directory is `apps/frontend` — `vercel.json` must exist there.
 3. After any shared package change: `cd packages/shared && pnpm build` then verify both apps typecheck.
+4. After a fresh `pnpm install`, run `pnpm --filter @trainer-app/shared build` before starting dev — the `prepare` hook was removed to fix Railway builds (Railway's auto-install runs with NODE_ENV=production, skipping devDeps and breaking `tsc`). The `railway.json` buildCommand handles this explicitly in CI.
 
 ## Terminology — use these exactly, never synonyms
 

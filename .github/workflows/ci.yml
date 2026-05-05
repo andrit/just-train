@@ -54,6 +54,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Build shared package — generates dist/index.js used by backend + frontend.
+      # The prepare lifecycle hook was removed from packages/shared to fix Railway
+      # builds (Railway's auto-install runs NODE_ENV=production, skipping devDeps).
+      # CI must build it explicitly so @trainer-app/shared resolves correctly.
+      - name: Build shared
+        run: pnpm --filter @trainer-app/shared build
+
       # TypeScript typecheck — catches type errors without producing output
       - name: Typecheck
         run: pnpm typecheck

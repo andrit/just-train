@@ -20,6 +20,7 @@ import { routeLog } from '../lib/logger'
 //   exercise media even if they know the exercise and media IDs.
 // ------------------------------------------------------------
 
+import '@fastify/multipart'
 import type { FastifyInstance } from 'fastify'
 import { z }                    from 'zod'
 import { db, exercises, exerciseMedia } from '../db'

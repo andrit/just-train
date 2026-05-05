@@ -24,6 +24,7 @@ import { routeLog } from '../lib/logger'
 //   HTTP → Rate limit check → Zod validation → auth.service → DB → response
 // ------------------------------------------------------------
 
+import '@fastify/cookie'
 import type { FastifyInstance, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { db, trainers, clients } from '../db'

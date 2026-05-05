@@ -23,6 +23,7 @@ import { routeLog } from '../lib/logger'
 //   backend enforces it as a safety net.
 // ------------------------------------------------------------
 
+import '@fastify/multipart'
 import type { FastifyInstance } from 'fastify'
 import { z }                    from 'zod'
 import { db, clientSnapshots, snapshotMedia, clients } from '../db'

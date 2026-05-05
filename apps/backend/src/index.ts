@@ -114,7 +114,7 @@ function isAllowedOrigin(origin: string): boolean {
 }
 
 app.register(cors, {
-  origin: (origin, cb) => {
+  origin: (origin: string | undefined, cb: (err: Error | null, allow: boolean) => void) => {
     // Allow requests with no origin (mobile apps, curl, Swagger)
     if (!origin) return cb(null, true)
     if (isAllowedOrigin(origin)) return cb(null, true)
@@ -201,7 +201,7 @@ app.register(rateLimit, {
   global:       true,
   max:          100,
   timeWindow:   '1 minute',
-  keyGenerator: (req) =>
+  keyGenerator: (req: { headers: Record<string, string | string[] | undefined>; ip: string }) =>
     (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
     ?? req.ip
     ?? 'unknown',

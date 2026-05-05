@@ -6,7 +6,6 @@
   "main":  "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "prepare":   "tsc -p tsconfig.build.json",
     "build":     "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "lint":      "echo 'shared: no lint needed (tsc covers it)'"

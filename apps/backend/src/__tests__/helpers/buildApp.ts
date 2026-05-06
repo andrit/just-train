@@ -12,6 +12,7 @@
 
 import { vi } from 'vitest'
 import Fastify                                   from 'fastify'
+import type { FastifyPluginCallback }            from 'fastify'
 import cookie                                    from '@fastify/cookie'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import { authRoutes }            from '../../routes/auth'
@@ -31,7 +32,7 @@ function createBaseApp() {
 
 export async function buildAuthTestApp() {
   const app = createBaseApp()
-  await app.register(cookie, { secret: 'test-cookie-secret-for-testing-only' })
+  await app.register(cookie as unknown as FastifyPluginCallback<Record<string, unknown>>, { secret: 'test-cookie-secret-for-testing-only' })
   await app.register(authRoutes, { prefix: '/api/v1' })
   await app.ready()
   return app
@@ -62,7 +63,7 @@ export async function buildClientSnapshotTestApp() {
 
 export async function buildFullTestApp() {
   const app = createBaseApp()
-  await app.register(cookie, { secret: 'test-cookie-secret-for-testing-only' })
+  await app.register(cookie as unknown as FastifyPluginCallback<Record<string, unknown>>, { secret: 'test-cookie-secret-for-testing-only' })
   await app.register(authRoutes,           { prefix: '/api/v1' })
   await app.register(clientRoutes,         { prefix: '/api/v1' })
   await app.register(clientGoalRoutes,     { prefix: '/api/v1' })

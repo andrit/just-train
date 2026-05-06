@@ -15,7 +15,6 @@ import { routeLog } from '../lib/logger'
 //   session_exercise → workout → session → trainer chain.
 // ------------------------------------------------------------
 
-import '@fastify/multipart'
 import type { FastifyInstance } from 'fastify'
 import { z }                    from 'zod'
 import { db, sessionExercises, sessionExerciseMedia } from '../db'

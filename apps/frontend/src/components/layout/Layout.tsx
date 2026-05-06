@@ -111,7 +111,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               key={item.path}
               to={item.path}
               end={item.end}
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium',
                   'transition-colors duration-150',
@@ -145,7 +145,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
             </div>
             <NavLink
               to="/preferences"
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 cn(
                   'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium w-full',
                   'transition-colors duration-150',
@@ -200,7 +200,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
             key={item.path}
             to={item.path}
             end={item.end}
-            className={({ isActive }) =>
+            className={({ isActive }: { isActive: boolean }) =>
               cn(
                 'flex flex-col items-center gap-0.5 py-2.5 px-3',
                 'text-xs font-medium transition-colors duration-150',

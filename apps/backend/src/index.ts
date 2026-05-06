@@ -21,10 +21,11 @@ import { routeLog } from './lib/logger'
 // Health check:   http://localhost:3001/health
 // ------------------------------------------------------------
 
-import Fastify       from 'fastify'
-import cors          from '@fastify/cors'
-import helmet        from '@fastify/helmet'
-import cookie        from '@fastify/cookie'
+import Fastify                        from 'fastify'
+import type { FastifyPluginCallback } from 'fastify'
+import cors                          from '@fastify/cors'
+import helmet                        from '@fastify/helmet'
+import cookie                        from '@fastify/cookie'
 import multipart     from '@fastify/multipart'
 import rateLimit     from '@fastify/rate-limit'
 import swagger       from '@fastify/swagger'
@@ -183,7 +184,7 @@ app.register(multipart, {
 // The cookie secret adds HMAC signing for tamper detection
 // (the token itself is still verified via argon2 in the DB).
 // ------------------------------------------------------------
-app.register(cookie, {
+app.register(cookie as unknown as FastifyPluginCallback<Record<string, unknown>>, {
   secret: process.env.COOKIE_SECRET ?? 'change-this-cookie-secret-in-production',
 })
 

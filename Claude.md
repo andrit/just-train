@@ -105,7 +105,7 @@ pnpm test
 
 All `/api/*` requests in production route through a Vercel rewrite (see `apps/frontend/vercel.json`) to the Railway backend. This means:
 - **Do NOT set `VITE_API_URL` in Vercel** — leave unset so the frontend defaults to `/api/v1` (same-origin via proxy)
-- **Set `RAILWAY_BACKEND_URL`** in Vercel (hostname only, no https://) — the rewrite needs this
+- **Hardcode the Railway hostname in `vercel.json`** — Vercel does not substitute user-defined env vars in rewrite destinations; `$RAILWAY_BACKEND_URL` silently fails with DNS_HOSTNAME_NOT_FOUND
 - **Set `CORS_ORIGIN`** and **`VERCEL_PROJECT_SLUG`** on Railway — needed for local dev and fallback
 
 Setting `VITE_API_URL` to the Railway URL directly bypasses the proxy → CORS errors + broken refresh cookies.

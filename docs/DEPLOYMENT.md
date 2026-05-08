@@ -96,18 +96,31 @@ It will look like: `https://trainerapp-production.up.railway.app`
 2. Select your GitHub repo
 3. Vercel will detect `vercel.json` at the root — no manual framework configuration needed
 
-### 2b. Set environment variables
+### 2b. Hardcode the Railway URL in vercel.json
 
-In Vercel → **Project Settings** → **Environment Variables**, add:
+Open `apps/frontend/vercel.json` and set the Railway backend hostname directly in the rewrite destination:
 
+```json
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://your-app-production.up.railway.app/api/:path*"
+    }
+  ]
+}
 ```
-RAILWAY_BACKEND_URL = your-app-production.up.railway.app
-```
-Use the hostname only from Step 1e — **no `https://`, no trailing slash**.
-For example: `just-train-production.up.railway.app`
 
-This variable powers the rewrite rule in `vercel.json` that proxies all `/api/*`
-requests through Vercel to Railway. Routing through the proxy means:
+Replace `your-app-production.up.railway.app` with the hostname from Step 1e.
+
+**Why hardcoded, not an env var?** Vercel does not substitute user-defined environment
+variables inside `vercel.json` rewrite destinations — only Vercel system variables work
+there. Using `$RAILWAY_BACKEND_URL` in the destination silently fails with
+`DNS_HOSTNAME_NOT_FOUND` at runtime.
+
+The Railway hostname is not sensitive (it's already public) so hardcoding it is correct.
+
+Routing through the proxy means:
 - No CORS — browser sees requests as same-origin (both on `your-app.vercel.app`)
 - Refresh token cookie works on page reload (same origin, no cross-site restrictions)
 

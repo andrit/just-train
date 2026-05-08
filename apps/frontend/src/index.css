@@ -58,6 +58,34 @@
   .scrollbar-hidden::-webkit-scrollbar {
     display: none;
   }
+
+  /*
+   * Knurled crosshatch texture — overrides the plain bg-brand-primary colour.
+   * Mimics the diamond-cut grip pattern on a dumbbell handle: two sets of
+   * 1px grooves at 45° and 135° create shallow shadow lines across the iron
+   * grey base, leaving raised diamond points between them.
+   *
+   * Form inputs use bg-iron-grey (same hex, no texture) so this only affects
+   * structural page backgrounds.
+   */
+  .bg-brand-primary {
+    background-color: #8A9099;
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.14) 0px,
+        rgba(0, 0, 0, 0.14) 1px,
+        transparent       1px,
+        transparent       7px
+      ),
+      repeating-linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.14) 0px,
+        rgba(0, 0, 0, 0.14) 1px,
+        transparent       1px,
+        transparent       7px
+      );
+  }
 }
 
 /* ── Component shortcuts ──────────────────────────────────────────────────── */
@@ -69,8 +97,9 @@
   }
 
   /* Input field — consistent across all forms */
+  /* bg-iron-grey (same hex as brand-primary) keeps inputs flat — no knurling texture */
   .field {
-    @apply w-full bg-brand-primary border border-surface-border rounded-lg
+    @apply w-full bg-iron-grey border border-surface-border rounded-lg
            px-3 py-2.5 text-sm text-gray-100 placeholder-gray-500
            focus:outline-none focus:ring-2 focus:ring-command-blue/50 focus:border-command-blue
            transition-colors;

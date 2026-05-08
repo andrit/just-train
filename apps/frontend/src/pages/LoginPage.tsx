@@ -102,7 +102,7 @@ export default function LoginPage(): React.JSX.Element {
         </div>
 
         {/* Tab toggle */}
-        <div className="flex rounded-xl bg-brand-accent/50 border border-surface-border p-1 mb-6">
+        <div className="flex rounded-xl bg-iron-grey/20 border border-iron-grey/30 p-1 mb-6">
           {(['login', 'register'] as const).map((m) => (
             <button
               key={m}
@@ -112,7 +112,7 @@ export default function LoginPage(): React.JSX.Element {
                 'flex-1 py-2 text-sm font-medium rounded-lg transition-colors capitalize',
                 mode === m
                   ? 'bg-command-blue text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-300',
+                  : 'text-command-blue hover:text-command-blue/80',
               )}
             >
               {m === 'login' ? 'Sign in' : 'Register'}

@@ -21,7 +21,7 @@ export default {
 
         // ── Structural tokens (mapped to design system) ───────────────────────
         brand: {
-          primary:   '#8A9099',   // iron grey — page background
+          primary:   '#000000',   // forge black — page background
           secondary: '#1C1C1C',   // near-black — card backgrounds
           accent:    '#111111',   // deep black — sidebar, panels
           // highlight removed — use ember-red, command-blue, or signal-yellow by intent

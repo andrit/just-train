@@ -93,9 +93,26 @@ All six files: schema → serializer → response schema → `usePreferences.ts`
 ./release.sh v2.13.0 "feat: description"
 ```
 
+## Command directories — run from the correct location
+
+Some commands must be run from a specific directory. Always include the directory when giving instructions.
+
+| Command | Directory | Notes |
+|---|---|---|
+| `pnpm db:push` | `apps/backend/` | Applies schema changes to the local DB |
+| `pnpm db:seed` | `apps/backend/` | Seeds exercises and default templates |
+| `pnpm --filter @trainer-app/shared build` | `/workspace` (root) | Compiles shared package to CJS |
+| `pnpm typecheck` | `/workspace` (root) | Typechecks all packages |
+| `pnpm lint` | `/workspace` (root) | Lints all packages |
+| `pnpm --filter backend test` | `/workspace` (root) | Runs backend tests |
+| `pnpm dev` | `/workspace` (root) | Starts frontend + backend |
+| `./hotfix.sh` | `/workspace` (root) | Git hotfix helper |
+| `./release.sh` | `/workspace` (root) | Git release helper |
+
 ## Pre-commit
 
 ```
+# from /workspace (root)
 pnpm typecheck
 pnpm lint
 pnpm test

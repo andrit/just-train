@@ -18,7 +18,7 @@
 // In Progress tapping re-expands the overlay.
 // ------------------------------------------------------------
 
-import { useState, useDeferredValue }    from 'react'
+import React, { useState, useDeferredValue } from 'react'
 import { cn }                            from '@/lib/cn'
 import { interactions }                  from '@/lib/interactions'
 import { useNav }                        from '@/services/navService'
@@ -29,6 +29,7 @@ import { useClients, useSelfClient }     from '@/lib/queries/clients'
 import {
   useSessions,
   useExecuteSession,
+  useUpdateSession,
 }                                        from '@/lib/queries/sessions'
 import { formatDate, formatDuration }    from '@/lib/formatters'
 import { Spinner }                       from '@/components/ui/Spinner'
@@ -73,15 +74,20 @@ function SessionCard({
   onTap,
   onExecute,
   onResume,
+  onCancel,
   isExecuting,
+  isCancelling,
 }: {
-  session:     SessionSummaryResponse
-  clientName:  string
-  onTap:       () => void
-  onExecute:   () => void
-  onResume:    () => void
-  isExecuting: boolean
+  session:      SessionSummaryResponse
+  clientName:   string
+  onTap:        () => void
+  onExecute:    () => void
+  onResume:     () => void
+  onCancel:     () => void
+  isExecuting:  boolean
+  isCancelling: boolean
 }): React.JSX.Element {
+  const [confirmCancel, setConfirmCancel] = React.useState(false)
   const duration = formatDuration(session.startTime, session.endTime)
   const isPlanned    = session.status === 'planned'
   const isInProgress = session.status === 'in_progress'
@@ -185,18 +191,58 @@ function SessionCard({
             )}
 
             {isInProgress && (
-              <button
-                type="button"
-                onClick={onResume}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium',
-                  'bg-command-blue/20 border border-command-blue/40 text-command-blue',
-                  interactions.button.base,
-                  interactions.button.press,
+              <div className="flex items-center gap-1.5">
+                {confirmCancel ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmCancel(false)}
+                      className="px-2.5 py-1.5 rounded-lg text-xs text-gray-400 border border-surface-border hover:text-gray-200 transition-colors"
+                    >
+                      Keep
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setConfirmCancel(false); onCancel() }}
+                      disabled={isCancelling}
+                      className={cn(
+                        'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium',
+                        'bg-red-500/20 border border-red-500/40 text-red-400',
+                        interactions.button.base,
+                        interactions.button.press,
+                        isCancelling && 'opacity-50',
+                      )}
+                    >
+                      Cancel session
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmCancel(true)}
+                      className="px-2 py-1.5 rounded-lg text-xs text-gray-500 hover:text-red-400 transition-colors"
+                      title="Cancel session"
+                    >
+                      <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                        <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onResume}
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium',
+                        'bg-command-blue/20 border border-command-blue/40 text-command-blue',
+                        interactions.button.base,
+                        interactions.button.press,
+                      )}
+                    >
+                      Resume
+                    </button>
+                  </>
                 )}
-              >
-                Resume
-              </button>
+              </div>
             )}
 
             {isCompleted && (
@@ -216,16 +262,18 @@ function SessionCard({
 export default function SessionsPage(): React.JSX.Element {
   const nav                   = useNav()
   const { trainerMode }       = usePreferences()
-  const { activeSessions, removePlannedSession, startSession } = useSessionStore()
-  const { expand }            = useOverlayStore()
+  const { activeSessions, removePlannedSession, startSession, endSession } = useSessionStore()
+  const { expand, focusedClientId, hide }  = useOverlayStore()
   const { data: clients }     = useClients()
   const { data: selfClient }  = useSelfClient()
   const executeSession        = useExecuteSession()
+  const updateSession         = useUpdateSession()
 
   const [tab,            setTab]            = useState<StatusTab>('all')
   const [clientFilter,   setClientFilter]   = useState<string>('')
   const [rawSearch,      setRawSearch]      = useState('')
   const [executingId,    setExecutingId]    = useState<string | null>(null)
+  const [cancellingId,   setCancellingId]   = useState<string | null>(null)
 
   const search = useDeferredValue(rawSearch.trim().toLowerCase())
 
@@ -271,6 +319,18 @@ export default function SessionsPage(): React.JSX.Element {
       startSession(session.clientId, session.id, getClientName(session.clientId))
     }
     expand(session.clientId)
+  }
+
+  const handleCancel = async (session: SessionSummaryResponse): Promise<void> => {
+    setCancellingId(session.id)
+    try {
+      await updateSession.mutateAsync({ id: session.id, status: 'cancelled' })
+      // Clear from client-side store and hide overlay if this was the focused session
+      endSession(session.clientId)
+      if (focusedClientId === session.clientId) hide()
+    } finally {
+      setCancellingId(null)
+    }
   }
 
   const allClients = [
@@ -425,7 +485,9 @@ export default function SessionsPage(): React.JSX.Element {
                   }}
                   onExecute={() => handleExecute(session)}
                   onResume={() => handleResume(session)}
+                  onCancel={() => handleCancel(session)}
                   isExecuting={executingId === session.id}
+                  isCancelling={cancellingId === session.id}
                 />
               ))}
             </div>

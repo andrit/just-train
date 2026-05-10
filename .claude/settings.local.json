@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc *)",
-      "Bash(xargs ls *)"
+      "Bash(xargs ls *)",
+      "Bash(pnpm typecheck *)",
+      "Bash(node_modules/.bin/tsc -p apps/frontend/tsconfig.json --noEmit)"
     ]
   }
 }

@@ -21,19 +21,29 @@ type OverlayState = 'hidden' | 'minimised' | 'expanded'
 interface OverlayStoreState {
   state:            OverlayState
   focusedClientId:  string | null
+  // Sidebar is open (full-width) unless a session overlay is expanded and the user
+  // hasn't explicitly toggled it open. Only meaningful when state === 'expanded'.
+  sidebarOpen:      boolean
 
-  expand:     (clientId: string) => void
-  minimise:   () => void
-  hide:       () => void
-  setFocused: (clientId: string) => void
+  expand:          (clientId: string) => void
+  minimise:        () => void
+  hide:            () => void
+  setFocused:      (clientId: string) => void
+  openSidebar:     () => void
+  closeSidebar:    () => void
 }
 
 export const useOverlayStore = create<OverlayStoreState>()((set) => ({
   state:           'hidden',
   focusedClientId: null,
+  sidebarOpen:     true,
 
-  expand: (clientId) => set({ state: 'expanded', focusedClientId: clientId }),
-  minimise: ()       => set({ state: 'minimised' }),
-  hide: ()           => set({ state: 'hidden', focusedClientId: null }),
-  setFocused: (id)   => set({ focusedClientId: id }),
+  // Collapse sidebar when session expands to full-screen
+  expand:    (clientId) => set({ state: 'expanded', focusedClientId: clientId, sidebarOpen: false }),
+  minimise:  ()         => set({ state: 'minimised', sidebarOpen: true }),
+  hide:      ()         => set({ state: 'hidden', focusedClientId: null, sidebarOpen: true }),
+  setFocused: (id)      => set({ focusedClientId: id }),
+
+  openSidebar:  () => set({ sidebarOpen: true }),
+  closeSidebar: () => set({ sidebarOpen: false }),
 }))

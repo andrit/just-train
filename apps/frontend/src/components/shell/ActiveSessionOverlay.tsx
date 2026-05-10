@@ -92,11 +92,14 @@ function SessionPill({
 // ── Main overlay ──────────────────────────────────────────────────────────────
 
 export function ActiveSessionOverlay(): React.JSX.Element | null {
-  const { activeSessions }                           = useSessionStore()
-  const { state, focusedClientId, expand, minimise } = useOverlayStore()
-  const { data: clients }                            = useClients()
-  const { data: selfClient }                         = useSelfClient()
-  const dragStartY                                   = useRef<number | null>(null)
+  const { activeSessions }                                     = useSessionStore()
+  const { state, focusedClientId, expand, minimise, sidebarOpen } = useOverlayStore()
+  const { data: clients }                                      = useClients()
+  const { data: selfClient }                                   = useSelfClient()
+  const dragStartY                                             = useRef<number | null>(null)
+
+  // Match sidebar width: collapsed = w-14 (3.5rem), full = w-56 (14rem)
+  const sidebarOffset = (state === 'expanded' && !sidebarOpen) ? 'md:left-14' : 'md:left-56'
 
   const sessionList  = Object.values(activeSessions)
   const sessionCount = sessionList.length
@@ -143,7 +146,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
   if (state === 'minimised') {
     return (
       <div
-        className="fixed bottom-[72px] left-0 right-0 md:left-56 z-[25] flex justify-center gap-2 px-4 pb-2"
+        className={cn('fixed bottom-[72px] left-0 right-0 z-[25] flex justify-center gap-2 px-4 pb-2', sidebarOffset)}
         style={{ pointerEvents: 'none' }}
       >
         {sessionList.map((session) => (
@@ -165,7 +168,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
 
   return (
     <div
-      className="fixed inset-0 md:left-56 z-[20] bg-brand-primary flex flex-col"
+      className={cn('fixed inset-0 z-[20] bg-brand-primary flex flex-col transition-all duration-300', sidebarOffset)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >

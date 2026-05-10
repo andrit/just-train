@@ -83,6 +83,13 @@ export default {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(27, 80, 217, 0.4)' },
           '50%':      { boxShadow: '0 0 0 8px rgba(27, 80, 217, 0)' },
         },
+        // Key tap — press-in then spring-up, like a piano key releasing
+        'key-tap': {
+          '0%':   { transform: 'scale(1)' },
+          '20%':  { transform: 'scale(0.97)' },
+          '60%':  { transform: 'scale(1.04)' },
+          '100%': { transform: 'scale(1)' },
+        },
         // Shake — used on destructive hover to signal danger
         'shake': {
           '0%, 100%': { transform: 'translateX(0)' },
@@ -192,6 +199,7 @@ export default {
         'slide-out-left':    'slide-out-left 0.2s ease-in forwards',
         'slide-out-right':   'slide-out-right 0.2s ease-in forwards',
         'pulse-border-amber': 'pulse-border-amber 1.5s ease-in-out infinite',
+        'key-tap':            'key-tap 0.25s ease-out',
       },
     },
   },

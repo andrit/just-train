@@ -6,9 +6,9 @@
 // button whose label comes from trainer preferences.
 // ------------------------------------------------------------
 
+import { useState } from 'react'
 import { Link }           from 'react-router-dom'
 import { cn }             from '@/lib/cn'
-import { interactions }   from '@/lib/interactions'
 import { SilhouetteAvatar } from '@/components/clients/SilhouetteAvatar'
 import {
   PROGRESSION_STATE_LABEL,
@@ -23,11 +23,28 @@ interface SelfTrainingWidgetProps {
   ctaLabel:     string
 }
 
+const KEY_CLASSES =
+  'w-full py-3 rounded-xl text-sm font-semibold text-center ' +
+  'transition-transform duration-100 ease-out ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue'
+
+function useKeyTap(): [boolean, () => void] {
+  const [tapping, setTapping] = useState(false)
+  const tap = () => {
+    setTapping(true)
+    setTimeout(() => setTapping(false), 250)
+  }
+  return [tapping, tap]
+}
+
 export function SelfTrainingWidget({
   selfClient,
   activeGoal,
   ctaLabel,
 }: SelfTrainingWidgetProps): React.JSX.Element {
+  const [ctaTapping,     tapCta]     = useKeyTap()
+  const [profileTapping, tapProfile] = useKeyTap()
+
   return (
     <div className="card overflow-hidden">
       {/* Header band */}
@@ -72,35 +89,30 @@ export function SelfTrainingWidget({
         </div>
       )}
 
-      {/* CTA row */}
-      <div className="px-4 py-3 flex gap-2">
-        {/* CTA button — navigates to session launcher */}
+      {/* Piano-key CTA row */}
+      <div className="px-4 py-3 flex flex-col gap-2">
+        {/* Key 1 — primary action */}
         <Link
           to={`/session/new?clientId=${selfClient.id}`}
+          onClick={tapCta}
           className={cn(
-            'flex-1 py-2.5 rounded-xl text-sm font-medium text-center',
-            'bg-command-blue text-white',
-            interactions.button.base,
-            interactions.fab.hover,
-            interactions.button.press,
-            interactions.fab.pulse,
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+            KEY_CLASSES,
+            'bg-command-blue text-white shadow-md shadow-command-blue/25',
+            ctaTapping && 'animate-key-tap',
           )}
         >
           {ctaLabel}
         </Link>
 
-        {/* Profile link */}
+        {/* Key 2 — profile */}
         <Link
           to="/my-training"
+          onClick={tapProfile}
           className={cn(
-            'px-3 py-2.5 rounded-xl text-sm font-medium',
-            'bg-surface border border-surface-border text-gray-300',
-            'hover:border-command-blue/30 hover:text-white',
-            interactions.button.base,
-            interactions.button.hover,
-            interactions.button.press,
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+            KEY_CLASSES,
+            'bg-surface-raised border border-surface-border text-gray-300',
+            'hover:border-white/20 hover:text-white',
+            profileTapping && 'animate-key-tap',
           )}
           aria-label="View my training profile"
         >

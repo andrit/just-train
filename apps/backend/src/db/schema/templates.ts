@@ -70,6 +70,7 @@ export const templateExercises = pgTable('template_exercises', {
   // Target / planned performance values
   targetSets:            integer('target_sets'),
   targetReps:            integer('target_reps'),
+  targetRepsPerSet:      text('target_reps_per_set'),  // comma-delimited per-set rep counts e.g. "10,8,6"
   targetWeight:          real('target_weight'),
   targetWeightUnit:      weightUnitEnum('target_weight_unit').notNull().default('lbs'),
   targetDurationSeconds: integer('target_duration_seconds'),

@@ -118,38 +118,41 @@ function IntensityPicker({ value, onChange }: { value: string; onChange: (v: str
 
 // ── Active set hero — workout-type-aware ──────────────────────────────────────
 
-function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, lastSet, onLog, isLogging }: {
-  setNumber:       number
-  sessionExercise: SessionExerciseResponse
-  workoutType:     string
-  weightUnit:      string
-  lastSet:         SetResponse | null
-  onLog:           (data: LogData) => void
-  isLogging:       boolean
+function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, lastSet, targetRepsOverride, onLog, isLogging }: {
+  setNumber:          number
+  sessionExercise:    SessionExerciseResponse
+  workoutType:        string
+  weightUnit:         string
+  lastSet:            SetResponse | null
+  targetRepsOverride: number | null
+  onLog:              (data: LogData) => void
+  isLogging:          boolean
 }): React.JSX.Element {
   const [logRef, fireLog] = useUXEventRef<HTMLButtonElement>()
 
+  const effectiveTargetReps = targetRepsOverride ?? sessionExercise.targetReps
+
   // ── Resistance state ──────────────────────────────────────────────────────
   const [weight, setWeight] = useState(String(sessionExercise.targetWeight ?? lastSet?.weight ?? ''))
-  const [reps,   setReps]   = useState(String(sessionExercise.targetReps   ?? lastSet?.reps   ?? ''))
+  const [reps,   setReps]   = useState(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
 
   // ── Cardio state ──────────────────────────────────────────────────────────
   const cardioMode = detectCardioMode(sessionExercise)
   const [distance,  setDistance]  = useState(String(sessionExercise.targetDistance ?? ''))
   const [duration,  setDuration]  = useState(String(sessionExercise.targetDurationSeconds ?? ''))
   const [intensity, setIntensity] = useState<string>(sessionExercise.targetIntensity ?? 'moderate')
-  const [cardioReps,setCardioReps] = useState(String(sessionExercise.targetReps ?? ''))
+  const [cardioReps,setCardioReps] = useState(String(effectiveTargetReps ?? ''))
 
   // ── Calisthenics state ────────────────────────────────────────────────────
   const caliIsTime = sessionExercise.targetDurationSeconds != null && sessionExercise.targetReps == null
-  const [caliReps, setCaliReps] = useState(String(sessionExercise.targetReps ?? lastSet?.reps ?? ''))
+  const [caliReps, setCaliReps] = useState(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
   const [caliTime, setCaliTime] = useState(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
 
-  // Reset pre-fill when set number changes
+  // Reset pre-fill when set number changes (effectiveTargetReps may differ per set)
   useEffect(() => {
     setWeight(String(sessionExercise.targetWeight ?? lastSet?.weight ?? ''))
-    setReps(String(sessionExercise.targetReps ?? lastSet?.reps ?? ''))
-    setCaliReps(String(sessionExercise.targetReps ?? lastSet?.reps ?? ''))
+    setReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
+    setCaliReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setDuration(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setNumber])
@@ -246,7 +249,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
               value={reps}
               onChange={setReps}
               mode="numeric"
-              placeholder={sessionExercise.targetReps ? String(sessionExercise.targetReps) : '—'}
+              placeholder={effectiveTargetReps ? String(effectiveTargetReps) : '—'}
               onEnter={handleLog}
             />
           </div>
@@ -265,7 +268,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
               <IntensityPicker value={intensity} onChange={setIntensity} />
             )}
             {cardioMode === 'reps' && (
-              <BigInput label="Reps" value={cardioReps} onChange={setCardioReps} mode="numeric" placeholder={sessionExercise.targetReps ? String(sessionExercise.targetReps) : '—'} onEnter={handleLog} />
+              <BigInput label="Reps" value={cardioReps} onChange={setCardioReps} mode="numeric" placeholder={effectiveTargetReps ? String(effectiveTargetReps) : '—'} onEnter={handleLog} />
             )}
           </div>
         )}
@@ -332,13 +335,15 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
 
 // ── Past set row ──────────────────────────────────────────────────────────────
 
-function PastSetRow({ set, setNumber, sessionExercise, workoutType }: {
-  set:             SetResponse
-  setNumber:       number
-  sessionExercise: SessionExerciseResponse
-  workoutType:     string
+function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOverride }: {
+  set:                 SetResponse
+  setNumber:           number
+  sessionExercise:     SessionExerciseResponse
+  workoutType:         string
+  targetRepsOverride:  number | null
 }): React.JSX.Element {
-  const repsOk   = outcome(set.reps,     sessionExercise.targetReps)
+  const effectiveTargetReps = targetRepsOverride ?? sessionExercise.targetReps
+  const repsOk   = outcome(set.reps,     effectiveTargetReps)
   const weightOk = outcome(set.weight,   sessionExercise.targetWeight)
   const timeOk   = outcome(set.durationSeconds, sessionExercise.targetDurationSeconds)
   const distOk   = outcome(set.distance, sessionExercise.targetDistance)
@@ -463,6 +468,13 @@ export function ExerciseBlock({
   const loggedSets  = sessionExercise.sets
   const loggedCount = loggedSets.length
   const targetSets  = sessionExercise.targetSets ?? DEFAULT_TARGET_SETS
+
+  // Parse per-set rep targets — returns null when no per-set data for that index
+  const getSetTargetReps = (setIndex: number): number | null => {
+    if (!sessionExercise.targetRepsPerSet) return sessionExercise.targetReps
+    const vals = sessionExercise.targetRepsPerSet.split(',').map((n) => parseInt(n, 10))
+    return vals[setIndex] ?? sessionExercise.targetReps
+  }
   const futureSets  = Math.max(0, targetSets - loggedCount - 1)
   const hitTarget   = loggedCount >= targetSets
 
@@ -550,6 +562,7 @@ export function ExerciseBlock({
             set={set}
             sessionExercise={sessionExercise}
             workoutType={workoutType}
+            targetRepsOverride={getSetTargetReps(i)}
           />
         ))}
 
@@ -559,6 +572,7 @@ export function ExerciseBlock({
             sessionExercise={sessionExercise}
             workoutType={workoutType}
             weightUnit={weightUnit}
+            targetRepsOverride={getSetTargetReps(loggedCount)}
             lastSet={
               // In-session: use the most recently logged set (shows progression)
               loggedSets.length > 0

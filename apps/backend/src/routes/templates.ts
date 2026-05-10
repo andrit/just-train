@@ -344,9 +344,10 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
             templateWorkoutId:     newWorkout.id,
             exerciseId:            te.exerciseId,
             orderIndex:            te.orderIndex,
-            targetSets:            te.targetSets            ?? null,
-            targetReps:            te.targetReps            ?? null,
-            targetWeight:          te.targetWeight          ?? null,
+            targetSets:            te.targetSets       ?? null,
+            targetReps:            te.targetReps       ?? null,
+            targetRepsPerSet:      te.targetRepsPerSet ?? null,
+            targetWeight:          te.targetWeight     ?? null,
             targetWeightUnit:      te.targetWeightUnit,
             targetDurationSeconds: te.targetDurationSeconds ?? null,
             targetDistance:        te.targetDistance        ?? null,
@@ -498,6 +499,7 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
         orderIndex:            z.number().int().optional(),
         targetSets:            z.number().int().optional(),
         targetReps:            z.number().int().optional(),
+        targetRepsPerSet:      z.string().optional(),
         targetWeight:          z.number().optional(),
         targetDurationSeconds: z.number().int().optional(),
         targetDistance:        z.number().optional(),
@@ -509,7 +511,7 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
     const { id: templateWorkoutId } = request.params as z.infer<typeof UuidParamSchema>
     const body = request.body as {
       exerciseId: string; orderIndex?: number
-      targetSets?: number; targetReps?: number; targetWeight?: number
+      targetSets?: number; targetReps?: number; targetRepsPerSet?: string; targetWeight?: number
       targetDurationSeconds?: number; targetDistance?: number; notes?: string
     }
 
@@ -523,9 +525,10 @@ To apply a template to a session, include its \`id\` as \`templateId\` when call
         templateWorkoutId,
         exerciseId:            body.exerciseId,
         orderIndex:            body.orderIndex ?? existing.length,
-        targetSets:            body.targetSets            ?? null,
-        targetReps:            body.targetReps            ?? null,
-        targetWeight:          body.targetWeight          ?? null,
+        targetSets:            body.targetSets       ?? null,
+        targetReps:            body.targetReps       ?? null,
+        targetRepsPerSet:      body.targetRepsPerSet ?? null,
+        targetWeight:          body.targetWeight     ?? null,
         targetWeightUnit:      'lbs',
         targetDurationSeconds: body.targetDurationSeconds ?? null,
         targetDistance:        body.targetDistance        ?? null,

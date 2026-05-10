@@ -42,20 +42,97 @@ type IntensityLevel = typeof INTENSITY_OPTIONS[number]
 
 // ── Target config component ───────────────────────────────────────────────────
 
+type RepsMode = 'uniform' | 'per-set'
+
+function RepsModeToggle({ mode, onMode }: { mode: RepsMode; onMode: (v: RepsMode) => void }): React.JSX.Element {
+  return (
+    <div className="flex gap-2">
+      {(['uniform', 'per-set'] as RepsMode[]).map((m) => (
+        <button
+          key={m}
+          type="button"
+          onClick={() => onMode(m)}
+          className={cn(
+            'flex-1 py-1.5 rounded-xl text-xs font-medium border transition-all',
+            mode === m
+              ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
+              : 'border-surface-border text-gray-500 hover:text-gray-300',
+          )}
+        >
+          {m === 'uniform' ? 'All same' : 'Per set'}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function PerSetRepsInputs({ repsPerSet, onChange }: {
+  repsPerSet: number[]
+  onChange:   (v: number[]) => void
+}): React.JSX.Element {
+  return (
+    <div className="space-y-2">
+      {repsPerSet.map((r, i) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <div key={i} className="flex items-center gap-3">
+          <span className="text-xs text-gray-600 font-mono w-10 shrink-0 text-right">
+            Set {i + 1}
+          </span>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={r}
+            min={1}
+            max={100}
+            onChange={(e) => {
+              const v = Math.max(1, Math.min(100, parseInt(e.target.value, 10) || 1))
+              const next = [...repsPerSet]
+              next[i] = v
+              onChange(next)
+            }}
+            className="field text-center text-lg font-mono font-bold flex-1"
+          />
+          <span className="text-xs text-gray-600 w-8 shrink-0">reps</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function ResistanceTargets({
-  sets, reps, weight, weightUnit,
-  onSets, onReps, onWeight,
+  sets, reps, repsMode, repsPerSet, weight, weightUnit,
+  onSets, onReps, onRepsMode, onRepsPerSet, onWeight,
 }: {
   sets: number; reps: number; weight: string; weightUnit: string
-  onSets: (v: number) => void; onReps: (v: number) => void; onWeight: (v: string) => void
+  repsMode:    RepsMode
+  repsPerSet:  number[]
+  onSets:      (v: number) => void
+  onReps:      (v: number) => void
+  onRepsMode:  (v: RepsMode) => void
+  onRepsPerSet:(v: number[]) => void
+  onWeight:    (v: string) => void
 }): React.JSX.Element {
   return (
     <div className="space-y-6">
-      <div className="flex justify-around items-start">
+      {/* Sets */}
+      <div className="flex justify-center">
         <DragStepper value={sets} onChange={onSets} min={1} max={10} label="Sets" />
-        <div className="text-2xl text-gray-700 pt-8">×</div>
-        <DragStepper value={reps} onChange={onReps} min={1} max={30} label="Reps" />
       </div>
+
+      {/* Reps section */}
+      <div className="space-y-3">
+        <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center">Reps</p>
+        <RepsModeToggle mode={repsMode} onMode={onRepsMode} />
+        {repsMode === 'uniform' ? (
+          <div className="flex justify-center">
+            <DragStepper value={reps} onChange={onReps} min={1} max={100} label="Reps per set" />
+          </div>
+        ) : (
+          <PerSetRepsInputs repsPerSet={repsPerSet} onChange={onRepsPerSet} />
+        )}
+      </div>
+
+      {/* Weight */}
       <div>
         <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center mb-2">
           Target Weight ({weightUnit})
@@ -163,52 +240,62 @@ function CardioTargets({
 }
 
 function CalisthenicsTargets({
-  mode, sets, reps, duration,
-  onMode, onSets, onReps, onDuration,
+  mode, sets, reps, repsMode, repsPerSet, duration,
+  onMode, onSets, onReps, onRepsMode, onRepsPerSet, onDuration,
 }: {
   mode: 'reps' | 'time'; sets: number; reps: number; duration: number
-  onMode: (v: 'reps' | 'time') => void
-  onSets: (v: number) => void; onReps: (v: number) => void; onDuration: (v: number) => void
+  repsMode:    RepsMode
+  repsPerSet:  number[]
+  onMode:      (v: 'reps' | 'time') => void
+  onSets:      (v: number) => void
+  onReps:      (v: number) => void
+  onRepsMode:  (v: RepsMode) => void
+  onRepsPerSet:(v: number[]) => void
+  onDuration:  (v: number) => void
 }): React.JSX.Element {
   return (
     <div className="space-y-6">
-      {/* Mode toggle */}
+      {/* By reps / by time toggle */}
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => onMode('reps')}
-          className={cn(
-            'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
-            mode === 'reps'
-              ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-              : 'border-surface-border text-gray-500 hover:text-gray-300',
-          )}
-        >
-          By Reps
-        </button>
-        <button
-          type="button"
-          onClick={() => onMode('time')}
-          className={cn(
-            'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
-            mode === 'time'
-              ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-              : 'border-surface-border text-gray-500 hover:text-gray-300',
-          )}
-        >
-          By Time
-        </button>
+        {(['reps', 'time'] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => onMode(m)}
+            className={cn(
+              'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
+              mode === m
+                ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
+                : 'border-surface-border text-gray-500 hover:text-gray-300',
+            )}
+          >
+            {m === 'reps' ? 'By Reps' : 'By Time'}
+          </button>
+        ))}
       </div>
 
-      <div className="flex justify-around items-start">
+      {/* Sets */}
+      <div className="flex justify-center">
         <DragStepper value={sets} onChange={onSets} min={1} max={10} label="Sets" />
-        <div className="text-2xl text-gray-700 pt-8">×</div>
-        {mode === 'reps' ? (
-          <DragStepper value={reps} onChange={onReps} min={1} max={100} label="Reps" />
-        ) : (
-          <DragStepper value={duration} onChange={onDuration} min={5} max={300} label="Seconds" />
-        )}
       </div>
+
+      {mode === 'reps' ? (
+        <div className="space-y-3">
+          <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center">Reps</p>
+          <RepsModeToggle mode={repsMode} onMode={onRepsMode} />
+          {repsMode === 'uniform' ? (
+            <div className="flex justify-center">
+              <DragStepper value={reps} onChange={onReps} min={1} max={100} label="Reps per set" />
+            </div>
+          ) : (
+            <PerSetRepsInputs repsPerSet={repsPerSet} onChange={onRepsPerSet} />
+          )}
+        </div>
+      ) : (
+        <div className="flex justify-center">
+          <DragStepper value={duration} onChange={onDuration} min={5} max={300} label="Seconds per set" />
+        </div>
+      )}
     </div>
   )
 }
@@ -265,6 +352,8 @@ export function AddExerciseSheet({
   const [targetSets,    setTargetSets]    = useState(3)
   const [targetReps,    setTargetReps]    = useState(10)
   const [targetWeight,  setTargetWeight]  = useState('')
+  const [repsMode,      setRepsMode]      = useState<RepsMode>('uniform')
+  const [repsPerSet,    setRepsPerSet]    = useState<number[]>([10, 10, 10])
 
   // Cardio
   const [cardioRounds,   setCardioRounds]   = useState(4)
@@ -278,6 +367,8 @@ export function AddExerciseSheet({
   const [caliSets,      setCaliSets]      = useState(3)
   const [caliReps,      setCaliReps]      = useState(15)
   const [caliDuration,  setCaliDuration]  = useState(30)
+  const [caliRepsMode,  setCaliRepsMode]  = useState<RepsMode>('uniform')
+  const [caliRepsPerSet, setCaliRepsPerSet] = useState<number[]>([15, 15, 15])
 
   // Stretching
   const [stretchSets,   setStretchSets]   = useState(2)
@@ -313,6 +404,35 @@ export function AddExerciseSheet({
     onClose()
   }
 
+  // Sync repsPerSet length when sets count changes
+  const handleTargetSetsChange = (n: number): void => {
+    setTargetSets(n)
+    setRepsPerSet((prev) => {
+      if (n > prev.length) return [...prev, ...Array(n - prev.length).fill(prev[prev.length - 1] ?? targetReps)]
+      return prev.slice(0, n)
+    })
+  }
+
+  const handleRepsMode = (mode: RepsMode): void => {
+    if (mode === 'per-set') setRepsPerSet(Array(targetSets).fill(targetReps))
+    else setTargetReps(repsPerSet[0] ?? targetReps)
+    setRepsMode(mode)
+  }
+
+  const handleCaliSetsChange = (n: number): void => {
+    setCaliSets(n)
+    setCaliRepsPerSet((prev) => {
+      if (n > prev.length) return [...prev, ...Array(n - prev.length).fill(prev[prev.length - 1] ?? caliReps)]
+      return prev.slice(0, n)
+    })
+  }
+
+  const handleCaliRepsMode = (mode: RepsMode): void => {
+    if (mode === 'per-set') setCaliRepsPerSet(Array(caliSets).fill(caliReps))
+    else setCaliReps(caliRepsPerSet[0] ?? caliReps)
+    setCaliRepsMode(mode)
+  }
+
   const handleSelect = (exercise: ExerciseSummaryResponse): void => {
     setSelected(exercise)
     setIsConfirming(true)
@@ -339,7 +459,10 @@ export function AddExerciseSheet({
       case 'resistance':
         return {
           targetSets,
-          targetReps,
+          ...(repsMode === 'uniform'
+            ? { targetReps }
+            : { targetRepsPerSet: repsPerSet.join(','), targetReps: repsPerSet[0] ?? targetReps }
+          ),
           ...(targetWeight.trim() && { targetWeight: parseFloat(targetWeight), targetWeightUnit: weightUnit }),
         }
       case 'cardio':
@@ -351,8 +474,12 @@ export function AddExerciseSheet({
         }
       case 'calisthenics':
         return {
-          targetSets:  caliSets,
-          ...(caliMode === 'reps' && { targetReps: caliReps }),
+          targetSets: caliSets,
+          ...(caliMode === 'reps' && (
+            caliRepsMode === 'uniform'
+              ? { targetReps: caliReps }
+              : { targetRepsPerSet: caliRepsPerSet.join(','), targetReps: caliRepsPerSet[0] ?? caliReps }
+          )),
           ...(caliMode === 'time' && { targetDurationSeconds: caliDuration }),
         }
       case 'stretching':
@@ -544,7 +671,10 @@ export function AddExerciseSheet({
           {workoutType === 'resistance' && (
             <ResistanceTargets
               sets={targetSets} reps={targetReps} weight={targetWeight} weightUnit={weightUnit}
-              onSets={setTargetSets} onReps={setTargetReps} onWeight={setTargetWeight}
+              repsMode={repsMode} repsPerSet={repsPerSet}
+              onSets={handleTargetSetsChange} onReps={setTargetReps}
+              onRepsMode={handleRepsMode} onRepsPerSet={setRepsPerSet}
+              onWeight={setTargetWeight}
             />
           )}
           {workoutType === 'cardio' && (
@@ -558,7 +688,10 @@ export function AddExerciseSheet({
           {workoutType === 'calisthenics' && (
             <CalisthenicsTargets
               mode={caliMode} sets={caliSets} reps={caliReps} duration={caliDuration}
-              onMode={setCaliMode} onSets={setCaliSets} onReps={setCaliReps} onDuration={setCaliDuration}
+              repsMode={caliRepsMode} repsPerSet={caliRepsPerSet}
+              onMode={setCaliMode} onSets={handleCaliSetsChange} onReps={setCaliReps}
+              onRepsMode={handleCaliRepsMode} onRepsPerSet={setCaliRepsPerSet}
+              onDuration={setCaliDuration}
             />
           )}
           {workoutType === 'stretching' && (

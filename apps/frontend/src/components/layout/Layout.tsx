@@ -104,8 +104,8 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
           )}
         </div>
 
-        {/* Nav links */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5" aria-label="Main navigation">
+        {/* Nav links — piano key layout: full-width, edge-to-edge border dividers */}
+        <nav className="flex-1 flex flex-col" aria-label="Main navigation">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -113,66 +113,85 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               end={item.end}
               className={({ isActive }: { isActive: boolean }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium',
-                  'transition-colors duration-150',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
-                  isActive
-                    ? 'bg-command-blue text-white'
-                    : 'text-gray-400 hover:bg-brand-primary/50 hover:text-gray-100',
+                  'group relative flex items-center gap-3 w-full px-5 py-3.5',
+                  'border-b border-surface-border',
+                  'text-sm font-medium transition-colors duration-100',
+                  'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
+                  isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200',
                 )
               }
             >
-              <span className="text-base w-5 text-center" aria-hidden>{item.icon}</span>
-              <span>{item.label}</span>
+              {/* Press flash — invisible at rest, pulses on press, fades out */}
+              <span
+                className="absolute inset-x-2 inset-y-1 rounded-lg bg-command-blue/25 opacity-0 group-active:opacity-100 transition-opacity duration-300 pointer-events-none"
+                aria-hidden
+              />
+              <span className="relative text-base w-5 text-center" aria-hidden>{item.icon}</span>
+              <span className="relative">{item.label}</span>
             </NavLink>
           ))}
         </nav>
 
         {/* User badge + preferences + logout */}
         {trainer != null && (
-          <div className="px-4 py-4 border-t border-surface-border space-y-1">
-            <div className="flex items-center gap-3 mb-2">
+          <div className="border-t border-surface-border">
+            {/* User badge */}
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-surface-border">
               <div
                 aria-hidden
-                className="w-8 h-8 rounded-full bg-command-blue/20 border border-command-blue/30 flex items-center justify-center shrink-0"
+                className="w-7 h-7 rounded-full bg-command-blue/20 border border-command-blue/30 flex items-center justify-center shrink-0"
               >
                 <span className="text-xs font-bold text-command-blue">{initials}</span>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-200 truncate">{trainer.name}</p>
-                <p className="text-xs text-gray-500 truncate">{trainer.email}</p>
+                <p className="text-xs font-medium text-gray-200 truncate">{trainer.name}</p>
+                <p className="text-[10px] text-gray-500 truncate">{trainer.email}</p>
               </div>
             </div>
+
+            {/* Preferences — piano key */}
             <NavLink
               to="/preferences"
               className={({ isActive }: { isActive: boolean }) =>
                 cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium w-full',
-                  'transition-colors duration-150',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
-                  isActive
-                    ? 'bg-command-blue text-white'
-                    : 'text-gray-500 hover:bg-brand-primary/50 hover:text-gray-300',
+                  'group relative flex items-center gap-3 w-full px-5 py-3',
+                  'border-b border-surface-border',
+                  'text-xs font-medium transition-colors duration-100',
+                  'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
+                  isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200',
                 )
               }
             >
-              <span className="text-sm" aria-hidden>⚙</span>
-              Preferences
+              <span
+                className="absolute inset-x-2 inset-y-1 rounded-lg bg-command-blue/25 opacity-0 group-active:opacity-100 transition-opacity duration-300 pointer-events-none"
+                aria-hidden
+              />
+              <span className="relative text-sm w-5 text-center" aria-hidden>⚙</span>
+              <span className="relative">Preferences</span>
             </NavLink>
+
+            {/* Logout — piano key */}
             <button
               type="button"
               onClick={handleLogout}
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium w-full',
-                'text-gray-500 hover:bg-red-500/10 hover:text-red-400',
-                'transition-colors duration-150',
+                'group relative flex items-center gap-3 w-full px-5 py-3',
+                'text-xs font-medium transition-colors duration-100',
+                'text-gray-400 hover:text-red-400',
+                'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
               )}
             >
-              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-                <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M10 11l3-3-3-3M13 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Log out
+              <span
+                className="absolute inset-x-2 inset-y-1 rounded-lg bg-red-500/20 opacity-0 group-active:opacity-100 transition-opacity duration-300 pointer-events-none"
+                aria-hidden
+              />
+              <span className="relative w-5 flex items-center justify-center" aria-hidden>
+                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                  <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M10 11l3-3-3-3M13 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span className="relative">Log out</span>
             </button>
           </div>
         )}

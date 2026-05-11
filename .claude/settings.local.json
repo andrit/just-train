@@ -4,7 +4,10 @@
       "Bash(npx tsc *)",
       "Bash(xargs ls *)",
       "Bash(pnpm typecheck *)",
-      "Bash(node_modules/.bin/tsc -p apps/frontend/tsconfig.json --noEmit)"
+      "Bash(node_modules/.bin/tsc -p apps/frontend/tsconfig.json --noEmit)",
+      "Bash(node_modules/.bin/vitest run *)",
+      "Bash(pnpm --filter backend typecheck)",
+      "Bash(npx vitest *)"
     ]
   }
 }

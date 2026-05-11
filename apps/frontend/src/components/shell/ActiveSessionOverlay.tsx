@@ -25,6 +25,7 @@ import { useSessionStore }                 from '@/store/sessionStore'
 import { useOverlayStore }                 from '@/store/overlayStore'
 import { useClients, useSelfClient }       from '@/lib/queries/clients'
 import LiveSessionContent                  from './LiveSessionContent'
+import { SessionErrorBoundary }            from './ErrorBoundary'
 
 // ── Elapsed timer ─────────────────────────────────────────────────────────────
 
@@ -166,8 +167,13 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
 
   if (state !== 'expanded') return null
 
+  const sessionLabel = `Active session — ${getClientName(focusedSession.clientId)}`
+
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={sessionLabel}
       className={cn('fixed inset-0 z-[20] bg-brand-primary flex flex-col transition-all duration-300', sidebarOffset)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
@@ -213,12 +219,14 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
         <p className="text-xs text-gray-600">{getClientName(focusedSession.clientId)}</p>
       </div>
 
-      {/* Session content */}
+      {/* Session content — wrapped so a crash minimises to pill rather than taking down the app */}
       <div className="flex-1 overflow-hidden">
-        <LiveSessionContent
-          sessionId={focusedSession.sessionId}
-          onMinimise={minimise}
-        />
+        <SessionErrorBoundary onMinimise={minimise}>
+          <LiveSessionContent
+            sessionId={focusedSession.sessionId}
+            onMinimise={minimise}
+          />
+        </SessionErrorBoundary>
       </div>
     </div>
   )

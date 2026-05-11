@@ -15,16 +15,21 @@
 //   const snapshot = makeClientSnapshot({ weightLbs: 185 })
 // ------------------------------------------------------------
 
-import type { Trainer, Client, RefreshToken, ClientGoal, ClientSnapshot } from '../../db/schema'
+import type {
+  Trainer, Client, RefreshToken, ClientGoal, ClientSnapshot,
+  Session, Challenge,
+} from '../../db/schema'
 
 // Stable test IDs — using fixed UUIDs makes test output easier to read
-export const TEST_TRAINER_ID  = '11111111-1111-1111-1111-111111111111'
-export const TEST_CLIENT_ID   = '22222222-2222-2222-2222-222222222222'
-export const TEST_TOKEN_ID    = '33333333-3333-3333-3333-333333333333'
-export const TEST_DEVICE_ID   = '44444444-4444-4444-4444-444444444444'
-export const TEST_UNKNOWN_ID  = '99999999-9999-9999-9999-999999999999'
-export const TEST_GOAL_ID     = '55555555-5555-5555-5555-555555555555'
-export const TEST_SNAPSHOT_ID = '66666666-6666-6666-6666-666666666666'
+export const TEST_TRAINER_ID    = '11111111-1111-1111-1111-111111111111'
+export const TEST_CLIENT_ID     = '22222222-2222-2222-2222-222222222222'
+export const TEST_TOKEN_ID      = '33333333-3333-3333-3333-333333333333'
+export const TEST_DEVICE_ID     = '44444444-4444-4444-4444-444444444444'
+export const TEST_UNKNOWN_ID    = '99999999-9999-9999-9999-999999999999'
+export const TEST_GOAL_ID       = '55555555-5555-5555-5555-555555555555'
+export const TEST_SNAPSHOT_ID   = '66666666-6666-6666-6666-666666666666'
+export const TEST_SESSION_ID    = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+export const TEST_CHALLENGE_ID  = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
 
 // ── Trainer ───────────────────────────────────────────────────────────────────
 
@@ -206,4 +211,63 @@ export const validSnapshotBody = {
   energyLevel:  7,
   sleepQuality: 6,
   stressLevel:  4,
+}
+
+// ── Session ───────────────────────────────────────────────────────────────────
+
+export function makeSession(overrides: Partial<Session> = {}): Session {
+  return {
+    id:           TEST_SESSION_ID,
+    clientId:     TEST_CLIENT_ID,
+    trainerId:    TEST_TRAINER_ID,
+    templateId:   null,
+    name:         'Test Session',
+    date:         '2025-01-15',
+    startTime:    null,
+    endTime:      null,
+    status:       'planned' as const,
+    notes:        null,
+    energyLevel:  null,
+    mobilityFeel: null,
+    stressLevel:  null,
+    sessionNotes: null,
+    createdAt:    new Date('2025-01-15T10:00:00Z'),
+    updatedAt:    new Date('2025-01-15T10:00:00Z'),
+    ...overrides,
+  }
+}
+
+// ── Challenge ─────────────────────────────────────────────────────────────────
+
+export function makeChallenge(overrides: Partial<Challenge> = {}): Challenge {
+  return {
+    id:             TEST_CHALLENGE_ID,
+    clientId:       TEST_CLIENT_ID,
+    trainerId:      TEST_TRAINER_ID,
+    title:          'Hit 100kg bench press',
+    description:    null,
+    metricType:     'weight_lifted' as const,
+    targetValue:    100,
+    currentValue:   0,
+    targetUnit:     'kg',
+    exerciseId:     null,
+    status:         'active' as const,
+    deadline:       '2025-06-01',
+    completedAt:    null,
+    createdAt:      new Date('2025-01-01T00:00:00Z'),
+    updatedAt:      new Date('2025-01-01T00:00:00Z'),
+    ...overrides,
+  }
+}
+
+export const validSessionBody = {
+  clientId: TEST_CLIENT_ID,
+  date:     '2025-01-15',
+}
+
+export const validChallengeBody = {
+  title:       'Complete 20 sessions',
+  metricType:  'sessions_completed',
+  targetValue: 20,
+  deadline:    '2025-06-01',
 }

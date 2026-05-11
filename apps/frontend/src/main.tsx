@@ -13,6 +13,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import App from './App'
+import { ErrorBoundary } from './components/shell/ErrorBoundary'
 import './index.css'
 import { syncService, SYNC_COMPLETE_EVENT } from './services/syncService'
 import { ApiError } from './lib/api'
@@ -56,7 +57,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       {/* BrowserRouter enables client-side routing */}
       <BrowserRouter>
-        <App />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
       </BrowserRouter>
 
       {/* DevTools panel — only visible in development, removed from production build */}

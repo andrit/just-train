@@ -22,6 +22,8 @@ import { clientSnapshotRoutes }  from '../../routes/client-snapshots'
 import { exerciseRoutes }        from '../../routes/exercises'
 import { sessionRoutes }         from '../../routes/sessions'
 import { templateRoutes }        from '../../routes/templates'
+import { kpiRoutes }             from '../../routes/kpis'
+import { challengeRoutes }       from '../../routes/challenges'
 
 function createBaseApp() {
   const app = Fastify({ logger: false })
@@ -71,6 +73,30 @@ export async function buildFullTestApp() {
   await app.register(exerciseRoutes,       { prefix: '/api/v1' })
   await app.register(sessionRoutes,        { prefix: '/api/v1' })
   await app.register(templateRoutes,       { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildSessionTestApp() {
+  const app = createBaseApp()
+  await app.register(clientRoutes,  { prefix: '/api/v1' })
+  await app.register(sessionRoutes, { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildKpiTestApp() {
+  const app = createBaseApp()
+  await app.register(clientRoutes, { prefix: '/api/v1' })
+  await app.register(kpiRoutes,    { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildChallengeTestApp() {
+  const app = createBaseApp()
+  await app.register(clientRoutes,    { prefix: '/api/v1' })
+  await app.register(challengeRoutes, { prefix: '/api/v1' })
   await app.ready()
   return app
 }

@@ -14,7 +14,7 @@
 
 import {
   pgTable, uuid, text, integer, real,
-  timestamp, pgEnum, boolean,
+  timestamp, pgEnum, boolean, index,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { SessionStatusEnum, SideEnum } from '@trainer-app/shared'
@@ -67,7 +67,13 @@ export const sessions = pgTable('sessions', {
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-})
+}, (t) => [
+  // KPI and history queries filter by trainerId+clientId and sort by date
+  index('sessions_trainer_id_idx').on(t.trainerId),
+  index('sessions_client_id_idx').on(t.clientId),
+  index('sessions_status_idx').on(t.status),
+  index('sessions_trainer_client_date_idx').on(t.trainerId, t.clientId, t.date),
+])
 
 export type Session    = typeof sessions.$inferSelect
 export type NewSession = typeof sessions.$inferInsert
@@ -84,7 +90,9 @@ export const workouts = pgTable('workouts', {
   orderIndex:  integer('order_index').notNull().default(0),
   notes:       text('notes'),
   createdAt:   timestamp('created_at').notNull().defaultNow(),
-})
+}, (t) => [
+  index('workouts_session_id_idx').on(t.sessionId),
+])
 
 export type Workout    = typeof workouts.$inferSelect
 export type NewWorkout = typeof workouts.$inferInsert
@@ -110,7 +118,11 @@ export const sessionExercises = pgTable('session_exercises', {
   targetDistance:        real('target_distance'),
   targetIntensity:       intensityEnum('target_intensity'),
   notes:                 text('notes'),
-})
+}, (t) => [
+  // PR detection queries by exerciseId across a client's history
+  index('session_exercises_workout_id_idx').on(t.workoutId),
+  index('session_exercises_exercise_id_idx').on(t.exerciseId),
+])
 
 export type SessionExercise    = typeof sessionExercises.$inferSelect
 export type NewSessionExercise = typeof sessionExercises.$inferInsert
@@ -133,6 +145,7 @@ export const sets = pgTable('sets', {
   sessionExerciseId: uuid('session_exercise_id')
     .notNull()
     .references(() => sessionExercises.id, { onDelete: 'cascade' }),
+
 
   setNumber: integer('set_number').notNull(), // 1, 2, 3... per exercise
 
@@ -164,7 +177,11 @@ export const sets = pgTable('sets', {
   isPRVolume: boolean('is_pr_volume').notNull().default(false),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+}, (t) => [
+  // Volume and PR queries join sets via sessionExerciseId; createdAt used for recency ordering
+  index('sets_session_exercise_id_idx').on(t.sessionExerciseId),
+  index('sets_created_at_idx').on(t.createdAt),
+])
 
 export type Set    = typeof sets.$inferSelect
 export type NewSet = typeof sets.$inferInsert

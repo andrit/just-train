@@ -90,6 +90,11 @@ export default {
           '60%':  { transform: 'scale(1.04)' },
           '100%': { transform: 'scale(1)' },
         },
+        // Wheel roll-up — 3D drum/slot-machine reveal for mobile account menu items
+        'wheel-roll-up': {
+          '0%':   { transform: 'perspective(300px) rotateX(-25deg) translateY(8px)', opacity: '0' },
+          '100%': { transform: 'perspective(300px) rotateX(0deg)  translateY(0)',    opacity: '1' },
+        },
         // Shake — used on destructive hover to signal danger
         'shake': {
           '0%, 100%': { transform: 'translateX(0)' },
@@ -200,6 +205,7 @@ export default {
         'slide-out-right':   'slide-out-right 0.2s ease-in forwards',
         'pulse-border-amber': 'pulse-border-amber 1.5s ease-in-out infinite',
         'key-tap':            'key-tap 0.25s ease-out',
+        'wheel-roll-up':      'wheel-roll-up 200ms ease-out both',
       },
     },
   },

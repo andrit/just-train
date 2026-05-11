@@ -2,7 +2,8 @@
 // components/layout/Layout.tsx — App shell with navigation
 // ------------------------------------------------------------
 
-import { NavLink, useNavigate }  from 'react-router-dom'
+import { useState }              from 'react'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useQueryClient }        from '@tanstack/react-query'
 import { cn }              from '@/lib/cn'
 import { useOverlayStore } from '@/store/overlayStore'
@@ -72,6 +73,110 @@ function BicepLogo({ className }: { className?: string }): React.JSX.Element {
   )
 }
 
+// ── Mobile account menu ───────────────────────────────────────────────────────
+
+function UserMenuButton({
+  initials,
+  name,
+  onLogout,
+  onNavClick,
+}: {
+  initials:   string
+  name:       string
+  onLogout:   () => void
+  onNavClick: () => void
+}): React.JSX.Element {
+  const [open, setOpen]  = useState(false)
+  const { pathname }     = useLocation()
+  const isPrefsActive    = pathname === '/preferences'
+
+  const close = (): void => setOpen(false)
+
+  return (
+    <div className="relative">
+      {/* Backdrop — closes menu on outside tap */}
+      {open && (
+        <div className="fixed inset-0 z-40" onClick={close} aria-hidden />
+      )}
+
+      {/* Roll-up items — positioned above the button */}
+      {open && (
+        <div className="absolute bottom-full right-0 mb-3 z-50 flex flex-col gap-2 min-w-[172px]">
+
+          {/* Log out — rolls up second (sits above Preferences) */}
+          <button
+            type="button"
+            onClick={() => { close(); onNavClick(); onLogout() }}
+            className={cn(
+              'flex items-center gap-3 px-4 py-3 w-full text-left rounded-xl',
+              'bg-brand-accent border border-surface-border',
+              'text-sm text-gray-300 hover:text-red-400 transition-colors',
+              'animate-wheel-roll-up',
+            )}
+            style={{ animationDelay: '60ms' }}
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0" aria-hidden>
+              <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M10 11l3-3-3-3M13 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Log out
+          </button>
+
+          {/* Preferences — rolls up first (closest to nav bar) */}
+          <NavLink
+            to="/preferences"
+            onClick={() => { close(); onNavClick() }}
+            className={cn(
+              'flex items-center gap-3 px-4 py-3 rounded-xl',
+              'bg-brand-accent border border-surface-border',
+              'text-sm text-gray-300 hover:text-white transition-colors',
+              'animate-wheel-roll-up',
+            )}
+          >
+            {/* Gear spins once as it rolls in */}
+            <span
+              className="text-base leading-none shrink-0"
+              style={{ display: 'inline-block', animation: 'spin 350ms ease-out forwards' }}
+              aria-hidden
+            >
+              ⚙
+            </span>
+            Preferences
+          </NavLink>
+        </div>
+      )}
+
+      {/* Nav button — shows initials + first name */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Account menu"
+        aria-expanded={open}
+        className={cn(
+          'flex flex-col items-center gap-0.5 py-2.5 px-3',
+          'text-xs font-medium transition-colors duration-150',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+          (isPrefsActive || open) ? 'text-command-blue' : 'text-gray-500',
+        )}
+      >
+        <div className={cn(
+          'w-6 h-6 rounded-full flex items-center justify-center',
+          'border transition-colors duration-150',
+          'text-[10px] font-bold leading-none',
+          (isPrefsActive || open)
+            ? 'bg-command-blue/20 border-command-blue/50 text-command-blue'
+            : 'bg-surface-raised border-surface-border text-gray-400',
+        )}>
+          {initials}
+        </div>
+        <span className="text-[10px] mt-0.5 max-w-[52px] truncate leading-tight">
+          {name.split(' ')[0] ?? 'Me'}
+        </span>
+      </button>
+    </div>
+  )
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
@@ -97,11 +202,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
   const isAthlete = trainerMode === 'athlete'
   const navItems  = isAthlete ? athleteNav() : TRAINER_NAV
 
-  // Mobile nav always includes Preferences
-  const mobileNavItems: NavItem[] = [
-    ...navItems,
-    { path: '/preferences', label: 'Prefs', icon: '⚙' },
-  ]
+  const mobileNavItems = navItems
 
   const initials = trainer?.name
     ? trainer.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase()
@@ -319,6 +420,16 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
             <span className="text-[10px] mt-0.5">{item.label}</span>
           </NavLink>
         ))}
+
+        {/* Account button — replaces the old Prefs tab, reveals logout + prefs on tap */}
+        {trainer != null && (
+          <UserMenuButton
+            initials={initials}
+            name={trainer.name}
+            onLogout={handleLogout}
+            onNavClick={handleNavClick}
+          />
+        )}
       </nav>
 
     </div>

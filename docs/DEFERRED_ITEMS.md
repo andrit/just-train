@@ -319,3 +319,101 @@ What: AI-powered body composition estimation from progress photos. The photos ar
 ### SnapshotPhotoCapture → InlineCameraSheet Migration
 When: UX polish pass
 What: Progress photo capture currently uses `<input type="file" capture>`. Could migrate to the `InlineCameraSheet` (MediaStream API) for a more seamless experience. Lower priority since progress photos are taken less frequently than form check clips.
+
+---
+
+## Pre-3.0 Discussion Items
+
+These three items were scoped during the v2.14.0 → v3.0.0 planning window. Schedule a dedicated discussion for each after the UX/UI collaborative walkthrough and before the 3.0 SaaS phase begins — they may partially or fully fold into 3.0 scope.
+
+---
+
+### OWASP Penetration Testing
+
+**When:** After UX/UI walkthrough, before 3.0 launch. SaaS launch without a formal security audit is a significant risk — once the app charges money and holds trainer/client data it becomes a target.
+
+**What:** A structured OWASP Top 10 review of every attack surface in the app:
+
+1. **Injection** — Drizzle ORM parameterises all queries, but verify no raw SQL strings anywhere. Check Cloudinary folder paths and any string interpolation in backend routes.
+2. **Broken Authentication** — JWT signing key strength, refresh token rotation under replay, argon2id cost factor vs. current hardware benchmarks, rate limiting under distributed IP rotation.
+3. **Sensitive Data Exposure** — verify `passwordHash` never appears in any response (Fastify schema serialisation is the guard — confirm it's enforced), TLS config on Railway, cookie flags (`httpOnly`, `secure`, `sameSite`), Cloudinary URLs for private media (progress photos should not be guessable).
+4. **Broken Access Control** — every route that takes a resource ID (`:clientId`, `:sessionId`, `:exerciseId`) must verify trainer ownership. Write a systematic test matrix: does trainer A's token reach trainer B's resources?
+5. **Security Misconfiguration** — CSP headers (hardened in v2.13.0), CORS origin list, Swagger UI disabled in production, Railway env vars not committed, `.env` in `.gitignore`.
+6. **XSS** — React escapes by default but check: `dangerouslySetInnerHTML` (used in report preview iframe — verify content-origin), Cloudinary media URLs rendered as `<img src>` (fine), user-supplied session/client names rendered as text (fine).
+7. **Insecure Direct Object References** — POST `/snapshots/:id/media` and POST `/session-exercises/:id/media` upload routes: does the route verify the snapshot/session belongs to the requesting trainer before accepting the upload?
+8. **SSRF / Open Redirect** — no outbound URL fetch based on user input, but verify Cloudinary upload accepts only buffers, not URLs.
+9. **Logging & Monitoring** — does the backend log failed auth attempts? Are 4xx/5xx errors surfaced in Railway's log drain? Is there an alerting path for anomalous activity?
+10. **Dependencies** — run `pnpm audit` and address high/critical CVEs before launch. Pin or patch anything flagged.
+
+**Tools:** OWASP ZAP (automated scan against staging), Burp Suite (manual intercept testing), `pnpm audit`, manual ownership-check test matrix using the existing Vitest infrastructure.
+
+**Output:** A signed-off security checklist. Any High findings are launch blockers. Medium findings get a ticket with a deadline. Low/Informational are documented and scheduled.
+
+**Why before 3.0:** Once subscription billing is live, the app handles payment context and holds PII for paying customers. The attack surface and legal exposure both increase substantially. The audit is cheapest to do before that complexity is added.
+
+---
+
+### Products + Stripe Checkout
+
+**When:** Partially in scope for 3.0 SaaS; discuss before 3.0 to decide what ships in 3.0 vs. post-3.0.
+
+**What:** Two distinct but related capabilities:
+
+**A. Subscription plans (core 3.0 scope)**
+- Gate the existing `subscriptionTier` (free / pro / studio) behind Stripe Subscriptions
+- Pricing page at `/pricing` — feature comparison table, monthly/annual toggle, CTA per tier
+- Stripe Checkout Session created server-side: `POST /billing/create-checkout-session` → redirects to Stripe-hosted checkout
+- Webhook handler: `POST /billing/webhook` — handles `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
+- On success: update `trainers.subscriptionTier`, `trainers.subscriptionStatus`, store `stripeCustomerId` and `stripeSubscriptionId` on the trainer record
+- Customer portal: `POST /billing/portal` → Stripe-hosted portal for plan changes, payment method updates, cancellation
+- Billing gate enforcement: `POST /clients` blocked for free trainers beyond limit, `POST /auth/seed-templates` gated for studio, etc. (full matrix in `DEFERRED_ITEMS.md` under SaaS & Billing)
+
+**B. One-time products (post-3.0 discussion)**
+- Template packs (curated premium template collections), report credits (for trainers on the free tier who want to send one-off reports), export bundles (CSV export of client history)
+- Products table in DB: `products (id, name, description, stripePriceId, type: 'one_time' | 'subscription', tier: string | null, active: boolean)`
+- `trainer_purchases` table: links trainer to product, records Stripe payment intent ID
+- Checkout flow: product detail page → Stripe Checkout in `payment` mode → webhook `payment_intent.succeeded` → unlock feature
+- In-app purchase prompts: upgrade nudges on gated features link directly to the relevant product or subscription tier
+
+**Checkout UX decisions to make before building:**
+- Stripe Checkout (hosted, fastest) vs. Stripe Elements (embedded, more control) — recommend hosted for v3.0, migrate to Elements in v3.1 if conversion data justifies it
+- Annual discount strategy — 20% off annual, or flat monthly? Affects the pricing page copy and Stripe Price configuration
+- Trial strategy — 14-day trial on Pro? Stripe's trial_period_days handles this; it affects the `subscriptionStatus: 'trialing'` state already in the schema
+- Studio tier — trainer-only, team accounts eventually; what is the v3.0 studio scope?
+
+**Why schedule separately:** Subscription and product models have different Stripe objects, different webhook events, and different UX flows. Scoping them together upfront avoids building subscription infrastructure that doesn't accommodate products, and vice versa.
+
+---
+
+### Timestamped Visual Regression Testing
+
+**When:** After UX/UI collaborative walkthrough (which will establish the visual baseline), before 3.0. The color system (v2.14.0) and the SaaS launch will both change high-traffic pages significantly — regression testing catches unintended drift.
+
+**What:** Automated screenshot capture at key UI states, compared against a stored baseline with timestamps so regressions can be traced to a specific commit.
+
+**Scope — screens to cover:**
+- Login page
+- Dashboard (trainer mode + athlete mode)
+- Client profile — all 4 tabs (Overview, Timeline, Baseline, PRs)
+- Sessions page — all status tabs
+- Live session overlay (expanded + minimised pill state)
+- Session plan panel
+- Exercise library (default view + search results)
+- Template builder
+- Preferences page
+- Onboarding flow (both modes)
+- Offline banner (triggered via network intercept)
+
+**Tooling recommendation:**
+- **Playwright** (already planned for E2E in the phase roadmap) with `expect(page).toHaveScreenshot()` — creates `.png` baselines committed to the repo, fails CI on diff above threshold
+- **Percy** or **Chromatic** as an alternative if a SaaS diff viewer is preferred over committed PNG files — integrates with GitHub PR checks
+- Timestamp each snapshot in the filename: `dashboard-trainer-2026-05-11.png` — useful for the audit trail
+
+**Implementation approach:**
+1. Write Playwright test fixtures for auth (login + seed trainer state)
+2. Write snapshot tests for each screen in `tests/visual/`
+3. Add `pnpm test:visual` script to CI — runs after build, compares against baseline
+4. Baseline update is a deliberate manual step: `pnpm test:visual --update-snapshots` (not automatic — prevents silent regressions)
+5. Store baselines in `tests/visual/snapshots/` (gitignored from normal diffs, tracked separately or in CI artifacts)
+
+**Why before 3.0:** The SaaS launch introduces a pricing page, upgrade flows, and billing state variants (trialing, pastDue, cancelled) — a lot of new UI surface. Having a visual regression baseline before 3.0 means the SaaS work can't silently break the existing trainer/athlete experience. It also gives the UX/UI walkthrough a structured artifact to work from.

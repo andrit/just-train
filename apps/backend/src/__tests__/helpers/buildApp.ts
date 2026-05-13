@@ -24,6 +24,11 @@ import { sessionRoutes }         from '../../routes/sessions'
 import { templateRoutes }        from '../../routes/templates'
 import { kpiRoutes }             from '../../routes/kpis'
 import { challengeRoutes }       from '../../routes/challenges'
+import { reportRoutes }          from '../../routes/reports'
+import { mediaRoutes }           from '../../routes/media'
+import { snapshotMediaRoutes }   from '../../routes/snapshot-media'
+import { sessionExerciseMediaRoutes } from '../../routes/session-exercise-media'
+import multipart                 from '@fastify/multipart'
 
 function createBaseApp() {
   const app = Fastify({ logger: false })
@@ -97,6 +102,48 @@ export async function buildChallengeTestApp() {
   const app = createBaseApp()
   await app.register(clientRoutes,    { prefix: '/api/v1' })
   await app.register(challengeRoutes, { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildTemplateTestApp() {
+  const app = createBaseApp()
+  await app.register(templateRoutes, { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildReportTestApp() {
+  const app = createBaseApp()
+  await app.register(clientRoutes,  { prefix: '/api/v1' })
+  await app.register(reportRoutes,  { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildMediaTestApp() {
+  const app = createBaseApp()
+  await app.register(multipart as unknown as FastifyPluginCallback<Record<string, unknown>>)
+  await app.register(mediaRoutes, { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildSnapshotMediaTestApp() {
+  const app = createBaseApp()
+  await app.register(multipart as unknown as FastifyPluginCallback<Record<string, unknown>>)
+  await app.register(clientRoutes,        { prefix: '/api/v1' })
+  await app.register(clientSnapshotRoutes,{ prefix: '/api/v1' })
+  await app.register(snapshotMediaRoutes, { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildSessionExerciseMediaTestApp() {
+  const app = createBaseApp()
+  await app.register(multipart as unknown as FastifyPluginCallback<Record<string, unknown>>)
+  await app.register(sessionRoutes,             { prefix: '/api/v1' })
+  await app.register(sessionExerciseMediaRoutes,{ prefix: '/api/v1' })
   await app.ready()
   return app
 }

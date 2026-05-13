@@ -17,7 +17,7 @@
 
 import type {
   Trainer, Client, RefreshToken, ClientGoal, ClientSnapshot,
-  Session, Challenge,
+  Session, Challenge, Template, TemplateWorkout, TemplateExercise,
 } from '../../db/schema'
 
 // Stable test IDs — using fixed UUIDs makes test output easier to read
@@ -29,7 +29,11 @@ export const TEST_UNKNOWN_ID    = '99999999-9999-9999-9999-999999999999'
 export const TEST_GOAL_ID       = '55555555-5555-5555-5555-555555555555'
 export const TEST_SNAPSHOT_ID   = '66666666-6666-6666-6666-666666666666'
 export const TEST_SESSION_ID    = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
-export const TEST_CHALLENGE_ID  = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+export const TEST_CHALLENGE_ID        = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+export const TEST_TEMPLATE_ID         = 'cccccccc-cccc-cccc-cccc-cccccccccccc'
+export const TEST_TEMPLATE_WORKOUT_ID = 'dddddddd-dddd-dddd-dddd-dddddddddddd'
+export const TEST_TEMPLATE_EXERCISE_ID= 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
+export const TEST_EXERCISE_ID         = 'ffffffff-0000-0000-0000-ffffffffffff'
 
 // ── Trainer ───────────────────────────────────────────────────────────────────
 
@@ -270,4 +274,53 @@ export const validChallengeBody = {
   metricType:  'sessions_completed',
   targetValue: 20,
   deadline:    '2025-06-01',
+}
+
+// ── Template ──────────────────────────────────────────────────────────────────
+
+export function makeTemplate(overrides: Partial<Template> = {}): Template {
+  return {
+    id:          TEST_TEMPLATE_ID,
+    trainerId:   TEST_TRAINER_ID,
+    name:        'Push Day A',
+    description: null,
+    notes:       null,
+    createdAt:   new Date('2025-01-01T00:00:00Z'),
+    updatedAt:   new Date('2025-01-01T00:00:00Z'),
+    ...overrides,
+  }
+}
+
+export function makeTemplateWorkout(overrides: Partial<TemplateWorkout> = {}): TemplateWorkout {
+  return {
+    id:          TEST_TEMPLATE_WORKOUT_ID,
+    templateId:  TEST_TEMPLATE_ID,
+    workoutType: 'resistance' as const,
+    orderIndex:  0,
+    notes:       null,
+    ...overrides,
+  }
+}
+
+export function makeTemplateExercise(overrides: Partial<TemplateExercise> = {}): TemplateExercise {
+  return {
+    id:                    TEST_TEMPLATE_EXERCISE_ID,
+    templateWorkoutId:     TEST_TEMPLATE_WORKOUT_ID,
+    exerciseId:            TEST_EXERCISE_ID,
+    orderIndex:            0,
+    targetSets:            3,
+    targetReps:            8,
+    targetRepsPerSet:      null,
+    targetWeight:          60,
+    targetWeightUnit:      'lbs' as const,
+    targetDurationSeconds: null,
+    targetDistance:        null,
+    targetIntensity:       null,
+    notes:                 null,
+    ...overrides,
+  }
+}
+
+export const validTemplateBody = {
+  name: 'Push Day A',
 }

@@ -7,7 +7,13 @@
       "Bash(node_modules/.bin/tsc -p apps/frontend/tsconfig.json --noEmit)",
       "Bash(node_modules/.bin/vitest run *)",
       "Bash(pnpm --filter backend typecheck)",
-      "Bash(npx vitest *)"
+      "Bash(npx vitest *)",
+      "Bash(pnpm --filter backend test)",
+      "Bash(npx --no pnpm --filter backend test)",
+      "Bash(node apps/backend/node_modules/.bin/vitest run --reporter=verbose)",
+      "Bash(node -e ' *)",
+      "Bash(pnpm --filter backend test --reporter=verbose)",
+      "Bash(npx --yes pnpm --filter backend test --reporter=verbose)"
     ]
   }
 }

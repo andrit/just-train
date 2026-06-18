@@ -25,6 +25,7 @@ import { authenticate } from '../middleware/authenticate'
 import { db, sessions, workouts, sessionExercises, sets, clients, templateWorkouts, templateExercises } from '../db'
 import { eq, and, desc } from 'drizzle-orm'
 import { updateChallengesForSet, updateChallengesForSessionComplete } from '../services/challenge.service'
+import { logSyncWrite } from '../services/syncLog.service'
 import {
   CreateSessionSchema,
   UpdateSessionSchema,
@@ -709,6 +710,18 @@ Which fields you populate depends on the workout type:
       if (!newSet) {
         return reply.status(500).send({ error: 'Failed to record set' })
       }
+
+      // ── Sync log ────────────────────────────────────────────────────────
+      // Fire-and-forget audit entry — never blocks the set response
+      logSyncWrite({
+        trainerId:       request.trainer.trainerId,
+        deviceId:        (request.headers['x-device-id'] as string) ?? '',
+        tableName:       'sets',
+        recordId:        newSet.id,
+        operation:       'insert',
+        payload:         newSet as Record<string, unknown>,
+        localTimestamp:  request.headers['x-local-timestamp'] as string | undefined,
+      }).catch(() => {})
 
       // ── Challenge auto-progress ─────────────────────────────────────────
       // Fire-and-forget — don't block the set response on challenge updates

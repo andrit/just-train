@@ -10,17 +10,20 @@
 
 **TrainerApp is a progress narrative engine. Logging is just the input.**
 
-Every screen answers: *"Is this client moving forward?"*
+Every screen answers: *"Is this person moving forward?"*
 
 ```
 Capture → Compare → Communicate
 ```
 
-The app serves two user types with one shared infrastructure:
-- **Trainer mode** — manages a client roster, delivers monthly reports, tracks own training as a secondary feature
-- **Athlete mode** — tracks own training only, no client roster, simplified interface
+The app is built around two user types with one shared backend:
 
-Both modes share identical backend logic. The difference is entirely in what the frontend shows.
+- **Athlete** — a complete, standalone training app for one person. Logs sessions, tracks progress, plans routines. Their world is: Dashboard → My Training → Sessions → Exercises → Templates. They never see clients because they never have clients.
+- **Trainer** — everything the Athlete has (via isSelf), plus client roster, monthly reports, at-risk alerts, and billing. "My Training" is the Trainer accessing their embedded Athlete experience.
+
+**Athlete is the atom.** The Trainer's isSelf client is their bridge to that atom — not the other way around. Athlete mode is not a filtered-down Trainer view; it is the foundational experience that Trainer builds on top of.
+
+Both user types share identical backend logic. The difference is in the frontend: the Athlete has a dedicated component and routing tree; the Trainer adds a client management layer on top.
 
 ---
 
@@ -40,15 +43,17 @@ These decisions have been made and should not be revisited without a strong reas
 - **Goals are a history table** — goals shift over time, never deleted, full arc narrative in reports
 - **Snapshots are time-series** — one per rhythm (per-session subjective, monthly body comp, phase transition)
 - **Sets store their own weight unit** — historical records stay accurate if trainer switches lbs/kg
-- **isSelf client** — every trainer gets one auto-created at registration. All session/snapshot/goal routes work identically for it. This is the foundation of both self-training and athlete mode.
+- **isSelf client** — every Trainer account has one auto-created Client record at registration (`isSelf=true`). This record IS the Athlete experience from the Trainer's perspective. The Trainer accesses it via "My Training". All session/snapshot/goal routes treat it identically to any other Client. It is not a special case — it is the same Athlete feature, accessed through the Trainer account.
 - **widgetProgression stored as comma-delimited text** — never queried inside, only read/written whole. Split to array in JS.
 
 ### SaaS model
 - `trainerMode` and `subscriptionTier` are **orthogonal** — mode determines product experience, tier determines feature level and price
-- Both modes can be free or paid
-- `studio` tier is trainer-only
-- Primary billing metric: **active clients per month** (clients with ≥1 completed session in rolling 30 days)
+- Both user types can be free or paid
+- `studio` tier is Trainer-only
+- Primary billing metric for Trainers: **active clients per month** (clients with ≥1 completed session in rolling 30 days). Athletes have a separate billing model (TBD — no per-client metric applies).
 - Billing gates are documented but **not yet enforced** — see `DEFERRED_ITEMS.md`
+- **Mode upgrade (Athlete → Trainer):** An Athlete can upgrade to a Trainer account. Their Athlete profile data is ingested as the new Trainer's isSelf client. They then gain access to client roster, reports, and billing. This is a one-way upgrade — deferred, definition in progress.
+- **Mode downgrade (Trainer → Athlete):** Not supported. A Trainer who wants to become an Athlete cancels and starts a new Athlete account.
 
 ### Security
 - Access tokens: JWT, 15 min TTL, in-memory only (Zustand, never localStorage)
@@ -63,6 +68,7 @@ These decisions have been made and should not be revisited without a strong reas
 - Components never call `apiClient` directly — they use query hooks from `lib/queries/`
 - All animation values in `lib/interactions.ts` — one place to tweak
 - UX events in `lib/ux-events.ts` — semantic layer above CSS animations
+- **Athlete has a dedicated component and routing tree** — `AthleteProfilePage` is separate from `ClientProfilePage`. `/clients` and `/clients/:id` are route-guarded for Athletes (redirect to `/`). Athletes never encounter client vocabulary in the UI.
 
 ---
 
@@ -302,10 +308,10 @@ The language used in code, conversations, and documentation is the same. When in
 
 | Term | Definition | Never say |
 |---|---|---|
-| **Trainer** | The app's primary user. Could be a professional coach or an athlete tracking themselves. | User, coach, admin |
-| **Athlete** | A Trainer in athlete mode — no client roster, only self-tracking. Not a separate entity. | Self-user, personal user |
-| **Client** | A person whose training a Trainer manages. Always owned by exactly one Trainer. | Athlete (when in trainer context), student, member |
-| **Self-client** | The Client record that represents the Trainer themselves (`isSelf=true`). Auto-created at registration. | Personal profile, own record |
+| **Athlete** | A standalone user who uses the app for personal training only. First-class user type — not a filtered Trainer. Their complete world is: Dashboard, My Training, Sessions, Exercises, Templates. Never has clients. | Self-user, personal user, athlete mode |
+| **Trainer** | A user who manages a client roster plus has their own Athlete experience embedded via isSelf. Trainer = Athlete + client management layer. | User, coach, admin |
+| **Client** | A person whose training a Trainer manages. Always owned by exactly one Trainer. Never used to describe an Athlete. | Athlete (when in trainer context), student, member |
+| **Self-client** | The Client record that represents the Trainer's own Athlete experience (`isSelf=true`). Auto-created at registration. The Trainer accesses it via "My Training". To an Athlete, their entire profile is equivalent to a self-client — the term "self-client" is Trainer vocabulary. | Personal profile, own record |
 | **Session** | A single training event. Has a date, a status lifecycle, and belongs to one Client. | Workout (the whole thing), training, class |
 | **Workout** | A typed block within a Session (e.g. "Resistance", "Cardio"). Groups related exercises. | Block (informally ok in discussion), circuit |
 | **Exercise** | A named movement in the library (Squat, Run, Plank). Belongs to a Trainer or is shared. | Move, lift, drill |
@@ -434,7 +440,8 @@ Rules that the system enforces (or will enforce). Listed here so they aren't sca
 5. **Weight unit is stored per set.** Never coerce historical records if the trainer changes their preference. Display conversion is always in the UI layer.
 6. **Trainer mode and subscription tier are orthogonal.** No code should assume `athlete = free` or `trainer = paid`. Check both fields independently.
 7. **Billing gates are additive.** A free trainer can do everything a pro trainer can do, just up to a limit. Never remove capability — just cap it.
-8. **The self-client is a first-class client.** All session, goal, snapshot, and report routes treat isSelf=true identically to isSelf=false. Athlete mode is just a UI skin over this fact.
+8. **The self-client is the Trainer's bridge to the Athlete experience.** All session, goal, snapshot, and report routes treat isSelf=true identically to isSelf=false — the backend is fully shared. On the frontend, the Athlete has a dedicated component tree (AthleteProfilePage, athlete nav, athlete dashboard). The Trainer reaches this same experience via "My Training". Athlete is not a UI skin over Trainer; Trainer is an extension layer built on top of the Athlete experience.
+9. **Athletes cannot access client routes.** `/clients` and `/clients/:id` redirect Athletes to the dashboard. Athletes never encounter client vocabulary in the UI.
 
 ---
 

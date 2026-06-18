@@ -126,3 +126,42 @@ All `/api/*` requests in production route through a Vercel rewrite (see `apps/fr
 - **Set `CORS_ORIGIN`** and **`VERCEL_PROJECT_SLUG`** on Railway — needed for local dev and fallback
 
 Setting `VITE_API_URL` to the Railway URL directly bypasses the proxy → CORS errors + broken refresh cookies.
+
+## Before Making Changes
+
+1. Read the relevant docs first — they contain decisions, context, and constraints
+2. Check `docs/project-state.md` for the current inventory and what's been built
+3. Verify your plan aligns with the architecture before writing code
+4. Ask before making structural changes (new layers, new dependencies, new patterns)
+5. Check `docs/skills` to see if there are skills related to teh work that can make it quicker to accurately and efficiently complete the task
+
+
+## After Each Completed Step
+
+After finishing any numbered step or subtask (e.g. completing 5C, finishing Step 4):
+
+1. Update `docs/CHANGELOG.md` — add version notes
+2. Update `docs/PROJECT_STATE.md` — update phases list and deferred items if new ones are added or old ones were completed with this task.
+3. If any relevant changes to the Deployment process, Update `docs/DEPLOYMENT.md`
+4. Add a task description and explanation with code examples and locations of those code changes to `docs/release-notes/` directory.
+
+Do this before reporting the step as done to the user.
+
+
+## Create Skill Files for Repeated Patterns
+
+If you find yourself doing the same kind of task more than twice, create a skill file. Skills capture reusable patterns, templates, and checklists so the workbench (and you) can do them consistently.
+
+Skill file locations:
+- `/mnt/skills/user/` — user-created skills (read by Claude Code automatically)
+- `docs/skills/` — (checked into the repo)
+
+A skill file should include:
+- **When to use it** — the trigger conditions
+- **Step-by-step process** — the exact actions to take
+- **Templates/boilerplate** — code that gets reused each time
+- **Checklist** — what to verify when done
+- **Files involved** — which files to create or modify
+
+
+---

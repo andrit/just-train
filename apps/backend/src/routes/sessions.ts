@@ -1,45 +1,42 @@
 import { routeLog } from '../lib/logger'
 // ------------------------------------------------------------
-// routes/sessions.ts — Sessions, Workouts, SessionExercises, Sets
+// routes/sessions.ts — Sessions, SessionExercises, Sets
 //
 // Routes:
-//   GET    /api/v1/sessions                            → list sessions
-//   GET    /api/v1/sessions/:id                        → full session tree
-//   POST   /api/v1/sessions                            → create session
-//   PATCH  /api/v1/sessions/:id                        → update session
+//   GET    /api/v1/sessions                                → list sessions
+//   GET    /api/v1/sessions/:id                            → full session tree
+//   POST   /api/v1/sessions                                → create session
+//   PATCH  /api/v1/sessions/:id                            → update session
+//   DELETE /api/v1/sessions/:id                            → discard session
 //
-//   POST   /api/v1/sessions/:id/workouts               → add workout block
-//   PATCH  /api/v1/sessions/:sessionId/workouts/:id    → update workout block
-//   DELETE /api/v1/sessions/:sessionId/workouts/:id    → remove workout block
+//   POST   /api/v1/sessions/:id/exercises                  → add exercise to session
+//   DELETE /api/v1/session-exercises/:id                   → remove exercise from session
+//   PATCH  /api/v1/sessions/:id/exercises/reorder          → reorder exercises
 //
-//   POST   /api/v1/workouts/:workoutId/exercises        → add exercise to workout
-//   DELETE /api/v1/workouts/:workoutId/exercises/:id    → remove exercise from workout
-//
-//   POST   /api/v1/session-exercises/:id/sets           → record a set
-//   PATCH  /api/v1/sets/:id                             → edit a recorded set
-//   DELETE /api/v1/sets/:id                             → delete a set
+//   POST   /api/v1/session-exercises/:id/sets              → record a set
+//   PATCH  /api/v1/sets/:id                                → edit a recorded set
+//   DELETE /api/v1/sets/:id                                → delete a set
 // ------------------------------------------------------------
 
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
-import { db, sessions, workouts, sessionExercises, sets, clients, templateWorkouts, templateExercises } from '../db'
+import { db, sessions, sessionExercises, sets, clients, exercises, templateExercises } from '../db'
 import { eq, and, desc } from 'drizzle-orm'
 import { updateChallengesForSet, updateChallengesForSessionComplete } from '../services/challenge.service'
 import { logSyncWrite } from '../services/syncLog.service'
 import {
   CreateSessionSchema,
   UpdateSessionSchema,
-  CreateWorkoutSchema,
   AddSessionExerciseSchema,
   CreateSetSchema,
   SessionListResponseSchema,
   SessionDetailResponseSchema,
   SessionSummaryResponseSchema,
-  WorkoutResponseSchema,
   SessionExerciseResponseSchema,
   SetResponseSchema,
   ErrorResponseSchema,
   UuidParamSchema,
+  SessionStatusEnum,
 } from '@trainer-app/shared'
 import { z } from 'zod'
 
@@ -48,7 +45,7 @@ import { z } from 'zod'
 const SessionFilterSchema = z.object({
   clientId: z.string().uuid().optional()
     .describe('Filter to a specific client'),
-  status: z.enum(['planned', 'in_progress', 'completed', 'cancelled']).optional()
+  status: SessionStatusEnum.optional()
     .describe('Filter by session status'),
 })
 
@@ -58,41 +55,23 @@ const SessionChildParamSchema = z.object({
   id: z.string().uuid().describe('Child resource UUID'),
 })
 
-const WorkoutChildParamSchema = z.object({
-  workoutId: z.string().uuid().describe('Parent workout UUID'),
-  id: z.string().uuid().describe('Child resource UUID'),
-})
-
-// Serialize a session row (with or without joined client) to match
-// SessionSummaryResponseSchema — converts Date objects to ISO strings.
-// These functions operate on raw Drizzle query results which have
-// complex nested types — any is intentional here.
+// Serialize a session exercise row to match SessionExerciseResponseSchema
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeWorkout(w: any): any {
+function serializeSessionExercise(se: any): any {
   return {
-    ...w,
-    createdAt:        w.createdAt instanceof Date ? w.createdAt.toISOString() : w.createdAt,
-    updatedAt:        w.updatedAt instanceof Date ? w.updatedAt.toISOString() : w.updatedAt,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sessionExercises: (w.sessionExercises ?? []).map((se: any) => ({
-      ...se,
-      createdAt: se.createdAt instanceof Date ? se.createdAt.toISOString() : se.createdAt,
-      updatedAt: se.updatedAt instanceof Date ? se.updatedAt.toISOString() : se.updatedAt,
-      exercise: se.exercise ? {
-        ...se.exercise,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        media: (se.exercise.media ?? []).map((m: any) => ({
-          ...m,
-          createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
-          updatedAt: m.updatedAt instanceof Date ? m.updatedAt.toISOString() : m.updatedAt,
-        })),
-      } : null,
+    ...se,
+    exercise: se.exercise ? {
+      ...se.exercise,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sets: (se.sets ?? []).map((set: any) => ({
-        ...set,
-        createdAt: set.createdAt instanceof Date ? set.createdAt.toISOString() : set.createdAt,
-        updatedAt: set.updatedAt instanceof Date ? set.updatedAt.toISOString() : set.updatedAt,
+      media: (se.exercise.media ?? []).map((m: any) => ({
+        ...m,
+        createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
       })),
+    } : null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sets: (se.sets ?? []).map((set: any) => ({
+      ...set,
+      createdAt: set.createdAt instanceof Date ? set.createdAt.toISOString() : set.createdAt,
     })),
   }
 }
@@ -101,14 +80,14 @@ function serializeWorkout(w: any): any {
 function serializeSession(s: any): any {
   return {
     ...s,
-    client:    s.client
+    client:           s.client
       ? { id: s.client.id, name: s.client.name, photoUrl: s.client.photoUrl ?? null }
       : null,
-    startTime: s.startTime instanceof Date ? s.startTime.toISOString() : (s.startTime ?? null),
-    endTime:   s.endTime   instanceof Date ? s.endTime.toISOString()   : (s.endTime   ?? null),
-    createdAt: s.createdAt instanceof Date ? s.createdAt.toISOString() : s.createdAt,
-    updatedAt: s.updatedAt instanceof Date ? s.updatedAt.toISOString() : s.updatedAt,
-    workouts:  (s.workouts ?? []).map(serializeWorkout),
+    startTime:        s.startTime instanceof Date ? s.startTime.toISOString() : (s.startTime ?? null),
+    endTime:          s.endTime   instanceof Date ? s.endTime.toISOString()   : (s.endTime   ?? null),
+    createdAt:        s.createdAt instanceof Date ? s.createdAt.toISOString() : s.createdAt,
+    updatedAt:        s.updatedAt instanceof Date ? s.updatedAt.toISOString() : s.updatedAt,
+    sessionExercises: (s.sessionExercises ?? []).map(serializeSessionExercise),
   }
 }
 
@@ -184,16 +163,11 @@ This is the primary payload for the active workout view — loaded once when the
         ),
         with: {
           client: true,
-          workouts: {
-            orderBy: workouts.orderIndex,
+          sessionExercises: {
+            orderBy: sessionExercises.orderIndex,
             with: {
-              sessionExercises: {
-                orderBy: sessionExercises.orderIndex,
-                with: {
-                  exercise: { with: { bodyPart: true, media: true } },
-                  sets: { orderBy: sets.setNumber },
-                },
-              },
+              exercise: { with: { bodyPart: true, media: true } },
+              sets: { orderBy: sets.setNumber },
             },
           },
         },
@@ -251,47 +225,30 @@ This is the primary payload for the active workout view — loaded once when the
       }
 
       // ── Apply template if provided ───────────────────────────────────────
-      // Deep-copy template workouts + exercises into the new session
+      // template_exercises → session_exercises (flat, ordered by template orderIndex)
+      // workoutType is copied from the template exercise record at add time.
       if (body.templateId) {
-        const templateData = await db.query.templateWorkouts.findMany({
-          where: eq(templateWorkouts.templateId, body.templateId),
-          orderBy: templateWorkouts.orderIndex,
-          with: {
-            templateExercises: {
-              orderBy: templateExercises.orderIndex,
-            },
-          },
+        const templateData = await db.query.templateExercises.findMany({
+          where:   eq(templateExercises.templateId, body.templateId),
+          orderBy: templateExercises.orderIndex,
         })
 
-        for (const tw of templateData) {
-          const [newWorkout] = await db
-            .insert(workouts)
-            .values({
-              sessionId:   newSession.id,
-              workoutType: tw.workoutType,
-              orderIndex:  tw.orderIndex,
-              notes:       tw.notes ?? null,
-            })
-            .returning()
-
-          if (!newWorkout) continue
-
-          for (const te of tw.templateExercises) {
-            await db.insert(sessionExercises).values({
-              workoutId:             newWorkout.id,
-              exerciseId:            te.exerciseId,
-              orderIndex:            te.orderIndex,
-              targetSets:            te.targetSets      ?? null,
-              targetReps:            te.targetReps      ?? null,
-              targetRepsPerSet:      te.targetRepsPerSet ?? null,
-              targetWeight:          te.targetWeight    ?? null,
-              targetWeightUnit:      te.targetWeightUnit,
-              targetDurationSeconds: te.targetDurationSeconds ?? null,
-              targetDistance:        te.targetDistance        ?? null,
-              targetIntensity:       te.targetIntensity       ?? null,
-              notes:                 te.notes ?? null,
-            })
-          }
+        for (const te of templateData) {
+          await db.insert(sessionExercises).values({
+            sessionId:             newSession.id,
+            exerciseId:            te.exerciseId,
+            workoutType:           te.workoutType as never,
+            orderIndex:            te.orderIndex,
+            targetSets:            te.targetSets            ?? null,
+            targetReps:            te.targetReps            ?? null,
+            targetRepsPerSet:      te.targetRepsPerSet      ?? null,
+            targetWeight:          te.targetWeight          ?? null,
+            targetWeightUnit:      te.targetWeightUnit,
+            targetDurationSeconds: te.targetDurationSeconds ?? null,
+            targetDistance:        te.targetDistance        ?? null,
+            targetIntensity:       te.targetIntensity       ?? null,
+            notes:                 te.notes                 ?? null,
+          })
         }
       }
       // ── End template application ─────────────────────────────────────────
@@ -423,170 +380,95 @@ This is the primary payload for the active workout view — loaded once when the
   })
 
   // ----------------------------------------------------------
-  // POST /sessions/:id/workouts — Add a workout block to a session
+  // POST /sessions/:id/exercises — Add an exercise directly to a session
+  //
+  // workoutType is looked up from the exercise library at add time and
+  // denormalized onto the session_exercise row for display grouping.
   // ----------------------------------------------------------
-  app.post('/sessions/:id/workouts', {
+  app.post('/sessions/:id/exercises', {
     schema: {
       tags: ['Sessions'],
       security: [{ bearerAuth: [] }],
-      summary: 'Add a workout block',
-      description: `Adds a workout block (e.g. 'resistance', 'cardio') to a session.
+      summary: 'Add exercise to a session',
+      description: `Adds an exercise from the library directly to a session.
 
-The \`orderIndex\` controls where this block sits in the session. Suggested defaults:
-- cardio → 1
-- stretching → 2  
-- calisthenics / resistance → 3
-- cooldown → 4
+The exercise's \`workoutType\` is automatically copied from the library at add time for grouping purposes.
 
-These are suggestions — the trainer can use any order.`,
+Optionally set target values (\`targetSets\`, \`targetReps\`, \`targetWeight\`) as goals — actuals are recorded separately in sets.
+
+To add an exercise not in the library, first call \`POST /exercises/quick-add\` to create it, then use the returned ID here.`,
       params: UuidParamSchema,
-      body: CreateWorkoutSchema.omit({ sessionId: true }),
+      body: AddSessionExerciseSchema,
       response: {
-        201: WorkoutResponseSchema,
+        201: SessionExerciseResponseSchema,
         400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
   }, async (request, reply) => {
     const { id: sessionId } = request.params as z.infer<typeof UuidParamSchema>
-    const body = request.body as Omit<z.infer<typeof CreateWorkoutSchema>, 'sessionId'>
+    const body = request.body as z.infer<typeof AddSessionExerciseSchema>
 
     try {
-      // Auto-assign orderIndex if not provided — append after existing blocks
-      let { orderIndex } = body
-      if (orderIndex === undefined) {
-        const existing = await db.query.workouts.findMany({
-          where: eq(workouts.sessionId, sessionId),
-          columns: { orderIndex: true },
-        })
-        orderIndex = existing.length + 1
+      // Look up workoutType from exercise library
+      const exercise = await db.query.exercises.findFirst({
+        where: eq(exercises.id, body.exerciseId),
+        columns: { workoutType: true },
+      })
+      if (!exercise) {
+        return reply.status(404).send({ error: 'Exercise not found' })
       }
 
-      const [newWorkout] = await db
-        .insert(workouts)
-        .values({ ...body, orderIndex, sessionId })
-        .returning()
-
-      // Return the full workout shape the schema expects (sessionExercises is empty on create)
-      return reply.status(201).send(serializeWorkout({
-        ...newWorkout,
-        sessionExercises: [],
-      }))
-    } catch (error) {
-      ;routeLog(app).error(error)
-      return reply.status(500).send({ error: 'Failed to add workout block' })
-    }
-  })
-
-  // ----------------------------------------------------------
-  // DELETE /sessions/:sessionId/workouts/:id — Remove a workout block
-  // ----------------------------------------------------------
-  app.delete('/sessions/:sessionId/workouts/:id', {
-    schema: {
-      tags: ['Sessions'],
-      security: [{ bearerAuth: [] }],
-      summary: 'Remove a workout block',
-      description: 'Removes a workout block and all its exercises and recorded sets from the session. This cannot be undone.',
-      params: SessionChildParamSchema,
-      response: {
-        204: z.null().describe('Workout block removed'),
-        404: ErrorResponseSchema,
-        500: ErrorResponseSchema,
-      },
-    },
-  }, async (request, reply) => {
-    const { id } = request.params as z.infer<typeof SessionChildParamSchema>
-
-    try {
-      const [deleted] = await db
-        .delete(workouts)
-        .where(eq(workouts.id, id))
-        .returning()
-
-      if (!deleted) {
-        return reply.status(404).send({ error: 'Workout block not found' })
-      }
-
-      return reply.status(204).send()
-    } catch (error) {
-      ;routeLog(app).error(error)
-      return reply.status(500).send({ error: 'Failed to remove workout block' })
-    }
-  })
-
-  // ----------------------------------------------------------
-  // POST /workouts/:workoutId/exercises — Add an exercise to a workout block
-  // ----------------------------------------------------------
-  app.post('/workouts/:workoutId/exercises', {
-    schema: {
-      tags: ['Sessions'],
-      security: [{ bearerAuth: [] }],
-      summary: 'Add exercise to a workout block',
-      description: `Adds an exercise from the library to a workout block in the session.
-
-Optionally set target values (\`targetSets\`, \`targetReps\`, \`targetWeight\`) as goals — actuals are recorded separately in sets.
-
-To add an exercise not in the library, first call \`POST /exercises/quick-add\` to create it, then use the returned ID here.`,
-      params: z.object({
-        workoutId: z.string().uuid().describe('Workout block UUID'),
-      }),
-      body: AddSessionExerciseSchema.omit({ workoutId: true }),
-      response: {
-        201: SessionExerciseResponseSchema,
-        400: ErrorResponseSchema,
-        500: ErrorResponseSchema,
-      },
-    },
-  }, async (request, reply) => {
-    const { workoutId } = request.params as { workoutId: string }
-    const body = request.body as Omit<z.infer<typeof AddSessionExerciseSchema>, 'workoutId'>
-
-    try {
-      // Auto-assign orderIndex if not provided
+      // Auto-assign orderIndex if not provided — append after existing exercises
       let { orderIndex } = body
       if (orderIndex === undefined) {
         const existing = await db.query.sessionExercises.findMany({
-          where: eq(sessionExercises.workoutId, workoutId),
+          where: eq(sessionExercises.sessionId, sessionId),
           columns: { orderIndex: true },
         })
-        orderIndex = existing.length + 1
+        orderIndex = existing.length
       }
 
-      const [newSessionExercise] = await db
+      const [newSE] = await db
         .insert(sessionExercises)
-        .values({ ...body, orderIndex, workoutId })
+        .values({
+          ...body,
+          sessionId,
+          workoutType: exercise.workoutType as never,
+          orderIndex,
+        })
         .returning()
 
-      // Response schema expects exercise + sets relations
       return reply.status(201).send({
-        ...newSessionExercise,
+        ...newSE,
         exercise: null,
         sets:     [],
       })
     } catch (error) {
       ;routeLog(app).error(error)
-      return reply.status(500).send({ error: 'Failed to add exercise to workout' })
+      return reply.status(500).send({ error: 'Failed to add exercise to session' })
     }
   })
 
   // ----------------------------------------------------------
-  // DELETE /workouts/:workoutId/exercises/:id
+  // DELETE /session-exercises/:id — Remove an exercise from a session
   // ----------------------------------------------------------
-  app.delete('/workouts/:workoutId/exercises/:id', {
+  app.delete('/session-exercises/:id', {
     schema: {
       tags: ['Sessions'],
       security: [{ bearerAuth: [] }],
-      summary: 'Remove exercise from a workout block',
-      description: 'Removes an exercise and all its recorded sets from a workout block.',
-      params: WorkoutChildParamSchema,
+      summary: 'Remove exercise from a session',
+      description: 'Removes an exercise and all its recorded sets from a session.',
+      params: UuidParamSchema,
       response: {
-        204: z.null().describe('Exercise removed from workout'),
+        204: z.null().describe('Exercise removed'),
         404: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
   }, async (request, reply) => {
-    const { id } = request.params as z.infer<typeof WorkoutChildParamSchema>
+    const { id } = request.params as z.infer<typeof UuidParamSchema>
 
     try {
       const [deleted] = await db
@@ -649,12 +531,8 @@ Which fields you populate depends on the workout type:
       const seRow = await db.query.sessionExercises.findFirst({
         where: eq(sessionExercises.id, sessionExerciseId),
         with: {
-          workout: {
-            with: {
-              session: {
-                columns: { clientId: true },
-              },
-            },
+          session: {
+            columns: { clientId: true },
           },
         },
       })
@@ -670,7 +548,7 @@ Which fields you populate depends on the workout type:
         const newVolume = body.weight * body.reps
 
         if (seRow) {
-          const clientId    = seRow.workout.session.clientId
+          const clientId    = seRow.session.clientId
           const exerciseId  = seRow.exerciseId
 
           // Query all historical sets for this client + exercise
@@ -678,8 +556,7 @@ Which fields you populate depends on the workout type:
             .select({ weight: sets.weight, reps: sets.reps })
             .from(sets)
             .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
-            .innerJoin(workouts, eq(sessionExercises.workoutId, workouts.id))
-            .innerJoin(sessions, eq(workouts.sessionId, sessions.id))
+            .innerJoin(sessions, eq(sessionExercises.sessionId, sessions.id))
             .where(
               and(
                 eq(sessions.clientId, clientId),
@@ -727,7 +604,7 @@ Which fields you populate depends on the workout type:
       // Fire-and-forget — don't block the set response on challenge updates
       if (seRow) {
         updateChallengesForSet(
-          seRow.workout.session.clientId,
+          seRow.session.clientId,
           seRow.exerciseId,
           {
             weight:          body.weight,
@@ -828,21 +705,20 @@ Which fields you populate depends on the workout type:
   })
 
   // ----------------------------------------------------------
-  // PATCH /sessions/:id/workouts/reorder
-  // Accepts an ordered array of workout IDs and updates their
-  // orderIndex values. Used by drag-to-reorder in plan builder.
+  // PATCH /sessions/:id/exercises/reorder
+  // Accepts a globally-ordered array of session exercise IDs.
   // ----------------------------------------------------------
-  app.patch('/sessions/:id/workouts/reorder', {
+  app.patch('/sessions/:id/exercises/reorder', {
     schema: {
       tags: ['Sessions'], security: [{ bearerAuth: [] }],
-      summary: 'Reorder workout blocks',
+      summary: 'Reorder exercises in a session',
       params: z.object({ id: z.string().uuid() }),
       body:   z.object({ orderedIds: z.array(z.string().uuid()) }),
       response: { 204: z.object({}), 403: ErrorResponseSchema, 500: ErrorResponseSchema },
     },
   }, async (request, reply) => {
-    const { id: sessionId }  = request.params as { id: string }
-    const { orderedIds }     = request.body as { orderedIds: string[] }
+    const { id: sessionId } = request.params as { id: string }
+    const { orderedIds }    = request.body as { orderedIds: string[] }
     try {
       // Verify session belongs to this trainer
       const session = await db.query.sessions.findFirst({
@@ -851,42 +727,11 @@ Which fields you populate depends on the workout type:
       })
       if (!session) return reply.status(403).send({ error: 'Not authorised' })
 
-      // Update each workout's orderIndex in parallel
-      await Promise.all(
-        orderedIds.map((workoutId, index) =>
-          db.update(workouts)
-            .set({ orderIndex: index })
-            .where(and(eq(workouts.id, workoutId), eq(workouts.sessionId, sessionId)))
-        )
-      )
-      return reply.status(204).send()
-    } catch (error) {
-      ;routeLog(app).error(error)
-      return reply.status(500).send({ error: 'Failed to reorder workout blocks' })
-    }
-  })
-
-  // ----------------------------------------------------------
-  // PATCH /workouts/:workoutId/exercises/reorder
-  // Accepts an ordered array of session exercise IDs.
-  // ----------------------------------------------------------
-  app.patch('/workouts/:workoutId/exercises/reorder', {
-    schema: {
-      tags: ['Sessions'], security: [{ bearerAuth: [] }],
-      summary: 'Reorder exercises within a workout block',
-      params: z.object({ workoutId: z.string().uuid() }),
-      body:   z.object({ orderedIds: z.array(z.string().uuid()) }),
-      response: { 204: z.object({}), 500: ErrorResponseSchema },
-    },
-  }, async (request, reply) => {
-    const { workoutId } = request.params as { workoutId: string }
-    const { orderedIds } = request.body as { orderedIds: string[] }
-    try {
       await Promise.all(
         orderedIds.map((exId, index) =>
           db.update(sessionExercises)
             .set({ orderIndex: index })
-            .where(and(eq(sessionExercises.id, exId), eq(sessionExercises.workoutId, workoutId)))
+            .where(and(eq(sessionExercises.id, exId), eq(sessionExercises.sessionId, sessionId)))
         )
       )
       return reply.status(204).send()

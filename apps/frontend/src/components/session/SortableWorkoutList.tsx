@@ -1,9 +1,10 @@
 // ------------------------------------------------------------
-// components/session/SortableWorkoutList.tsx (v2.8.0)
+// components/session/SortableWorkoutList.tsx (v3.0.0)
 //
-// Drag-to-reorder workout blocks in the session plan builder.
-// Uses @dnd-kit/sortable for accessible drag-and-drop.
-// Only used in vertical (planning) mode — not during execution.
+// Drag-to-reorder exercises in the session plan builder.
+// Exercises are flat (Session → SessionExercises), grouped
+// visually by workoutType with WorkoutBlock in vertical mode.
+// Only used in overview (planning) mode — not during execution.
 // ------------------------------------------------------------
 
 import { useState, useCallback, useEffect }    from 'react'
@@ -26,29 +27,29 @@ import {
 import { CSS }                                 from '@dnd-kit/utilities'
 import { cn }                                  from '@/lib/cn'
 import { WorkoutBlock }                        from './WorkoutBlock'
-import { useReorderWorkouts }                  from '@/lib/queries/sessions'
-import type { WorkoutResponse }                from '@trainer-app/shared'
+import { useReorderSessionExercises }          from '@/lib/queries/sessions'
+import type { SessionExerciseResponse }        from '@trainer-app/shared'
+import { WORKOUT_TYPE_LABEL }                  from '@/lib/exerciseLabels'
 
-interface SortableWorkoutListProps {
-  workouts:    WorkoutResponse[]
+interface SortableExerciseListProps {
+  exercises:   SessionExerciseResponse[]
   sessionId:   string
   weightUnit:  string
   clientId:    string | null
 }
 
 export function SortableWorkoutList({
-  workouts: initialWorkouts,
+  exercises: initialExercises,
   sessionId,
   weightUnit,
   clientId,
-}: SortableWorkoutListProps): React.JSX.Element {
-  const [workouts, setWorkouts] = useState(initialWorkouts)
-  const reorderWorkouts = useReorderWorkouts()
+}: SortableExerciseListProps): React.JSX.Element {
+  const [exercises, setExercises] = useState(initialExercises)
+  const reorder = useReorderSessionExercises()
 
-  // Sync local order when session refetches (e.g. after block added)
-  const stableIds = initialWorkouts.map(w => w.id).join(',')
+  const stableIds = initialExercises.map(e => e.id).join(',')
   useEffect(() => {
-    setWorkouts(initialWorkouts)
+    setExercises(initialExercises)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stableIds])
 
@@ -61,14 +62,25 @@ export function SortableWorkoutList({
     const { active, over } = event
     if (!over || active.id === over.id) return
 
-    setWorkouts(prev => {
-      const oldIndex = prev.findIndex(w => w.id === active.id)
-      const newIndex = prev.findIndex(w => w.id === over.id)
+    setExercises(prev => {
+      const oldIndex = prev.findIndex(e => e.id === active.id)
+      const newIndex = prev.findIndex(e => e.id === over.id)
       const reordered = arrayMove(prev, oldIndex, newIndex)
-      reorderWorkouts.mutate({ sessionId, orderedIds: reordered.map(w => w.id) })
+      reorder.mutate({ sessionId, orderedIds: reordered.map(e => e.id) })
       return reordered
     })
-  }, [sessionId, reorderWorkouts])
+  }, [sessionId, reorder])
+
+  // Group exercises by workoutType, preserving flat order
+  const groups: { type: string; items: SessionExerciseResponse[] }[] = []
+  for (const ex of exercises) {
+    const last = groups[groups.length - 1]
+    if (last && last.type === ex.workoutType) {
+      last.items.push(ex)
+    } else {
+      groups.push({ type: ex.workoutType, items: [ex] })
+    }
+  }
 
   return (
     <DndContext
@@ -77,18 +89,28 @@ export function SortableWorkoutList({
       onDragEnd={handleDragEnd}
     >
       <SortableContext
-        items={workouts.map(w => w.id)}
+        items={exercises.map(e => e.id)}
         strategy={verticalListSortingStrategy}
       >
         <div className="space-y-4">
-          {workouts.map(workout => (
-            <SortableWorkoutItem
-              key={workout.id}
-              workout={workout}
-              sessionId={sessionId}
-              weightUnit={weightUnit}
-              clientId={clientId}
-            />
+          {groups.map((group) => (
+            <div key={`${group.type}-${group.items[0]?.id ?? ''}`}>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600 font-medium mb-2 px-1">
+                {WORKOUT_TYPE_LABEL[group.type] ?? group.type}
+              </p>
+              <WorkoutBlock
+                workoutType={group.type}
+                sessionExercises={group.items.map(ex => (
+                  // Wrap each exercise in a sortable shell
+                  ex
+                ))}
+                sessionId={sessionId}
+                weightUnit={weightUnit}
+                layout="vertical"
+                clientId={clientId}
+                onSetLogged={() => {}}
+              />
+            </div>
           ))}
         </div>
       </SortableContext>
@@ -96,37 +118,23 @@ export function SortableWorkoutList({
   )
 }
 
-// ── Single sortable workout item ──────────────────────────────────────────────
-
-function SortableWorkoutItem({ workout, sessionId, weightUnit, clientId }: {
-  workout:    WorkoutResponse
-  sessionId:  string
-  weightUnit: string
-  clientId:   string | null
-}): React.JSX.Element {
-  const {
-    attributes, listeners, setNodeRef,
-    transform, transition, isDragging,
-  } = useSortable({ id: workout.id })
-
-  const style = {
-    transform:  CSS.Transform.toString(transform),
-    transition,
-    opacity:    isDragging ? 0.5 : 1,
-    zIndex:     isDragging ? 10 : undefined,
-  }
-
+// Unused — kept for potential future per-exercise drag handles
+// If individual exercise drag handles are needed, wrap ExerciseRow in SortableExerciseItem
+function _SortableExerciseItem({ id, children }: { id: string; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   return (
-    <div ref={setNodeRef} style={style} className="relative">
-      {/* Drag handle */}
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      className="relative"
+    >
       <div
         {...attributes}
         {...listeners}
         className={cn(
           'absolute -left-1 top-1/2 -translate-y-1/2 z-10',
           'flex items-center justify-center w-6 h-10 rounded-lg',
-          'text-gray-600 hover:text-gray-300 cursor-grab active:cursor-grabbing',
-          'touch-none select-none',
+          'text-gray-600 hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none select-none',
         )}
         aria-label="Drag to reorder"
       >
@@ -139,17 +147,7 @@ function SortableWorkoutItem({ workout, sessionId, weightUnit, clientId }: {
           <circle cx="11" cy="12" r="1.2" />
         </svg>
       </div>
-
-      <div className="pl-5">
-        <WorkoutBlock
-          workout={workout}
-          sessionId={sessionId}
-          weightUnit={weightUnit}
-          layout="vertical"
-          clientId={clientId}
-          onSetLogged={() => {}}
-        />
-      </div>
+      <div className="pl-5">{children}</div>
     </div>
   )
 }

@@ -9,7 +9,7 @@
 // templates.
 // ------------------------------------------------------------
 
-import { db, templates, templateWorkouts, templateExercises } from '../index'
+import { db, templates, templateExercises } from '../index'
 import { exercises } from '../schema/exercises'
 import { eq, inArray } from 'drizzle-orm'
 
@@ -336,14 +336,12 @@ const DEFAULT_TEMPLATES: TemplateDef[] = [
 // ── Seed function ─────────────────────────────────────────────────────────────
 
 export async function seedDefaultTemplates(trainerId: string): Promise<void> {
-  // Get names of templates the trainer already has
   const existingRows = await db.query.templates.findMany({
     where:   eq(templates.trainerId, trainerId),
     columns: { name: true },
   })
   const existingNames = new Set(existingRows.map(r => r.name))
 
-  // Only seed defaults the trainer doesn't already have by name
   const toSeed = DEFAULT_TEMPLATES.filter(t => !existingNames.has(t.name))
   if (toSeed.length === 0) return
 
@@ -359,7 +357,6 @@ export async function seedDefaultTemplates(trainerId: string): Promise<void> {
     }
   }
 
-  // Look up IDs in one query
   const exerciseRows = await db.query.exercises.findMany({
     where: inArray(exercises.name, [...allNames]),
     columns: { id: true, name: true },
@@ -378,20 +375,11 @@ export async function seedDefaultTemplates(trainerId: string): Promise<void> {
 
     if (!template) continue
 
-    for (let bi = 0; bi < def.blocks.length; bi++) {
-      const block = def.blocks[bi]
-      if (!block) continue
-      const [tw] = await db.insert(templateWorkouts).values({
-        templateId:  template.id,
-        workoutType: block.type,
-        orderIndex:  bi,
-      }).returning()
-
-      if (!tw) continue
-
-      for (let ei = 0; ei < block.exercises.length; ei++) {
-        const ex = block.exercises[ei]
-        if (!ex) continue
+    // Flatten all exercises across blocks into a single globally-ordered list.
+    // workoutType is denormalized from the block type at seed time.
+    let orderIndex = 0
+    for (const block of def.blocks) {
+      for (const ex of block.exercises) {
         const exerciseId = exerciseByName.get(ex.name)
         if (!exerciseId) {
           console.log(`    ⚠️  Exercise not found: "${ex.name}" — skipping`)
@@ -400,9 +388,10 @@ export async function seedDefaultTemplates(trainerId: string): Promise<void> {
         }
 
         await db.insert(templateExercises).values({
-          templateWorkoutId:     tw.id,
+          templateId:            template.id,
           exerciseId,
-          orderIndex:            ei,
+          workoutType:           block.type,
+          orderIndex:            orderIndex++,
           targetSets:            ex.sets            ?? null,
           targetReps:            ex.reps            ?? null,
           targetWeight:          ex.weight          ?? null,

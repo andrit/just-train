@@ -25,7 +25,7 @@ export default defineConfig({
 
       // Include these file patterns in the service worker's precache.
       // Everything in the precache is available offline immediately.
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png', 'icons/*-maskable.png'],
 
       // Web App Manifest — defines how the app appears when installed
       // on a home screen (name, icon, colors, display mode).
@@ -80,8 +80,13 @@ export default defineConfig({
             src: '/icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
-            // 'any maskable' — allows the OS to apply its own icon shape
-            purpose: 'any maskable',
+            purpose: 'any',
+          },
+          {
+            src: '/icons/icon-192x192-maskable.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
           },
           {
             src: '/icons/icon-384x384.png',
@@ -92,9 +97,21 @@ export default defineConfig({
             src: '/icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable',
+            purpose: 'any',
+          },
+          {
+            src: '/icons/icon-512x512-maskable.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
+      },
+
+      // Enable service worker in development so DevTools shows it as active.
+      // Uses a virtual SW that mirrors production behaviour without precaching.
+      devOptions: {
+        enabled: true,
       },
 
       // Workbox service worker configuration

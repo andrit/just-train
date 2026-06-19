@@ -69,7 +69,7 @@ export function SessionPlanPanel({
   // ── Save current session plan as a template ───────────────────────────────
   // Opens name prompt — then saves and shows toast on success
   const handleSaveAsTemplate = (): void => {
-    if (!session || !workouts.length) return
+    if (!session || !(session.sessionExercises ?? []).length) return
     setNamePromptOpen(true)
   }
 
@@ -196,7 +196,7 @@ export function SessionPlanPanel({
     )
   }
 
-  const workouts   = session?.workouts ?? []
+  const sessionExercises = session?.sessionExercises ?? []
   const clientName = selectedClientId
     ? (clients?.find(c => c.id === selectedClientId)?.name ?? selfClient?.name ?? 'Client')
     : null
@@ -257,7 +257,7 @@ export function SessionPlanPanel({
                 </button>
 
                 {/* Save as template */}
-                {sessionId && workouts.length > 0 && (
+                {sessionId && sessionExercises.length > 0 && (
                   <button
                     type="button"
                     onClick={handleSaveAsTemplate}
@@ -302,7 +302,7 @@ export function SessionPlanPanel({
                 )}
 
                 {/* Execute — only when session has blocks */}
-                {sessionId && workouts.length > 0 && (
+                {sessionId && sessionExercises.length > 0 && (
                   <button
                     type="button"
                     onClick={handleExecute}
@@ -401,7 +401,7 @@ export function SessionPlanPanel({
           <div className="flex justify-center py-12">
             <Spinner size="lg" className="text-command-blue" />
           </div>
-        ) : workouts.length === 0 ? (
+        ) : sessionExercises.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-3xl mb-4" aria-hidden>📋</p>
             <p className="text-gray-300 font-medium mb-1">Plan your session</p>
@@ -459,7 +459,7 @@ export function SessionPlanPanel({
           </div>
         ) : (
           <SortableWorkoutList
-            workouts={workouts}
+            exercises={sessionExercises}
             sessionId={sessionId ?? ''}
             weightUnit={weightUnit}
             clientId={selectedClientId}
@@ -468,7 +468,7 @@ export function SessionPlanPanel({
       </div>
 
       {/* Add block FAB */}
-      {sessionId && workouts.length > 0 && (
+      {sessionId && sessionExercises.length > 0 && (
         <button
           type="button"
           onClick={handleAddBlock}

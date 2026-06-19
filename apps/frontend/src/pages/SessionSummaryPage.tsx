@@ -54,21 +54,15 @@ export default function SessionSummaryPage(): React.JSX.Element {
     )
   }
 
-  // Compute stats from the session tree
-  const workouts   = session.workouts ?? []
-  const totalSets  = workouts.reduce(
-    (acc, w) => acc + w.sessionExercises.reduce((a, se) => a + se.sets.length, 0), 0
+  // Compute stats from the flat session exercise list
+  const sessionExercises = session.sessionExercises ?? []
+  const totalSets  = sessionExercises.reduce((acc, se) => acc + se.sets.length, 0)
+  const totalReps  = sessionExercises.reduce(
+    (acc, se) => acc + se.sets.reduce((s, set) => s + (set.reps ?? 0), 0), 0
   )
-  const totalReps  = workouts.reduce(
-    (acc, w) => acc + w.sessionExercises.reduce(
-      (a, se) => a + se.sets.reduce((s, set) => s + (set.reps ?? 0), 0), 0
-    ), 0
-  )
-  const totalVolume = workouts.reduce(
-    (acc, w) => acc + w.sessionExercises.reduce(
-      (a, se) => a + se.sets.reduce(
-        (s, set) => s + ((set.weight ?? 0) * (set.reps ?? 0)), 0
-      ), 0
+  const totalVolume = sessionExercises.reduce(
+    (acc, se) => acc + se.sets.reduce(
+      (s, set) => s + ((set.weight ?? 0) * (set.reps ?? 0)), 0
     ), 0
   )
 

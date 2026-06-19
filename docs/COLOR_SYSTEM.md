@@ -9,9 +9,10 @@
 
 | Name | Hex | Role |
 |---|---|---|
-| **Forge Black** | `#000000` | Absolute ground. Foundation surface. |
+| **Forge Black** | `#000000` | Absolute ground. Used for depth and shadows. |
+| **Near Black** | `#0d0d0d` | Page background. Carries the crosshatch texture. |
 | **Chalk White** | `#FFFFFF` | Absolute light. Primary text on dark. |
-| **Iron Grey** | `#8A9099` | Structure. Neutral body. Secondary text and borders. |
+| **Iron Grey** | `#8A9099` | Structure. Secondary text, borders, and crosshatch thread colour. |
 | **Ember Red** | `#D91B1B` | Intensity design element. |
 | **Command Blue** | `#1B50D9` | Action design element. |
 | **Signal Yellow** | `#FFE200` | Notification design element. |
@@ -170,8 +171,9 @@ Token names in `tailwind.config.js`:
 colors: {
   // Neutral foundation
   'forge-black':   '#000000',
+  'near-black':    '#0d0d0d',  // page background — carries crosshatch texture
   'chalk-white':   '#FFFFFF',
-  'iron-grey':     '#8A9099',  // also mapped to brand.primary (page background)
+  'iron-grey':     '#8A9099',  // secondary text, borders, crosshatch thread
 
   // Chromatic accents — semantic, not decorative
   'ember-red':     '#D91B1B',  // intensity

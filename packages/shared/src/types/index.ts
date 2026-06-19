@@ -24,6 +24,7 @@ import type {
   PhotoSharingPreference,
   ChallengeMetricType,
   ChallengeStatus,
+  TemplateType,
 } from '../enums/index'
 
 // ============================================================
@@ -106,26 +107,19 @@ export interface Template {
   id: string
   trainerId: string
   name: string
+  type: TemplateType
   description?: string
   notes?: string
-  templateWorkouts?: TemplateWorkout[] // joined when fetching full template
+  templateExercises?: TemplateExercise[] // joined when fetching full template
   createdAt: string
   updatedAt: string
 }
 
-export interface TemplateWorkout {
-  id: string
-  templateId: string
-  workoutType: WorkoutType
-  orderIndex: number
-  notes?: string
-  templateExercises?: TemplateExercise[]
-}
-
 export interface TemplateExercise {
   id: string
-  templateWorkoutId: string
+  templateId: string
   exerciseId: string
+  workoutType: WorkoutType // inherited from exercise at add time
   exercise?: Exercise // joined
   orderIndex: number
   targetSets?: number
@@ -154,27 +148,17 @@ export interface Session {
   endTime?: string
   status: SessionStatus
   notes?: string
-  workouts?: Workout[] // joined when fetching full session
+  sessionExercises?: SessionExercise[] // joined when fetching full session
   createdAt: string
   updatedAt: string
 }
 
-// A workout block within a session (e.g. the 'resistance' block for arms & back)
-export interface Workout {
-  id: string
-  sessionId: string
-  workoutType: WorkoutType
-  orderIndex: number
-  notes?: string
-  sessionExercises?: SessionExercise[] // joined when fetching full workout
-  createdAt: string
-}
-
-// An exercise added to a workout block in a session
+// An exercise added directly to a session
 export interface SessionExercise {
   id: string
-  workoutId: string
+  sessionId: string
   exerciseId: string
+  workoutType: WorkoutType // inherited from exercise at add time
   exercise?: Exercise // joined
   orderIndex: number
   targetSets?: number

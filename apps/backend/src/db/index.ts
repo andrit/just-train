@@ -53,12 +53,10 @@ export const {
 
   // Templates
   templates,
-  templateWorkouts,
   templateExercises,
 
   // Sessions
   sessions,
-  workouts,
   sessionExercises,
   sets,
   syncLog,

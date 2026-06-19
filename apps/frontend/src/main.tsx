@@ -17,6 +17,11 @@ import { ErrorBoundary } from './components/shell/ErrorBoundary'
 import './index.css'
 import { syncService, SYNC_COMPLETE_EVENT } from './services/syncService'
 import { ApiError } from './lib/api'
+import { capturePWAInstallPrompt } from './lib/pwaInstall'
+
+// Register beforeinstallprompt listener before React mounts — the browser fires
+// this event early and it won't repeat, so the listener must be in place first.
+capturePWAInstallPrompt()
 
 const queryClient = new QueryClient({
   defaultOptions: {

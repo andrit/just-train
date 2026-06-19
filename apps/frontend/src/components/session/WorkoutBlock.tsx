@@ -26,11 +26,11 @@ import { formatSeconds }                 from '@/lib/formatters'
 import { WORKOUT_TYPE_LABEL, WORKOUT_TYPE_COLOR } from '@/lib/exerciseLabels'
 import { ExerciseBlock }                 from './ExerciseBlock'
 import { AddExerciseSheet }              from './AddExerciseSheet'
-import { useDeleteWorkout }              from '@/lib/queries/sessions'
-import type { WorkoutResponse }          from '@trainer-app/shared'
+import type { SessionExerciseResponse }  from '@trainer-app/shared'
 
 interface WorkoutBlockProps {
-  workout:            WorkoutResponse
+  workoutType:        string
+  sessionExercises:   SessionExerciseResponse[]
   sessionId:          string
   weightUnit:         string
   layout:             'horizontal' | 'vertical'
@@ -46,31 +46,20 @@ interface WorkoutBlockProps {
 }
 
 export function WorkoutBlock({
-  workout, sessionId, weightUnit, layout, clientId, onSetLogged, onAddBlock, restDurationSeconds = 90, restTimer,
+  workoutType, sessionExercises: exercises, sessionId, weightUnit, layout, clientId, onSetLogged, onAddBlock, restDurationSeconds = 90, restTimer,
 }: WorkoutBlockProps): React.JSX.Element {
   const [exerciseIndex,   setExerciseIndex]   = useState(0)
   const [addExerciseOpen, setAddExerciseOpen] = useState(false)
-  const [confirmDelete,   setConfirmDelete]   = useState(false)
   const [prFlash,         setPrFlash]         = useState<{ label: string } | null>(null)
 
-  const deleteWorkout = useDeleteWorkout()
-
-  const exercises    = workout.sessionExercises
   const totalEx      = exercises.length
   const clampedIdx   = Math.min(exerciseIndex, Math.max(0, totalEx - 1))
   const currentEx    = exercises[clampedIdx]
   const prevEx       = exercises[clampedIdx - 1]
   const nextEx       = exercises[clampedIdx + 1]
 
-  const typeColor = WORKOUT_TYPE_COLOR[workout.workoutType] ?? 'text-gray-400 border-gray-500/60'
-  const typeLabel = WORKOUT_TYPE_LABEL[workout.workoutType] ?? workout.workoutType
-
-  const handleDeleteBlock = (): void => {
-    deleteWorkout.mutate(
-      { workoutId: workout.id, sessionId },
-      { onSuccess: () => setConfirmDelete(false) },
-    )
-  }
+  const typeColor = WORKOUT_TYPE_COLOR[workoutType] ?? 'text-gray-400 border-gray-500/60'
+  const typeLabel = WORKOUT_TYPE_LABEL[workoutType] ?? workoutType
 
   const handleExerciseAdded = (): void => {
     setAddExerciseOpen(false)
@@ -110,37 +99,9 @@ export function WorkoutBlock({
             )}
           </div>
 
-          {/* Delete block — inline confirm */}
-          {confirmDelete ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">Remove block?</span>
-              <button
-                type="button"
-                onClick={handleDeleteBlock}
-                disabled={deleteWorkout.isPending}
-                className="text-xs text-red-400 hover:text-red-300 font-medium"
-              >
-                Remove
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(false)}
-                className="text-xs text-gray-500 hover:text-gray-300"
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmDelete(true)}
-              aria-label="Remove block"
-              className="text-gray-600 hover:text-red-400 transition-colors p-1"
-            >
-              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
+          {/* Exercise count */}
+          {totalEx > 0 && (
+            <span className="text-[10px] text-gray-600">{totalEx} exercise{totalEx !== 1 ? 's' : ''}</span>
           )}
         </div>
 
@@ -212,8 +173,7 @@ export function WorkoutBlock({
                     key={currentEx.id}
                     sessionExercise={currentEx}
                     sessionId={sessionId}
-                    workoutId={workout.id}
-                    workoutType={workout.workoutType}
+                    workoutType={workoutType}
                     weightUnit={weightUnit}
                     clientId={clientId}
                     restDurationSeconds={restDurationSeconds}
@@ -364,9 +324,8 @@ export function WorkoutBlock({
 
       <AddExerciseSheet
         open={addExerciseOpen}
-        workoutId={workout.id}
         sessionId={sessionId}
-        workoutType={workout.workoutType}
+        workoutType={workoutType}
         onClose={handleExerciseAdded}
       />
     </>

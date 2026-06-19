@@ -36,6 +36,7 @@ import {
   PhotoSharingPreferenceEnum,
   ChallengeMetricTypeEnum,
   ChallengeStatusEnum,
+  TemplateTypeEnum,
 } from '../enums/index'
 
 // ============================================================
@@ -53,16 +54,6 @@ export const UuidParamSchema = z.object({
   id: z.string().uuid().describe('Resource UUID'),
 })
 export type UuidParam = z.infer<typeof UuidParamSchema>
-
-export const SessionWorkoutParamSchema = z.object({
-  sessionId: z.string().uuid(),
-  id:        z.string().uuid(),
-})
-
-export const WorkoutExerciseParamSchema = z.object({
-  workoutId: z.string().uuid(),
-  id:        z.string().uuid(),
-})
 
 // ============================================================
 // TRAINER (Phase 2: added emailVerified, lastLoginAt)
@@ -371,10 +362,11 @@ export type SetResponse = z.infer<typeof SetResponseSchema>
 // ============================================================
 
 export const SessionExerciseResponseSchema = z.object({
-  id:         z.string().uuid(),
-  workoutId:  z.string().uuid(),
-  exerciseId: z.string().uuid(),
-  exercise:   ExerciseSummaryResponseSchema.nullable()
+  id:          z.string().uuid(),
+  sessionId:   z.string().uuid(),
+  exerciseId:  z.string().uuid(),
+  workoutType: WorkoutTypeEnum,
+  exercise:    ExerciseSummaryResponseSchema.nullable()
     .describe('Null if exercise was deleted after being added to this session'),
   orderIndex:            z.number().int(),
   targetSets:            z.number().int().nullable(),
@@ -389,23 +381,6 @@ export const SessionExerciseResponseSchema = z.object({
   sets:                  z.array(SetResponseSchema).describe('All recorded sets ordered by setNumber'),
 })
 export type SessionExerciseResponse = z.infer<typeof SessionExerciseResponseSchema>
-
-// ============================================================
-// WORKOUT
-// ============================================================
-
-export const WorkoutResponseSchema = z.object({
-  id:          z.string().uuid(),
-  sessionId:   z.string().uuid(),
-  workoutType: WorkoutTypeEnum,
-  orderIndex:  z.number().int()
-    .describe('Position in session. Default: cardio=1, stretching=2, calisthenics/resistance=3, cooldown=4'),
-  notes:            z.string().nullable(),
-  sessionExercises: z.array(SessionExerciseResponseSchema)
-    .describe('Exercises in this block ordered by orderIndex'),
-  createdAt: z.string().datetime(),
-})
-export type WorkoutResponse = z.infer<typeof WorkoutResponseSchema>
 
 // ============================================================
 // SESSION
@@ -442,8 +417,8 @@ export const SessionSummaryResponseSchema = z.object({
 export type SessionSummaryResponse = z.infer<typeof SessionSummaryResponseSchema>
 
 export const SessionDetailResponseSchema = SessionSummaryResponseSchema.extend({
-  workouts: z.array(WorkoutResponseSchema)
-    .describe('All workout blocks ordered by orderIndex, with full exercise and set data'),
+  sessionExercises: z.array(SessionExerciseResponseSchema)
+    .describe('All exercises ordered by orderIndex, with full set data'),
 })
 export type SessionDetailResponse = z.infer<typeof SessionDetailResponseSchema>
 
@@ -456,10 +431,11 @@ export type SessionListResponse = z.infer<typeof SessionListResponseSchema>
 // ============================================================
 
 const TemplateExerciseResponseSchema = z.object({
-  id:               z.string().uuid(),
-  templateWorkoutId: z.string().uuid(),
-  exerciseId:        z.string().uuid(),
-  exercise:          ExerciseSummaryResponseSchema.nullable(),
+  id:         z.string().uuid(),
+  templateId: z.string().uuid(),
+  exerciseId: z.string().uuid(),
+  workoutType: WorkoutTypeEnum,
+  exercise:    ExerciseSummaryResponseSchema.nullable(),
   orderIndex:            z.number().int(),
   targetSets:            z.number().int().nullable(),
   targetReps:            z.number().int().nullable(),
@@ -471,19 +447,11 @@ const TemplateExerciseResponseSchema = z.object({
   notes:                 z.string().nullable(),
 })
 
-const TemplateWorkoutResponseSchema = z.object({
-  id:          z.string().uuid(),
-  templateId:  z.string().uuid(),
-  workoutType: WorkoutTypeEnum,
-  orderIndex:  z.number().int(),
-  notes:       z.string().nullable(),
-  templateExercises: z.array(TemplateExerciseResponseSchema),
-})
-
 export const TemplateSummaryResponseSchema = z.object({
   id:          z.string().uuid(),
   trainerId:   z.string().uuid(),
   name:        z.string(),
+  type:        TemplateTypeEnum,
   description: z.string().nullable(),
   notes:       z.string().nullable(),
   createdAt:   z.string().datetime(),
@@ -492,8 +460,8 @@ export const TemplateSummaryResponseSchema = z.object({
 export type TemplateSummaryResponse = z.infer<typeof TemplateSummaryResponseSchema>
 
 export const TemplateDetailResponseSchema = TemplateSummaryResponseSchema.extend({
-  templateWorkouts: z.array(TemplateWorkoutResponseSchema)
-    .describe('Workout blocks ordered by orderIndex, with exercises and target values'),
+  templateExercises: z.array(TemplateExerciseResponseSchema)
+    .describe('Exercises ordered by orderIndex, with target values'),
 })
 export type TemplateDetailResponse = z.infer<typeof TemplateDetailResponseSchema>
 

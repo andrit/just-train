@@ -28,10 +28,8 @@ export function PostSessionWrapUp({
   const { data: activeChallenges } = useChallenges(session.clientId, 'active')
 
   // ── Compute stats ───────────────────────────────────────────────────────────
-  const allSets = session.workouts.flatMap(w =>
-    w.sessionExercises.flatMap(se => se.sets)
-  )
-  const allExercises = session.workouts.flatMap(w => w.sessionExercises)
+  const allExercises = session.sessionExercises ?? []
+  const allSets      = allExercises.flatMap(se => se.sets)
 
   const totalSets    = allSets.length
   const totalVolume  = allSets.reduce((sum, s) => {
@@ -70,7 +68,7 @@ export function PostSessionWrapUp({
                 ? `${(totalVolume / 1000).toFixed(1)}k`
                 : String(Math.round(totalVolume))
               }`}
-              unit={session.workouts[0]?.sessionExercises[0]?.targetWeightUnit ?? 'lbs'}
+              unit={allExercises[0]?.targetWeightUnit ?? 'lbs'}
             />
           )}
           {prCount > 0 && (

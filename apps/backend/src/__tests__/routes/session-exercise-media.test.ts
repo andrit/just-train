@@ -33,11 +33,9 @@ vi.mock('../../db', () => {
       select: vi.fn().mockReturnValue(chain),
     },
     sessions:             {},
-    workouts:             {},
     sessionExercises:     {},
     sessionExerciseMedia: {},
     sets:                 {},
-    templateWorkouts:     {},
     templateExercises:    {},
     clients:              {},
   }
@@ -123,9 +121,7 @@ describe('DELETE /session-exercise-media/:id', () => {
       cloudinaryPublicId: 'test-public-id',
       mediaType:          'video',
       sessionExercise: {
-        workout: {
-          session: { trainerId: TEST_TRAINER_ID, id: TEST_SESSION_ID, clientId: '22222222-2222-2222-2222-222222222222' },
-        },
+        session: { trainerId: TEST_TRAINER_ID, id: TEST_SESSION_ID, clientId: '22222222-2222-2222-2222-222222222222' },
       },
     } as never)
 
@@ -165,7 +161,7 @@ describe('GET /session-exercises/:id/media', () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.sessionExercises.findFirst).mockResolvedValueOnce({
       id: TEST_SESSION_EXERCISE_ID,
-      workout: { session: { trainerId: TEST_TRAINER_ID } },
+      session: { trainerId: TEST_TRAINER_ID },
     } as never)
     // chain.where returns [] (default for select chain)
 

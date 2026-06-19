@@ -12,7 +12,7 @@ export default {
         // Neutral foundation — no semantic meaning, structural only
         'forge-black':   '#000000',  // absolute ground
         'chalk-white':   '#FFFFFF',  // absolute light
-        'iron-grey':     '#8A9099',  // cold steel — page background
+        'iron-grey':     '#8A9099',  // cold steel — secondary text, borders, crosshatch texture
 
         // Chromatic accents — one job each, never decorative
         'ember-red':     '#D91B1B',  // intensity: PRs, destructive, threshold moments
@@ -21,9 +21,9 @@ export default {
 
         // ── Structural tokens (mapped to design system) ───────────────────────
         brand: {
-          primary:   '#8A9099',   // iron grey — page background
-          secondary: '#1C1C1C',   // near-black — card backgrounds
-          accent:    '#111111',   // deep black — sidebar, panels
+          primary:   '#0d0d0d',   // near-black — page background (crosshatch texture via index.css)
+          secondary: '#1C1C1C',   // dark — card backgrounds
+          accent:    '#111111',   // slightly lighter than primary — sidebar, panels
           // highlight removed — use ember-red, command-blue, or signal-yellow by intent
         },
         // Functional shades used in the UI
@@ -58,6 +58,11 @@ export default {
       spacing: {
         'safe-bottom': 'env(safe-area-inset-bottom)',
         '18': '4.5rem',
+      },
+
+      // ── Shadow tokens ──────────────────────────────────────────────────────
+      boxShadow: {
+        pressable: '0 2px 4px rgba(0, 0, 0, 0.45)',
       },
 
       // ── Animations ─────────────────────────────────────────────────────────

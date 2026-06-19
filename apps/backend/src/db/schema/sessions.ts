@@ -1,10 +1,10 @@
 // ------------------------------------------------------------
-// schema/sessions.ts — Session, Workout, SessionExercise, Set, SyncLog
+// schema/sessions.ts — Session, SessionExercise, Set, SyncLog
 //
 // This is the core tracking layer of the app.
 //
 // HIERARCHY:
-//   Session → Workouts → SessionExercises → Sets
+//   Session → SessionExercises → Sets
 //
 // A session can be built two ways:
 //   - Pre-planned: created from a template (status: planned)
@@ -67,46 +67,29 @@ export const sessions = pgTable('sessions', {
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-}, (t) => [
-  // KPI and history queries filter by trainerId+clientId and sort by date
-  index('sessions_trainer_id_idx').on(t.trainerId),
-  index('sessions_client_id_idx').on(t.clientId),
-  index('sessions_status_idx').on(t.status),
-  index('sessions_trainer_client_date_idx').on(t.trainerId, t.clientId, t.date),
-])
+}, (t) => ({
+  trainerIdIdx:        index('sessions_trainer_id_idx').on(t.trainerId),
+  clientIdIdx:         index('sessions_client_id_idx').on(t.clientId),
+  statusIdx:           index('sessions_status_idx').on(t.status),
+  trainerClientDateIdx: index('sessions_trainer_client_date_idx').on(t.trainerId, t.clientId, t.date),
+}))
 
 export type Session    = typeof sessions.$inferSelect
 export type NewSession = typeof sessions.$inferInsert
 
 // ------------------------------------------------------------
-// WORKOUTS — typed blocks within a session
-// Default order: cardio → stretching → calisthenics/resistance → cooldown
-// orderIndex is editable by the trainer.
-// ------------------------------------------------------------
-export const workouts = pgTable('workouts', {
-  id:          uuid('id').primaryKey().defaultRandom(),
-  sessionId:   uuid('session_id').notNull().references(() => sessions.id, { onDelete: 'cascade' }),
-  workoutType: workoutTypeEnum('workout_type').notNull(),
-  orderIndex:  integer('order_index').notNull().default(0),
-  notes:       text('notes'),
-  createdAt:   timestamp('created_at').notNull().defaultNow(),
-}, (t) => [
-  index('workouts_session_id_idx').on(t.sessionId),
-])
-
-export type Workout    = typeof workouts.$inferSelect
-export type NewWorkout = typeof workouts.$inferInsert
-
-// ------------------------------------------------------------
-// SESSION EXERCISES — exercise linked into a workout block
+// SESSION EXERCISES — exercise linked directly into a session
+// workoutType is denormalized from the exercise record at add time
+// for visual grouping without a separate workout-block table.
 // target_* = planned values (from template or pre-planning)
 // Actual performance is in the sets table.
 // ------------------------------------------------------------
 export const sessionExercises = pgTable('session_exercises', {
-  id:         uuid('id').primaryKey().defaultRandom(),
-  workoutId:  uuid('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
-  exerciseId: uuid('exercise_id').notNull().references(() => exercises.id, { onDelete: 'restrict' }),
-  orderIndex: integer('order_index').notNull().default(0),
+  id:          uuid('id').primaryKey().defaultRandom(),
+  sessionId:   uuid('session_id').notNull().references(() => sessions.id, { onDelete: 'cascade' }),
+  exerciseId:  uuid('exercise_id').notNull().references(() => exercises.id, { onDelete: 'restrict' }),
+  workoutType: workoutTypeEnum('workout_type').notNull(),
+  orderIndex:  integer('order_index').notNull().default(0),
 
   // Target / planned values
   targetSets:            integer('target_sets'),
@@ -118,11 +101,10 @@ export const sessionExercises = pgTable('session_exercises', {
   targetDistance:        real('target_distance'),
   targetIntensity:       intensityEnum('target_intensity'),
   notes:                 text('notes'),
-}, (t) => [
-  // PR detection queries by exerciseId across a client's history
-  index('session_exercises_workout_id_idx').on(t.workoutId),
-  index('session_exercises_exercise_id_idx').on(t.exerciseId),
-])
+}, (t) => ({
+  sessionIdIdx:  index('session_exercises_session_id_idx').on(t.sessionId),
+  exerciseIdIdx: index('session_exercises_exercise_id_idx').on(t.exerciseId),
+}))
 
 export type SessionExercise    = typeof sessionExercises.$inferSelect
 export type NewSessionExercise = typeof sessionExercises.$inferInsert
@@ -177,11 +159,10 @@ export const sets = pgTable('sets', {
   isPRVolume: boolean('is_pr_volume').notNull().default(false),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
-}, (t) => [
-  // Volume and PR queries join sets via sessionExerciseId; createdAt used for recency ordering
-  index('sets_session_exercise_id_idx').on(t.sessionExerciseId),
-  index('sets_created_at_idx').on(t.createdAt),
-])
+}, (t) => ({
+  sessionExerciseIdIdx: index('sets_session_exercise_id_idx').on(t.sessionExerciseId),
+  createdAtIdx:         index('sets_created_at_idx').on(t.createdAt),
+}))
 
 export type Set    = typeof sets.$inferSelect
 export type NewSet = typeof sets.$inferInsert
@@ -213,19 +194,14 @@ export type NewSyncLog = typeof syncLog.$inferInsert
 // RELATIONS
 // ------------------------------------------------------------
 export const sessionsRelations = relations(sessions, ({ one, many }) => ({
-  client:   one(clients,    { fields: [sessions.clientId],   references: [clients.id] }),
-  trainer:  one(trainers,   { fields: [sessions.trainerId],  references: [trainers.id] }),
-  template: one(templates,  { fields: [sessions.templateId], references: [templates.id] }),
-  workouts: many(workouts),
-}))
-
-export const workoutsRelations = relations(workouts, ({ one, many }) => ({
-  session:          one(sessions, { fields: [workouts.sessionId], references: [sessions.id] }),
+  client:           one(clients,   { fields: [sessions.clientId],   references: [clients.id] }),
+  trainer:          one(trainers,  { fields: [sessions.trainerId],  references: [trainers.id] }),
+  template:         one(templates, { fields: [sessions.templateId], references: [templates.id] }),
   sessionExercises: many(sessionExercises),
 }))
 
 export const sessionExercisesRelations = relations(sessionExercises, ({ one, many }) => ({
-  workout:  one(workouts,  { fields: [sessionExercises.workoutId],  references: [workouts.id] }),
+  session:  one(sessions,  { fields: [sessionExercises.sessionId],  references: [sessions.id] }),
   exercise: one(exercises, { fields: [sessionExercises.exerciseId], references: [exercises.id] }),
   sets:     many(sets),
 }))

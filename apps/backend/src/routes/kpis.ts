@@ -25,7 +25,7 @@ import { routeLog } from '../lib/logger'
 
 import type { FastifyInstance }  from 'fastify'
 import { authenticate }          from '../middleware/authenticate'
-import { db, clients, sessions, workouts, sessionExercises, sets } from '../db'
+import { db, clients, sessions, sessionExercises, sets } from '../db'
 import { eq, and, desc }         from 'drizzle-orm'
 import {
   ClientKpiResponseSchema,
@@ -90,21 +90,17 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       })
       if (!client) return reply.status(404).send({ error: 'Client not found' })
 
-      // Load all completed sessions with full workout/set tree
+      // Load all completed sessions with flat exercise/set tree
       const allSessions = await db.query.sessions.findMany({
         where: and(
           eq(sessions.clientId, clientId),
           eq(sessions.status, 'completed'),
         ),
         with: {
-          workouts: {
+          sessionExercises: {
             with: {
-              sessionExercises: {
-                with: {
-                  exercise: { columns: { name: true, workoutType: true } },
-                  sets: true,
-                },
-              },
+              exercise: { columns: { name: true, workoutType: true } },
+              sets: true,
             },
           },
         },
@@ -162,28 +158,24 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
 
       const recentSessions = allSessions.slice(0, 10)
       const recentSets: SetRow[] = recentSessions.flatMap(s =>
-        s.workouts.flatMap(w =>
-          w.sessionExercises.flatMap(se =>
-            se.sets.map(set => ({
-              exerciseName:    se.exercise?.name ?? 'Unknown',
-              workoutType:     se.exercise?.workoutType ?? 'resistance',
-              weight:          set.weight,
-              reps:            set.reps,
-              durationSeconds: set.durationSeconds,
-              distance:        set.distance,
-            }))
-          )
+        s.sessionExercises.flatMap(se =>
+          se.sets.map(set => ({
+            exerciseName:    se.exercise?.name ?? 'Unknown',
+            workoutType:     se.exercise?.workoutType ?? 'resistance',
+            weight:          set.weight,
+            reps:            set.reps,
+            durationSeconds: set.durationSeconds,
+            distance:        set.distance,
+          }))
         )
       )
 
       const calcVolumeTrend = (): Trend => {
         if (allSessions.length < 4) return 'insufficient_data'
         const vol = (ss: typeof allSessions) => ss.reduce(
-          (acc, s) => acc + s.workouts.reduce(
-            (a, w) => a + w.sessionExercises.reduce(
-              (b, se) => b + se.sets.reduce(
-                (c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0
-              ), 0
+          (acc, s) => acc + s.sessionExercises.reduce(
+            (b, se) => b + se.sets.reduce(
+              (c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0
             ), 0
           ), 0
         )
@@ -276,11 +268,9 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       )
 
       const volumeThisMonthLbs = monthSessions.reduce(
-        (acc, s) => acc + s.workouts.reduce(
-          (a, w) => a + w.sessionExercises.reduce(
-            (b, se) => b + se.sets.reduce(
-              (c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0
-            ), 0
+        (acc, s) => acc + s.sessionExercises.reduce(
+          (b, se) => b + se.sets.reduce(
+            (c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0
           ), 0
         ), 0
       )
@@ -379,8 +369,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         })
         .from(sets)
         .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
-        .innerJoin(workouts, eq(sessionExercises.workoutId, workouts.id))
-        .innerJoin(sessions, eq(workouts.sessionId, sessions.id))
+        .innerJoin(sessions, eq(sessionExercises.sessionId, sessions.id))
         .where(
           and(
             eq(sessions.clientId, clientId),
@@ -507,8 +496,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         })
         .from(sets)
         .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
-        .innerJoin(workouts,         eq(sessionExercises.workoutId, workouts.id))
-        .innerJoin(sessions,         eq(workouts.sessionId, sessions.id))
+        .innerJoin(sessions,         eq(sessionExercises.sessionId, sessions.id))
         .where(
           and(
             eq(sessions.clientId, clientId),

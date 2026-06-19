@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TrainerApp — Wireframes</title>
+<style>
+/* ── Design tokens ────────────────────────────────────────────────────────── */
+:root {
+  --near-black:    #0d0d0d;
+  --forge-black:   #000000;
+  --iron-grey:     #8A9099;
+  --chalk-white:   #FFFFFF;
+  --command-blue:  #1B50D9;
+  --ember-red:     #D91B1B;
+  --signal-yellow: #FFE200;
+  --surface:       #1E1E1E;
+  --surface-raised:#282828;
+  --surface-border:#404040;
+  --brand-secondary:#1C1C1C;
+
+  --crosshatch-body: repeating-linear-gradient(45deg,rgba(138,144,153,.10) 0,rgba(138,144,153,.10) 1px,transparent 1px,transparent 7px),repeating-linear-gradient(135deg,rgba(138,144,153,.10) 0,rgba(138,144,153,.10) 1px,transparent 1px,transparent 7px);
+  --crosshatch-header: repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0,rgba(0,0,0,.18) 1px,transparent 1px,transparent 7px),repeating-linear-gradient(135deg,rgba(0,0,0,.18) 0,rgba(0,0,0,.18) 1px,transparent 1px,transparent 7px);
+  --crosshatch-card-border: repeating-linear-gradient(45deg,rgba(138,144,153,.22) 0,rgba(138,144,153,.22) 1px,transparent 1px,transparent 7px),repeating-linear-gradient(135deg,rgba(138,144,153,.22) 0,rgba(138,144,153,.22) 1px,transparent 1px,transparent 7px);
+
+  --font-display: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
+  --font-body:    'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    'DM Mono', ui-monospace, monospace;
+}
+
+/* ── Reset ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: var(--font-body); background: #111; color: #e5e7eb; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input  { font-family: inherit; }
+
+/* ── Wireframe shell ──────────────────────────────────────────────────────── */
+.wf-shell {
+  display: grid;
+  grid-template-columns: 220px 1fr 280px;
+  min-height: 100vh;
+}
+
+/* ── Screen nav ───────────────────────────────────────────────────────────── */
+.wf-nav {
+  background: #181818;
+  border-right: 1px solid #2a2a2a;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.wf-nav h1 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--chalk-white);
+  padding: 0 16px 16px;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 12px;
+}
+.wf-nav h1 span { color: var(--command-blue); }
+.wf-group { margin-bottom: 6px; }
+.wf-group-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #555;
+  padding: 10px 16px 4px;
+}
+.wf-nav-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 16px;
+  font-size: 12px;
+  color: #888;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+}
+.wf-nav-btn:hover { color: #ccc; background: #202020; }
+.wf-nav-btn.active {
+  color: var(--chalk-white);
+  border-left-color: var(--command-blue);
+  background: rgba(27,80,217,.08);
+}
+
+/* ── Phone frame ──────────────────────────────────────────────────────────── */
+.wf-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  gap: 16px;
+  background: #141414;
+}
+.wf-screen-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #555;
+  align-self: flex-start;
+}
+.phone-shell {
+  width: 375px;
+  height: 812px;
+  background: var(--near-black);
+  border-radius: 44px;
+  border: 8px solid #1a1a1a;
+  box-shadow: 0 0 0 1px #333, 0 24px 80px rgba(0,0,0,.8);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.phone-screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  background-color: var(--near-black);
+  background-image: var(--crosshatch-body);
+  overflow: hidden;
+}
+.phone-screen.active { display: flex; }
+
+/* ── Annotations panel ────────────────────────────────────────────────────── */
+.wf-annotations {
+  background: #181818;
+  border-left: 1px solid #2a2a2a;
+  padding: 24px 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.wf-annotations h2 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--chalk-white);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.ann { display: none; }
+.ann.active { display: block; }
+.ann-section { margin-bottom: 18px; }
+.ann-section h3 {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--command-blue);
+  margin-bottom: 8px;
+}
+.ann-section p, .ann-section li {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+.ann-section ul { padding-left: 14px; }
+.ann-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  letter-spacing: .05em;
+}
+.tag-offline  { background: rgba(27,80,217,.2);  color: var(--command-blue); }
+.tag-install  { background: rgba(255,226,0,.15);  color: var(--signal-yellow); }
+.tag-decision { background: rgba(138,144,153,.15);color: var(--iron-grey); }
+.tag-deferred { background: rgba(217,27,27,.15);  color: var(--ember-red); }
+
+/* ── Common phone UI primitives ───────────────────────────────────────────── */
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--chalk-white);
+  flex-shrink: 0;
+}
+
+/* Bottom tab bar */
+.tab-bar {
+  display: flex;
+  background: var(--brand-secondary);
+  border-top: 1px solid var(--surface-border);
+  padding: 6px 0 22px;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  font-size: 10px;
+  color: #555;
+  font-weight: 500;
+}
+.tab-item.active { color: var(--command-blue); }
+.tab-icon { font-size: 20px; line-height: 1; }
+.tab-label { font-size: 9px; letter-spacing: .03em; }
+
+/* Scroll content area */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* Grey crosshatch header */
+.hdr {
+  background-color: rgba(138,144,153,.92);
+  background-image: var(--crosshatch-header);
+  flex-shrink: 0;
+  padding: 12px 16px 10px;
+}
+.hdr h1 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--chalk-white);
+  margin-bottom: 8px;
+}
+
+/* Search bar */
+.search-bar {
+  background: var(--near-black);
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #555;
+  width: 100%;
+}
+
+/* Pill row */
+.pill-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 0 4px;
+  flex-shrink: 0;
+}
+.pill-row::-webkit-scrollbar { display: none; }
+.pill {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--surface-border);
+  background: var(--brand-secondary);
+  color: #bbb;
+  white-space: nowrap;
+}
+.pill.active {
+  background: var(--chalk-white);
+  color: var(--brand-secondary);
+  border-color: transparent;
+}
+.pill-divider { width: 1px; background: var(--surface-border); flex-shrink: 0; margin: 0 2px; }
+
+/* Card */
+.card {
+  border-radius: 14px;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(180deg,#232323 0%,#1c1c1c 100%) padding-box,
+    var(--crosshatch-card-border) border-box,
+    var(--crosshatch-card-border) border-box;
+  box-shadow: 0 8px 28px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.055);
+  padding: 14px;
+}
+
+/* Skel lines */
+.skel { background: #2a2a2a; border-radius: 4px; }
+.skel.h8  { height: 8px; }
+.skel.h10 { height: 10px; }
+.skel.h12 { height: 12px; }
+.skel.h14 { height: 14px; }
+.skel.h20 { height: 20px; }
+.skel.h32 { height: 32px; }
+.skel.h48 { height: 48px; }
+.skel.h64 { height: 64px; }
+.skel.h80 { height: 80px; }
+.skel.w30 { width: 30%; }
+.skel.w40 { width: 40%; }
+.skel.w50 { width: 50%; }
+.skel.w60 { width: 60%; }
+.skel.w70 { width: 70%; }
+.skel.w80 { width: 80%; }
+.skel.full { width: 100%; }
+
+/* Label */
+.section-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: #555;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* Big CTA button */
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: var(--command-blue);
+  color: var(--chalk-white);
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,.45);
+}
+.btn-secondary {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: var(--surface-raised);
+  color: #ccc;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 2px 4px rgba(0,0,0,.45);
+}
+.btn-danger {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: rgba(217,27,27,.12);
+  color: var(--ember-red);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid rgba(217,27,27,.2);
+  box-shadow: 0 2px 4px rgba(0,0,0,.45);
+}
+
+/* Stat block */
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stat-number {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--chalk-white);
+  line-height: 1;
+}
+.stat-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: .08em; }
+
+/* Avatar circle */
+.avatar {
+  border-radius: 50%;
+  background: #2a2a2a;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--iron-grey);
+}
+
+/* Row item */
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(64,64,64,.4);
+}
+.list-row:last-child { border-bottom: none; }
+
+/* Offline banner */
+.offline-banner {
+  background: rgba(27,80,217,.9);
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--chalk-white);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Badge */
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+}
+.badge-amber  { background: rgba(245,158,11,.15); color: #f59e0b; border: 1px solid rgba(245,158,11,.2); }
+.badge-red    { background: rgba(217,27,27,.15);  color: var(--ember-red); border: 1px solid rgba(217,27,27,.2); }
+.badge-green  { background: rgba(52,211,153,.15); color: #34d399; border: 1px solid rgba(52,211,153,.2); }
+.badge-blue   { background: rgba(27,80,217,.15);  color: var(--command-blue); border: 1px solid rgba(27,80,217,.2); }
+
+/* Input big */
+.big-input {
+  width: 100%;
+  background: var(--near-black);
+  border: 2px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 14px;
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--chalk-white);
+  text-align: center;
+}
+
+/* Timeline spine */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.t-row { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 12px; }
+.t-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--surface-border); flex-shrink: 0; margin-top: 3px;
+}
+.t-dot.done { background: #34d399; }
+.t-dot.active { background: var(--command-blue); }
+.t-content { flex: 1; }
+
+/* Toast / install prompt */
+.install-prompt {
+  position: absolute;
+  bottom: 90px;
+  left: 12px; right: 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.7);
+}
+
+/* Utility */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.flex-1 { flex: 1; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.p-4 { padding: 16px; }
+.px-4 { padding-left: 16px; padding-right: 16px; }
+.py-2 { padding-top: 8px; padding-bottom: 8px; }
+.text-xs { font-size: 11px; }
+.text-sm { font-size: 13px; }
+.text-md { font-size: 15px; }
+.text-white { color: var(--chalk-white); }
+.text-muted { color: #666; }
+.text-blue  { color: var(--command-blue); }
+.text-red   { color: var(--ember-red); }
+.text-green { color: #34d399; }
+.text-amber { color: #f59e0b; }
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
+.font-mono { font-family: var(--font-mono); }
+.font-display { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.rounded { border-radius: 8px; }
+.rounded-full { border-radius: 999px; }
+.w-full { width: 100%; }
+.opacity-40 { opacity: .4; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.border-b { border-bottom: 1px solid var(--surface-border); }
+.shrink-0 { flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="wf-shell">
+
+<!-- ── Screen nav ─────────────────────────────────────────────────────────── -->
+<nav class="wf-nav">
+  <h1>Trainer<span>App</span></h1>
+
+  <div class="wf-group">
+    <div class="wf-group-label">Auth</div>
+    <button class="wf-nav-btn active" onclick="show('login')">Login</button>
+    <button class="wf-nav-btn" onclick="show('onboard-mode')">Onboarding — Mode</button>
+    <button class="wf-nav-btn" onclick="show('onboard-profile')">Onboarding — Profile</button>
+  </div>
+
+  <div class="wf-group">
+    <div class="wf-group-label">Athlete</div>
+    <button class="wf-nav-btn" onclick="show('dash-athlete')">Dashboard</button>
+    <button class="wf-nav-btn" onclick="show('sessions-athlete')">Sessions</button>
+    <button class="wf-nav-btn" onclick="show('my-training')">My Training</button>
+    <button class="wf-nav-btn" onclick="show('exercises')">Exercises</button>
+    <button class="wf-nav-btn" onclick="show('templates')">Templates</button>
+  </div>
+
+  <div class="wf-group">
+    <div class="wf-group-label">Trainer</div>
+    <button class="wf-nav-btn" onclick="show('dash-trainer')">Dashboard</button>
+    <button class="wf-nav-btn" onclick="show('sessions-trainer')">Sessions</button>
+    <button class="wf-nav-btn" onclick="show('clients')">Clients</button>
+    <button class="wf-nav-btn" onclick="show('client-profile')">Client Profile</button>
+  </div>
+
+  <div class="wf-group">
+    <div class="wf-group-label">Session Flow</div>
+    <button class="wf-nav-btn" onclick="show('session-launcher')">Launcher</button>
+    <button class="wf-nav-btn" onclick="show('live-session')">Live Session</button>
+    <button class="wf-nav-btn" onclick="show('session-summary')">Summary</button>
+    <button class="wf-nav-btn" onclick="show('session-history')">History Panel</button>
+  </div>
+
+  <div class="wf-group">
+    <div class="wf-group-label">Settings</div>
+    <button class="wf-nav-btn" onclick="show('preferences')">Preferences</button>
+  </div>
+
+  <div class="wf-group">
+    <div class="wf-group-label">PWA States</div>
+    <button class="wf-nav-btn" onclick="show('install-prompt')">Install Prompt</button>
+    <button class="wf-nav-btn" onclick="show('offline-banner')">Offline — Banner</button>
+    <button class="wf-nav-btn" onclick="show('offline-blocked')">Offline — Blocked</button>
+  </div>
+</nav>
+
+<!-- ── Phone stage ─────────────────────────────────────────────────────────── -->
+<div class="wf-stage">
+  <div class="wf-screen-title" id="stage-title">Login</div>
+  <div class="phone-shell">
+
+    <!-- 1. LOGIN ────────────────────────────────────────────────────────────── -->
+    <div class="phone-screen active" id="s-login">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;gap:24px;">
+        <!-- Logo -->
+        <div style="text-align:center;margin-bottom:8px;">
+          <div style="width:64px;height:64px;background:rgba(27,80,217,.15);border:2px solid rgba(27,80,217,.3);border-radius:16px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;">
+            <div style="font-size:28px;">💪</div>
+          </div>
+          <div class="font-display" style="font-size:32px;color:var(--chalk-white);">TrainerApp</div>
+          <div class="text-xs text-muted" style="margin-top:4px;letter-spacing:.06em;text-transform:uppercase;">Train. Track. Progress.</div>
+        </div>
+
+        <!-- Fields -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <div class="section-label">Email</div>
+            <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:10px;padding:12px 14px;font-size:14px;color:#555;">athlete@example.com</div>
+          </div>
+          <div>
+            <div class="section-label">Password</div>
+            <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:10px;padding:12px 14px;font-size:14px;color:#555;">••••••••</div>
+          </div>
+        </div>
+
+        <div class="btn-primary">Sign In</div>
+        <div style="text-align:center;font-size:12px;color:#555;">
+          Don't have an account? <span style="color:var(--command-blue);font-weight:600;">Sign Up</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. ONBOARDING — MODE ─────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-onboard-mode">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;padding:24px 20px;gap:20px;">
+        <div>
+          <div class="font-display" style="font-size:26px;color:var(--chalk-white);margin-bottom:6px;">How are you using<br>TrainerApp?</div>
+          <div class="text-xs text-muted">You can change this later in Preferences.</div>
+        </div>
+
+        <!-- Athlete card -->
+        <div class="card" style="border:2px solid var(--command-blue);padding:20px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div style="width:44px;height:44px;background:rgba(27,80,217,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">🏃</div>
+            <div>
+              <div class="font-display" style="font-size:18px;color:var(--chalk-white);">Athlete</div>
+              <div class="text-xs text-muted">I train myself</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#888;line-height:1.5;">Log sessions, track PRs, and see your progress over time.</div>
+        </div>
+
+        <!-- Trainer card -->
+        <div class="card" style="padding:20px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div style="width:44px;height:44px;background:rgba(138,144,153,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">👥</div>
+            <div>
+              <div class="font-display" style="font-size:18px;color:var(--chalk-white);">Trainer</div>
+              <div class="text-xs text-muted">I coach clients</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#888;line-height:1.5;">Everything an Athlete has, plus client roster, at-risk alerts, and monthly reports.</div>
+          <div class="badge badge-amber" style="margin-top:8px;">14-day free trial</div>
+        </div>
+
+        <div class="btn-primary">Continue as Athlete</div>
+      </div>
+    </div>
+
+    <!-- 3. ONBOARDING — PROFILE ──────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-onboard-profile">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;padding:24px 20px;gap:20px;">
+        <div>
+          <div class="font-display" style="font-size:26px;color:var(--chalk-white);margin-bottom:6px;">Set up your profile</div>
+          <div class="text-xs text-muted">Quick — just the essentials.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div class="section-label">Your name</div>
+            <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--chalk-white);">Alex</div>
+          </div>
+          <div>
+            <div class="section-label">Weight unit</div>
+            <div style="display:flex;gap:8px;">
+              <div style="flex:1;padding:12px;background:var(--command-blue);border-radius:10px;text-align:center;font-size:14px;font-weight:600;color:var(--chalk-white);">kg</div>
+              <div style="flex:1;padding:12px;background:var(--surface);border:1px solid var(--surface-border);border-radius:10px;text-align:center;font-size:14px;color:#666;">lbs</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:auto;">
+          <div class="btn-primary">Get Started</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. DASHBOARD — ATHLETE ───────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-dash-athlete">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:10px;">
+
+        <!-- Greeting + avatar -->
+        <div class="flex justify-between items-center" style="margin-bottom:4px;">
+          <div>
+            <div class="text-xs text-muted" style="margin-bottom:2px;">Good morning</div>
+            <div class="font-display" style="font-size:22px;color:var(--chalk-white);">Alex</div>
+          </div>
+          <div class="avatar" style="width:38px;height:38px;">AL</div>
+        </div>
+
+        <!-- Glanceable header strip — compact, not the hero -->
+        <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;">
+          <div style="flex-shrink:0;background:var(--surface);border:1px solid var(--surface-border);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:5px;">
+            <span style="font-size:13px;">🔥</span><span class="text-xs text-white font-bold">12</span><span class="text-xs text-muted">streak</span>
+          </div>
+          <div style="flex-shrink:0;background:var(--surface);border:1px solid var(--surface-border);border-radius:8px;padding:6px 10px;">
+            <span class="text-xs text-muted">Last session </span><span class="text-xs text-white font-bold">today</span>
+          </div>
+          <div style="flex-shrink:0;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:8px;padding:6px 10px;">
+            <span class="text-xs" style="color:#34d399;font-weight:600;">↑ PR · Bench 100kg</span>
+          </div>
+        </div>
+
+        <!-- TRAIN — primary action card, three-state -->
+        <div style="background:var(--command-blue);border-radius:14px;padding:16px 18px;box-shadow:0 2px 4px rgba(0,0,0,.45);">
+          <div class="section-label" style="color:rgba(255,255,255,.6);margin-bottom:6px;">TRAIN</div>
+          <div class="font-display" style="font-size:22px;color:var(--chalk-white);margin-bottom:2px;">Start Training</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);">No session planned — start blank or from a template</div>
+        </div>
+        <!-- State note (not rendered — for annotation) -->
+
+        <!-- PLAN -->
+        <div class="card" style="padding:14px 16px;">
+          <div class="section-label" style="margin-bottom:4px;">PLAN</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm text-white font-bold">Plan a session</div>
+              <div class="text-xs text-muted">Schedule a future workout</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <!-- GOALS -->
+        <div class="card" style="padding:14px 16px;">
+          <div class="section-label" style="margin-bottom:4px;">GOALS</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm text-white font-bold">Bench 100kg × 5</div>
+              <div class="text-xs text-muted">Active goal · 80% there</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="card" style="padding:14px 16px;">
+          <div class="section-label" style="margin-bottom:4px;">HISTORY</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm text-white font-bold">Push Day A</div>
+              <div class="text-xs text-muted">Today · 48 min · 2 PRs</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <!-- BUILD -->
+        <div class="card" style="padding:14px 16px;">
+          <div class="section-label" style="margin-bottom:4px;">BUILD</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm text-white font-bold">Build a template</div>
+              <div class="text-xs text-muted">3 templates saved</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <!-- Secondary: Log Snapshot -->
+        <div style="padding:10px 14px;border:1px solid var(--surface-border);border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+          <span class="text-xs text-muted">Log body snapshot</span>
+          <span class="text-xs text-blue font-bold">+ Add</span>
+        </div>
+
+        <!-- KPI widgets — optional, user-configured, below the fold -->
+        <div class="section-label" style="margin-top:4px;">Your Stats</div>
+        <div class="card">
+          <div class="flex gap-3 items-center">
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;">4</div><div class="stat-label">Sessions / wk</div></div>
+            <div style="width:1px;height:32px;background:var(--surface-border);"></div>
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;">3</div><div class="stat-label">PRs this week</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item active"><div class="tab-icon">⌂</div><div class="tab-label">Dashboard</div></div>
+        <div class="tab-item"><div class="tab-icon">🏋️</div><div class="tab-label">Sessions</div></div>
+        <div class="tab-item"><div class="tab-icon">💪</div><div class="tab-label">Training</div></div>
+        <div class="tab-item"><div class="tab-icon">🔬</div><div class="tab-label">Exercises</div></div>
+        <div class="tab-item"><div class="tab-icon">📄</div><div class="tab-label">Templates</div></div>
+      </div>
+    </div>
+
+    <!-- 5. DASHBOARD — TRAINER ───────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-dash-trainer">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:10px;">
+
+        <!-- Greeting + avatar -->
+        <div class="flex justify-between items-center" style="margin-bottom:4px;">
+          <div>
+            <div class="text-xs text-muted" style="margin-bottom:2px;">Good morning</div>
+            <div class="font-display" style="font-size:22px;color:var(--chalk-white);">Coach Sam</div>
+          </div>
+          <div class="avatar" style="width:38px;height:38px;">CS</div>
+        </div>
+
+        <!-- Glanceable header strip -->
+        <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;">
+          <div style="flex-shrink:0;background:var(--surface);border:1px solid var(--surface-border);border-radius:8px;padding:6px 10px;">
+            <span class="text-xs text-white font-bold">12</span><span class="text-xs text-muted"> active clients</span>
+          </div>
+          <div style="flex-shrink:0;background:rgba(217,27,27,.1);border:1px solid rgba(217,27,27,.25);border-radius:8px;padding:6px 10px;">
+            <span class="text-xs font-bold" style="color:var(--ember-red);">⚠ 2 at risk</span>
+          </div>
+          <div style="flex-shrink:0;background:var(--surface);border:1px solid var(--surface-border);border-radius:8px;padding:6px 10px;">
+            <span class="text-xs text-muted">My training </span><span class="text-xs text-white font-bold">2d ago</span>
+          </div>
+        </div>
+
+        <!-- At-risk alert — prominent but not the hero -->
+        <div style="background:rgba(217,27,27,.08);border:1px solid rgba(217,27,27,.22);border-radius:12px;padding:12px 14px;">
+          <div class="flex justify-between items-center mb-1">
+            <div class="text-sm font-bold" style="color:var(--ember-red);">⚠ 2 clients at risk</div>
+            <div class="text-xs text-muted">Dismiss</div>
+          </div>
+          <div class="text-xs text-muted">Jordan & Maya — no session in 21+ days</div>
+        </div>
+
+        <!-- TRAIN (My Training) -->
+        <div style="background:var(--command-blue);border-radius:14px;padding:16px 18px;box-shadow:0 2px 4px rgba(0,0,0,.45);">
+          <div class="section-label" style="color:rgba(255,255,255,.6);margin-bottom:6px;">TRAIN</div>
+          <div class="font-display" style="font-size:22px;color:var(--chalk-white);margin-bottom:2px;">My Training</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);">Last session 2 days ago — ready to go</div>
+        </div>
+
+        <!-- PLAN (client session) -->
+        <div class="card" style="padding:14px 16px;">
+          <div class="section-label" style="margin-bottom:4px;">PLAN</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm text-white font-bold">Plan a client session</div>
+              <div class="text-xs text-muted">Schedule for Jordan, Ryan, or others</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <!-- CLIENTS -->
+        <div class="card" style="padding:14px 16px;">
+          <div class="section-label" style="margin-bottom:4px;">CLIENTS</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm text-white font-bold">Roster</div>
+              <div class="text-xs text-muted">12 active · 2 need attention</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="card" style="padding:14px 16px;">
+          <div class="section-label" style="margin-bottom:4px;">HISTORY</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm text-white font-bold">Jordan — Leg Day</div>
+              <div class="text-xs text-muted">Today · 55 min</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <!-- BUILD -->
+        <div class="card" style="padding:14px 16px;">
+          <div class="section-label" style="margin-bottom:4px;">BUILD</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-sm text-white font-bold">Build a template</div>
+              <div class="text-xs text-muted">5 templates saved</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <!-- KPI widgets — configurable, below the fold -->
+        <div class="section-label" style="margin-top:4px;">Your Stats</div>
+        <div class="card">
+          <div class="flex gap-3">
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;">12</div><div class="stat-label">Active clients</div></div>
+            <div style="width:1px;height:32px;background:var(--surface-border);"></div>
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;color:#f59e0b;">2</div><div class="stat-label">At risk</div></div>
+            <div style="width:1px;height:32px;background:var(--surface-border);"></div>
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;color:#34d399;">3</div><div class="stat-label">New clients</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item active"><div class="tab-icon">⌂</div><div class="tab-label">Dashboard</div></div>
+        <div class="tab-item"><div class="tab-icon">🏋️</div><div class="tab-label">Sessions</div></div>
+        <div class="tab-item"><div class="tab-icon">👥</div><div class="tab-label">Clients</div></div>
+        <div class="tab-item"><div class="tab-icon">💪</div><div class="tab-label">Exercises</div></div>
+        <div class="tab-item"><div class="tab-icon">📄</div><div class="tab-label">Templates</div></div>
+      </div>
+    </div>
+
+    <!-- 6. SESSIONS — ATHLETE ────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-sessions-athlete">
+      <div class="hdr">
+        <div class="flex justify-between items-center">
+          <h1>Sessions</h1>
+          <div class="btn-primary" style="width:auto;padding:8px 14px;font-size:13px;">+ New</div>
+        </div>
+        <div class="search-bar mb-2">Search sessions…</div>
+        <div class="pill-row">
+          <div class="pill active">All</div>
+          <div class="pill">Resistance</div>
+          <div class="pill">Cardio</div>
+          <div class="pill">This month</div>
+        </div>
+      </div>
+
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="text-xs text-muted" style="margin-bottom:4px;">24 sessions · June</div>
+
+        <!-- Session row -->
+        <div class="card" style="padding:12px 14px;">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <div class="text-sm text-white font-bold">Push Day A</div>
+              <div class="text-xs text-muted">Resistance · 48 min</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="text-xs text-muted">Today, 7:30am</div>
+              <div class="badge badge-green mt-2">2 PRs</div>
+            </div>
+          </div>
+          <div class="flex gap-3 text-xs text-muted">
+            <span>3 exercises</span><span>·</span><span>9 sets</span><span>·</span><span>RPE 8</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:12px 14px;">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <div class="text-sm text-white font-bold">Leg Day B</div>
+              <div class="text-xs text-muted">Resistance · 55 min</div>
+            </div>
+            <div class="text-xs text-muted">Yesterday</div>
+          </div>
+          <div class="flex gap-3 text-xs text-muted">
+            <span>4 exercises</span><span>·</span><span>12 sets</span><span>·</span><span>RPE 9</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:12px 14px;opacity:.7;">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <div class="text-sm text-white font-bold">Pull Day A</div>
+              <div class="text-xs text-muted">Resistance · 41 min</div>
+            </div>
+            <div class="text-xs text-muted">3 days ago</div>
+          </div>
+          <div class="flex gap-3 text-xs text-muted">
+            <span>3 exercises</span><span>·</span><span>9 sets</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:12px 14px;opacity:.5;">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="text-sm text-white font-bold">Rest day</div>
+              <div class="text-xs text-muted">No session logged</div>
+            </div>
+            <div class="text-xs text-muted">4 days ago</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">⌂</div><div class="tab-label">Dashboard</div></div>
+        <div class="tab-item active"><div class="tab-icon">🏋️</div><div class="tab-label">Sessions</div></div>
+        <div class="tab-item"><div class="tab-icon">💪</div><div class="tab-label">Training</div></div>
+        <div class="tab-item"><div class="tab-icon">🔬</div><div class="tab-label">Exercises</div></div>
+        <div class="tab-item"><div class="tab-icon">📄</div><div class="tab-label">Templates</div></div>
+      </div>
+    </div>
+
+    <!-- 7. MY TRAINING ────────────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-my-training">
+      <div class="hdr">
+        <h1>My Training</h1>
+        <div class="pill-row" style="padding-top:4px;">
+          <div class="pill active">Overview</div>
+          <div class="pill">Goals</div>
+          <div class="pill">Snapshots</div>
+          <div class="pill">PRs</div>
+        </div>
+      </div>
+
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:12px;">
+        <!-- Current goal -->
+        <div class="card">
+          <div class="section-label">Current Goal</div>
+          <div class="text-sm text-white font-bold mb-1">Bench 100kg × 5</div>
+          <div style="height:6px;background:var(--surface-border);border-radius:3px;margin-bottom:6px;">
+            <div style="height:6px;background:var(--command-blue);border-radius:3px;width:80%;"></div>
+          </div>
+          <div class="text-xs text-muted">80kg best · on track</div>
+        </div>
+
+        <!-- PRs -->
+        <div class="card">
+          <div class="section-label">Top PRs</div>
+          <div class="list-row" style="padding:8px 0;">
+            <div class="flex-1 text-sm text-white">Squat</div>
+            <div class="font-mono text-sm" style="color:#34d399;">140 kg × 1</div>
+          </div>
+          <div class="list-row" style="padding:8px 0;">
+            <div class="flex-1 text-sm text-white">Bench Press</div>
+            <div class="font-mono text-sm" style="color:#34d399;">100 kg × 5</div>
+          </div>
+          <div class="list-row" style="padding:8px 0;">
+            <div class="flex-1 text-sm text-white">Deadlift</div>
+            <div class="font-mono text-sm" style="color:#34d399;">180 kg × 1</div>
+          </div>
+        </div>
+
+        <!-- Volume chart -->
+        <div class="card">
+          <div class="section-label">Volume Trend</div>
+          <div class="skel h80 full rounded" style="opacity:.25;"></div>
+        </div>
+
+        <!-- Latest snapshot -->
+        <div class="card">
+          <div class="section-label">Latest Snapshot</div>
+          <div class="flex gap-3">
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;">78</div><div class="stat-label">kg</div></div>
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;">16%</div><div class="stat-label">Body fat</div></div>
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;">8</div><div class="stat-label">RPE avg</div></div>
+          </div>
+          <div class="text-xs text-muted mt-2">2 weeks ago · + Add new snapshot</div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">⌂</div><div class="tab-label">Dashboard</div></div>
+        <div class="tab-item"><div class="tab-icon">🏋️</div><div class="tab-label">Sessions</div></div>
+        <div class="tab-item active"><div class="tab-icon">💪</div><div class="tab-label">Training</div></div>
+        <div class="tab-item"><div class="tab-icon">🔬</div><div class="tab-label">Exercises</div></div>
+        <div class="tab-item"><div class="tab-icon">📄</div><div class="tab-label">Templates</div></div>
+      </div>
+    </div>
+
+    <!-- 8. EXERCISES ─────────────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-exercises">
+      <div class="hdr">
+        <div class="flex justify-between items-center mb-2">
+          <h1>Exercises</h1>
+          <div class="btn-primary" style="width:auto;padding:8px 14px;font-size:13px;">+ New</div>
+        </div>
+        <div class="search-bar mb-2">Search exercises…</div>
+        <div class="pill-row">
+          <div class="pill active">All</div>
+          <div class="pill">Resistance</div>
+          <div class="pill">Cardio</div>
+          <div class="pill">Calisthenics</div>
+          <div class="pill">Stretching</div>
+        </div>
+        <div style="height:1px;background:rgba(64,64,64,.4);margin:4px 0 6px;"></div>
+        <div class="pill-row">
+          <div class="pill">Arms</div>
+          <div class="pill active">Back</div>
+          <div class="pill">Chest</div>
+          <div class="pill">Core</div>
+          <div class="pill">Legs</div>
+          <div class="pill-divider"></div>
+          <div class="pill">✏️ Drafts</div>
+        </div>
+      </div>
+
+      <div class="scroll-area" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px;">
+        <div class="card" style="padding:10px;">
+          <div style="height:60px;background:#1a1a1a;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:24px;">💪</div>
+          <div class="text-xs text-white font-bold mb-1">Pull-Up</div>
+          <div class="text-xs text-muted">Back · Calisthenics</div>
+        </div>
+        <div class="card" style="padding:10px;">
+          <div style="height:60px;background:#1a1a1a;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:24px;">💪</div>
+          <div class="text-xs text-white font-bold mb-1">Barbell Row</div>
+          <div class="text-xs text-muted">Back · Resistance</div>
+        </div>
+        <div class="card" style="padding:10px;">
+          <div style="height:60px;background:#1a1a1a;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:24px;">💪</div>
+          <div class="text-xs text-white font-bold mb-1">Lat Pulldown</div>
+          <div class="text-xs text-muted">Back · Resistance</div>
+        </div>
+        <div class="card" style="padding:10px;">
+          <div style="height:60px;background:#1a1a1a;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:24px;">💪</div>
+          <div class="text-xs text-white font-bold mb-1">Cable Row</div>
+          <div class="text-xs text-muted">Back · Resistance</div>
+          <div class="badge badge-amber" style="margin-top:4px;font-size:9px;">Draft</div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">⌂</div><div class="tab-label">Dashboard</div></div>
+        <div class="tab-item"><div class="tab-icon">🏋️</div><div class="tab-label">Sessions</div></div>
+        <div class="tab-item"><div class="tab-icon">💪</div><div class="tab-label">Training</div></div>
+        <div class="tab-item active"><div class="tab-icon">🔬</div><div class="tab-label">Exercises</div></div>
+        <div class="tab-item"><div class="tab-icon">📄</div><div class="tab-label">Templates</div></div>
+      </div>
+    </div>
+
+    <!-- 9. TEMPLATES ─────────────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-templates">
+      <div class="hdr">
+        <div class="flex justify-between items-center mb-2">
+          <h1>Templates</h1>
+          <div class="btn-primary" style="width:auto;padding:8px 14px;font-size:13px;">+ New</div>
+        </div>
+        <div class="search-bar">Search templates…</div>
+      </div>
+
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card" style="padding:12px 14px;">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <div class="text-sm text-white font-bold">Push Day A</div>
+              <div class="text-xs text-muted">Resistance · 3 exercises</div>
+            </div>
+            <div class="badge badge-blue">Use</div>
+          </div>
+          <div class="text-xs text-muted">Bench, OHP, Tricep pushdown</div>
+        </div>
+        <div class="card" style="padding:12px 14px;">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <div class="text-sm text-white font-bold">Pull Day A</div>
+              <div class="text-xs text-muted">Resistance · 3 exercises</div>
+            </div>
+            <div class="badge badge-blue">Use</div>
+          </div>
+          <div class="text-xs text-muted">Pull-up, Barbell row, Curl</div>
+        </div>
+        <div class="card" style="padding:12px 14px;">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <div class="text-sm text-white font-bold">Leg Day B</div>
+              <div class="text-xs text-muted">Resistance · 4 exercises</div>
+            </div>
+            <div class="badge badge-blue">Use</div>
+          </div>
+          <div class="text-xs text-muted">Squat, RDL, Leg press, Calf raises</div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">⌂</div><div class="tab-label">Dashboard</div></div>
+        <div class="tab-item"><div class="tab-icon">🏋️</div><div class="tab-label">Sessions</div></div>
+        <div class="tab-item"><div class="tab-icon">💪</div><div class="tab-label">Training</div></div>
+        <div class="tab-item"><div class="tab-icon">🔬</div><div class="tab-label">Exercises</div></div>
+        <div class="tab-item active"><div class="tab-icon">📄</div><div class="tab-label">Templates</div></div>
+      </div>
+    </div>
+
+    <!-- 10. SESSIONS — TRAINER ───────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-sessions-trainer">
+      <div class="hdr">
+        <div class="flex justify-between items-center mb-2">
+          <h1>Sessions</h1>
+          <div class="btn-primary" style="width:auto;padding:8px 14px;font-size:13px;">+ New</div>
+        </div>
+        <div class="search-bar mb-2">Search sessions…</div>
+        <div class="pill-row">
+          <div class="pill active">All clients</div>
+          <div class="pill">Jordan</div>
+          <div class="pill">Ryan</div>
+          <div class="pill">Maya</div>
+          <div class="pill">My Training</div>
+        </div>
+      </div>
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card" style="padding:12px 14px;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <div class="text-sm text-white font-bold">Jordan — Leg Day</div>
+              <div class="text-xs text-muted">Resistance · 55 min</div>
+            </div>
+            <div class="text-xs text-muted">Today</div>
+          </div>
+          <div class="flex gap-3 text-xs text-muted"><span>4 exercises</span><span>·</span><span>12 sets</span><span>·</span><span>RPE 8</span></div>
+        </div>
+        <div class="card" style="padding:12px 14px;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <div class="text-sm text-white font-bold">My Training — Push</div>
+              <div class="text-xs text-muted">Resistance · 48 min</div>
+            </div>
+            <div class="text-xs text-muted">Yesterday</div>
+          </div>
+          <div class="flex gap-3 text-xs text-muted"><span>3 exercises</span><span>·</span><span>9 sets</span></div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">⌂</div><div class="tab-label">Dashboard</div></div>
+        <div class="tab-item active"><div class="tab-icon">🏋️</div><div class="tab-label">Sessions</div></div>
+        <div class="tab-item"><div class="tab-icon">👥</div><div class="tab-label">Clients</div></div>
+        <div class="tab-item"><div class="tab-icon">💪</div><div class="tab-label">Exercises</div></div>
+        <div class="tab-item"><div class="tab-icon">📄</div><div class="tab-label">Templates</div></div>
+      </div>
+    </div>
+
+    <!-- 11. CLIENTS ──────────────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-clients">
+      <div class="hdr">
+        <div class="flex justify-between items-center mb-2">
+          <h1>Clients</h1>
+          <div class="btn-primary" style="width:auto;padding:8px 14px;font-size:13px;">+ Add</div>
+        </div>
+        <div class="search-bar">Search clients…</div>
+      </div>
+      <div class="scroll-area">
+        <!-- At-risk section -->
+        <div class="p-4" style="padding-bottom:6px;">
+          <div class="section-label" style="color:var(--ember-red);">⚠ Needs attention</div>
+        </div>
+        <div class="list-row">
+          <div class="avatar" style="width:40px;height:40px;">JD</div>
+          <div class="flex-1">
+            <div class="text-sm text-white font-bold">Jordan Davis</div>
+            <div class="text-xs" style="color:var(--ember-red);">23 days without a session</div>
+          </div>
+          <div class="badge badge-red">At risk</div>
+        </div>
+        <div class="list-row">
+          <div class="avatar" style="width:40px;height:40px;">MK</div>
+          <div class="flex-1">
+            <div class="text-sm text-white font-bold">Maya Kim</div>
+            <div class="text-xs" style="color:var(--ember-red);">21 days without a session</div>
+          </div>
+          <div class="badge badge-red">At risk</div>
+        </div>
+
+        <div class="p-4" style="padding-bottom:6px;padding-top:16px;">
+          <div class="section-label">Active</div>
+        </div>
+        <div class="list-row">
+          <div class="avatar" style="width:40px;height:40px;">RP</div>
+          <div class="flex-1">
+            <div class="text-sm text-white font-bold">Ryan Park</div>
+            <div class="text-xs text-muted">Last session yesterday</div>
+          </div>
+        </div>
+        <div class="list-row">
+          <div class="avatar" style="width:40px;height:40px;">SL</div>
+          <div class="flex-1">
+            <div class="text-sm text-white font-bold">Sarah Liu</div>
+            <div class="text-xs text-muted">Last session 2 days ago</div>
+          </div>
+        </div>
+        <div class="list-row">
+          <div class="avatar" style="width:40px;height:40px;">TN</div>
+          <div class="flex-1">
+            <div class="text-sm text-white font-bold">Tom Nguyen</div>
+            <div class="text-xs text-muted">Last session 3 days ago</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">⌂</div><div class="tab-label">Dashboard</div></div>
+        <div class="tab-item"><div class="tab-icon">🏋️</div><div class="tab-label">Sessions</div></div>
+        <div class="tab-item active"><div class="tab-icon">👥</div><div class="tab-label">Clients</div></div>
+        <div class="tab-item"><div class="tab-icon">💪</div><div class="tab-label">Exercises</div></div>
+        <div class="tab-item"><div class="tab-icon">📄</div><div class="tab-label">Templates</div></div>
+      </div>
+    </div>
+
+    <!-- 12. CLIENT PROFILE ───────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-client-profile">
+      <div class="status-bar"><span>← Clients</span><span>●●●</span></div>
+      <!-- Header -->
+      <div style="background:var(--surface);padding:16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--surface-border);">
+        <div class="avatar" style="width:52px;height:52px;font-size:18px;">JD</div>
+        <div class="flex-1">
+          <div class="text-md text-white font-bold">Jordan Davis</div>
+          <div class="text-xs text-muted">Client since Jan 2026 · 3×/week goal</div>
+          <div class="badge badge-red mt-2">23 days inactive</div>
+        </div>
+      </div>
+      <!-- Tabs -->
+      <div style="display:flex;border-bottom:1px solid var(--surface-border);background:var(--surface);">
+        <div style="flex:1;padding:10px;text-align:center;font-size:11px;font-weight:600;color:var(--command-blue);border-bottom:2px solid var(--command-blue);">Overview</div>
+        <div style="flex:1;padding:10px;text-align:center;font-size:11px;color:#555;">Sessions</div>
+        <div style="flex:1;padding:10px;text-align:center;font-size:11px;color:#555;">Goals</div>
+        <div style="flex:1;padding:10px;text-align:center;font-size:11px;color:#555;">Snapshots</div>
+      </div>
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card">
+          <div class="section-label">This month</div>
+          <div class="flex gap-3">
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;">0</div><div class="stat-label">Sessions</div></div>
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;color:var(--ember-red);">23</div><div class="stat-label">Days inactive</div></div>
+            <div class="stat-block flex-1"><div class="stat-number" style="font-size:20px;">8</div><div class="stat-label">Goal: 3/wk</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-label">Active Goal</div>
+          <div class="text-sm text-white font-bold mb-1">Deadlift 160kg × 3</div>
+          <div style="height:6px;background:var(--surface-border);border-radius:3px;">
+            <div style="height:6px;background:var(--command-blue);border-radius:3px;width:55%;"></div>
+          </div>
+          <div class="text-xs text-muted mt-2">88kg best · 72kg to go</div>
+        </div>
+        <div class="btn-primary">Log Session for Jordan</div>
+        <div class="btn-secondary">Send Monthly Report</div>
+      </div>
+    </div>
+
+    <!-- 13. SESSION LAUNCHER ─────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-session-launcher">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;padding:20px;gap:16px;">
+        <div class="font-display" style="font-size:24px;color:var(--chalk-white);">Start Session</div>
+
+        <!-- From template -->
+        <div>
+          <div class="section-label">From template</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="card" style="padding:12px;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div class="text-sm text-white font-bold">Push Day A</div>
+                <div class="text-xs text-muted">3 exercises · last used 3 days ago</div>
+              </div>
+              <div class="badge badge-blue">Use</div>
+            </div>
+            <div class="card" style="padding:12px;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div class="text-sm text-white font-bold">Leg Day B</div>
+                <div class="text-xs text-muted">4 exercises · last used 5 days ago</div>
+              </div>
+              <div class="badge badge-blue">Use</div>
+            </div>
+            <div class="card" style="padding:12px;display:flex;justify-content:space-between;align-items:center;opacity:.6;">
+              <div>
+                <div class="text-sm text-white font-bold">Pull Day A</div>
+                <div class="text-xs text-muted">3 exercises · last used 8 days ago</div>
+              </div>
+              <div class="badge badge-blue">Use</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blank session — no type selection -->
+        <div>
+          <div class="section-label">Or start blank</div>
+          <div class="card" style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="text-sm text-white font-bold">Blank session</div>
+              <div class="text-xs text-muted">Add exercises — type inferred automatically</div>
+            </div>
+            <div style="font-size:20px;color:var(--iron-grey);">→</div>
+          </div>
+        </div>
+
+        <div style="margin-top:auto;">
+          <div class="btn-primary">Start Blank Session</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14. LIVE SESSION ──────────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-live-session">
+      <!-- Persistent mini-bar at top -->
+      <div style="background:rgba(27,80,217,.15);border-bottom:1px solid rgba(27,80,217,.25);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+        <div>
+          <div class="text-xs" style="color:var(--command-blue);font-weight:600;letter-spacing:.06em;text-transform:uppercase;">Live Session</div>
+          <div class="text-xs text-muted">Push Day A · 00:18:42</div>
+        </div>
+        <div class="btn-danger" style="width:auto;padding:6px 12px;font-size:12px;">End</div>
+      </div>
+
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:14px;">
+        <!-- Exercise header -->
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="font-display" style="font-size:20px;color:var(--chalk-white);">Bench Press</div>
+            <div class="text-xs text-muted">Exercise 1 of 3 · Resistance</div>
+          </div>
+          <div class="badge badge-blue">Target: 3×5</div>
+        </div>
+
+        <!-- Past sets -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:10px;border:1px solid var(--surface-border);">
+            <div style="width:20px;height:20px;background:rgba(52,211,153,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#34d399;">✓</div>
+            <div class="text-xs text-muted font-mono flex-1">1</div>
+            <div class="font-mono text-sm" style="color:#34d399;font-weight:600;">80 × 5</div>
+            <div class="text-xs text-muted">Target 80×5</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:10px;border:1px solid var(--surface-border);">
+            <div style="width:20px;height:20px;background:rgba(52,211,153,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#34d399;">✓</div>
+            <div class="text-xs text-muted font-mono flex-1">2</div>
+            <div class="font-mono text-sm" style="color:#34d399;font-weight:600;">82.5 × 5</div>
+            <div class="text-xs text-muted">↑ PR</div>
+          </div>
+        </div>
+
+        <!-- Active set hero -->
+        <div style="background:rgba(27,80,217,.05);border:2px solid rgba(27,80,217,.35);border-radius:16px;padding:16px;">
+          <div class="text-xs text-blue" style="font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;">Set 3</div>
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <div style="flex:1;">
+              <div class="section-label">Weight (kg)</div>
+              <div class="big-input" style="font-size:36px;padding:12px;">82.5</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;padding-bottom:14px;color:#555;font-family:var(--font-display);font-size:20px;">×</div>
+            <div style="flex:1;">
+              <div class="section-label">Reps</div>
+              <div class="big-input" style="font-size:36px;padding:12px;border-color:var(--command-blue);">5</div>
+            </div>
+          </div>
+          <div class="text-xs text-muted" style="text-align:center;margin-bottom:12px;">Last time: 80 × 5 · RPE 7</div>
+          <div class="btn-primary">+ Log Set</div>
+        </div>
+
+        <!-- Future sets -->
+        <div style="opacity:.3;display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;">
+            <div style="width:20px;height:20px;border:1px solid var(--surface-border);border-radius:50%;"></div>
+            <div class="text-xs text-muted font-mono flex-1">4</div>
+            <div class="text-xs text-muted">80×5</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;">
+            <div style="width:20px;height:20px;border:1px solid var(--surface-border);border-radius:50%;"></div>
+            <div class="text-xs text-muted font-mono flex-1">5</div>
+            <div class="text-xs text-muted">80×5</div>
+          </div>
+        </div>
+
+        <!-- Next exercise -->
+        <div class="card" style="padding:10px 12px;opacity:.6;">
+          <div class="text-xs text-muted" style="margin-bottom:2px;">Next up</div>
+          <div class="text-sm text-white font-bold">Overhead Press</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15. SESSION SUMMARY ───────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-session-summary">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:14px;">
+        <!-- Header -->
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-size:40px;margin-bottom:8px;">🏆</div>
+          <div class="font-display" style="font-size:26px;color:var(--chalk-white);">Session Complete</div>
+          <div class="text-xs text-muted mt-2">Push Day A · 48 min</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+            <div class="stat-block"><div class="stat-number" style="font-size:22px;">3</div><div class="stat-label">Exercises</div></div>
+            <div class="stat-block"><div class="stat-number" style="font-size:22px;">9</div><div class="stat-label">Sets</div></div>
+            <div class="stat-block"><div class="stat-number" style="font-size:22px;color:var(--signal-yellow);">2</div><div class="stat-label">PRs</div></div>
+          </div>
+        </div>
+
+        <!-- PR callout -->
+        <div style="background:rgba(255,226,0,.08);border:1px solid rgba(255,226,0,.2);border-radius:14px;padding:12px 14px;">
+          <div class="text-xs" style="color:var(--signal-yellow);font-weight:600;margin-bottom:6px;">⭐ New PRs</div>
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-sm text-white">Bench Press</div>
+            <div class="font-mono text-sm" style="color:var(--signal-yellow);">82.5 kg × 5</div>
+          </div>
+          <div class="flex justify-between items-center">
+            <div class="text-sm text-white">Overhead Press</div>
+            <div class="font-mono text-sm" style="color:var(--signal-yellow);">55 kg × 5</div>
+          </div>
+        </div>
+
+        <!-- RPE -->
+        <div class="card">
+          <div class="section-label">Session RPE</div>
+          <div style="display:flex;gap:6px;">
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">1</div>
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">2</div>
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">3</div>
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">4</div>
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">5</div>
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">6</div>
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">7</div>
+            <div style="flex:1;padding:8px;background:rgba(27,80,217,.2);border-radius:8px;text-align:center;font-size:11px;font-weight:700;color:var(--command-blue);border:1px solid rgba(27,80,217,.4);">8</div>
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">9</div>
+            <div style="flex:1;padding:8px;background:var(--surface-raised);border-radius:8px;text-align:center;font-size:11px;color:#555;">10</div>
+          </div>
+        </div>
+
+        <div class="btn-primary">Done</div>
+        <div class="btn-secondary">View Full History</div>
+      </div>
+    </div>
+
+    <!-- 16. SESSION HISTORY ─────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-session-history">
+      <div class="status-bar"><span>← Session</span><span>●●●</span></div>
+      <div style="background:var(--surface);padding:14px 16px;border-bottom:1px solid var(--surface-border);flex-shrink:0;">
+        <div class="font-display" style="font-size:20px;color:var(--chalk-white);margin-bottom:2px;">Bench Press History</div>
+        <div class="text-xs text-muted">All sets logged for this exercise</div>
+      </div>
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:10px;">
+        <!-- Chart placeholder -->
+        <div class="card">
+          <div class="section-label">1RM Estimate trend</div>
+          <div class="skel h64 full rounded" style="opacity:.25;"></div>
+        </div>
+        <!-- Session rows -->
+        <div class="card" style="padding:12px;">
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-sm text-white font-bold">Today</div>
+            <div class="badge badge-green">PR session</div>
+          </div>
+          <div class="flex gap-6 text-xs">
+            <div><div class="font-mono" style="font-size:16px;color:#34d399;font-weight:700;">82.5</div><div class="text-muted">Set 2–3 (kg)</div></div>
+            <div><div class="font-mono" style="font-size:16px;color:var(--chalk-white);font-weight:700;">5</div><div class="text-muted">Reps</div></div>
+            <div><div class="font-mono" style="font-size:16px;color:var(--chalk-white);font-weight:700;">8</div><div class="text-muted">RPE</div></div>
+          </div>
+        </div>
+        <div class="card" style="padding:12px;">
+          <div class="text-sm text-white font-bold mb-2">3 days ago</div>
+          <div class="flex gap-6 text-xs">
+            <div><div class="font-mono" style="font-size:16px;color:var(--chalk-white);font-weight:700;">80</div><div class="text-muted">kg</div></div>
+            <div><div class="font-mono" style="font-size:16px;color:var(--chalk-white);font-weight:700;">5</div><div class="text-muted">Reps</div></div>
+            <div><div class="font-mono" style="font-size:16px;color:var(--chalk-white);font-weight:700;">7</div><div class="text-muted">RPE</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 17. PREFERENCES ─────────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-preferences">
+      <div class="hdr">
+        <h1>Preferences</h1>
+      </div>
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="list-row">
+            <div class="flex-1 text-sm text-white">Mode</div>
+            <div class="text-sm text-muted">Athlete</div>
+          </div>
+          <div class="list-row">
+            <div class="flex-1 text-sm text-white">Weight unit</div>
+            <div class="text-sm text-muted">kg</div>
+          </div>
+          <div class="list-row">
+            <div class="flex-1 text-sm text-white">Session RPE prompts</div>
+            <div style="width:36px;height:20px;background:var(--command-blue);border-radius:10px;"></div>
+          </div>
+          <div class="list-row">
+            <div class="flex-1 text-sm text-white">At-risk alerts</div>
+            <div style="width:36px;height:20px;background:var(--command-blue);border-radius:10px;"></div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="list-row">
+            <div class="flex-1 text-sm text-white">Upgrade to Trainer</div>
+            <div class="text-blue text-xs font-bold">→</div>
+          </div>
+        </div>
+
+        <div style="margin-top:4px;">
+          <div class="section-label">Account</div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="list-row">
+            <div class="flex-1 text-sm text-white">Name</div>
+            <div class="text-sm text-muted">Alex</div>
+          </div>
+          <div class="list-row">
+            <div class="flex-1 text-sm text-white">Email</div>
+            <div class="text-sm text-muted">athlete@example.com</div>
+          </div>
+        </div>
+        <div class="btn-danger">Sign Out</div>
+      </div>
+    </div>
+
+    <!-- 18. INSTALL PROMPT ───────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-install-prompt">
+      <!-- Underlying screen — session summary (install fires after first completed session) -->
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px;filter:brightness(.4);">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-size:40px;margin-bottom:8px;">🏆</div>
+          <div class="font-display" style="font-size:26px;color:var(--chalk-white);">Session Complete</div>
+        </div>
+      </div>
+
+      <!-- Install prompt overlay -->
+      <div class="install-prompt">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:40px;height:40px;background:rgba(27,80,217,.15);border:1.5px solid rgba(27,80,217,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">💪</div>
+          <div>
+            <div class="text-sm text-white font-bold">Add to Home Screen</div>
+            <div class="text-xs text-muted">TrainerApp</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.5;">
+          Train anywhere, even without signal. Your session data never disappears.
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div class="btn-primary" style="flex:2;padding:11px;">Add to Home Screen</div>
+          <div class="btn-secondary" style="flex:1;padding:11px;font-size:12px;">Not now</div>
+        </div>
+        <div class="text-xs text-muted" style="text-align:center;margin-top:8px;">Won't ask again if dismissed</div>
+      </div>
+    </div>
+
+    <!-- 19. OFFLINE — BANNER ──────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-offline-banner">
+      <div class="status-bar"><span>9:41</span><span style="color:#555;">No Signal</span></div>
+      <!-- Offline banner -->
+      <div class="offline-banner">
+        <span>📶</span>
+        <span style="flex:1;">Offline — changes will sync when you reconnect</span>
+        <span class="badge badge-blue" style="font-size:10px;">3 queued</span>
+      </div>
+      <!-- Underlying screen — live session (offline during logging) -->
+      <div style="background:rgba(27,80,217,.15);border-bottom:1px solid rgba(27,80,217,.25);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+        <div>
+          <div class="text-xs" style="color:var(--command-blue);font-weight:600;letter-spacing:.06em;text-transform:uppercase;">Live Session</div>
+          <div class="text-xs text-muted">Push Day A · 00:22:10</div>
+        </div>
+        <div class="btn-danger" style="width:auto;padding:6px 12px;font-size:12px;">End</div>
+      </div>
+      <div class="scroll-area p-4" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="flex justify-between items-center">
+          <div class="font-display" style="font-size:20px;color:var(--chalk-white);">Squat</div>
+          <div class="badge badge-amber">Offline — saving locally</div>
+        </div>
+        <!-- Active set -->
+        <div style="background:rgba(27,80,217,.05);border:2px solid rgba(27,80,217,.35);border-radius:16px;padding:16px;">
+          <div class="text-xs text-blue" style="font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;">Set 1</div>
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <div style="flex:1;"><div class="section-label">Weight (kg)</div><div class="big-input" style="font-size:36px;padding:12px;">100</div></div>
+            <div style="display:flex;align-items:flex-end;padding-bottom:14px;color:#555;font-family:var(--font-display);font-size:20px;">×</div>
+            <div style="flex:1;"><div class="section-label">Reps</div><div class="big-input" style="font-size:36px;padding:12px;border-color:var(--command-blue);">5</div></div>
+          </div>
+          <div class="text-xs text-muted" style="text-align:center;margin-bottom:12px;">Last time: 100 × 5 · RPE 8</div>
+          <div class="btn-primary">+ Log Set</div>
+        </div>
+        <div class="card" style="padding:10px 12px;">
+          <div class="text-xs text-muted">Sets logged offline are saved locally and will sync automatically when you reconnect.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 20. OFFLINE — BLOCKED ─────────────────────────────────────────────────── -->
+    <div class="phone-screen" id="s-offline-blocked">
+      <div class="status-bar"><span>9:41</span><span style="color:#555;">No Signal</span></div>
+      <div class="offline-banner">
+        <span>📶</span>
+        <span style="flex:1;">Offline</span>
+      </div>
+      <!-- Blocked screen: Reports -->
+      <div class="hdr">
+        <h1>Reports</h1>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:16px;text-align:center;">
+        <div style="width:64px;height:64px;background:rgba(138,144,153,.1);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;">📡</div>
+        <div class="font-display" style="font-size:20px;color:var(--chalk-white);">Reports need a connection</div>
+        <div class="text-xs text-muted" style="line-height:1.6;max-width:240px;">Monthly reports are generated and delivered by email. This requires a network connection.</div>
+        <div class="badge badge-amber" style="font-size:11px;padding:6px 12px;">Will be available when you reconnect</div>
+      </div>
+    </div>
+
+  </div><!-- /phone-shell -->
+</div><!-- /wf-stage -->
+
+<!-- ── Annotations ──────────────────────────────────────────────────────────── -->
+<div class="wf-annotations">
+  <h2>Notes</h2>
+
+  <div class="ann active" id="a-login">
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Login requires network. Show error message if offline — do not show spinner indefinitely.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Decisions</h3>
+      <span class="ann-tag tag-decision">DECIDED</span>
+      <ul><li>Auth tokens in-memory (Zustand), refresh token in httpOnly cookie</li><li>Session persists across home-screen launches via cookie</li><li>No "remember me" toggle needed — refresh token handles this</li></ul>
+    </div>
+  </div>
+
+  <div class="ann" id="a-onboard-mode">
+    <div class="ann-section">
+      <h3>Trigger</h3>
+      <p>Shown once after registration when <code>onboardedAt</code> is null. Never shown again.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Decisions</h3>
+      <span class="ann-tag tag-decision">DECIDED</span>
+      <ul>
+        <li>Athlete → Trainer upgrade: settings toggle + paywall. No return path.</li>
+        <li>Trainer mode 14-day free trial before billing gate</li>
+        <li>This choice should feel weighty — stacked full-height cards, not a tab or dropdown</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Blocked — requires network to POST /auth/onboard. Show error if offline.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-onboard-profile">
+    <div class="ann-section">
+      <h3>Fields</h3>
+      <ul><li>Name (required)</li><li>Weight unit: kg / lbs (toggle, not dropdown)</li></ul>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Blocked — requires network. Show error on submit if offline.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-dash-athlete">
+    <div class="ann-section">
+      <h3>Layout principle</h3>
+      <span class="ann-tag tag-decision">DECIDED</span>
+      <p>Dashboard is an <b>action hub</b>. Actions lead. KPIs follow.</p>
+      <ul>
+        <li><b>Header strip</b> (compact chips): streak, last session, recent PR — glanceable, not the hero</li>
+        <li><b>TRAIN</b> — primary action card, always first, command-blue fill</li>
+        <li><b>PLAN</b> — schedule a future session</li>
+        <li><b>GOALS</b> — view / update active goal</li>
+        <li><b>HISTORY</b> — jump to last session</li>
+        <li><b>BUILD</b> — build a template</li>
+        <li><b>Log Snapshot</b> — secondary, bottom</li>
+        <li><b>KPI widgets</b> — user-configured, below the fold</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>TRAIN card states</h3>
+      <ul>
+        <li><b>Default:</b> "Start Training" — no planned session</li>
+        <li><b>Planned:</b> "Begin: Push Day A ×" — a planned session exists</li>
+        <li><b>In progress:</b> "Resume: Push Day A ×" — session already started</li>
+      </ul>
+      <p>× dismisses the planned/in-progress session after confirmation.</p>
+    </div>
+    <div class="ann-section">
+      <h3>KPI pinning</h3>
+      <p>Configured from Goals screen, not from Dashboard. Dashboard itself is configuration-free. Pinned KPI chips appear in the header strip alongside streak + last session.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>All action cards work from cache. TRAIN works offline (session queued locally). PLAN/GOALS/BUILD require network for mutations. KPI strip shows stale timestamp.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Install prompt</h3>
+      <span class="ann-tag tag-install">INSTALL</span>
+      <p>Does NOT fire on dashboard. Fires after first completed session on Session Summary.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-dash-trainer">
+    <div class="ann-section">
+      <h3>Layout principle</h3>
+      <span class="ann-tag tag-decision">DECIDED</span>
+      <p>Same action-hub structure as Athlete. Trainer-specific actions replace athlete ones. KPIs are below the fold and user-configured.</p>
+      <ul>
+        <li><b>Header strip</b>: active client count, at-risk count, my last session</li>
+        <li><b>At-risk alert</b>: Ember Red, prominent — but not the primary CTA</li>
+        <li><b>TRAIN</b> — My Training (isSelf session)</li>
+        <li><b>PLAN</b> — plan a client session</li>
+        <li><b>CLIENTS</b> — roster with at-risk summary</li>
+        <li><b>HISTORY</b> — most recent client session</li>
+        <li><b>BUILD</b> — build a template</li>
+        <li><b>KPI widgets</b> — configurable, below fold</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>At-risk alert</h3>
+      <ul>
+        <li>Threshold: 21+ days without a session</li>
+        <li>Dismissal: per-session only — resets on next app open (by design)</li>
+        <li>Also appears as chip in header strip for quick reference</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Client list from cache. At-risk alert from cache. TRAIN (My Training) fully works offline. Report send blocked offline.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-sessions-athlete">
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>List shows cached sessions. "New session" still works — creates offline session in queue. Offline banner shown.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Empty state</h3>
+      <p>First-time: "No sessions yet — start your first session." with CTA button.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-my-training">
+    <div class="ann-section">
+      <h3>Tabs</h3>
+      <ul><li>Overview — stats, PRs, volume chart</li><li>Goals — active and completed goals</li><li>Snapshots — body comp timeseries</li><li>PRs — full PR table by exercise</li></ul>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>All data from cache. Charts may show "last synced" indicator. Adding a new goal or snapshot is blocked offline.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Trainer mode note</h3>
+      <p>In Trainer mode this is the isSelf client view — same component, different vocabulary. Trainer sees their own training here.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-exercises">
+    <div class="ann-section">
+      <h3>Filter rows</h3>
+      <ul><li>Row 1 (larger pills): workout type — mutually exclusive</li><li>Divider line</li><li>Row 2 (smaller pills): body part + category + drafts toggle — additive</li></ul>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Exercise library fully cached. Browse and search works offline. Creating a new exercise is blocked offline (requires enrichment via backend).</p>
+    </div>
+    <div class="ann-section">
+      <h3>Grid layout</h3>
+      <p>2-column grid at 375px. Card shows thumbnail, name, body part tag. Draft badge shown on unenriched exercises.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-templates">
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Template list from cache. Using a template to start a session works offline — session queued locally. Creating a new template is blocked offline.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Empty state</h3>
+      <p>"No templates yet — create one from any completed session." Link to Sessions.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-sessions-trainer">
+    <div class="ann-section">
+      <h3>Client filter pills</h3>
+      <p>One pill per client for quick filtering. "My Training" pill shows trainer's own sessions (isSelf). Defaults to "All clients".</p>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Cached sessions shown. New session logging works offline.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-clients">
+    <div class="ann-section">
+      <h3>At-risk section</h3>
+      <p>Clients with 21+ days since last session surfaced at top with Ember Red treatment. Same data as dashboard alert.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Client list from cache. Adding a new client is blocked offline. Tapping a client opens cached profile data.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Empty state</h3>
+      <p>"No clients yet — add your first client." CTA.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-client-profile">
+    <div class="ann-section">
+      <h3>Tabs</h3>
+      <ul><li>Overview — stats, active goal, quick actions</li><li>Sessions — client's session history</li><li>Goals — goals CRUD</li><li>Snapshots — body comp timeseries</li></ul>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Cached data shown. "Log Session for Client" works offline. "Send Monthly Report" is blocked — requires email delivery via Resend.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Decisions</h3>
+      <span class="ann-tag tag-decision">DECIDED</span>
+      <p>Reports: email-only (Resend). No in-app report preview in initial scope.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-session-launcher">
+    <div class="ann-section">
+      <h3>Workout type</h3>
+      <span class="ann-tag tag-decision">DECIDED</span>
+      <p>No upfront type selection. <code>workoutType</code> is inferred from the exercise record when each exercise is added. A mixed session (e.g. resistance + stretching) carries the type per exercise, not per session.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Two paths</h3>
+      <ul>
+        <li><b>From template:</b> picks exercises + targets from the template record, <code>workoutType</code> carried from <code>template_exercise</code></li>
+        <li><b>Blank:</b> opens live session with empty exercise list — user adds exercises from the library</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>Trigger</h3>
+      <p>Opened via bottom-sheet from any "Start Session", TRAIN card, or "New" button. Also reachable at /session/new.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Fully works offline. Template list from cache. Session created in local queue, syncs on reconnect.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-live-session">
+    <div class="ann-section">
+      <h3>Key UX decisions</h3>
+      <ul>
+        <li>"Last time" context must be prominent — currently a small text line, needs more visual weight (see Hevy comparison)</li>
+        <li>Past sets: color-coded (emerald = hit/surpass, amber = missed) — TrainerApp unique</li>
+        <li>Future sets: greyed placeholders showing upcoming targets</li>
+        <li>Active set: full hero with large inputs, pre-filled from target or last set</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Core feature — fully works offline. Sets written to localStorage queue. Offline banner shown. Badge shows queued count. No degradation of logging functionality.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Gaps vs competitors</h3>
+      <span class="ann-tag tag-deferred">PHASE 3+</span>
+      <ul><li>Rest timer (auto-start after set log)</li><li>Set type tagging (warmup / working / drop / failure)</li><li>Plate calculator</li></ul>
+    </div>
+  </div>
+
+  <div class="ann" id="a-session-summary">
+    <div class="ann-section">
+      <h3>Install prompt trigger</h3>
+      <span class="ann-tag tag-install">INSTALL</span>
+      <p>This is where the install prompt fires — after the first completed session, for users on a supporting browser. Once, non-recurring. Does not fire if already installed.</p>
+    </div>
+    <div class="ann-section">
+      <h3>RPE capture</h3>
+      <p>Session-level RPE collected here (1–10 selector). This feeds the subjective score timeseries and dashboard analytics.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Summary shown from local session data. RPE can be logged offline. PR detection may be delayed until sync (backend calculates PRs server-side).</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-session-history">
+    <div class="ann-section">
+      <h3>Entry points</h3>
+      <ul><li>Session Summary → "View Full History"</li><li>Tapping an exercise name in any session card</li></ul>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Cached data shown. Chart may be stale. Banner indicates last sync time.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-preferences">
+    <div class="ann-section">
+      <h3>Upgrade path</h3>
+      <span class="ann-tag tag-decision">DECIDED</span>
+      <p>Athlete → Trainer: settings toggle + paywall. No dedicated upgrade screen. One-way only.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Push notifications</h3>
+      <span class="ann-tag tag-deferred">DEFERRED</span>
+      <p>Notification preferences not in Phase D scope. Deferred past SaaS launch.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Offline state</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Preference reads from local store. Changes queue for sync. Sign out available offline.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-install-prompt">
+    <div class="ann-section">
+      <h3>Timing</h3>
+      <span class="ann-tag tag-install">INSTALL</span>
+      <ul>
+        <li>Fires once, after the first completed session</li>
+        <li>Requires: supporting browser + <code>beforeinstallprompt</code> event captured</li>
+        <li>Does not fire on first load</li>
+        <li>Non-recurring: dismissed = never shown again</li>
+        <li>iOS: no native prompt — show manual instructions sheet instead (Phase 12)</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>Copy</h3>
+      <p>"Train anywhere, even without signal. Your session data never disappears."</p>
+      <p>CTA: "Add to Home Screen" (not generic "Install")</p>
+      <p>Dismiss: "Not now" — permanent</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-offline-banner">
+    <div class="ann-section">
+      <h3>Four states</h3>
+      <ul>
+        <li><b>Offline:</b> "Offline — changes will sync when you reconnect" + queued count badge</li>
+        <li><b>Syncing:</b> "Syncing…" with spinner</li>
+        <li><b>Queued:</b> "N changes queued"</li>
+        <li><b>Error:</b> "Sync failed — tap to retry"</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>Behavior</h3>
+      <p>Banner appears at top of content area (below status bar, above page header). Dismissible? No — stays until reconnected. Auto-dismisses after successful sync.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Core offline guarantee</h3>
+      <span class="ann-tag tag-offline">OFFLINE</span>
+      <p>Set logging, exercise browsing, template use — all work fully offline. Queue persists to localStorage across app restarts.</p>
+    </div>
+  </div>
+
+  <div class="ann" id="a-offline-blocked">
+    <div class="ann-section">
+      <h3>Screens that are blocked offline</h3>
+      <ul>
+        <li>Reports (email send requires network)</li>
+        <li>Login / Onboarding</li>
+        <li>Creating new exercises (backend enrichment required)</li>
+        <li>Adding new clients</li>
+      </ul>
+    </div>
+    <div class="ann-section">
+      <h3>Pattern</h3>
+      <p>Empty state with icon + explanation copy + "available when you reconnect" badge. Never a spinner or an error — the user is informed, not confused.</p>
+    </div>
+    <div class="ann-section">
+      <h3>Offline contract reference</h3>
+      <p>Full feature × offline-state matrix defined in <code>design/offline-contract.md</code>.</p>
+    </div>
+  </div>
+
+</div><!-- /annotations -->
+</div><!-- /shell -->
+
+<script>
+const screens = [
+  ['login','Login'],
+  ['onboard-mode','Onboarding — Mode'],
+  ['onboard-profile','Onboarding — Profile'],
+  ['dash-athlete','Dashboard (Athlete)'],
+  ['dash-trainer','Dashboard (Trainer)'],
+  ['sessions-athlete','Sessions (Athlete)'],
+  ['my-training','My Training'],
+  ['exercises','Exercises'],
+  ['templates','Templates'],
+  ['sessions-trainer','Sessions (Trainer)'],
+  ['clients','Clients'],
+  ['client-profile','Client Profile'],
+  ['session-launcher','Session Launcher'],
+  ['live-session','Live Session'],
+  ['session-summary','Session Summary'],
+  ['session-history','Session History'],
+  ['preferences','Preferences'],
+  ['install-prompt','Install Prompt'],
+  ['offline-banner','Offline — Banner'],
+  ['offline-blocked','Offline — Blocked'],
+]
+
+function show(id) {
+  // Screens
+  document.querySelectorAll('.phone-screen').forEach(el => el.classList.remove('active'))
+  const s = document.getElementById('s-' + id)
+  if (s) s.classList.add('active')
+
+  // Annotations
+  document.querySelectorAll('.ann').forEach(el => el.classList.remove('active'))
+  const a = document.getElementById('a-' + id)
+  if (a) a.classList.add('active')
+
+  // Nav buttons
+  document.querySelectorAll('.wf-nav-btn').forEach(btn => btn.classList.remove('active'))
+  const clicked = [...document.querySelectorAll('.wf-nav-btn')].find(b => b.getAttribute('onclick') === `show('${id}')`)
+  if (clicked) clicked.classList.add('active')
+
+  // Stage title
+  const match = screens.find(([k]) => k === id)
+  document.getElementById('stage-title').textContent = match ? match[1] : id
+}
+</script>
+</body>
+</html>

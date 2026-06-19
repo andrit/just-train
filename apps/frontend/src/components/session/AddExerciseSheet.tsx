@@ -331,14 +331,13 @@ function CooldownTargets({
 
 interface AddExerciseSheetProps {
   open:        boolean
-  workoutId:   string
   sessionId:   string
   workoutType: string
   onClose:     () => void
 }
 
 export function AddExerciseSheet({
-  open, workoutId, sessionId, workoutType, onClose,
+  open, sessionId, workoutType, onClose,
 }: AddExerciseSheetProps): React.JSX.Element {
   const trainer = useAuthStore((s) => s.trainer)
   const weightUnit = trainer?.weightUnitPreference ?? 'lbs'
@@ -440,7 +439,7 @@ export function AddExerciseSheet({
 
   // Quick-add with default targets (swipe-to-add or "Add with defaults" button)
   const handleSwipeAdd = (exercise: ExerciseSummaryResponse): void => {
-    const defaults: Omit<AddExerciseInput, 'workoutId' | 'sessionId' | 'exerciseId'> =
+    const defaults: Omit<AddExerciseInput, 'sessionId' | 'exerciseId'> =
       workoutType === 'resistance'   ? { targetSets: 3, targetReps: 10 }
       : workoutType === 'cardio'     ? { targetSets: 4, targetDurationSeconds: 60 }
       : workoutType === 'calisthenics' ? { targetSets: 3, targetReps: 15 }
@@ -448,13 +447,13 @@ export function AddExerciseSheet({
       : workoutType === 'cooldown'   ? { targetDurationSeconds: 120 }
       : { targetSets: 3, targetReps: 10 }
     addExercise.mutate(
-      { workoutId, sessionId, exerciseId: exercise.id, ...defaults },
+      { sessionId, exerciseId: exercise.id, ...defaults },
       { onSuccess: handleClose },
     )
   }
 
   // Build the AddExerciseInput based on workout type
-  const buildInput = (): Omit<AddExerciseInput, 'workoutId' | 'sessionId' | 'exerciseId'> => {
+  const buildInput = (): Omit<AddExerciseInput, 'sessionId' | 'exerciseId'> => {
     switch (workoutType) {
       case 'resistance':
         return {
@@ -499,7 +498,7 @@ export function AddExerciseSheet({
   const handleConfirm = (): void => {
     if (!selected) return
     addExercise.mutate(
-      { workoutId, sessionId, exerciseId: selected.id, ...buildInput() },
+      { sessionId, exerciseId: selected.id, ...buildInput() },
       { onSuccess: handleClose },
     )
   }
@@ -510,7 +509,7 @@ export function AddExerciseSheet({
       {
         onSuccess: (newExercise) => {
           addExercise.mutate(
-            { workoutId, sessionId, exerciseId: newExercise.id, ...buildInput() },
+            { sessionId, exerciseId: newExercise.id, ...buildInput() },
             { onSuccess: handleClose },
           )
         },

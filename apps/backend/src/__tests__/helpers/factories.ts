@@ -17,7 +17,7 @@
 
 import type {
   Trainer, Client, RefreshToken, ClientGoal, ClientSnapshot,
-  Session, Challenge, Template, TemplateWorkout, TemplateExercise,
+  Session, Challenge, Template, TemplateExercise,
 } from '../../db/schema'
 
 // Stable test IDs — using fixed UUIDs makes test output easier to read
@@ -283,6 +283,7 @@ export function makeTemplate(overrides: Partial<Template> = {}): Template {
     id:          TEST_TEMPLATE_ID,
     trainerId:   TEST_TRAINER_ID,
     name:        'Push Day A',
+    type:        'session' as const,
     description: null,
     notes:       null,
     createdAt:   new Date('2025-01-01T00:00:00Z'),
@@ -291,22 +292,12 @@ export function makeTemplate(overrides: Partial<Template> = {}): Template {
   }
 }
 
-export function makeTemplateWorkout(overrides: Partial<TemplateWorkout> = {}): TemplateWorkout {
-  return {
-    id:          TEST_TEMPLATE_WORKOUT_ID,
-    templateId:  TEST_TEMPLATE_ID,
-    workoutType: 'resistance' as const,
-    orderIndex:  0,
-    notes:       null,
-    ...overrides,
-  }
-}
-
 export function makeTemplateExercise(overrides: Partial<TemplateExercise> = {}): TemplateExercise {
   return {
     id:                    TEST_TEMPLATE_EXERCISE_ID,
-    templateWorkoutId:     TEST_TEMPLATE_WORKOUT_ID,
+    templateId:            TEST_TEMPLATE_ID,
     exerciseId:            TEST_EXERCISE_ID,
+    workoutType:           'resistance' as const,
     orderIndex:            0,
     targetSets:            3,
     targetReps:            8,

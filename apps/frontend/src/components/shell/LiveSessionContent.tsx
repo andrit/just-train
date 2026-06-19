@@ -129,8 +129,19 @@ export default function LiveSessionContent({
     )
   }
 
-  const workouts   = session.workouts ?? []
-  const clientName = session.client?.name ?? 'Training Session'
+  const sessionExercises = session.sessionExercises ?? []
+  const clientName       = session.client?.name ?? 'Training Session'
+
+  // Group exercises by workoutType for visual block rendering
+  const exerciseGroups: { type: string; items: typeof sessionExercises }[] = []
+  for (const ex of sessionExercises) {
+    const last = exerciseGroups[exerciseGroups.length - 1]
+    if (last && last.type === ex.workoutType) {
+      last.items.push(ex)
+    } else {
+      exerciseGroups.push({ type: ex.workoutType, items: [ex] })
+    }
+  }
 
   return (
     <>
@@ -223,13 +234,13 @@ export default function LiveSessionContent({
           </div>
         </header>
 
-        {/* Workout blocks */}
-        {workouts.length === 0 ? (
+        {/* Session exercises (grouped by workoutType) */}
+        {exerciseGroups.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
               <p className="text-4xl mb-4" aria-hidden>🏋️</p>
               <p className="text-gray-300 font-medium mb-1">Ready to train</p>
-              <p className="text-gray-600 text-sm mb-6">Add your first workout block to get started</p>
+              <p className="text-gray-600 text-sm mb-6">Add your first exercise to get started</p>
               <button
                 type="button"
                 onClick={() => setAddBlockOpen(true)}
@@ -243,16 +254,16 @@ export default function LiveSessionContent({
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
                   <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
-                Add Block
+                Add Exercise
               </button>
             </div>
           </div>
         ) : sessionLayout === 'horizontal' ? (
           <div className="flex-1 flex flex-col overflow-hidden">
-            {workouts.length > 1 && (
+            {exerciseGroups.length > 1 && (
               <div className="flex justify-center gap-1.5 py-3 shrink-0">
-                {workouts.map((w) => (
-                  <div key={w.id} className="w-1.5 h-1.5 rounded-full bg-surface-border" />
+                {exerciseGroups.map((g) => (
+                  <div key={g.type} className="w-1.5 h-1.5 rounded-full bg-surface-border" />
                 ))}
               </div>
             )}
@@ -260,10 +271,11 @@ export default function LiveSessionContent({
               className="flex-1 flex gap-3 overflow-x-auto scrollbar-hidden px-4 pb-6 snap-x snap-mandatory"
               style={{ scrollSnapType: 'x mandatory' }}
             >
-              {workouts.map((workout) => (
-                <div key={workout.id} className="snap-center">
+              {exerciseGroups.map((group) => (
+                <div key={group.type} className="snap-center">
                   <WorkoutBlock
-                    workout={workout}
+                    workoutType={group.type}
+                    sessionExercises={group.items}
                     sessionId={sessionId}
                     weightUnit={weightUnit}
                     layout="horizontal"
@@ -279,10 +291,11 @@ export default function LiveSessionContent({
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-6">
-            {workouts.map((workout) => (
+            {exerciseGroups.map((group) => (
               <WorkoutBlock
-                key={workout.id}
-                workout={workout}
+                key={group.type}
+                workoutType={group.type}
+                sessionExercises={group.items}
                 sessionId={sessionId}
                 weightUnit={weightUnit}
                 layout="vertical"
@@ -297,12 +310,12 @@ export default function LiveSessionContent({
         )}
       </div>
 
-      {/* Add Block FAB — labelled so its purpose is clear */}
-      {workouts.length > 0 && (
+      {/* Add Exercise FAB */}
+      {exerciseGroups.length > 0 && (
         <button
           type="button"
           onClick={() => setAddBlockOpen(true)}
-          aria-label="Add workout block"
+          aria-label="Add exercise"
           className={cn(
             'fixed bottom-6 right-4 z-30',
             'flex items-center gap-2 px-4 h-12 rounded-full',
@@ -315,7 +328,7 @@ export default function LiveSessionContent({
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0">
             <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          <span className="text-sm font-medium pr-1">Add Block</span>
+          <span className="text-sm font-medium pr-1">Add Exercise</span>
         </button>
       )}
 
@@ -331,7 +344,7 @@ export default function LiveSessionContent({
         onCancel={() => setShowEndModal(false)}
         onDiscard={handleDiscard}
         loading={endSession.isPending || discardSession.isPending}
-        hasWork={(workouts ?? []).some(w => w.sessionExercises.some(se => se.sets.length > 0))}
+        hasWork={sessionExercises.some(se => se.sets.length > 0)}
       />
 
       {showWrapUp && session && (

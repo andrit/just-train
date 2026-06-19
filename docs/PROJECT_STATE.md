@@ -651,6 +651,42 @@ client portal magic link (read-only report access), multi-trainer studio account
 
 ---
 
+## PWA SDLC Progress (Workbench)
+
+TrainerApp is managed through the workbench PWA SDLC (`/workbench/project-types/pwa/project.json`).
+This tracks progress through the workbench phases, which are separate from the app's own versioned phase system above.
+
+| Phase | Name | Status |
+|---|---|---|
+| 0 | Planning & DDD | ✅ Complete — signed off |
+| 1 | Scaffold | ✅ Complete — manifest valid, SW activated, `mobile-web-app-capable` added (2026-06-19) |
+| 2 | Core Schema | ✅ Complete — localStorage write queue (offlineQueue.ts), Workbox read cache, syncService, sync_log backend audit table. All shipped in v2.4.0 (2026-06-19) |
+| D | Design | ✅ Complete — design system (crosshatch, near-black background, card borders, header treatment, pill styles, shadow-pressable), product-synthesis.md approved, wireframes.html (20 screens, offline states, install prompt), dashboard action-hub layout confirmed (2026-06-19) |
+| 3 | Core Features | 🔄 **Active** |
+| 4 | Service Worker & Caching | 🔜 |
+| 5 | Auth | 🔜 |
+| 6 | Push Notifications | 🔜 |
+| 7 | Lighthouse & Performance | 🔜 |
+| 8 | Testing | 🔜 |
+| 9 | Extract | 🔜 |
+| 10 | QA Gate | 🔜 |
+| 11 | Support Audit | 🔜 |
+| 12 | Support Automation | 🔜 |
+| 13–17 | Launch phases | 🔜 |
+| 18 | Ongoing | 🔜 |
+
+Phase 2 deliverables (from `pwa/project.json`):
+- Client-side persistence approach chosen and implemented (IndexedDB via Dexie.js, or localStorage for lightweight cases)
+- Data sync strategy documented — how offline writes replay to server when reconnected
+- TypeScript types for all client-side entities
+- Seed/mock data for offline development
+
+Advance criteria:
+- One entity stored and retrieved successfully via client-side persistence
+- Sync strategy documented (implementation can follow in Phase 4)
+
+---
+
 ## v2.5.0 Spec — UI/UX Polish + Gamification Foundations
 
 ### Session execution layout — WorkoutBlock redesign

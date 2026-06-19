@@ -80,7 +80,7 @@ export default function ExercisesPage(): React.JSX.Element {
     <div className="flex flex-col min-h-full">
 
       {/* ── Sticky header ─────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-20 bg-brand-primary/90 backdrop-blur-md border-b border-surface-border">
+      <div className="sticky top-0 z-20 header-crosshatch backdrop-blur-md border-b border-surface-border">
 
         {/* Title + New button */}
         <div className="flex items-center justify-between px-4 md:px-6 pt-4 pb-3">
@@ -123,10 +123,10 @@ export default function ExercisesPage(): React.JSX.Element {
                 setCategory('') // reset category when switching type
               }}
               className={cn(
-                'shrink-0 px-4 py-1.5 rounded-full border text-xs font-medium transition-all duration-150',
+                'shrink-0 px-4 py-1.5 rounded-full border text-xs font-medium transition-all duration-150 shadow-pressable',
                 workoutType === value
-                  ? cn(color, 'bg-current/10')
-                  : 'border-surface-border text-gray-500 hover:border-gray-500 hover:text-gray-300',
+                  ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
+                  : 'bg-[#1C1C1C] border-surface-border text-gray-300 hover:border-gray-400 hover:text-gray-200',
               )}
             >
               {label}
@@ -134,8 +134,10 @@ export default function ExercisesPage(): React.JSX.Element {
           ))}
         </div>
 
+        <div className="mx-4 md:mx-6 border-t border-surface-border/40" />
+
         {/* Secondary filters */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hidden px-4 md:px-6 pb-3">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hidden px-4 md:px-6 pb-3 pt-2">
           {/* Body parts */}
           {(bodyParts ?? []).map((bp) => (
             <button
@@ -143,10 +145,10 @@ export default function ExercisesPage(): React.JSX.Element {
               type="button"
               onClick={() => setBodyPartId(bodyPartId === bp.id ? '' : bp.id)}
               className={cn(
-                'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium capitalize transition-all duration-150',
+                'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium capitalize transition-all duration-150 shadow-pressable',
                 bodyPartId === bp.id
-                  ? 'border-command-blue/60 text-command-blue bg-command-blue/10'
-                  : 'border-surface-border text-gray-600 hover:border-gray-500 hover:text-gray-400',
+                  ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
+                  : 'bg-[#1C1C1C] border-surface-border text-gray-300 hover:border-gray-400 hover:text-gray-200',
               )}
             >
               {bp.name.replace('_', ' ')}
@@ -160,10 +162,10 @@ export default function ExercisesPage(): React.JSX.Element {
               type="button"
               onClick={() => setCategory(category === value ? '' : value)}
               className={cn(
-                'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium transition-all duration-150',
+                'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium transition-all duration-150 shadow-pressable',
                 category === value
-                  ? 'border-violet-500/60 text-violet-400 bg-violet-500/10'
-                  : 'border-surface-border text-gray-600 hover:border-gray-500 hover:text-gray-400',
+                  ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
+                  : 'bg-[#1C1C1C] border-surface-border text-gray-300 hover:border-gray-400 hover:text-gray-200',
               )}
             >
               {label}
@@ -178,10 +180,10 @@ export default function ExercisesPage(): React.JSX.Element {
             type="button"
             onClick={() => setDraftsOnly(!draftsOnly)}
             className={cn(
-              'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium transition-all duration-150',
+              'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium transition-all duration-150 shadow-pressable',
               draftsOnly
-                ? 'border-amber-500/60 text-amber-400 bg-amber-500/10'
-                : 'border-surface-border text-gray-600 hover:border-gray-500 hover:text-gray-400',
+                ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
+                : 'bg-[#1C1C1C] border-surface-border text-gray-300 hover:border-gray-400 hover:text-gray-200',
             )}
           >
             ✏️ Drafts

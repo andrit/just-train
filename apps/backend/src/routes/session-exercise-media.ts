@@ -12,7 +12,7 @@ import { routeLog } from '../lib/logger'
 //   Video capped at 30 seconds (validated client-side, enforced here).
 //
 // OWNERSHIP:
-//   session_exercise → workout → session → trainer chain.
+//   session_exercise → session → trainer chain.
 // ------------------------------------------------------------
 
 import type { FastifyInstance } from 'fastify'
@@ -59,19 +59,13 @@ export async function sessionExerciseMediaRoutes(app: FastifyInstance): Promise<
   app.addHook('preHandler', authenticate)
 
   // Helper: verify session exercise belongs to this trainer.
-  // Returns the full chain (sessionExercise + workout + session) for folder path.
+  // Returns the session exercise with its parent session for folder path.
   async function findOwnedSessionExercise(trainerId: string, sessionExerciseId: string) {
     const se = await db.query.sessionExercises.findFirst({
       where: eq(sessionExercises.id, sessionExerciseId),
-      with: {
-        workout: {
-          with: {
-            session: true,
-          },
-        },
-      },
+      with: { session: true },
     })
-    if (!se || se.workout?.session?.trainerId !== trainerId) return null
+    if (!se || se.session?.trainerId !== trainerId) return null
     return se
   }
 
@@ -81,17 +75,11 @@ export async function sessionExerciseMediaRoutes(app: FastifyInstance): Promise<
       where: eq(sessionExerciseMedia.id, mediaId),
       with: {
         sessionExercise: {
-          with: {
-            workout: {
-              with: {
-                session: true,
-              },
-            },
-          },
+          with: { session: true },
         },
       },
     })
-    if (!media || media.sessionExercise?.workout?.session?.trainerId !== trainerId) return null
+    if (!media || media.sessionExercise?.session?.trainerId !== trainerId) return null
     return media
   }
 
@@ -155,7 +143,7 @@ Video duration is enforced server-side. The upload runs in the background during
     }
 
     try {
-      const session = se.workout?.session
+      const session   = se.session
       const clientId  = session?.clientId ?? ''
       const sessionId = session?.id ?? ''
 

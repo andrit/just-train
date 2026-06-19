@@ -439,7 +439,6 @@ interface LogData {
 interface ExerciseBlockProps {
   sessionExercise:     SessionExerciseResponse
   sessionId:           string
-  workoutId:           string
   workoutType:         string
   weightUnit:          string
   clientId:            string | null   // for exercise history auto-populate
@@ -448,7 +447,7 @@ interface ExerciseBlockProps {
 }
 
 export function ExerciseBlock({
-  sessionExercise, sessionId, workoutId, workoutType, weightUnit, clientId, restDurationSeconds = 90, onSetLogged,
+  sessionExercise, sessionId, workoutType, weightUnit, clientId, restDurationSeconds = 90, onSetLogged,
 }: ExerciseBlockProps): React.JSX.Element {
   const logSet         = useLogSet()
   const deleteExercise = useDeleteSessionExercise()
@@ -537,7 +536,7 @@ export function ExerciseBlock({
           {/* Delete exercise */}
           <button
             type="button"
-            onClick={() => deleteExercise.mutate({ sessionExerciseId: sessionExercise.id, workoutId, sessionId })}
+            onClick={() => deleteExercise.mutate({ sessionExerciseId: sessionExercise.id, sessionId })}
             aria-label="Remove exercise"
             className="text-gray-600 hover:text-red-400 transition-colors p-1"
           >

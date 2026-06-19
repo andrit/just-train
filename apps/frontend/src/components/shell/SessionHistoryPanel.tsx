@@ -58,16 +58,10 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
   }
 
   const duration    = formatDuration(session.startTime ?? null, session.endTime ?? null)
-  const totalSets   = session.workouts?.reduce((acc, w) =>
-    acc + w.sessionExercises.reduce((a, se) => a + se.sets.length, 0), 0
-  ) ?? 0
-  const totalVolume = session.workouts?.reduce((acc, w) =>
-    acc + w.sessionExercises.reduce((a, se) =>
-      a + se.sets.reduce((s, set) =>
-        s + ((set.reps ?? 0) * (set.weight ?? 0)), 0
-      ), 0
-    ), 0
-  ) ?? 0
+  const totalSets   = (session.sessionExercises ?? []).reduce((acc, se) => acc + se.sets.length, 0)
+  const totalVolume = (session.sessionExercises ?? []).reduce((acc, se) =>
+    acc + se.sets.reduce((s, set) => s + ((set.reps ?? 0) * (set.weight ?? 0)), 0), 0
+  )
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
@@ -139,72 +133,61 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
       </div>
 
       {/* Exercise breakdown */}
-      <div className="px-4 py-4 space-y-5 flex-1">
-        {(session.workouts ?? []).map((workout) => (
-          <div key={workout.id}>
-            {/* Block type label */}
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">
-              {workout.workoutType}
-            </p>
+      <div className="px-4 py-4 space-y-3 flex-1">
+        {(session.sessionExercises ?? []).map((se) => (
+          <div key={se.id} className="bg-surface rounded-xl px-3 py-3 border border-surface-border">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="font-medium text-sm text-gray-200">
+                {se.exercise?.name ?? 'Unknown'}
+              </p>
+              <ExerciseMediaThumbs
+                sessionExerciseId={se.id}
+                onTap={(idx) => setMediaViewer({ sessionExerciseId: se.id, startIdx: idx })}
+              />
+            </div>
+            <div className="space-y-1">
+              {se.sets
+                .filter(set => !prFilterOn || set.isPR || set.isPRVolume)
+                .map((set, i) => {
+                const hitReps   = !se.targetReps   || (set.reps ?? 0) >= se.targetReps
+                const hitWeight = !se.targetWeight || (set.weight ?? 0) >= se.targetWeight
+                const hit = hitReps && hitWeight
 
-            <div className="space-y-2">
-              {workout.sessionExercises.map((se) => (
-                <div key={se.id} className="bg-surface rounded-xl px-3 py-3 border border-surface-border">
-                  <div className="flex items-center gap-2 mb-2">
-                    <p className="font-medium text-sm text-gray-200">
-                      {se.exercise?.name ?? 'Unknown'}
-                    </p>
-                    <ExerciseMediaThumbs
-                      sessionExerciseId={se.id}
-                      onTap={(idx) => setMediaViewer({ sessionExerciseId: se.id, startIdx: idx })}
-                    />
+                return (
+                  <div key={set.id} className="flex items-center gap-3 text-xs font-mono">
+                    <span className="text-gray-600 w-5">{i + 1}</span>
+                    <div className={cn(
+                      'flex items-center gap-1 flex-1',
+                      hit ? 'text-emerald-400' : 'text-amber-400',
+                    )}>
+                      {set.weight != null && <span>{set.weight}</span>}
+                      {set.weight != null && set.reps != null && <span className="text-gray-600">×</span>}
+                      {set.reps != null && <span>{set.reps}</span>}
+                      {set.durationSeconds != null && <span>{set.durationSeconds}s</span>}
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      {set.isPR && (
+                        <span className="text-[9px] font-medium bg-amber-500/15 border border-amber-500/30 text-amber-400 px-1.5 py-0.5 rounded-full">
+                          1RM
+                        </span>
+                      )}
+                      {set.isPRVolume && (
+                        <span className="text-[9px] font-medium bg-command-blue/10 border border-command-blue/30 text-command-blue px-1.5 py-0.5 rounded-full">
+                          Vol
+                        </span>
+                      )}
+                      {!set.isPR && !set.isPRVolume && (se.targetReps || se.targetWeight) && (
+                        <span className="text-gray-700 text-[10px]">
+                          {se.targetWeight && `${se.targetWeight}×`}{se.targetReps}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {se.sets
-                      .filter(set => !prFilterOn || set.isPR || set.isPRVolume)
-                      .map((set, i) => {
-                      const hitReps   = !se.targetReps   || (set.reps ?? 0) >= se.targetReps
-                      const hitWeight = !se.targetWeight || (set.weight ?? 0) >= se.targetWeight
-                      const hit = hitReps && hitWeight
-
-                      return (
-                        <div key={set.id} className="flex items-center gap-3 text-xs font-mono">
-                          <span className="text-gray-600 w-5">{i + 1}</span>
-                          <div className={cn(
-                            'flex items-center gap-1 flex-1',
-                            hit ? 'text-emerald-400' : 'text-amber-400',
-                          )}>
-                            {set.weight != null && <span>{set.weight}</span>}
-                            {set.weight != null && set.reps != null && <span className="text-gray-600">×</span>}
-                            {set.reps != null && <span>{set.reps}</span>}
-                            {set.durationSeconds != null && <span>{set.durationSeconds}s</span>}
-                          </div>
-                          <div className="flex gap-1 shrink-0">
-                            {set.isPR && (
-                              <span className="text-[9px] font-medium bg-amber-500/15 border border-amber-500/30 text-amber-400 px-1.5 py-0.5 rounded-full">
-                                1RM
-                              </span>
-                            )}
-                            {set.isPRVolume && (
-                              <span className="text-[9px] font-medium bg-command-blue/10 border border-command-blue/30 text-command-blue px-1.5 py-0.5 rounded-full">
-                                Vol
-                              </span>
-                            )}
-                            {!set.isPR && !set.isPRVolume && (se.targetReps || se.targetWeight) && (
-                              <span className="text-gray-700 text-[10px]">
-                                {se.targetWeight && `${se.targetWeight}×`}{se.targetReps}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                    {se.sets.length === 0 && (
-                      <p className="text-xs text-gray-600 italic">No sets logged</p>
-                    )}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
+              {se.sets.length === 0 && (
+                <p className="text-xs text-gray-600 italic">No sets logged</p>
+              )}
             </div>
           </div>
         ))}

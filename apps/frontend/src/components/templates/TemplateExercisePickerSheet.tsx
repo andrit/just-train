@@ -1,11 +1,10 @@
 // ------------------------------------------------------------
-// components/templates/TemplateExercisePickerSheet.tsx (v2.10.0)
+// components/templates/TemplateExercisePickerSheet.tsx
 //
 // Exercise picker for the template builder.
-// Pre-filters by the parent block's workout type so resistance
-// blocks only show resistance exercises, etc.
-// "All types" chip to override.
-// Accordion rows with swipe-right-to-add.
+// Defaults to "All types" — workoutType is derived server-side
+// from the exercise record when the exercise is added.
+// Optional workoutType hint pre-selects the type filter.
 // ------------------------------------------------------------
 
 import { useState, useMemo }     from 'react'
@@ -18,19 +17,17 @@ import { WORKOUT_TYPE_LABEL }    from '@/lib/exerciseLabels'
 import { ExerciseAccordionRow }  from '@/components/exercises/ExerciseAccordionRow'
 
 interface TemplateExercisePickerSheetProps {
-  open:              boolean
-  templateId:        string
-  templateWorkoutId: string
-  workoutType:       string
-  currentCount:      number   // for orderIndex
-  onClose:           () => void
+  open:         boolean
+  templateId:   string
+  workoutType?: string   // optional hint — pre-selects the type filter chip
+  onClose:      () => void
 }
 
 export function TemplateExercisePickerSheet({
-  open, templateId, templateWorkoutId, workoutType, currentCount, onClose,
+  open, templateId, workoutType, onClose,
 }: TemplateExercisePickerSheetProps): React.JSX.Element {
   const [search, setSearch]             = useState('')
-  const [showAllTypes, setShowAllTypes] = useState(false)
+  const [showAllTypes, setShowAllTypes] = useState(!workoutType)
   const [expandedId, setExpandedId]     = useState<string | null>(null)
 
   const { data: exercises, isLoading }  = useExercises(search ? { search } : undefined)
@@ -38,7 +35,7 @@ export function TemplateExercisePickerSheet({
 
   const filtered = useMemo(() => {
     if (!exercises) return []
-    const typeFiltered = showAllTypes
+    const typeFiltered = (showAllTypes || !workoutType)
       ? exercises
       : exercises.filter(e => e.workoutType === workoutType)
     const q = search.trim().toLowerCase()
@@ -49,11 +46,11 @@ export function TemplateExercisePickerSheet({
     )
   }, [exercises, search, workoutType, showAllTypes])
 
-  const typeLabel = WORKOUT_TYPE_LABEL[workoutType] ?? workoutType
+  const typeLabel = workoutType ? (WORKOUT_TYPE_LABEL[workoutType] ?? workoutType) : ''
 
   const handleAdd = (exerciseId: string, name: string): void => {
     addExercise.mutate(
-      { templateId, templateWorkoutId, exerciseId, orderIndex: currentCount },
+      { templateId, exerciseId },
       {
         onSuccess: () => { toast.success(`${name} added`); onClose() },
         onError:   () => toast.error('Failed to add exercise'),
@@ -83,32 +80,34 @@ export function TemplateExercisePickerSheet({
             autoFocus
             className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
           />
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setShowAllTypes(false)}
-              className={cn(
-                'px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize',
-                !showAllTypes
-                  ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                  : 'border-surface-border text-gray-500 hover:text-gray-300',
-              )}
-            >
-              {typeLabel}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowAllTypes(true)}
-              className={cn(
-                'px-3 py-1 rounded-full text-xs font-medium border transition-all',
-                showAllTypes
-                  ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                  : 'border-surface-border text-gray-500 hover:text-gray-300',
-              )}
-            >
-              All types
-            </button>
-          </div>
+          {workoutType && (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAllTypes(false)}
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize',
+                  !showAllTypes
+                    ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
+                    : 'border-surface-border text-gray-500 hover:text-gray-300',
+                )}
+              >
+                {typeLabel}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAllTypes(true)}
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-medium border transition-all',
+                  showAllTypes
+                    ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
+                    : 'border-surface-border text-gray-500 hover:text-gray-300',
+                )}
+              >
+                All types
+              </button>
+            </div>
+          )}
         </div>
 
         {/* List */}
@@ -119,7 +118,9 @@ export function TemplateExercisePickerSheet({
             <p className="text-center text-gray-500 text-sm py-8">
               {search
                 ? `No exercises matching "${search}"`
-                : `No exercises found for ${typeLabel}`}
+                : typeLabel
+                  ? `No exercises found for ${typeLabel}`
+                  : 'No exercises found'}
             </p>
           ) : (
             <div className="space-y-1">

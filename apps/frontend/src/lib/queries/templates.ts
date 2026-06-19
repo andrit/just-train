@@ -100,57 +100,38 @@ export function useForkTemplate() {
   })
 }
 
-// ── Add workout block ─────────────────────────────────────────────────────────
-
-export function useAddTemplateBlock() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ templateId, workoutType, orderIndex }: {
-      templateId: string; workoutType: string; orderIndex: number
-    }) =>
-      apiClient.post(`/templates/${templateId}/workouts`, { workoutType, orderIndex }),
-    onSuccess: (_data, { templateId }) =>
-      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
-  })
-}
-
-// ── Delete workout block ──────────────────────────────────────────────────
-
-export function useDeleteTemplateWorkout() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ workoutId }: { templateId: string; workoutId: string }) =>
-      apiClient.delete(`/template-workouts/${workoutId}`),
-    onSuccess: (_data, { templateId }) =>
-      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
-  })
-}
-
-// ── Reorder workout blocks ───────────────────────────────────────────────
-
-export function useReorderTemplateWorkouts() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ templateId, orderedIds }: { templateId: string; orderedIds: string[] }) =>
-      apiClient.patch(`/templates/${templateId}/workouts/reorder`, { orderedIds }),
-    onSuccess: (_data, { templateId }) =>
-      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
-  })
-}
-
-// ── Add exercise to block ────────────────────────────────────────────────
+// ── Add exercise ──────────────────────────────────────────────────────────────
 
 export function useAddTemplateExercise() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ templateWorkoutId, exerciseId, orderIndex }: {
-      templateId: string; templateWorkoutId: string
-      exerciseId: string; orderIndex: number
-    }) =>
-      apiClient.post(`/template-workouts/${templateWorkoutId}/exercises`, {
-        exerciseId, orderIndex,
-      }),
-    onSuccess: (_data, vars) =>
-      qc.invalidateQueries({ queryKey: templateKeys.detail(vars.templateId) }),
+    mutationFn: ({ templateId, exerciseId }: { templateId: string; exerciseId: string }) =>
+      apiClient.post(`/templates/${templateId}/exercises`, { exerciseId }),
+    onSuccess: (_data, { templateId }) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
+  })
+}
+
+// ── Delete exercise ───────────────────────────────────────────────────────────
+
+export function useDeleteTemplateExercise() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ exerciseId }: { templateId: string; exerciseId: string }) =>
+      apiClient.delete(`/template-exercises/${exerciseId}`),
+    onSuccess: (_data, { templateId }) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
+  })
+}
+
+// ── Reorder exercises ─────────────────────────────────────────────────────────
+
+export function useReorderTemplateExercises() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ templateId, orderedIds }: { templateId: string; orderedIds: string[] }) =>
+      apiClient.patch(`/templates/${templateId}/exercises/reorder`, { orderedIds }),
+    onSuccess: (_data, { templateId }) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
   })
 }

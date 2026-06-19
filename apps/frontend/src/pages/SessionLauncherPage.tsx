@@ -29,11 +29,9 @@ function TemplateCard({
   template,
   onSelect,
 }: {
-  template: { id: string; name: string; description: string | null; templateWorkouts?: { workoutType: string }[] }
+  template: { id: string; name: string; description: string | null }
   onSelect:  (id: string) => void
 }): React.JSX.Element {
-  const workoutCount = template.templateWorkouts?.length ?? 0
-
   return (
     <button
       type="button"
@@ -51,11 +49,6 @@ function TemplateCard({
       </p>
       {template.description && (
         <p className="text-xs text-gray-500 mt-1 line-clamp-2">{template.description}</p>
-      )}
-      {workoutCount > 0 && (
-        <p className="text-xs text-gray-600 mt-2">
-          {workoutCount} workout block{workoutCount !== 1 ? 's' : ''}
-        </p>
       )}
     </button>
   )

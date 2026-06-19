@@ -6,12 +6,11 @@
 //   ['sessions', id]                → single session detail (full tree)
 //
 // SESSION LIFECYCLE:
-//   1. POST /sessions                     → creates session, status=planned
-//   2. PATCH /sessions/:id status=in_progress → starts session (sets startTime)
-//   3. POST /sessions/:id/workouts        → add workout block
-//   4. POST /workouts/:id/exercises       → add exercise to block
-//   5. POST /session-exercises/:id/sets   → log a set
-//   6. PATCH /sessions/:id status=completed → end session (sets endTime)
+//   1. POST /sessions                          → creates session, status=planned
+//   2. PATCH /sessions/:id status=in_progress  → starts session (sets startTime)
+//   3. POST /sessions/:id/exercises            → add exercise directly to session
+//   4. POST /session-exercises/:id/sets        → log a set
+//   5. PATCH /sessions/:id status=completed    → end session (sets endTime)
 // ------------------------------------------------------------
 
 import {
@@ -26,7 +25,6 @@ import type {
   SessionDetailResponse,
   SessionListResponse,
   SessionSummaryResponse,
-  WorkoutResponse,
   SessionExerciseResponse,
   SetResponse,
 } from '@trainer-app/shared'
@@ -43,7 +41,7 @@ export const sessionKeys = {
 
 export interface SessionFilters {
   clientId?: string
-  status?:   'planned' | 'in_progress' | 'completed' | 'cancelled'
+  status?:   'planned' | 'building' | 'in_progress' | 'completed' | 'partial' | 'cancelled'
 }
 
 // ── Session list ──────────────────────────────────────────────────────────────
@@ -111,7 +109,7 @@ export function useCreateSession(): UseMutationResult<SessionSummaryResponse, Er
 
 export interface UpdateSessionInput {
   id:           string
-  status?:      'planned' | 'in_progress' | 'completed' | 'cancelled'
+  status?:      'planned' | 'building' | 'in_progress' | 'completed' | 'partial' | 'cancelled'
   name?:        string
   notes?:       string
   energyLevel?: number
@@ -172,35 +170,10 @@ export function useEndSession(): UseMutationResult<SessionSummaryResponse, Error
   })
 }
 
-// ── Add workout block ─────────────────────────────────────────────────────────
-
-export interface AddWorkoutInput {
-  sessionId:   string
-  workoutType: string
-  orderIndex?: number
-  notes?:      string
-}
-
-export function useAddWorkout(): UseMutationResult<WorkoutResponse, Error, AddWorkoutInput> {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ sessionId, ...body }) =>
-      offlineAwareApi.post<WorkoutResponse>(
-        `/sessions/${sessionId}/workouts`,
-        body,
-        `Add ${(body as { workoutType?: string }).workoutType ?? ''} workout block`,
-      ),
-    onSuccess: (_, { sessionId }) => {
-      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
-    },
-  })
-}
-
-// ── Add exercise to workout ───────────────────────────────────────────────────
+// ── Add exercise to session ───────────────────────────────────────────────────
 
 export interface AddExerciseInput {
-  workoutId:   string
-  sessionId:   string   // for cache invalidation
+  sessionId:   string
   exerciseId:  string
   orderIndex?: number
   targetSets?:            number
@@ -215,11 +188,11 @@ export interface AddExerciseInput {
 export function useAddExercise(): UseMutationResult<SessionExerciseResponse, Error, AddExerciseInput> {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ workoutId, sessionId: _sessionId, ...body }) =>
+    mutationFn: ({ sessionId, ...body }) =>
       offlineAwareApi.post<SessionExerciseResponse>(
-        `/workouts/${workoutId}/exercises`,
+        `/sessions/${sessionId}/exercises`,
         body,
-        `Add exercise to workout`,
+        `Add exercise to session`,
       ),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
@@ -280,26 +253,13 @@ export function useEditSet(): UseMutationResult<SetResponse, Error, EditSetInput
   })
 }
 
-// ── Delete workout block ──────────────────────────────────────────────────────
-
-export function useDeleteWorkout(): UseMutationResult<void, Error, { workoutId: string; sessionId: string }> {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ workoutId, sessionId }) =>
-      apiClient.delete<void>(`/sessions/${sessionId}/workouts/${workoutId}`),
-    onSuccess: (_, { sessionId }) => {
-      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
-    },
-  })
-}
-
 // ── Delete session exercise ───────────────────────────────────────────────────
 
-export function useDeleteSessionExercise(): UseMutationResult<void, Error, { sessionExerciseId: string; workoutId: string; sessionId: string }> {
+export function useDeleteSessionExercise(): UseMutationResult<void, Error, { sessionExerciseId: string; sessionId: string }> {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ workoutId, sessionExerciseId }) =>
-      apiClient.delete<void>(`/workouts/${workoutId}/exercises/${sessionExerciseId}`),
+    mutationFn: ({ sessionExerciseId }) =>
+      apiClient.delete<void>(`/session-exercises/${sessionExerciseId}`),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
     },
@@ -372,25 +332,13 @@ export function useDiscardSession(): UseMutationResult<void, Error, { id: string
   })
 }
 
-// ── Reorder workout blocks ────────────────────────────────────────────────────
+// ── Reorder exercises in a session ────────────────────────────────────────────
 
-export function useReorderWorkouts() {
+export function useReorderSessionExercises() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ sessionId, orderedIds }: { sessionId: string; orderedIds: string[] }) =>
-      apiClient.patch(`/sessions/${sessionId}/workouts/reorder`, { orderedIds }),
-    onSuccess: (_data, { sessionId }) =>
-      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) }),
-  })
-}
-
-// ── Reorder exercises within a workout block ──────────────────────────────────
-
-export function useReorderExercises() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ workoutId, orderedIds }: { sessionId: string; workoutId: string; orderedIds: string[] }) =>
-      apiClient.patch(`/workouts/${workoutId}/exercises/reorder`, { orderedIds }),
+      apiClient.patch(`/sessions/${sessionId}/exercises/reorder`, { orderedIds }),
     onSuccess: (_data, { sessionId }) =>
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) }),
   })

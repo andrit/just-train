@@ -26,6 +26,7 @@ import {
   SnapshotPoseEnum,
   ChallengeMetricTypeEnum,
   ChallengeStatusEnum,
+  TemplateTypeEnum,
 } from '../enums/index'
 
 // ============================================================
@@ -285,32 +286,12 @@ export const UpdateSessionSchema = z.object({
 export type UpdateSessionInput = z.infer<typeof UpdateSessionSchema>
 
 // ============================================================
-// WORKOUT
-// ============================================================
-
-export const CreateWorkoutSchema = z.object({
-  sessionId: z.string().uuid(),
-  workoutType: WorkoutTypeEnum,
-  orderIndex: z.number().int().min(1).optional()
-    .describe('Position in session — auto-assigned if not provided'),
-  notes: z.string().max(1000).optional(),
-})
-export type CreateWorkoutInput = z.infer<typeof CreateWorkoutSchema>
-
-export const UpdateWorkoutSchema = z.object({
-  orderIndex: z.number().int().min(1).optional(),
-  notes: z.string().max(1000).optional(),
-})
-export type UpdateWorkoutInput = z.infer<typeof UpdateWorkoutSchema>
-
-// ============================================================
 // SESSION EXERCISE
 // ============================================================
 
 export const AddSessionExerciseSchema = z.object({
-  workoutId:  z.string().uuid(),
   exerciseId: z.string().uuid(),
-  orderIndex: z.number().int().min(1).optional(),
+  orderIndex: z.number().int().min(0).optional(),
   targetSets: z.number().int().min(1).optional(),
   targetReps: z.number().int().min(1).optional(),
   targetRepsPerSet: z.string().optional().describe('Comma-delimited per-set rep counts e.g. "10,8,6"'),
@@ -354,23 +335,15 @@ export type UpdateSetInput = z.infer<typeof UpdateSetSchema>
 
 export const CreateTemplateSchema = z.object({
   name: z.string().min(1).max(150),
+  type: TemplateTypeEnum.default('session'),
   description: z.string().max(2000).optional(),
   notes: z.string().max(2000).optional(),
 })
 export type CreateTemplateInput = z.infer<typeof CreateTemplateSchema>
 
-export const CreateTemplateWorkoutSchema = z.object({
-  templateId: z.string().uuid(),
-  workoutType: WorkoutTypeEnum,
-  orderIndex: z.number().int().min(1),
-  notes: z.string().max(1000).optional(),
-})
-export type CreateTemplateWorkoutInput = z.infer<typeof CreateTemplateWorkoutSchema>
-
 export const AddTemplateExerciseSchema = z.object({
-  templateWorkoutId: z.string().uuid(),
   exerciseId: z.string().uuid(),
-  orderIndex: z.number().int().min(1),
+  orderIndex: z.number().int().min(0).optional(),
   targetSets: z.number().int().min(1).optional(),
   targetReps: z.number().int().min(1).optional(),
   targetRepsPerSet: z.string().optional().describe('Comma-delimited per-set rep counts e.g. "10,8,6"'),

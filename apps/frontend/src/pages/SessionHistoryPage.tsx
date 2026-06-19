@@ -89,15 +89,15 @@ export default function SessionHistoryPage(): React.JSX.Element {
     )
   }
 
-  const workouts    = session.workouts ?? []
-  const totalSets   = workouts.reduce((a, w) => a + w.sessionExercises.reduce((b, se) => b + se.sets.length, 0), 0)
-  const totalVolume = workouts.reduce((a, w) => w.sessionExercises.reduce(
-    (b, se) => b + se.sets.reduce((c, s) => c + ((s.weight ?? 0) * (s.reps ?? 0)), 0), a
-  ), 0)
+  const exercises    = session.sessionExercises ?? []
+  const totalSets    = exercises.reduce((a, se) => a + se.sets.length, 0)
+  const totalVolume  = exercises.reduce(
+    (a, se) => a + se.sets.reduce((c, s) => c + ((s.weight ?? 0) * (s.reps ?? 0)), 0), 0
+  )
   const duration = formatDuration(session.startTime, session.endTime)
 
-  // Workout type label
-  const workoutTypeLabels = [...new Set(workouts.map((w) => w.workoutType))]
+  // Workout type label — derived from unique workoutTypes on exercises
+  const workoutTypeLabels = [...new Set(exercises.map((e) => e.workoutType))]
     .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
     .join(' · ')
 
@@ -152,102 +152,100 @@ export default function SessionHistoryPage(): React.JSX.Element {
         </div>
 
         {/* Exercise list */}
-        {workouts.length > 0 && (
+        {exercises.length > 0 && (
           <div className="py-4 border-b border-surface-border">
             <h2 className="section-label mb-3">Exercises</h2>
             <div className="space-y-5">
-              {workouts.map((workout) =>
-                workout.sessionExercises.map((se) => {
-                  const name = se.exercise?.name ?? 'Unknown'
+              {exercises.map((se) => {
+                const name = se.exercise?.name ?? 'Unknown'
 
-                  return (
-                    <div key={se.id}>
-                      {/* Exercise name + target */}
-                      <div className="flex items-baseline justify-between mb-2">
-                        <p className="text-sm font-medium text-gray-200">{name}</p>
-                        {(se.targetSets || se.targetReps || se.targetWeight) && (
-                          <p className="text-xs text-gray-600 font-mono">
-                            target{se.targetSets ? ` ${se.targetSets}×` : ''}{se.targetReps ?? ''}{se.targetWeight ? ` @ ${se.targetWeight}` : ''}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Set rows */}
-                      {se.sets.length === 0 ? (
-                        <p className="text-xs text-gray-700 italic pl-1">no sets logged</p>
-                      ) : (
-                        <div className="space-y-1.5">
-                          {se.sets.map((s, i) => {
-                            const missedReps   = se.targetReps   != null && (s.reps   ?? 0) < se.targetReps
-                            const missedWeight = se.targetWeight != null && (s.weight ?? 0) < se.targetWeight
-                            const missed       = missedReps || missedWeight
-                            const surpassed    =
-                              !missed &&
-                              ((se.targetReps   != null && (s.reps   ?? 0) > se.targetReps) ||
-                               (se.targetWeight != null && (s.weight ?? 0) > se.targetWeight))
-
-                            return (
-                              <div
-                                key={s.id}
-                                className="flex items-center gap-3 px-2 py-1.5 rounded-lg"
-                              >
-                                {/* Set number dot */}
-                                <div className={cn(
-                                  'w-4 h-4 rounded-full flex items-center justify-center shrink-0',
-                                  missed    ? 'bg-amber-500/20'  :
-                                  surpassed ? 'bg-emerald-500/30' :
-                                              'bg-emerald-500/20',
-                                )}>
-                                  <div className={cn(
-                                    'w-1.5 h-1.5 rounded-full',
-                                    missed    ? 'bg-amber-400'  :
-                                    surpassed ? 'bg-emerald-300' :
-                                                'bg-emerald-400',
-                                  )} />
-                                </div>
-
-                                {/* Set number */}
-                                <span className="text-xs text-gray-600 font-mono w-4 shrink-0">
-                                  {i + 1}
-                                </span>
-
-                                {/* Actual values */}
-                                <span className={cn(
-                                  'font-mono text-sm font-medium',
-                                  missed    ? 'text-amber-400'  :
-                                  surpassed ? 'text-emerald-300' :
-                                              'text-gray-300',
-                                )}>
-                                  {[
-                                    s.weight != null ? `${s.weight}` : null,
-                                    s.reps   != null ? `${s.reps} reps` : null,
-                                    s.durationSeconds != null ? `${s.durationSeconds}s` : null,
-                                  ].filter(Boolean).join(' × ')}
-                                </span>
-
-                                {/* Target */}
-                                {(se.targetReps != null || se.targetWeight != null) && (
-                                  <span className="text-xs text-gray-700 font-mono ml-auto">
-                                    /{[
-                                      se.targetWeight != null ? `${se.targetWeight}` : null,
-                                      se.targetReps   != null ? `${se.targetReps}` : null,
-                                    ].filter(Boolean).join('×')}
-                                  </span>
-                                )}
-
-                                {/* RPE */}
-                                {s.rpe != null && (
-                                  <span className="text-xs text-gray-700">RPE {s.rpe}</span>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
+                return (
+                  <div key={se.id}>
+                    {/* Exercise name + target */}
+                    <div className="flex items-baseline justify-between mb-2">
+                      <p className="text-sm font-medium text-gray-200">{name}</p>
+                      {(se.targetSets || se.targetReps || se.targetWeight) && (
+                        <p className="text-xs text-gray-600 font-mono">
+                          target{se.targetSets ? ` ${se.targetSets}×` : ''}{se.targetReps ?? ''}{se.targetWeight ? ` @ ${se.targetWeight}` : ''}
+                        </p>
                       )}
                     </div>
-                  )
-                })
-              )}
+
+                    {/* Set rows */}
+                    {se.sets.length === 0 ? (
+                      <p className="text-xs text-gray-700 italic pl-1">no sets logged</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {se.sets.map((s, i) => {
+                          const missedReps   = se.targetReps   != null && (s.reps   ?? 0) < se.targetReps
+                          const missedWeight = se.targetWeight != null && (s.weight ?? 0) < se.targetWeight
+                          const missed       = missedReps || missedWeight
+                          const surpassed    =
+                            !missed &&
+                            ((se.targetReps   != null && (s.reps   ?? 0) > se.targetReps) ||
+                             (se.targetWeight != null && (s.weight ?? 0) > se.targetWeight))
+
+                          return (
+                            <div
+                              key={s.id}
+                              className="flex items-center gap-3 px-2 py-1.5 rounded-lg"
+                            >
+                              {/* Set number dot */}
+                              <div className={cn(
+                                'w-4 h-4 rounded-full flex items-center justify-center shrink-0',
+                                missed    ? 'bg-amber-500/20'  :
+                                surpassed ? 'bg-emerald-500/30' :
+                                            'bg-emerald-500/20',
+                              )}>
+                                <div className={cn(
+                                  'w-1.5 h-1.5 rounded-full',
+                                  missed    ? 'bg-amber-400'  :
+                                  surpassed ? 'bg-emerald-300' :
+                                              'bg-emerald-400',
+                                )} />
+                              </div>
+
+                              {/* Set number */}
+                              <span className="text-xs text-gray-600 font-mono w-4 shrink-0">
+                                {i + 1}
+                              </span>
+
+                              {/* Actual values */}
+                              <span className={cn(
+                                'font-mono text-sm font-medium',
+                                missed    ? 'text-amber-400'  :
+                                surpassed ? 'text-emerald-300' :
+                                            'text-gray-300',
+                              )}>
+                                {[
+                                  s.weight != null ? `${s.weight}` : null,
+                                  s.reps   != null ? `${s.reps} reps` : null,
+                                  s.durationSeconds != null ? `${s.durationSeconds}s` : null,
+                                ].filter(Boolean).join(' × ')}
+                              </span>
+
+                              {/* Target */}
+                              {(se.targetReps != null || se.targetWeight != null) && (
+                                <span className="text-xs text-gray-700 font-mono ml-auto">
+                                  /{[
+                                    se.targetWeight != null ? `${se.targetWeight}` : null,
+                                    se.targetReps   != null ? `${se.targetReps}` : null,
+                                  ].filter(Boolean).join('×')}
+                                </span>
+                              )}
+
+                              {/* RPE */}
+                              {s.rpe != null && (
+                                <span className="text-xs text-gray-700">RPE {s.rpe}</span>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

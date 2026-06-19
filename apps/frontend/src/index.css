@@ -38,7 +38,7 @@
 
   /* Focus ring — keyboard accessibility */
   :focus-visible {
-    @apply outline-none ring-2 ring-command-blue ring-offset-2 ring-offset-iron-grey;
+    @apply outline-none ring-2 ring-command-blue ring-offset-2 ring-offset-black;
   }
 }
 
@@ -61,29 +61,29 @@
 
   /*
    * Knurled crosshatch texture — overrides the plain bg-brand-primary colour.
-   * Mimics the diamond-cut grip pattern on a dumbbell handle: two sets of
-   * 1px grooves at 45° and 135° create shallow shadow lines across the iron
-   * grey base, leaving raised diamond points between them.
+   * Near-black base (#0d0d0d) with iron-grey lines at low opacity.
+   * Two sets of 1px grooves at 45° and 135° read as shallow engraved lines
+   * on dark metal — the same diamond-cut grip pattern, now as raised light
+   * threads on a dark surface rather than dark grooves on grey.
    *
-   * Form inputs use bg-iron-grey (same hex, no texture) so this only affects
-   * structural page backgrounds.
+   * Form inputs use bg-surface so they read as elevated fields above the page.
    */
   .bg-brand-primary {
-    background-color: #8A9099;
+    background-color: #0d0d0d;
     background-image:
       repeating-linear-gradient(
         45deg,
-        rgba(0, 0, 0, 0.14) 0px,
-        rgba(0, 0, 0, 0.14) 1px,
-        transparent       1px,
-        transparent       7px
+        rgba(138, 144, 153, 0.10) 0px,
+        rgba(138, 144, 153, 0.10) 1px,
+        transparent               1px,
+        transparent               7px
       ),
       repeating-linear-gradient(
         135deg,
-        rgba(0, 0, 0, 0.14) 0px,
-        rgba(0, 0, 0, 0.14) 1px,
-        transparent       1px,
-        transparent       7px
+        rgba(138, 144, 153, 0.10) 0px,
+        rgba(138, 144, 153, 0.10) 1px,
+        transparent               1px,
+        transparent               7px
       );
   }
 }
@@ -91,19 +91,118 @@
 /* ── Component shortcuts ──────────────────────────────────────────────────── */
 
 @layer components {
-  /* Card — the primary content container */
+  /*
+   * Card — primary content container.
+   *
+   * Border technique: `border: 1.5px solid transparent` creates the border area.
+   * The card surface gradient is clipped to `padding-box` (content only).
+   * The crosshatch gradients fill `border-box` (entire area including border).
+   * The transparent border lets the crosshatch show through in the border ring only.
+   * Works with border-radius natively — no pseudo-elements, no mask.
+   */
   .card {
-    @apply bg-surface rounded-xl border border-surface-border;
-    background: linear-gradient(180deg, #232323 0%, #1c1c1c 100%);
+    @apply rounded-xl;
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(180deg, #232323 0%, #1c1c1c 100%) padding-box,
+      repeating-linear-gradient(
+        45deg,
+        rgba(138, 144, 153, 0.22) 0px,
+        rgba(138, 144, 153, 0.22) 1px,
+        transparent               1px,
+        transparent               7px
+      ) border-box,
+      repeating-linear-gradient(
+        135deg,
+        rgba(138, 144, 153, 0.22) 0px,
+        rgba(138, 144, 153, 0.22) 1px,
+        transparent               1px,
+        transparent               7px
+      ) border-box;
     box-shadow:
       0 8px 28px rgba(0, 0, 0, 0.55),
       inset 0 1px 0 rgba(255, 255, 255, 0.055);
   }
 
-  /* Input field — consistent across all forms */
-  /* bg-iron-grey (same hex as brand-primary) keeps inputs flat — no knurling texture */
+  /*
+   * Crosshatch border utility — apply to any element that needs a textured
+   * border without the full .card treatment (no surface gradient, no shadow).
+   * Use on panels, section containers, or standalone dividers.
+   *
+   * Uses a ::before pseudo-element with a CSS mask that punches out the
+   * content area, leaving only the 1.5px border ring filled with crosshatch.
+   * The element's own background is unaffected.
+   *
+   * Requires: position:relative on the element (or add via @apply below).
+   * Caution: consumes ::before — don't use on elements that already use it.
+   */
+  .border-crosshatch {
+    position: relative;
+  }
+  .border-crosshatch::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    border-radius: inherit;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        rgba(138, 144, 153, 0.22) 0px,
+        rgba(138, 144, 153, 0.22) 1px,
+        transparent               1px,
+        transparent               7px
+      ),
+      repeating-linear-gradient(
+        135deg,
+        rgba(138, 144, 153, 0.22) 0px,
+        rgba(138, 144, 153, 0.22) 1px,
+        transparent               1px,
+        transparent               7px
+      );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /*
+   * Header crosshatch — sticky header variant of the page texture.
+   *
+   * bg-brand-primary/90 only generates background-color and ignores the
+   * background-image set in the .bg-brand-primary utility override, so sticky
+   * headers appear as flat semi-transparent panels without texture.
+   *
+   * This class sets both the semi-transparent base colour AND the crosshatch
+   * background-image together so the knurl reads through the backdrop blur.
+   * Use instead of bg-brand-primary/90 on sticky/fixed header containers.
+   * Slightly stronger thread opacity (0.14 vs 0.10) because headers are UI
+   * chrome, not ambient background — they need to anchor as a distinct zone.
+   */
+  .header-crosshatch {
+    background-color: rgba(138, 144, 153, 0.92);
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.18) 0px,
+        rgba(0, 0, 0, 0.18) 1px,
+        transparent         1px,
+        transparent         7px
+      ),
+      repeating-linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.18) 0px,
+        rgba(0, 0, 0, 0.18) 1px,
+        transparent         1px,
+        transparent         7px
+      );
+  }
+
+  /* Input field — bg-surface elevates inputs above the near-black page background */
   .field {
-    @apply w-full bg-iron-grey border border-surface-border rounded-lg
+    @apply w-full bg-surface border border-surface-border rounded-lg
            px-3 py-2.5 text-sm text-gray-100 placeholder-gray-500
            focus:outline-none focus:ring-2 focus:ring-command-blue/50 focus:border-command-blue
            transition-colors;

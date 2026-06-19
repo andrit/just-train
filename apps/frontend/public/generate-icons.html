@@ -8,61 +8,90 @@
              border-radius: 8px; font-size: 16px; cursor: pointer; margin: 8px; }
     canvas { display: block; margin: 20px 0; border-radius: 12px; }
     .preview { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+    h2 { color: #ff4b6e; margin-top: 32px; }
   </style>
 </head>
 <body>
   <h1>💪 TrainerApp Icon Generator</h1>
-  <p>Click the button to generate and download all PWA icon sizes.</p>
-  <div class="preview" id="preview"></div>
-  <br>
-  <button onclick="generateAll()">Download All Icons</button>
+  <p>Generates standard icons + maskable variants with safe-zone padding.</p>
+
+  <h2>Standard icons</h2>
+  <div class="preview" id="preview-standard"></div>
+  <button onclick="downloadStandard()">Download Standard Icons</button>
+
+  <h2>Maskable icons (safe zone — subject stays within center 80%)</h2>
+  <div class="preview" id="preview-maskable"></div>
+  <button onclick="downloadMaskable()">Download Maskable Icons</button>
+
+  <br><br>
+  <button onclick="downloadAll()">Download All</button>
 
   <script>
-    const sizes = [72, 96, 128, 144, 152, 192, 384, 512]
-    const BG = '#1a1a2e'
-    const EMOJI = '💪'
+    const SIZES    = [72, 96, 128, 144, 152, 192, 384, 512]
+    const MASKABLE = [192, 512]
+    const BG       = '#1a1a2e'
+    const EMOJI    = '💪'
 
-    function generateIcon(size) {
+    // Standard: emoji fills ~68% of icon
+    function drawIcon(size, safeFraction = 0.68) {
       const canvas = document.createElement('canvas')
-      canvas.width = size
+      canvas.width  = size
       canvas.height = size
       const ctx = canvas.getContext('2d')
 
-      // Background
       ctx.fillStyle = BG
       ctx.fillRect(0, 0, size, size)
 
-      // Emoji centered
-      const fontSize = Math.floor(size * 0.68)
-      ctx.font = `${fontSize}px serif`
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
+      const fontSize = Math.floor(size * safeFraction)
+      ctx.font          = `${fontSize}px serif`
+      ctx.textAlign     = 'center'
+      ctx.textBaseline  = 'middle'
       ctx.fillText(EMOJI, size / 2, size / 2 + fontSize * 0.05)
 
       return canvas
     }
 
-    function generateAll() {
+    // Maskable: emoji confined to center 80% safe zone → use ~54% of total size
+    function drawMaskable(size) {
+      return drawIcon(size, 0.54)
+    }
+
+    function download(canvas, filename) {
+      const link = document.createElement('a')
+      link.download = filename
+      link.href     = canvas.toDataURL('image/png')
+      link.click()
+    }
+
+    function downloadStandard() {
+      SIZES.forEach(s => download(drawIcon(s), `icon-${s}x${s}.png`))
+    }
+
+    function downloadMaskable() {
+      MASKABLE.forEach(s => download(drawMaskable(s), `icon-${s}x${s}-maskable.png`))
+    }
+
+    function downloadAll() {
+      downloadStandard()
+      downloadMaskable()
+    }
+
+    // Previews
+    function addPreview(containerId, sizes, drawFn, suffix = '') {
+      const container = document.getElementById(containerId)
       sizes.forEach(size => {
-        const canvas = generateIcon(size)
-        const link = document.createElement('a')
-        link.download = `icon-${size}x${size}.png`
-        link.href = canvas.toDataURL('image/png')
-        link.click()
+        const canvas = drawFn(size)
+        canvas.title = `${size}x${size}${suffix}`
+        const wrap = document.createElement('div')
+        wrap.style.textAlign = 'center'
+        wrap.innerHTML = `<div style="font-size:12px;color:#888">${size}x${size}${suffix}</div>`
+        wrap.prepend(canvas)
+        container.appendChild(wrap)
       })
     }
 
-    // Show previews
-    const preview = document.getElementById('preview')
-    ;[72, 192, 512].forEach(size => {
-      const canvas = generateIcon(size)
-      canvas.title = `${size}x${size}`
-      const label = document.createElement('div')
-      label.style.textAlign = 'center'
-      label.innerHTML = `<div style="font-size:12px;color:#888">${size}x${size}</div>`
-      label.prepend(canvas)
-      preview.appendChild(label)
-    })
+    addPreview('preview-standard', [72, 192, 512], drawIcon)
+    addPreview('preview-maskable', MASKABLE, drawMaskable, ' maskable')
   </script>
 </body>
 </html>

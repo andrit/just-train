@@ -349,7 +349,7 @@ export default function SessionsPage(): React.JSX.Element {
     <div className="flex flex-col min-h-full">
 
       {/* ── Sticky header ─────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-20 bg-brand-primary/90 backdrop-blur-md border-b border-surface-border">
+      <div className="sticky top-0 z-20 header-crosshatch backdrop-blur-md border-b border-surface-border">
 
         {/* Title + New Plan */}
         <div className="flex items-center justify-between px-4 md:px-6 pt-4 pb-3">

@@ -5,9 +5,9 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
 import { buildTemplateTestApp } from '../helpers/buildApp'
 import {
-  makeTemplate,
+  makeTemplate, makeTemplateExercise,
   validTemplateBody,
-  TEST_TRAINER_ID, TEST_TEMPLATE_ID, TEST_TEMPLATE_WORKOUT_ID, TEST_TEMPLATE_EXERCISE_ID, TEST_EXERCISE_ID,
+  TEST_TRAINER_ID, TEST_TEMPLATE_ID, TEST_TEMPLATE_EXERCISE_ID, TEST_EXERCISE_ID,
 } from '../helpers/factories'
 import { generateAccessToken } from '../../services/auth.service'
 
@@ -29,12 +29,11 @@ vi.mock('../../db', () => {
           findFirst: vi.fn().mockResolvedValue(undefined),
           findMany:  vi.fn().mockResolvedValue([]),
         },
-        templateWorkouts: {
-          findFirst: vi.fn().mockResolvedValue(undefined),
-          findMany:  vi.fn().mockResolvedValue([]),
-        },
         templateExercises: {
           findMany: vi.fn().mockResolvedValue([]),
+        },
+        exercises: {
+          findFirst: vi.fn().mockResolvedValue(undefined),
         },
       },
       insert: vi.fn().mockReturnValue(chain),
@@ -43,7 +42,6 @@ vi.mock('../../db', () => {
       select: vi.fn().mockReturnValue(chain),
     },
     templates:         {},
-    templateWorkouts:  {},
     templateExercises: {},
     exercises:         {},
   }
@@ -123,7 +121,7 @@ describe('GET /templates/:id', () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({
       ...makeTemplate(),
-      templateWorkouts: [],
+      templateExercises: [],
     } as never)
 
     const res = await app.inject({
@@ -245,7 +243,6 @@ describe('POST /templates/:id/fork', () => {
   beforeEach(()      => { vi.clearAllMocks() })
 
   it('returns 401 without auth', async () => {
-    // payload: {} needed — optional body schema still fails on null from empty POST
     const res = await app.inject({ method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/fork`, payload: {} })
     expect(res.statusCode).toBe(401)
   })
@@ -263,21 +260,21 @@ describe('POST /templates/:id/fork', () => {
 
   it('forks a template and returns 201', async () => {
     const { db } = await import('../../db')
-    const source = { ...makeTemplate(), templateWorkouts: [] }
-    // Fork route sends raw result without serializeDates — use ISO strings to satisfy the schema
+    const source = { ...makeTemplate(), templateExercises: [] }
     const forkedDetail = {
-      id:          'ffffffff-1111-1111-1111-111111111111',
-      trainerId:   TEST_TRAINER_ID,
-      name:        'Push Day A (copy)',
-      description: null,
-      notes:       null,
-      createdAt:   '2025-01-01T00:00:00.000Z',
-      updatedAt:   '2025-01-01T00:00:00.000Z',
-      templateWorkouts: [],
+      id:               'ffffffff-1111-1111-1111-111111111111',
+      trainerId:        TEST_TRAINER_ID,
+      name:             'Push Day A (copy)',
+      type:             'session',
+      description:      null,
+      notes:            null,
+      createdAt:        '2025-01-01T00:00:00.000Z',
+      updatedAt:        '2025-01-01T00:00:00.000Z',
+      templateExercises: [],
     }
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce(source as never)
     vi.mocked(db.insert({} as never).values({} as never).returning)
-      .mockResolvedValueOnce([{ id: 'ffffffff-1111-1111-1111-111111111111', trainerId: TEST_TRAINER_ID, name: 'Push Day A (copy)', description: null, notes: null, createdAt: new Date('2025-01-01'), updatedAt: new Date('2025-01-01') }])
+      .mockResolvedValueOnce([{ id: 'ffffffff-1111-1111-1111-111111111111', trainerId: TEST_TRAINER_ID, name: 'Push Day A (copy)', type: 'session', description: null, notes: null, createdAt: new Date('2025-01-01'), updatedAt: new Date('2025-01-01') }])
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce(forkedDetail as never)
 
     const res = await app.inject({
@@ -288,9 +285,9 @@ describe('POST /templates/:id/fork', () => {
   })
 })
 
-// ── POST /templates/:id/workouts ──────────────────────────────────────────────
+// ── POST /templates/:id/exercises ─────────────────────────────────────────────
 
-describe('POST /templates/:id/workouts', () => {
+describe('POST /templates/:id/exercises', () => {
   let app: Awaited<ReturnType<typeof buildTemplateTestApp>>
   beforeAll(async () => { app = await buildTemplateTestApp() })
   afterAll(async ()  => { await app.close() })
@@ -298,8 +295,8 @@ describe('POST /templates/:id/workouts', () => {
 
   it('returns 401 without auth', async () => {
     const res = await app.inject({
-      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/workouts`,
-      payload: { workoutType: 'resistance' },
+      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises`,
+      payload: { exerciseId: TEST_EXERCISE_ID },
     })
     expect(res.statusCode).toBe(401)
   })
@@ -307,33 +304,47 @@ describe('POST /templates/:id/workouts', () => {
   it('returns 404 when template not owned by trainer', async () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce(undefined)
+    vi.mocked(db.query.exercises.findFirst).mockResolvedValueOnce({ workoutType: 'resistance' } as never)
 
     const res = await app.inject({
-      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/workouts`,
-      headers: authHeader(), payload: { workoutType: 'resistance' },
+      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises`,
+      headers: authHeader(), payload: { exerciseId: TEST_EXERCISE_ID },
     })
     expect(res.statusCode).toBe(404)
   })
 
-  it('adds a workout block to an owned template', async () => {
+  it('returns 404 when exercise does not exist', async () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TEST_TEMPLATE_ID } as never)
-    vi.mocked(db.query.templateWorkouts.findMany).mockResolvedValueOnce([])
-    vi.mocked(db.insert({} as never).values({} as never).returning)
-      .mockResolvedValueOnce([{ id: TEST_TEMPLATE_WORKOUT_ID }])
+    vi.mocked(db.query.exercises.findFirst).mockResolvedValueOnce(undefined)
 
     const res = await app.inject({
-      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/workouts`,
-      headers: authHeader(), payload: { workoutType: 'resistance' },
+      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises`,
+      headers: authHeader(), payload: { exerciseId: TEST_EXERCISE_ID },
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('adds an exercise to a template and returns 201', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TEST_TEMPLATE_ID } as never)
+    vi.mocked(db.query.exercises.findFirst).mockResolvedValueOnce({ workoutType: 'resistance' } as never)
+    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([])
+    vi.mocked(db.insert({} as never).values({} as never).returning)
+      .mockResolvedValueOnce([{ id: TEST_TEMPLATE_EXERCISE_ID }])
+
+    const res = await app.inject({
+      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises`,
+      headers: authHeader(), payload: { exerciseId: TEST_EXERCISE_ID },
     })
     expect(res.statusCode).toBe(201)
-    expect(res.json()).toHaveProperty('id', TEST_TEMPLATE_WORKOUT_ID)
+    expect(res.json()).toHaveProperty('id', TEST_TEMPLATE_EXERCISE_ID)
   })
 })
 
-// ── PATCH /templates/:id/workouts/reorder ─────────────────────────────────────
+// ── PATCH /templates/:id/exercises/reorder ────────────────────────────────────
 
-describe('PATCH /templates/:id/workouts/reorder', () => {
+describe('PATCH /templates/:id/exercises/reorder', () => {
   let app: Awaited<ReturnType<typeof buildTemplateTestApp>>
   beforeAll(async () => { app = await buildTemplateTestApp() })
   afterAll(async ()  => { await app.close() })
@@ -341,7 +352,7 @@ describe('PATCH /templates/:id/workouts/reorder', () => {
 
   it('returns 401 without auth', async () => {
     const res = await app.inject({
-      method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/workouts/reorder`,
+      method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises/reorder`,
       payload: { orderedIds: [] },
     })
     expect(res.statusCode).toBe(401)
@@ -352,76 +363,21 @@ describe('PATCH /templates/:id/workouts/reorder', () => {
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce(undefined)
 
     const res = await app.inject({
-      method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/workouts/reorder`,
-      headers: authHeader(), payload: { orderedIds: [TEST_TEMPLATE_WORKOUT_ID] },
+      method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises/reorder`,
+      headers: authHeader(), payload: { orderedIds: [TEST_TEMPLATE_EXERCISE_ID] },
     })
     expect(res.statusCode).toBe(403)
   })
 
-  it('reorders workout blocks for an owned template', async () => {
+  it('reorders exercises for an owned template and returns 204', async () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TEST_TEMPLATE_ID } as never)
 
     const res = await app.inject({
-      method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/workouts/reorder`,
-      headers: authHeader(), payload: { orderedIds: [TEST_TEMPLATE_WORKOUT_ID] },
+      method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises/reorder`,
+      headers: authHeader(), payload: { orderedIds: [TEST_TEMPLATE_EXERCISE_ID] },
     })
     expect(res.statusCode).toBe(204)
-  })
-})
-
-// ── DELETE /template-workouts/:id ─────────────────────────────────────────────
-
-describe('DELETE /template-workouts/:id', () => {
-  let app: Awaited<ReturnType<typeof buildTemplateTestApp>>
-  beforeAll(async () => { app = await buildTemplateTestApp() })
-  afterAll(async ()  => { await app.close() })
-  beforeEach(()      => { vi.clearAllMocks() })
-
-  it('returns 401 without auth', async () => {
-    const res = await app.inject({
-      method: 'DELETE', url: `/api/v1/template-workouts/${TEST_TEMPLATE_WORKOUT_ID}`,
-    })
-    expect(res.statusCode).toBe(401)
-  })
-
-  it('deletes a workout block and returns 204', async () => {
-    const res = await app.inject({
-      method: 'DELETE', url: `/api/v1/template-workouts/${TEST_TEMPLATE_WORKOUT_ID}`,
-      headers: authHeader(),
-    })
-    expect(res.statusCode).toBe(204)
-  })
-})
-
-// ── POST /template-workouts/:id/exercises ─────────────────────────────────────
-
-describe('POST /template-workouts/:id/exercises', () => {
-  let app: Awaited<ReturnType<typeof buildTemplateTestApp>>
-  beforeAll(async () => { app = await buildTemplateTestApp() })
-  afterAll(async ()  => { await app.close() })
-  beforeEach(()      => { vi.clearAllMocks() })
-
-  it('returns 401 without auth', async () => {
-    const res = await app.inject({
-      method: 'POST', url: `/api/v1/template-workouts/${TEST_TEMPLATE_WORKOUT_ID}/exercises`,
-      payload: { exerciseId: TEST_EXERCISE_ID },
-    })
-    expect(res.statusCode).toBe(401)
-  })
-
-  it('adds an exercise to a workout block and returns 201', async () => {
-    const { db } = await import('../../db')
-    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([])
-    vi.mocked(db.insert({} as never).values({} as never).returning)
-      .mockResolvedValueOnce([{ id: TEST_TEMPLATE_EXERCISE_ID }])
-
-    const res = await app.inject({
-      method: 'POST', url: `/api/v1/template-workouts/${TEST_TEMPLATE_WORKOUT_ID}/exercises`,
-      headers: authHeader(), payload: { exerciseId: TEST_EXERCISE_ID },
-    })
-    expect(res.statusCode).toBe(201)
-    expect(res.json()).toHaveProperty('id', TEST_TEMPLATE_EXERCISE_ID)
   })
 })
 

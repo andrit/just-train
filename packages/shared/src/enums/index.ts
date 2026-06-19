@@ -30,7 +30,7 @@ export type BodyPart = z.infer<typeof BodyPartEnum>
 export const EquipmentEnum = z.enum(['none', 'bodyweight', 'barbell', 'dumbbell', 'cable', 'machine', 'kettlebell', 'resistance_band', 'cardio_machine', 'other'])
 export type Equipment = z.infer<typeof EquipmentEnum>
 
-export const SessionStatusEnum = z.enum(['planned', 'in_progress', 'completed', 'cancelled'])
+export const SessionStatusEnum = z.enum(['planned', 'building', 'in_progress', 'completed', 'partial', 'cancelled'])
 export type SessionStatus = z.infer<typeof SessionStatusEnum>
 
 export const IntensityEnum = z.enum(['low', 'moderate', 'high', 'max'])
@@ -127,3 +127,9 @@ export type ChallengeMetricType = z.infer<typeof ChallengeMetricTypeEnum>
 
 export const ChallengeStatusEnum = z.enum(['active', 'completed', 'expired', 'cancelled'])
 export type ChallengeStatus = z.infer<typeof ChallengeStatusEnum>
+
+// Template type — advisory scope hint, not schema-enforced.
+//   session: exercises may span multiple workout types
+//   workout: all exercises share one workout type (UI pre-filter hint only)
+export const TemplateTypeEnum = z.enum(['session', 'workout'])
+export type TemplateType = z.infer<typeof TemplateTypeEnum>

@@ -407,12 +407,8 @@ export async function buildReportData(
   const allSessions = await db.query.sessions.findMany({
     where: and(eq(sessions.clientId, clientId), eq(sessions.status, 'completed')),
     with: {
-      workouts: {
-        with: {
-          sessionExercises: {
-            with: { sets: true },
-          },
-        },
+      sessionExercises: {
+        with: { sets: true },
       },
     },
     orderBy: desc(sessions.date),
@@ -426,13 +422,9 @@ export async function buildReportData(
   })
 
   const reportSessions = periodSessions.map(s => {
-    const sets = s.workouts.reduce(
-      (a, w) => a + w.sessionExercises.reduce((b, se) => b + se.sets.length, 0), 0
-    )
-    const volumeLbs = s.workouts.reduce(
-      (a, w) => a + w.sessionExercises.reduce(
-        (b, se) => b + se.sets.reduce((c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0), 0
-      ), 0
+    const sets = s.sessionExercises.reduce((b, se) => b + se.sets.length, 0)
+    const volumeLbs = s.sessionExercises.reduce(
+      (b, se) => b + se.sets.reduce((c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0), 0
     )
     return {
       date:        s.date,

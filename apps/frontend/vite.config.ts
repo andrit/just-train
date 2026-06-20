@@ -18,6 +18,14 @@ export default defineConfig({
     react(),
 
     VitePWA({
+      // Use a custom service worker (src/sw.ts) instead of the auto-generated one.
+      // Required for custom event handlers (Background Sync 'sync' event).
+      // VitePWA injects the precache manifest into sw.ts at build time
+      // at the self.__WB_MANIFEST injection point.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+
       // 'autoUpdate' — the service worker updates silently in the background.
       // The user gets the latest version on their next page load without
       // any prompts or interruption.
@@ -109,56 +117,16 @@ export default defineConfig({
       },
 
       // Enable service worker in development so DevTools shows it as active.
-      // Uses a virtual SW that mirrors production behaviour without precaching.
+      // type: 'module' is required for TypeScript ES module SW files in dev mode.
       devOptions: {
         enabled: true,
+        type: 'module',
       },
 
-      // Workbox service worker configuration
-      workbox: {
-        // Cache these file patterns when the service worker installs
+      // Precache manifest build config — which static assets to include.
+      // Runtime caching strategies live in src/sw.ts (injectManifest mode).
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-
-        // Runtime caching strategies for different types of requests:
-        //
-        // Only cache reference data that is safe to serve offline:
-        //   - exercises: exercise library (changes rarely, no PII)
-        //   - body-parts: static taxonomy (never changes)
-        //   - templates: workout blueprints (no PII)
-        //
-        // Explicitly NOT cached (sensitive or auth-bearing):
-        //   - /auth/* — tokens and session data
-        //   - /clients/* — PII (client roster, health data)
-        //   - /sessions/* — training records
-        //   - /snapshots/* — body measurements
-        //   - /kpis/* — computed from health data
-        //   - /reports/* — client-facing documents
-        runtimeCaching: [
-          {
-            urlPattern: /\/api\/v1\/(exercises|body-parts|templates)(\?|\/|$)/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-reference-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24, // 24 hours
-              },
-            },
-          },
-          {
-            // Cloudinary media — CacheFirst strategy:
-            // Serve from cache first (images don't change), update in background
-            urlPattern: /^https:\/\/res\.cloudinary\.com\//,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'cloudinary-media',
-              expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-              },
-            },
-          },
-        ],
       },
     }),
   ],

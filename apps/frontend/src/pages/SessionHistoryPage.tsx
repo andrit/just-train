@@ -21,6 +21,7 @@ import { useSession }                           from '@/lib/queries/sessions'
 import { useRestoreScroll }                     from '@/hooks/useScrollRestoration'
 import { formatDuration, formatDateLong }       from '@/lib/formatters'
 import { Spinner }                              from '@/components/ui/Spinner'
+import { ErrorState }                          from '@/components/ui/ErrorState'
 
 
 // ── Score bar ─────────────────────────────────────────────────────────────────
@@ -50,7 +51,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
   // Restore scroll on return (this page is the destination — runs on mount)
   useRestoreScroll()
 
-  const { data: session, isLoading } = useSession(id ?? null)
+  const { data: session, isLoading, isError } = useSession(id ?? null)
 
   const handleBack = (): void => {
     const state = location.state as { from?: string; scrollKey?: string; clientName?: string; returnTab?: string } | null
@@ -76,6 +77,10 @@ export default function SessionHistoryPage(): React.JSX.Element {
         <Spinner size="lg" className="text-command-blue" />
       </div>
     )
+  }
+
+  if (isError) {
+    return <ErrorState message="Could not load session." onRetry={handleBack} />
   }
 
   if (!session) {

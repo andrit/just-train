@@ -12,6 +12,8 @@ import {
   useForkTemplate,
 }                                      from '@/lib/queries/templates'
 import { Spinner }                     from '@/components/ui/Spinner'
+import { ErrorState }                 from '@/components/ui/ErrorState'
+import { useOnlineStatus }            from '@/hooks/useOnlineStatus'
 import { ConfirmDialog }               from '@/components/ui/ConfirmDialog'
 import { TemplateBuilderSheet }        from '@/components/templates/TemplateBuilderSheet'
 import { toast }                       from '@/store/toastStore'
@@ -27,7 +29,8 @@ export default function TemplatesPage(): React.JSX.Element {
   const seededRef   = useRef(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const { data: templates, isLoading, refetch } = useTemplates(search || undefined)
+  const { data: templates, isLoading, isError: templatesError, refetch } = useTemplates(search || undefined)
+  const isOnline = useOnlineStatus()
   const deleteTemplate = useDeleteTemplate()
   const forkTemplate   = useForkTemplate()
 
@@ -78,13 +81,16 @@ export default function TemplatesPage(): React.JSX.Element {
         </div>
         <button
           type="button"
-          onClick={() => { setEditId(null); setBuilderOpen(true) }}
+          onClick={() => { if (isOnline) { setEditId(null); setBuilderOpen(true) } }}
+          disabled={!isOnline}
+          title={isOnline ? undefined : 'Connect to create templates'}
           className={cn(
             'flex items-center gap-1.5 px-3 py-2 rounded-xl',
             'bg-command-blue/15 border border-command-blue/30',
             'text-xs font-medium text-command-blue',
             interactions.button.base,
             interactions.button.press,
+            !isOnline && 'opacity-40 cursor-not-allowed',
           )}
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
@@ -150,6 +156,8 @@ export default function TemplatesPage(): React.JSX.Element {
           <div className="flex flex-col items-center justify-center py-12 gap-3">
             <Spinner size="md" className="text-command-blue" />
           </div>
+        ) : templatesError ? (
+          <ErrorState onRetry={() => void refetch()} />
         ) : (templates ?? []).length === 0 ? (
           <div className="text-center py-12">
             <p className="text-2xl mb-3" aria-hidden>📋</p>
@@ -170,6 +178,7 @@ export default function TemplatesPage(): React.JSX.Element {
               <TemplateCard
                 key={t.id}
                 template={t}
+                isOnline={isOnline}
                 onEdit={() => { setEditId(t.id); setBuilderOpen(true) }}
                 onFork={() => handleFork(t.id, t.name)}
                 onDelete={() => setDeleteId(t.id)}
@@ -200,13 +209,16 @@ export default function TemplatesPage(): React.JSX.Element {
 
 // ── Template card ─────────────────────────────────────────────────────────────
 
-function TemplateCard({ template, onEdit, onFork, onDelete }: {
+function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
   template: TemplateSummaryResponse
+  isOnline: boolean
   onEdit:   () => void
   onFork:   () => void
   onDelete: () => void
 }): React.JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false)
+
+  const offlineMenuItemClass = 'opacity-40 cursor-not-allowed'
 
   return (
     <div className="bg-brand-secondary rounded-2xl border border-surface-border p-4">
@@ -233,18 +245,38 @@ function TemplateCard({ template, onEdit, onFork, onDelete }: {
             <>
               <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-8 z-50 w-44 bg-brand-primary border border-surface-border rounded-xl shadow-lg overflow-hidden">
-                <button type="button" onClick={() => { onEdit(); setMenuOpen(false) }}
-                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors">
+                <button
+                  type="button"
+                  disabled={!isOnline}
+                  onClick={() => { if (isOnline) { onEdit(); setMenuOpen(false) } }}
+                  title={isOnline ? undefined : 'Connect to edit'}
+                  className={cn('w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors', !isOnline && offlineMenuItemClass)}
+                >
                   Edit template
                 </button>
-                <button type="button" onClick={() => { onFork(); setMenuOpen(false) }}
-                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors border-t border-surface-border">
+                <button
+                  type="button"
+                  disabled={!isOnline}
+                  onClick={() => { if (isOnline) { onFork(); setMenuOpen(false) } }}
+                  title={isOnline ? undefined : 'Connect to duplicate'}
+                  className={cn('w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors border-t border-surface-border', !isOnline && offlineMenuItemClass)}
+                >
                   Duplicate
                 </button>
-                <button type="button" onClick={() => { onDelete(); setMenuOpen(false) }}
-                  className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-surface-border/30 transition-colors border-t border-surface-border">
+                <button
+                  type="button"
+                  disabled={!isOnline}
+                  onClick={() => { if (isOnline) { onDelete(); setMenuOpen(false) } }}
+                  title={isOnline ? undefined : 'Connect to delete'}
+                  className={cn('w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-surface-border/30 transition-colors border-t border-surface-border', !isOnline && offlineMenuItemClass)}
+                >
                   Delete
                 </button>
+                {!isOnline && (
+                  <p className="px-4 py-2 text-[10px] text-gray-600 border-t border-surface-border">
+                    Connect to make changes
+                  </p>
+                )}
               </div>
             </>
           )}

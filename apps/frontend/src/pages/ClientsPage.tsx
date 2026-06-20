@@ -21,6 +21,8 @@ import { ClientDrawer }        from '@/components/clients/ClientDrawer'
 import { SilhouetteAvatar }    from '@/components/clients/SilhouetteAvatar'
 import { Spinner }             from '@/components/ui/Spinner'
 import { EmptyState }          from '@/components/ui/EmptyState'
+import { ErrorState }          from '@/components/ui/ErrorState'
+import { useOnlineStatus }     from '@/hooks/useOnlineStatus'
 import { cn }                  from '@/lib/cn'
 import { interactions }        from '@/lib/interactions'
 import { PROGRESSION_STATE_LABEL, PROGRESSION_STATE_COLOR } from '@/components/clients/utils'
@@ -30,9 +32,10 @@ export default function ClientsPage(): React.JSX.Element {
   const isTrainer  = trainer?.trainerMode === 'trainer'
 
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const nav = useNav()
+  const nav      = useNav()
+  const isOnline = useOnlineStatus()
 
-  const { data: clients,    isLoading: clientsLoading } = useClients()
+  const { data: clients,    isLoading: clientsLoading, isError: clientsError, refetch: refetchClients } = useClients()
   const { data: selfClient, isLoading: selfLoading     } = useSelfClient()
 
   const isLoading = clientsLoading || selfLoading
@@ -46,20 +49,23 @@ export default function ClientsPage(): React.JSX.Element {
           {isTrainer ? 'Clients' : 'My Training'}
         </h1>
 
-        {/* Add Client button — trainer mode only, animated */}
+        {/* Add Client button — trainer mode only, disabled offline */}
         {isTrainer && (
           <button
             type="button"
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Add new client"
+            onClick={() => { if (isOnline) setDrawerOpen(true) }}
+            disabled={!isOnline}
+            aria-label={isOnline ? 'Add new client' : 'Connect to add clients'}
+            title={isOnline ? undefined : 'Connect to add clients'}
             className={cn(
               'flex items-center gap-2 px-4 py-2 rounded-xl',
               'bg-command-blue text-white text-sm font-medium',
               interactions.button.base,
               interactions.fab.hover,
               interactions.button.press,
-              interactions.fab.pulse,   // ← remove to disable pulse on header button
+              isOnline && interactions.fab.pulse,
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+              !isOnline && 'opacity-40 cursor-not-allowed',
             )}
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4" aria-hidden>
@@ -74,6 +80,8 @@ export default function ClientsPage(): React.JSX.Element {
         <div className="flex justify-center py-16">
           <Spinner size="lg" className="text-command-blue" />
         </div>
+      ) : clientsError ? (
+        <ErrorState onRetry={() => void refetchClients()} />
       ) : (
         <div className="space-y-3">
 

@@ -22,6 +22,8 @@ import { useSelfClient, useClients }     from '@/lib/queries/clients'
 import { useCreateSession, useStartSession } from '@/lib/queries/sessions'
 import { useTemplates }                  from '@/lib/queries/templates'
 import { Spinner }                       from '@/components/ui/Spinner'
+import { OfflineFallback }              from '@/components/shell/OfflineFallback'
+import { useOnlineStatus }              from '@/hooks/useOnlineStatus'
 
 // ── Template card ─────────────────────────────────────────────────────────────
 
@@ -119,6 +121,7 @@ type View = 'main' | 'client-select' | 'template-pick'
 export default function SessionLauncherPage(): React.JSX.Element {
   const navigate       = useNavigate()
   const [searchParams] = useSearchParams()
+  const isOnline       = useOnlineStatus()
   const _trainer        = useAuthStore((s) => s.trainer)
   const { trainerMode, ctaLabel } = usePreferences()
   const { fire } = useUXEvent()
@@ -320,6 +323,32 @@ export default function SessionLauncherPage(): React.JSX.Element {
 
   const hasActiveSession = selectedClientId ? hasSession(selectedClientId) : false
   const displayCta = hasActiveSession ? 'Continue Session' : ctaLabel
+
+  if (!isOnline) {
+    return (
+      <div className="p-4 md:p-6 max-w-xl mx-auto">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 mb-4"
+        >
+          <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+            <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Back
+        </button>
+        <OfflineFallback
+          title="You're offline"
+          message="Starting a session requires a connection. Your in-progress sessions are still saved."
+          stillWorks={[
+            "Exercises you've already loaded",
+            "Templates you've already loaded",
+            'In-progress session — sets sync when you reconnect',
+          ]}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="p-4 md:p-6 max-w-xl mx-auto">

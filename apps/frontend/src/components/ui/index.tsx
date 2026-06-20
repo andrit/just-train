@@ -22,6 +22,9 @@ export type { SpinnerProps, SpinnerSize } from './Spinner'
 export { EmptyState }    from './EmptyState'
 export type { EmptyStateProps } from './EmptyState'
 
+export { ErrorState }    from './ErrorState'
+export type { ErrorStateProps } from './ErrorState'
+
 export { Input }         from './Input'
 export type { InputProps } from './Input'
 

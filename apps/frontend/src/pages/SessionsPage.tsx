@@ -33,6 +33,7 @@ import {
 }                                        from '@/lib/queries/sessions'
 import { formatDate, formatDuration }    from '@/lib/formatters'
 import { Spinner }                       from '@/components/ui/Spinner'
+import { ErrorState }                   from '@/components/ui/ErrorState'
 import type { SessionSummaryResponse }   from '@trainer-app/shared'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -279,7 +280,7 @@ export default function SessionsPage(): React.JSX.Element {
 
   // Fetch by status tab
   const statusFilter = tab === 'all' ? undefined : tab
-  const { data: sessions, isLoading } = useSessions({
+  const { data: sessions, isLoading, isError: sessionsError, refetch: refetchSessions } = useSessions({
     ...(statusFilter  && { status: statusFilter }),
     ...(clientFilter  && { clientId: clientFilter }),
   })
@@ -439,7 +440,11 @@ export default function SessionsPage(): React.JSX.Element {
           </div>
         )}
 
-        {!isLoading && filtered.length === 0 && (
+        {!isLoading && sessionsError && (
+          <ErrorState onRetry={() => void refetchSessions()} />
+        )}
+
+        {!isLoading && !sessionsError && filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-3xl mb-3" aria-hidden>
               {tab === 'planned' ? '📋' : tab === 'in_progress' ? '🏋️' : '📅'}
@@ -465,7 +470,7 @@ export default function SessionsPage(): React.JSX.Element {
         )}
 
         {/* Grouped list */}
-        {grouped.map(({ label, sessions: group }) => (
+        {!sessionsError && grouped.map(({ label, sessions: group }) => (
           <div key={label}>
             {/* Date label */}
             <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">{label}</p>

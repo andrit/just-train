@@ -11,6 +11,7 @@ import { cn }                            from '@/lib/cn'
 import { interactions }                  from '@/lib/interactions'
 import { useSession }                    from '@/lib/queries/sessions'
 import { Spinner }                       from '@/components/ui/Spinner'
+import { ErrorState }                   from '@/components/ui/ErrorState'
 
 function ScoreBar({ label, value }: { label: string; value: number }): React.JSX.Element {
   return (
@@ -33,7 +34,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: session, isLoading } = useSession(id ?? null)
+  const { data: session, isLoading, isError } = useSession(id ?? null)
 
   if (isLoading) {
     return (
@@ -41,6 +42,10 @@ export default function SessionSummaryPage(): React.JSX.Element {
         <Spinner size="lg" className="text-command-blue" />
       </div>
     )
+  }
+
+  if (isError) {
+    return <ErrorState message="Could not load session." onRetry={() => navigate('/')} />
   }
 
   if (!session) {

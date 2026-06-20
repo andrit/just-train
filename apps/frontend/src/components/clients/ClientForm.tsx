@@ -48,6 +48,7 @@ export function ClientForm({
 }: ClientFormProps): React.JSX.Element {
   const isEditing = client != null
 
+  const [nameError,        setNameError]       = useState<string | null>(null)
   const [name,             setName]            = useState(client?.name             ?? '')
   const [email,            setEmail]           = useState(client?.email            ?? '')
   const [phone,            setPhone]           = useState(client?.phone            ?? '')
@@ -62,6 +63,7 @@ export function ClientForm({
 
   // Sync fields if client prop changes (drawer re-opened with different client)
   useEffect(() => {
+    setNameError(null)
     setName(client?.name             ?? '')
     setEmail(client?.email           ?? '')
     setPhone(client?.phone           ?? '')
@@ -78,6 +80,10 @@ export function ClientForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
+    if (!name.trim()) {
+      setNameError('Name is required')
+      return
+    }
     onSubmit({
       name:             name.trim(),
       email:            email.trim() || undefined,
@@ -115,8 +121,9 @@ export function ClientForm({
           <Input
             label="Full name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); if (nameError) setNameError(null) }}
             placeholder="e.g. Jordan Smith"
+            error={nameError ?? undefined}
             required
           />
           <Input

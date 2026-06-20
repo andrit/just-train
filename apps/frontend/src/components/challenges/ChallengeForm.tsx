@@ -11,7 +11,7 @@
 // whether copy says "Challenge for [name]" vs "Set a challenge".
 // ------------------------------------------------------------
 
-import { useState }          from 'react'
+import { useState, useId }   from 'react'
 import { cn }                from '@/lib/cn'
 import { interactions }      from '@/lib/interactions'
 import { BottomSheet }       from '@/components/ui/BottomSheet'
@@ -56,7 +56,17 @@ export function ChallengeForm({
   const [targetValue, setTargetValue] = useState('')
   const [targetUnit, setTargetUnit]   = useState('lbs')
   const [deadline, setDeadline]       = useState('')
-  const [error, setError]             = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  const uid           = useId()
+  const exerciseErrId = `${uid}-exercise-error`
+  const deadlineErrId = `${uid}-deadline-error`
+  const targetErrId   = `${uid}-target-error`
+
+  const setFieldError = (field: string, msg: string): void =>
+    setFieldErrors((prev) => ({ ...prev, [field]: msg }))
+  const clearFieldError = (field: string): void =>
+    setFieldErrors((prev) => { const next = { ...prev }; delete next[field]; return next })
 
   const createChallenge = useCreateChallenge()
   const { data: exercises } = useExercises()
@@ -73,12 +83,13 @@ export function ChallengeForm({
   }
 
   const handleSubmit = (): void => {
-    setError(null)
-
-    if (!title.trim()) { setError('Title is required'); return }
-    if (!targetValue || Number(targetValue) <= 0) { setError('Target must be a positive number'); return }
-    if (!deadline) { setError('Deadline is required'); return }
-    if (needsExercise && !exerciseId) { setError('Select an exercise for this metric type'); return }
+    const next: Record<string, string> = {}
+    if (!title.trim())                             next.title    = 'Title is required'
+    if (!targetValue || Number(targetValue) <= 0)  next.target   = 'Enter a positive number'
+    if (!deadline)                                 next.deadline = 'Deadline is required'
+    if (needsExercise && !exerciseId)              next.exercise = 'Select an exercise for this metric type'
+    setFieldErrors(next)
+    if (Object.keys(next).length > 0) return
 
     createChallenge.mutate(
       {
@@ -95,7 +106,6 @@ export function ChallengeForm({
       },
       {
         onSuccess: () => {
-          // Reset form
           setTitle('')
           setDescription('')
           setMetricType('weight_lifted')
@@ -103,9 +113,10 @@ export function ChallengeForm({
           setTargetValue('')
           setTargetUnit('lbs')
           setDeadline('')
+          setFieldErrors({})
           onClose()
         },
-        onError: (err) => setError(err.message),
+        onError: (err) => setFieldErrors({ server: err.message }),
       },
     )
   }
@@ -121,20 +132,22 @@ export function ChallengeForm({
     <BottomSheet open={open} onClose={onClose} title={contextLabel} maxHeight="90vh">
       <div className="px-5 pb-6 space-y-4">
 
-        {error && (
+        {fieldErrors.server && (
           <div role="alert" className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-400">
-            {error}
+            {fieldErrors.server}
           </div>
         )}
 
         {/* Title */}
         <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider block mb-1">Title</label>
           <Input
+            label="Title"
             placeholder='e.g. "10 unassisted pull-ups"'
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => { setTitle(e.target.value); clearFieldError('title') }}
+            error={fieldErrors.title}
             maxLength={200}
+            required
           />
         </div>
 
@@ -174,32 +187,49 @@ export function ChallengeForm({
         {/* Exercise selector — only for exercise-specific metrics */}
         {needsExercise && (
           <div>
-            <label className="text-xs text-gray-500 uppercase tracking-wider block mb-1">Exercise</label>
+            <label
+              htmlFor={`${uid}-exercise`}
+              className="text-xs text-gray-500 uppercase tracking-wider block mb-1"
+            >
+              Exercise <span className="text-ember-red" aria-hidden>*</span>
+            </label>
             <select
+              id={`${uid}-exercise`}
               value={exerciseId}
-              onChange={(e) => setExerciseId(e.target.value)}
-              className="w-full bg-surface border border-surface-border rounded-lg px-3 py-2 text-sm text-gray-300"
+              onChange={(e) => { setExerciseId(e.target.value); clearFieldError('exercise') }}
+              aria-invalid={fieldErrors.exercise ? true : undefined}
+              aria-describedby={fieldErrors.exercise ? exerciseErrId : undefined}
+              aria-required
+              className={cn(
+                'w-full bg-surface border rounded-lg px-3 py-2 text-sm text-gray-300',
+                fieldErrors.exercise ? 'border-red-500' : 'border-surface-border',
+              )}
             >
               <option value="">Select an exercise...</option>
               {(exercises ?? []).map((ex) => (
                 <option key={ex.id} value={ex.id}>{ex.name}</option>
               ))}
             </select>
+            {fieldErrors.exercise && (
+              <p id={exerciseErrId} role="alert" className="mt-1.5 text-xs text-red-400">
+                {fieldErrors.exercise}
+              </p>
+            )}
           </div>
         )}
 
         {/* Target value + unit */}
         <div className="flex gap-3">
           <div className="flex-1">
-            <label className="text-xs text-gray-500 uppercase tracking-wider block mb-1">
-              {metricType === 'qualitative' ? 'Target (1–10 scale)' : 'Target'}
-            </label>
             <Input
+              label={metricType === 'qualitative' ? 'Target (1–10 scale)' : 'Target'}
               type="number"
               inputMode="decimal"
               placeholder={metricType === 'qualitative' ? '10' : '100'}
               value={targetValue}
-              onChange={(e) => setTargetValue(e.target.value)}
+              onChange={(e) => { setTargetValue(e.target.value); clearFieldError('target') }}
+              error={fieldErrors.target}
+              required
             />
           </div>
           {metricType !== 'qualitative' && (
@@ -232,14 +262,31 @@ export function ChallengeForm({
 
         {/* Deadline */}
         <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider block mb-1">Deadline</label>
+          <label
+            htmlFor={`${uid}-deadline`}
+            className="text-xs text-gray-500 uppercase tracking-wider block mb-1"
+          >
+            Deadline <span className="text-ember-red" aria-hidden>*</span>
+          </label>
           <input
+            id={`${uid}-deadline`}
             type="date"
             value={deadline || defaultDeadline()}
-            onChange={(e) => setDeadline(e.target.value)}
+            onChange={(e) => { setDeadline(e.target.value); clearFieldError('deadline') }}
             min={new Date().toISOString().slice(0, 10)}
-            className="w-full bg-surface border border-surface-border rounded-lg px-3 py-2 text-sm text-gray-300"
+            aria-invalid={fieldErrors.deadline ? true : undefined}
+            aria-describedby={fieldErrors.deadline ? deadlineErrId : undefined}
+            aria-required
+            className={cn(
+              'w-full bg-surface border rounded-lg px-3 py-2 text-sm text-gray-300',
+              fieldErrors.deadline ? 'border-red-500' : 'border-surface-border',
+            )}
           />
+          {fieldErrors.deadline && (
+            <p id={deadlineErrId} role="alert" className="mt-1.5 text-xs text-red-400">
+              {fieldErrors.deadline}
+            </p>
+          )}
         </div>
 
         {/* Submit */}

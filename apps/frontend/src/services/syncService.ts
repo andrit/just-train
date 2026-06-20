@@ -127,13 +127,26 @@ function init(): void {
   if (isInitialised) return
   isInitialised = true
 
-  // Flush on reconnect
+  // Flush on reconnect (window.online fires when the tab is open)
   window.addEventListener('online', () => {
     if (import.meta.env.DEV) {
       console.debug('[syncService] online — flushing queue')
     }
-    flushQueue()
+    void flushQueue()
   })
+
+  // Background Sync relay — SW messages us when it gets a 'sync' event.
+  // This covers the case where connectivity returned while the app tab was closed.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
+      if ((event.data as { type?: string })?.type === 'FLUSH_QUEUE') {
+        if (import.meta.env.DEV) {
+          console.debug('[syncService] SW background sync relay → flushing queue')
+        }
+        void flushQueue()
+      }
+    })
+  }
 
   // Prefetch on load (after a short delay so the app renders first)
   setTimeout(() => {

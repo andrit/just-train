@@ -93,6 +93,18 @@ class LocalStorageQueue implements OfflineQueue {
     ops.push(full)
     this.write(ops)
 
+    // Register a Background Sync tag so the SW flushes the queue when
+    // connectivity returns, even if this tab was closed at that moment.
+    // Cast needed: SyncManager isn't in this TypeScript version's DOM lib.
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
+      type SyncableReg = ServiceWorkerRegistration & { sync: { register(tag: string): Promise<void> } }
+      navigator.serviceWorker.ready
+        .then((reg) => (reg as SyncableReg).sync.register('trainer-app-write-queue'))
+        .catch(() => {
+          // Background Sync not supported — window.online fallback in syncService handles it
+        })
+    }
+
     if (import.meta.env.DEV) {
       console.debug(`[offlineQueue] enqueued: ${op.description}`, op)
     }

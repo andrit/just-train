@@ -6,11 +6,12 @@
 // Lets the trainer name/rename the session before closing.
 // ------------------------------------------------------------
 
-import { useState }                           from 'react'
+import { useState, useEffect }                from 'react'
 import { cn }                                 from '@/lib/cn'
 import { interactions }                       from '@/lib/interactions'
 import { Spinner }                            from '@/components/ui/Spinner'
 import { useChallenges }                      from '@/lib/queries/challenges'
+import { markFirstSessionCompleted }          from '@/lib/installPrompt'
 import type { SessionDetailResponse }         from '@trainer-app/shared'
 
 interface PostSessionWrapUpProps {
@@ -23,6 +24,9 @@ export function PostSessionWrapUp({
   session, onDone, isSaving = false,
 }: PostSessionWrapUpProps): React.JSX.Element {
   const [name, setName] = useState(session.name ?? '')
+
+  // Mark first session on mount — triggers contextual install prompt (UF-S-03).
+  useEffect(() => { markFirstSessionCompleted() }, [])
 
   // v2.12.0: fetch active challenges for the client to show progress
   const { data: activeChallenges } = useChallenges(session.clientId, 'active')

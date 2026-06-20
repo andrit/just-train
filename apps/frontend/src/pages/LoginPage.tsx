@@ -47,6 +47,12 @@ export default function LoginPage(): React.JSX.Element {
     e.preventDefault()
     clearFieldErrors()
 
+    // Auth always requires network (offline-contract.md)
+    if (!navigator.onLine) {
+      setServerError("You're offline — please connect to log in")
+      return
+    }
+
     // Explicit validation — browser 'required' attr unreliable on installed PWAs
     let hasError = false
     if (mode === 'register' && !name.trim()) { setNameError('Name is required'); hasError = true }

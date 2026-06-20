@@ -29,6 +29,7 @@
 import { Navigate, Routes, Route }         from 'react-router-dom'
 import { AuthProvider, ProtectedRoute }    from '@/components/auth/AuthProvider'
 import { useAuthStore }                    from '@/store/authStore'
+import { usePreferences }                  from '@/hooks/usePreferences'
 import Layout                              from '@/components/layout/Layout'
 import { AppShell }                        from '@/components/shell/AppShell'
 import LoginPage                           from '@/pages/LoginPage'
@@ -64,6 +65,20 @@ function OnboardingGate({ children }: { children: React.ReactNode }): React.JSX.
   return <>{children}</>
 }
 
+// ── Athlete route guard ────────────────────────────────────────────────────────
+// Policy P1 (user-flow.md): athletes who navigate directly to /clients or
+// /clients/:id are redirected to / rather than seeing a 403 or trainer UI.
+
+function AthleteRouteGuard({ children }: { children: React.ReactNode }): React.JSX.Element {
+  const { trainerMode } = usePreferences()
+
+  if (trainerMode === 'athlete') {
+    return <Navigate to="/" replace />
+  }
+
+  return <>{children}</>
+}
+
 // ── App ───────────────────────────────────────────────────────────────────────
 
 export default function App(): React.JSX.Element {
@@ -93,8 +108,8 @@ export default function App(): React.JSX.Element {
                   <AppShell>
                     <Routes>
                       <Route path="/"                        element={<DashboardPage />} />
-                      <Route path="/clients"                 element={<ClientsPage />} />
-                      <Route path="/clients/:id"             element={<ClientProfilePage />} />
+                      <Route path="/clients"                 element={<AthleteRouteGuard><ClientsPage /></AthleteRouteGuard>} />
+                      <Route path="/clients/:id"             element={<AthleteRouteGuard><ClientProfilePage /></AthleteRouteGuard>} />
                       <Route path="/my-training"             element={<MyTrainingPage />} />
                       <Route path="/exercises"               element={<ExercisesPage />} />
                       <Route path="/sessions"                element={<SessionsPage />} />

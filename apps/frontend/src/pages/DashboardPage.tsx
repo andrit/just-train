@@ -302,10 +302,20 @@ export default function DashboardPage(): React.JSX.Element {
 
       {selfClient && trainerMode === 'athlete' && (
         <>
+          {/* Log Snapshot — secondary action for measurements (UF-A-03) */}
+          <button
+            type="button"
+            onClick={() => navigate('/my-training', { state: { tab: 'baseline' } })}
+            className="mt-4 w-full text-left rounded-lg border border-surface-border bg-surface-raised px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:border-gray-500 transition-colors active:scale-[0.98]"
+          >
+            <span className="font-display text-xs uppercase tracking-widest text-gray-500 block">Log Snapshot</span>
+            <span className="text-xs text-gray-600">Record your measurements</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setChallengeFormOpen(true)}
-            className="mt-4 w-full text-center text-sm text-command-blue hover:text-command-blue/80 py-2"
+            className="mt-2 w-full text-center text-sm text-command-blue hover:text-command-blue/80 py-2"
           >
             + Set a challenge
           </button>

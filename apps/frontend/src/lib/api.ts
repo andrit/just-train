@@ -125,10 +125,16 @@ async function request<T>(
   // ── 401 — attempt silent refresh + retry once ────────────────────────────
   // Fires on any 401: expired token, missing token, or invalid token.
   // Auth routes excluded. Singleton refresh prevents parallel calls.
+  //
+  // If offline when the refresh fails, we do NOT redirect to login — the
+  // user's session is still valid and will resume on reconnect. The request
+  // is rejected so the offline banner can surface it.
   if (response.status === 401 && !isRetry && !path.includes('/auth/')) {
     const newToken = await attemptTokenRefresh()
     if (newToken) {
       return request<T>(path, init, true)
+    } else if (!navigator.onLine) {
+      throw new ApiError(401, 'You\'re offline — request will retry on reconnect')
     } else {
       redirectToLogin()
       throw new ApiError(401, 'Session expired — please log in again')

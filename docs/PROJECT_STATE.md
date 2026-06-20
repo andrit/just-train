@@ -662,10 +662,11 @@ This tracks progress through the workbench phases, which are separate from the a
 | 1 | Scaffold | ✅ Complete — manifest valid, SW activated, `mobile-web-app-capable` added (2026-06-19) |
 | 2 | Core Schema | ✅ Complete — localStorage write queue (offlineQueue.ts), Workbox read cache, syncService, sync_log backend audit table. All shipped in v2.4.0 (2026-06-19) |
 | D | Design | ✅ Complete — design system (crosshatch, near-black background, card borders, header treatment, pill styles, shadow-pressable), product-synthesis.md approved, wireframes.html (20 screens, offline states, install prompt), dashboard action-hub layout confirmed (2026-06-19) |
-| 3 | Core Features | 🔄 **Active** |
-| 4 | Service Worker & Caching | 🔜 |
-| 5 | Auth | 🔜 |
-| 6 | Push Notifications | 🔜 |
+| 3 | Core Features | ✅ Complete — dashboard action-hub, loading/empty/error states, offline fallbacks (SessionLauncher, Templates, Clients), accessible form validation (2026-06-19). **Post-retro gap fixes (2026-06-20):** AthleteRouteGuard (P1 — athletes blocked from /clients), AthleteProfilePage at /my-training (P8/P9 — no URL leak, first-person vocabulary), Log Snapshot dashboard action (UF-A-03), install prompt infrastructure (UF-S-03 — beforeinstallprompt capture, passive icon, contextual nudge after first session, iOS share-sheet instructions) |
+| 4 | Service Worker & Caching | ✅ Complete — injectManifest SW, cleanupOutdatedCaches, navigateFallback, background sync relay (2026-06-20) |
+| 5 | Auth | ✅ Complete — offline auth init screen (OfflineAuthScreen + AuthProvider retry-on-reconnect), 401 interceptor offline guard (no logout on network error), login form offline guard (2026-06-20) |
+| 6 | Push Notifications | 🔜 — deferred past SaaS launch (product-synthesis.md) |
+| 5-next | Phase 5 advance criteria | ✅ Session from home screen icon: httpOnly cookie survives standalone launch. ✅ Offline user stays authenticated: OfflineAuthScreen holds instead of login redirect. |
 | 7 | Lighthouse & Performance | 🔜 |
 | 8 | Testing | 🔜 |
 | 9 | Extract | 🔜 |

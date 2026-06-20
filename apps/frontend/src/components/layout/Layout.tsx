@@ -10,6 +10,7 @@ import { useOverlayStore } from '@/store/overlayStore'
 import { useAuthStore }    from '@/store/authStore'
 import { useSyncStatus }   from '@/hooks/useSyncStatus'
 import { usePreferences }  from '@/hooks/usePreferences'
+import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { OfflineBanner }   from '@/components/shell/OfflineBanner'
 import { ToastContainer }  from '@/components/ui/ToastContainer'
 import { apiClient }       from '@/lib/api'
@@ -80,11 +81,15 @@ function UserMenuButton({
   name,
   onLogout,
   onNavClick,
+  showInstall,
+  onInstall,
 }: {
-  initials:   string
-  name:       string
-  onLogout:   () => void
-  onNavClick: () => void
+  initials:     string
+  name:         string
+  onLogout:     () => void
+  onNavClick:   () => void
+  showInstall?: boolean
+  onInstall?:   () => void
 }): React.JSX.Element {
   const [open, setOpen]  = useState(false)
   const { pathname }     = useLocation()
@@ -103,7 +108,7 @@ function UserMenuButton({
       {open && (
         <div className="absolute bottom-full right-0 mb-3 z-50 flex flex-col gap-2 min-w-[172px]">
 
-          {/* Log out — rolls up second (sits above Preferences) */}
+          {/* Log out — rolls up highest */}
           <button
             type="button"
             onClick={() => { close(); onNavClick(); onLogout() }}
@@ -113,7 +118,7 @@ function UserMenuButton({
               'text-sm text-gray-300 hover:text-red-400 transition-colors',
               'animate-wheel-roll-up',
             )}
-            style={{ animationDelay: '60ms' }}
+            style={{ animationDelay: showInstall ? '90ms' : '60ms' }}
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0" aria-hidden>
               <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -121,6 +126,26 @@ function UserMenuButton({
             </svg>
             Log out
           </button>
+
+          {/* Install App — passive icon, only when installable (P4) */}
+          {showInstall && (
+            <button
+              type="button"
+              onClick={() => { close(); onNavClick(); void onInstall?.() }}
+              className={cn(
+                'flex items-center gap-3 px-4 py-3 w-full text-left rounded-xl',
+                'bg-brand-accent border border-surface-border',
+                'text-sm text-gray-300 hover:text-white transition-colors',
+                'animate-wheel-roll-up',
+              )}
+              style={{ animationDelay: '60ms' }}
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0 text-command-blue" aria-hidden>
+                <path d="M8 2v8M5 7l3 3 3-3M2 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Install App
+            </button>
+          )}
 
           {/* Preferences — rolls up first (closest to nav bar) */}
           <NavLink
@@ -184,6 +209,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
   const trainer          = useAuthStore((s) => s.trainer)
   const clearAuth        = useAuthStore((s) => s.clearAuth)
   const { trainerMode }  = usePreferences()
+  const { showPassiveIcon, promptInstall } = useInstallPrompt()
   const {
     state: overlayState,
     sidebarOpen,
@@ -352,6 +378,32 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               <span className="relative">Preferences</span>
             </NavLink>
 
+            {/* Install App — passive icon (P4); only when installable */}
+            {showPassiveIcon && (
+              <button
+                type="button"
+                onClick={() => void promptInstall()}
+                className={cn(
+                  'group relative flex items-center gap-3 w-full px-5 py-3',
+                  'border-b border-surface-border',
+                  'text-xs font-medium transition-colors duration-100',
+                  'text-command-blue hover:text-command-blue/80',
+                  'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
+                )}
+              >
+                <span
+                  className="absolute inset-x-2 inset-y-1 rounded-lg bg-command-blue/15 opacity-0 group-active:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  aria-hidden
+                />
+                <span className="relative w-5 flex items-center justify-center" aria-hidden>
+                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                    <path d="M8 2v8M5 7l3 3 3-3M2 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span className="relative">Install App</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleLogout}
@@ -428,6 +480,8 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
             name={trainer.name}
             onLogout={handleLogout}
             onNavClick={handleNavClick}
+            showInstall={showPassiveIcon}
+            onInstall={promptInstall}
           />
         )}
       </nav>

@@ -32,11 +32,13 @@ import { cn }                                from '@/lib/cn'
 import { useNav }                            from '@/services/navService'
 import { useOverlayStore }                   from '@/store/overlayStore'
 import { useSessionStore }                   from '@/store/sessionStore'
+import { useInstallPrompt }                  from '@/hooks/useInstallPrompt'
 import { ActiveSessionOverlay }              from './ActiveSessionOverlay'
 import { ClientProfilePanel }                from './ClientProfilePanel'
 import { SessionLauncherSheet }              from './SessionLauncherSheet'
 import { SessionPlanPanel }                  from './SessionPlanPanel'
 import { SessionHistoryPanel }               from './SessionHistoryPanel'
+import { InstallPromptBanner }               from './InstallPromptBanner'
 import type { PanelState }                   from '@/services/navService'
 
 interface AppShellProps {
@@ -48,6 +50,7 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
   const nav                                   = useNav()
   const { state: overlayState }               = useOverlayStore()
   const { activeSessions }                    = useSessionStore()
+  const { bannerOpen, isIOS, promptInstall, closeBanner } = useInstallPrompt()
 
   // Read current panel from location state
   const currentPanel = (location.state as { panel?: PanelState } | null)?.panel ?? null
@@ -141,6 +144,15 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
 
       {/* ── Active session overlay ────────────────────────────────────────── */}
       <ActiveSessionOverlay />
+
+      {/* ── PWA install nudge (UF-S-03) ────────────────────────────────────── */}
+      {bannerOpen && (
+        <InstallPromptBanner
+          isIOS={isIOS}
+          onInstall={promptInstall}
+          onDismiss={closeBanner}
+        />
+      )}
     </div>
   )
 }

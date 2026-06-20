@@ -55,7 +55,7 @@ function ActionCard({ label, description, accent = false, onClick }: ActionCardP
       <span className={`block font-display text-sm uppercase tracking-widest ${accent ? 'text-command-blue' : 'text-gray-200'}`}>
         {label}
       </span>
-      <span className="block text-xs text-gray-500 mt-0.5">{description}</span>
+      <span className="block text-xs text-gray-400 mt-0.5">{description}</span>
     </button>
   )
 }
@@ -308,8 +308,8 @@ export default function DashboardPage(): React.JSX.Element {
             onClick={() => navigate('/my-training', { state: { tab: 'baseline' } })}
             className="mt-4 w-full text-left rounded-lg border border-surface-border bg-surface-raised px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:border-gray-500 transition-colors active:scale-[0.98]"
           >
-            <span className="font-display text-xs uppercase tracking-widest text-gray-500 block">Log Snapshot</span>
-            <span className="text-xs text-gray-600">Record your measurements</span>
+            <span className="font-display text-xs uppercase tracking-widest text-gray-400 block">Log Snapshot</span>
+            <span className="text-xs text-gray-400">Record your measurements</span>
           </button>
 
           <button

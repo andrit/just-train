@@ -53,13 +53,14 @@ export function SilhouetteAvatar({
 
   return (
     <div
+      role="img"
+      aria-label={`${name} avatar`}
       className={cn(
         'rounded-full overflow-hidden shrink-0 bg-brand-accent border border-surface-border',
         'flex items-end justify-center',
         sizeClass,
         className,
       )}
-      aria-label={`${name} avatar`}
     >
       <SilhouetteSVG className={cn(iconSizeClass, 'text-gray-500 mb-0.5')} />
     </div>

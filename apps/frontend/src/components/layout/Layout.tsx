@@ -171,14 +171,16 @@ function UserMenuButton({
         </div>
       )}
 
-      {/* Nav button — shows initials + first name */}
+      {/* Nav button — shows initials + first name.
+          aria-label includes the visible name so it satisfies WCAG 2.5.3 (Label in Name).
+          min-h-[44px] ensures the touch target meets the 44×44pt minimum. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Account menu"
+        aria-label={`${name.split(' ')[0]} — account menu`}
         aria-expanded={open}
         className={cn(
-          'flex flex-col items-center gap-0.5 py-2.5 px-3',
+          'flex flex-col items-center gap-0.5 py-2.5 px-3 min-h-[44px] min-w-[44px] justify-center',
           'text-xs font-medium transition-colors duration-150',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
           (isPrefsActive || open) ? 'text-command-blue' : 'text-gray-500',

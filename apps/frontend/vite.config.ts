@@ -131,6 +131,20 @@ export default defineConfig({
     }),
   ],
 
+  build: {
+    rollupOptions: {
+      output: {
+        // Split heavy vendor deps into their own chunks so the main app entry
+        // is smaller and each route chunk doesn't repeat shared code.
+        manualChunks: {
+          'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+          'vendor-query':  ['@tanstack/react-query'],
+          'vendor-zustand': ['zustand'],
+        },
+      },
+    },
+  },
+
   resolve: {
     alias: {
       // '@/' maps to 'src/' for clean imports:

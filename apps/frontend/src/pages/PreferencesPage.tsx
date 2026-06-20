@@ -670,6 +670,7 @@ export default function PreferencesPage(): React.JSX.Element {
               Reports and alerts send at 08:00 in your local time
             </p>
             <select
+              aria-label="Timezone"
               value={trainer?.timezone ?? 'UTC'}
               onChange={(e) => save('timezone', e.target.value)}
               className="field w-full text-sm"

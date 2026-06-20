@@ -26,27 +26,40 @@
 //   /templates          → Template list
 // ------------------------------------------------------------
 
+import { lazy, Suspense }                  from 'react'
 import { Navigate, Routes, Route }         from 'react-router-dom'
 import { AuthProvider, ProtectedRoute }    from '@/components/auth/AuthProvider'
 import { useAuthStore }                    from '@/store/authStore'
 import { usePreferences }                  from '@/hooks/usePreferences'
 import Layout                              from '@/components/layout/Layout'
 import { AppShell }                        from '@/components/shell/AppShell'
-import LoginPage                           from '@/pages/LoginPage'
-import OnboardingPage                      from '@/pages/OnboardingPage'
-import DashboardPage                       from '@/pages/DashboardPage'
-import ClientsPage                         from '@/pages/ClientsPage'
-import ClientProfilePage                   from '@/pages/ClientProfilePage'
-import ExercisesPage                       from '@/pages/ExercisesPage'
-import SessionsPage                        from '@/pages/SessionsPage'
-import TemplatesPage                       from '@/pages/TemplatesPage'
-import PreferencesPage                     from '@/pages/PreferencesPage'
-import SessionLauncherPage                 from '@/pages/SessionLauncherPage'
-import LiveSessionPage                     from '@/pages/LiveSessionPage'
-import SessionSummaryPage                  from '@/pages/SessionSummaryPage'
-import SessionHistoryPage                  from '@/pages/SessionHistoryPage'
-import MyTrainingPage                      from '@/pages/MyTrainingPage'
-import NotFoundPage                        from '@/pages/NotFoundPage'
+import { Spinner }                         from '@/components/ui/Spinner'
+
+// Route-level code splitting — each page loads only when first navigated to.
+// AuthProvider and Layout are kept eager since they render on every route.
+const LoginPage           = lazy(() => import('@/pages/LoginPage'))
+const OnboardingPage      = lazy(() => import('@/pages/OnboardingPage'))
+const DashboardPage       = lazy(() => import('@/pages/DashboardPage'))
+const ClientsPage         = lazy(() => import('@/pages/ClientsPage'))
+const ClientProfilePage   = lazy(() => import('@/pages/ClientProfilePage'))
+const ExercisesPage       = lazy(() => import('@/pages/ExercisesPage'))
+const SessionsPage        = lazy(() => import('@/pages/SessionsPage'))
+const TemplatesPage       = lazy(() => import('@/pages/TemplatesPage'))
+const PreferencesPage     = lazy(() => import('@/pages/PreferencesPage'))
+const SessionLauncherPage = lazy(() => import('@/pages/SessionLauncherPage'))
+const LiveSessionPage     = lazy(() => import('@/pages/LiveSessionPage'))
+const SessionSummaryPage  = lazy(() => import('@/pages/SessionSummaryPage'))
+const SessionHistoryPage  = lazy(() => import('@/pages/SessionHistoryPage'))
+const MyTrainingPage      = lazy(() => import('@/pages/MyTrainingPage'))
+const NotFoundPage        = lazy(() => import('@/pages/NotFoundPage'))
+
+function PageFallback(): React.JSX.Element {
+  return (
+    <div className="flex justify-center items-center min-h-[60vh]">
+      <Spinner size="lg" className="text-command-blue" />
+    </div>
+  )
+}
 
 // ── Onboarding gate ───────────────────────────────────────────────────────────
 // Sits between ProtectedRoute and Layout.
@@ -84,6 +97,7 @@ function AthleteRouteGuard({ children }: { children: React.ReactNode }): React.J
 export default function App(): React.JSX.Element {
   return (
     <AuthProvider>
+      <Suspense fallback={<PageFallback />}>
       <Routes>
         {/* Public */}
         <Route path="/login" element={<LoginPage />} />
@@ -128,6 +142,7 @@ export default function App(): React.JSX.Element {
           }
         />
       </Routes>
+      </Suspense>
     </AuthProvider>
   )
 }

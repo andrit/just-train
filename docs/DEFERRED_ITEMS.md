@@ -464,3 +464,23 @@ These three items were scoped during the v2.14.0 → v3.0.0 planning window. Sch
 5. Store baselines in `tests/visual/snapshots/` (gitignored from normal diffs, tracked separately or in CI artifacts)
 
 **Why before 3.0:** The SaaS launch introduces a pricing page, upgrade flows, and billing state variants (trialing, pastDue, cancelled) — a lot of new UI surface. Having a visual regression baseline before 3.0 means the SaaS work can't silently break the existing trainer/athlete experience. It also gives the UX/UI walkthrough a structured artifact to work from.
+
+---
+
+## SW Update Strategy — `registerType: 'prompt'`
+
+**When:** Review after the final PWA SDLC phase (Phase 18 — Ongoing) is reached, or at v3.0 SaaS launch — whichever comes first.
+
+**What:** `vite.config.ts` currently uses `registerType: 'autoUpdate'`. This means SW updates activate silently on the next page load with no user intervention. Consider switching to `registerType: 'prompt'` so the user explicitly approves the update before it takes effect.
+
+**Why it matters:** A trainer mid-session (sets logged, rest timer running) could have their app silently reload when the new SW activates — losing in-progress UI state even if the data was already saved. `prompt` mode holds the new SW in `waiting` state until the user approves (or until the app is fully closed). VitePWA's `useRegisterSW` hook provides `needRefresh` and `updateServiceWorker()` to build the prompt UI.
+
+**What to build:**
+- A subtle "Update available" banner (not a modal — doesn't interrupt logging)
+- "Update now" button calls `updateServiceWorker()` → SW activates immediately
+- "Later" dismisses the banner; SW updates on next cold open
+- Banner should not appear during an active session (check `sessionStore.activeSessions`)
+
+**Trade-off vs autoUpdate:** `autoUpdate` is simpler and means users always get the latest version. `prompt` gives control but requires a UI surface and a deferred-activation strategy. The right call depends on how frequently updates ship and whether live-session interruption has been a real complaint.
+
+**Files to change:** `vite.config.ts` (`registerType`), new component `UpdatePromptBanner.tsx`, wire into `App.tsx` using `useRegisterSW` from `virtual:pwa-register/react`.

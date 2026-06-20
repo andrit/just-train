@@ -19,5 +19,5 @@
     ".storybook/**/*",
     "vite.config.ts"
   ],
-  "exclude": ["node_modules", "dist", "storybook-static", "src/sw.ts"]
+  "exclude": ["node_modules", "dist", "storybook-static", "src/sw.ts", "src/__tests__", "e2e"]
 }

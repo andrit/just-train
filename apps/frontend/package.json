@@ -10,6 +10,10 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -56,6 +60,14 @@
     "workbox-expiration": "^7.4.1",
     "workbox-precaching": "^7.4.1",
     "workbox-routing": "^7.4.1",
-    "workbox-strategies": "^7.4.1"
+    "workbox-strategies": "^7.4.1",
+    "@playwright/test": "^1.44.0",
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "jsdom": "^24.0.0",
+    "msw": "^2.3.0",
+    "vitest": "^1.6.0"
   }
 }

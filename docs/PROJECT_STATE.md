@@ -667,8 +667,8 @@ This tracks progress through the workbench phases, which are separate from the a
 | 5 | Auth | ✅ Complete — offline auth init screen (OfflineAuthScreen + AuthProvider retry-on-reconnect), 401 interceptor offline guard (no logout on network error), login form offline guard (2026-06-20) |
 | 6 | Push Notifications | 🔜 — deferred past SaaS launch (product-synthesis.md) |
 | 5-next | Phase 5 advance criteria | ✅ Session from home screen icon: httpOnly cookie survives standalone launch. ✅ Offline user stays authenticated: OfflineAuthScreen holds instead of login redirect. |
-| 7 | Lighthouse & Performance | 🔜 |
-| 8 | Testing | 🔜 |
+| 7 | Lighthouse & Performance | ✅ Complete — a11y fixes (aria-prohibited-attr, color contrast, select-name, target-size, label-content-name-mismatch), meta description, robots.txt, route-level lazy loading (all 15 pages), manualChunks vendor split (react, query, zustand), lighthouse-production-audit.md user task doc (2026-06-20) |
+| 8 | Testing | ✅ Complete — Vitest (jsdom, globals, MSW node server), unit tests for offlineQueue (8 cases), installPrompt (15 cases), authStore (6 cases), api.ts 401 offline guard (6 cases), Playwright E2E (5 flow specs: unauth redirect, login, offline login guard, dashboard, AthleteRouteGuard), Playwright SW tests (registration + offline navigation fallback). `tsconfig.test.json` separates test types from app build. Run: `pnpm test` / `pnpm test:e2e` (2026-06-20) |
 | 9 | Extract | 🔜 |
 | 10 | QA Gate | 🔜 |
 | 11 | Support Audit | 🔜 |

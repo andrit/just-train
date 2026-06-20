@@ -70,6 +70,26 @@ TrainerApp is a mobile-first PWA for fitness trainers and athletes. Progress nar
 - Backend logging: always `routeLog(app)`, never `app.log` directly.
 - Drizzle: always guard `.returning()` results, never use `!`.
 
+## Fix quality — always fix the root cause, not the symptom
+
+When something is broken — a failing test, a type error, a runtime bug — find out *why* before touching code.
+
+**Never:**
+- Change an assertion to match wrong behavior
+- Widen a type (`as any`, union with `unknown`) to silence a complaint
+- Add a `try/catch` or `?? null` to hide a crash without understanding its source
+- Use a longer timeout to fix a slow operation
+- Write test-only code paths (`if (process.env.NODE_ENV === 'test')`)
+- Mock a return value in a test that papers over a broken assumption in production code
+
+**Always:**
+- Understand why the error occurs before writing a fix
+- Fix the code, the setup, or the test infrastructure — whichever is actually wrong
+- Prefer using the correct API over adapting to the wrong one (e.g. synchronous `controller` vs async `getRegistration()` when the synchronous check is semantically right)
+- Run tests in an environment that matches production as closely as possible (e.g. `vite preview` not `vite dev` for SW tests that depend on the precache manifest)
+
+If you're not sure why something is failing, say so rather than speculating with a patch.
+
 ## Adding a column — 4-file checklist (same commit)
 
 1. Schema file (`apps/backend/src/db/schema/`)

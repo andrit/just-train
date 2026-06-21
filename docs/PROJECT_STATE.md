@@ -670,8 +670,9 @@ This tracks progress through the workbench phases, which are separate from the a
 | 7 | Lighthouse & Performance | ✅ Complete — a11y fixes (aria-prohibited-attr, color contrast, select-name, target-size, label-content-name-mismatch), meta description, robots.txt, route-level lazy loading (all 15 pages), manualChunks vendor split (react, query, zustand), lighthouse-production-audit.md user task doc (2026-06-20) |
 | 8 | Testing | ✅ Complete — Vitest (jsdom, globals, MSW node server), unit tests for offlineQueue (8 cases), installPrompt (15 cases), authStore (6 cases), api.ts 401 offline guard (6 cases), Playwright E2E (5 flow specs: unauth redirect, login, offline login guard, dashboard, AthleteRouteGuard), Playwright SW tests (registration + offline navigation fallback). `tsconfig.test.json` separates test types from app build. Run: `pnpm test` / `pnpm test:e2e` (2026-06-20) |
 | 9 | Extract | ✅ Complete — pwa-caching-strategy.md (15 chunks) + pwa-e2e-testing-gotchas.md (18 chunks) ingested to RAG (2026-06-20) |
-| 10 | QA Gate | 🔜 |
-| 11 | Support Audit | 🔜 |
+| 10 | QA Gate | 🔄 In progress — user running QA tests |
+| 10.5 | Email Verification | ✅ Complete — schema, service, routes (register fire-and-forget, send-verification, verify-email), VerifyEmailPage, dashboard banner via apiClient, DB migration 002 (2026-06-20) |
+| 11 | Support Audit | ✅ Complete — docs/support-playbook.md: browser/PWA compatibility matrix, auth/email/session/template/report/media/SW failure inventory, DB quick-reference, FAQ stubs (2026-06-21) |
 | 12 | Support Automation | 🔜 |
 | 13–17 | Launch phases | 🔜 |
 | 18 | Ongoing | 🔜 |

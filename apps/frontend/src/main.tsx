@@ -12,12 +12,31 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import * as Sentry from '@sentry/react'
 import App from './App'
 import { ErrorBoundary } from './components/shell/ErrorBoundary'
 import './index.css'
 import { syncService, SYNC_COMPLETE_EVENT } from './services/syncService'
 import { ApiError } from './lib/api'
 import { capturePWAInstallPrompt } from './lib/pwaInstall'
+
+// Sentry error monitoring — no-ops when DSN is absent (dev + CI).
+// Add VITE_SENTRY_DSN to Vercel env vars to activate in production.
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN as string,
+    environment: import.meta.env.MODE,
+    tracesSampleRate: 0.05,
+    allowUrls: [window.location.origin],
+    // Auth errors are expected — not actionable noise in Sentry
+    ignoreErrors: ['Unauthorized', 'X-Device-ID header required'],
+  })
+
+  // Track PWA install to home screen — satisfies Phase 16 advance criterion
+  window.addEventListener('pwa:installed', () => {
+    Sentry.captureMessage('PWA installed to home screen', 'info')
+  })
+}
 
 // Register beforeinstallprompt listener before React mounts — the browser fires
 // this event early and it won't repeat, so the listener must be in place first.

@@ -88,3 +88,14 @@ jobs:
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_db
           NODE_ENV:     production
+
+      # Lighthouse CI — audits the production build for performance, accessibility,
+      # and PWA manifest validity. Warns on score regressions, hard-blocks on
+      # missing manifest (catches SW config breakage before it hits production).
+      # Reports upload to temporary-public-storage; link printed in CI output.
+      - name: Lighthouse CI
+        run: |
+          npx serve --version > /dev/null 2>&1 || npm install -g serve
+          npx @lhci/cli@0.14.x autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

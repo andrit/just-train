@@ -20,8 +20,10 @@
 import * as argon2 from 'argon2'
 import * as crypto from 'crypto'
 import * as jwt from 'jsonwebtoken'
-import { db, refreshTokens } from '../db'
-import { eq, and, gt } from 'drizzle-orm'
+import { Resend } from 'resend'
+import { db, refreshTokens, emailVerificationTokens } from '../db'
+import { eq, and, gt, desc } from 'drizzle-orm'
+import { trainers } from '../db/schema/trainers'
 import type { TrainerRole } from '@trainer-app/shared'
 
 // ============================================================
@@ -250,6 +252,102 @@ export async function revokeRefreshToken(tokenId: string): Promise<void> {
     .update(refreshTokens)
     .set({ revokedAt: new Date() })
     .where(eq(refreshTokens.id, tokenId))
+}
+
+// ============================================================
+// EMAIL VERIFICATION (Phase 10.5)
+// SHA-256 is used here instead of argon2: verification tokens are
+// single-use, short-lived, and high-entropy (48 random bytes). The
+// deterministic SHA-256 hash lets us query by hash directly.
+// ============================================================
+
+const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000  // 24 hours
+const RESEND_COOLDOWN_MS        = 60 * 1000             // 60 seconds
+
+function sha256(value: string): string {
+  return crypto.createHash('sha256').update(value).digest('hex')
+}
+
+export function generateVerificationToken(): { raw: string; hash: string } {
+  const raw  = crypto.randomBytes(48).toString('hex')
+  const hash = sha256(raw)
+  return { raw, hash }
+}
+
+export async function storeVerificationToken(trainerId: string, tokenHash: string): Promise<void> {
+  const expiresAt = new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS)
+  await db.insert(emailVerificationTokens).values({ trainerId, tokenHash, expiresAt })
+}
+
+export async function sendVerificationEmail(
+  email: string,
+  name:  string,
+  rawToken: string,
+): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) throw new Error('RESEND_API_KEY is not set')
+
+  const fromEmail = process.env.REPORT_FROM_EMAIL ?? 'reports@trainerapp.io'
+  const appUrl    = process.env.APP_URL            ?? 'https://trainerapp.io'
+  const link      = `${appUrl}/verify-email?token=${rawToken}`
+  const resend    = new Resend(apiKey)
+
+  const { error } = await resend.emails.send({
+    from:    fromEmail,
+    to:      email,
+    subject: 'Verify your TrainerApp email',
+    html: [
+      `<p>Hi ${name},</p>`,
+      `<p>Click the link below to verify your email address. The link expires in 24 hours.</p>`,
+      `<p><a href="${link}">${link}</a></p>`,
+      `<p>If you didn't create a TrainerApp account, you can safely ignore this email.</p>`,
+    ].join(''),
+  })
+
+  if (error) throw new Error(error.message ?? 'Failed to send verification email')
+}
+
+export type VerifyTokenResult = 'ok' | 'expired' | 'used' | 'not_found'
+
+export async function verifyEmailToken(rawToken: string): Promise<VerifyTokenResult> {
+  const tokenHash = sha256(rawToken)
+  const now       = new Date()
+
+  const record = await db.query.emailVerificationTokens.findFirst({
+    where: eq(emailVerificationTokens.tokenHash, tokenHash),
+  })
+
+  if (!record)        return 'not_found'
+  if (record.usedAt)  return 'used'
+  if (record.expiresAt <= now) return 'expired'
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(emailVerificationTokens)
+      .set({ usedAt: now })
+      .where(eq(emailVerificationTokens.id, record.id))
+
+    await tx
+      .update(trainers)
+      .set({ emailVerified: true, updatedAt: now })
+      .where(eq(trainers.id, record.trainerId))
+  })
+
+  return 'ok'
+}
+
+/**
+ * Check whether a resend is allowed for a trainer.
+ * Returns true if no token exists or the most recent one was created > 60s ago.
+ */
+export async function canResendVerification(trainerId: string): Promise<boolean> {
+  const latest = await db.query.emailVerificationTokens.findFirst({
+    where:   eq(emailVerificationTokens.trainerId, trainerId),
+    orderBy: [desc(emailVerificationTokens.createdAt)],
+  })
+
+  if (!latest) return true
+  return Date.now() - latest.createdAt.getTime() > RESEND_COOLDOWN_MS
 }
 
 // ============================================================

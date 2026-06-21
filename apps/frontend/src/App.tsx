@@ -39,6 +39,7 @@ import { Spinner }                         from '@/components/ui/Spinner'
 // AuthProvider and Layout are kept eager since they render on every route.
 const LoginPage           = lazy(() => import('@/pages/LoginPage'))
 const OnboardingPage      = lazy(() => import('@/pages/OnboardingPage'))
+const VerifyEmailPage     = lazy(() => import('@/pages/VerifyEmailPage'))
 const DashboardPage       = lazy(() => import('@/pages/DashboardPage'))
 const ClientsPage         = lazy(() => import('@/pages/ClientsPage'))
 const ClientProfilePage   = lazy(() => import('@/pages/ClientProfilePage'))
@@ -100,7 +101,8 @@ export default function App(): React.JSX.Element {
       <Suspense fallback={<PageFallback />}>
       <Routes>
         {/* Public */}
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login"        element={<LoginPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* Onboarding — protected but pre-layout */}
         <Route

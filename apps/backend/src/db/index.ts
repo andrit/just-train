@@ -69,4 +69,7 @@ export const {
 
   // v2.12.0: coach challenges
   challenges,
+
+  // Phase 10.5: email verification
+  emailVerificationTokens,
 } = schema

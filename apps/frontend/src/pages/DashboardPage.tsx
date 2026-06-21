@@ -13,7 +13,7 @@
 // stack below the fold, gated by trainerMode.
 // ------------------------------------------------------------
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate }                  from 'react-router-dom'
 import { usePreferences }               from '@/hooks/usePreferences'
 import { useClients, useSelfClient, useClientGoals } from '@/lib/queries/clients'
@@ -29,6 +29,93 @@ import { useUXEvent }                   from '@/hooks/useUXEvent'
 import { useNav }                       from '@/services/navService'
 import type { WidgetId }               from '@/lib/widgets'
 import type { ClientGoalResponse }     from '@trainer-app/shared'
+
+// ── Email verification banner ─────────────────────────────────────────────────
+
+function EmailVerificationBanner(): React.JSX.Element | null {
+  const trainer                   = useAuthStore((s) => s.trainer)
+  const [dismissed, setDismissed] = useState(false)
+  const [sent, setSent]           = useState(false)
+  const [cooldown, setCooldown]   = useState(0)
+  const [sending, setSending]     = useState(false)
+
+  const startCooldown = useCallback(() => {
+    setCooldown(60)
+    const interval = setInterval(() => {
+      setCooldown((c) => {
+        if (c <= 1) { clearInterval(interval); return 0 }
+        return c - 1
+      })
+    }, 1000)
+  }, [])
+
+  async function handleSend() {
+    if (sending || cooldown > 0) return
+    setSending(true)
+    try {
+      const BASE_URL = import.meta.env.VITE_API_URL ?? '/api/v1'
+      const { accessToken } = useAuthStore.getState()
+      const res = await fetch(`${BASE_URL}/auth/send-verification`, {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${accessToken ?? ''}` },
+        credentials: 'include',
+      })
+      if (res.ok) {
+        setSent(true)
+        startCooldown()
+      }
+    } finally {
+      setSending(false)
+    }
+  }
+
+  if (!trainer || trainer.emailVerified || dismissed) return null
+
+  return (
+    <div className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 flex items-start gap-3 animate-slide-up">
+      <svg className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      </svg>
+      <div className="flex-1 min-w-0">
+        <p className="text-amber-300 text-xs font-medium">
+          {sent ? 'Verification email sent — check your inbox.' : 'Please verify your email address.'}
+        </p>
+        {!sent && (
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={sending || cooldown > 0}
+            className="mt-1 text-xs text-amber-400 underline underline-offset-2 hover:text-amber-300 disabled:opacity-50 disabled:no-underline"
+          >
+            {sending ? 'Sending…' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Send verification email'}
+          </button>
+        )}
+        {sent && cooldown > 0 && (
+          <p className="mt-1 text-xs text-amber-600">Resend available in {cooldown}s</p>
+        )}
+        {sent && cooldown === 0 && (
+          <button
+            type="button"
+            onClick={handleSend}
+            className="mt-1 text-xs text-amber-400 underline underline-offset-2 hover:text-amber-300"
+          >
+            Resend
+          </button>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => setDismissed(true)}
+        className="text-gray-600 hover:text-gray-400 shrink-0"
+        aria-label="Dismiss"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  )
+}
 
 // ── Action card sub-components ────────────────────────────────────────────────
 
@@ -212,6 +299,8 @@ export default function DashboardPage(): React.JSX.Element {
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
+
+      <EmailVerificationBanner />
 
       {/* Greeting */}
       <div className="mb-5 animate-slide-up">

@@ -851,6 +851,27 @@ journal stays in sync: `cd apps/backend && npx drizzle-kit generate`.
 
 ---
 
+### 002 — Create `email_verification_tokens` table (Phase 10.5)
+
+Apply this on production after deploying the Phase 10.5 backend. Drizzle migration
+file should be generated with `npx drizzle-kit generate` before deploying.
+
+```sql
+CREATE TABLE email_verification_tokens (
+  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  trainer_id  uuid        NOT NULL REFERENCES trainers(id) ON DELETE CASCADE,
+  token_hash  text        NOT NULL,
+  expires_at  timestamp   NOT NULL,
+  used_at     timestamp,
+  created_at  timestamp   NOT NULL DEFAULT now()
+);
+
+CREATE INDEX ON email_verification_tokens (trainer_id);
+CREATE INDEX ON email_verification_tokens (token_hash);
+```
+
+---
+
 ### 001 — Add `type` column to `templates` (2026-06-20)
 
 The `template_type` enum and `type` column were added to the Drizzle schema but not

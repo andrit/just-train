@@ -44,6 +44,7 @@ TrainerApp is a mobile-first PWA for fitness trainers and athletes. Progress nar
 2. Vercel root directory is `apps/frontend` — `vercel.json` must exist there.
 3. After any shared package change: `cd packages/shared && pnpm build` then verify both apps typecheck.
 4. After a fresh `pnpm install`, run `pnpm --filter @trainer-app/shared build` before starting dev — the `prepare` hook was removed to fix Railway builds (Railway's auto-install runs with NODE_ENV=production, skipping devDeps and breaking `tsc`). The `railway.json` buildCommand handles this explicitly in CI.
+5. **After any schema change, run `npx drizzle-kit generate` before deploying.** Skipping this creates a drift between the Drizzle snapshot and the production DB — the `templates.type` column incident caused all templates to fail loading on every device. The migration file must be committed alongside the schema change.
 
 ## Terminology — use these exactly, never synonyms
 
@@ -70,6 +71,22 @@ TrainerApp is a mobile-first PWA for fitness trainers and athletes. Progress nar
 - Backend logging: always `routeLog(app)`, never `app.log` directly.
 - Drizzle: always guard `.returning()` results, never use `!`.
 
+## Working process
+
+**Think before coding.** State assumptions out loud before starting. If the request is ambiguous, ask. If a simpler approach exists, push back. Stop when confused — name what is unclear, do not pick one interpretation and run.
+
+**Simplicity first.** Write the minimum code that solves the problem. No speculative abstractions. No flexibility nobody asked for. The test: would a senior engineer call this overcomplicated?
+
+**Surgical changes.** Touch only what the task requires. Do not improve neighboring code. Do not refactor what is not broken. Every changed line should trace back to the request.
+
+**Goal-driven execution.** Turn vague instructions into verifiable targets before writing a line. "Add validation" becomes "write tests for invalid inputs, then make them pass."
+
+**Deliberate shortcuts get a `ponytail:` comment.** When you consciously take a simpler path that has a known ceiling, mark it so it doesn't become invisible debt:
+```typescript
+// ponytail: linear scan fine at this scale. ceiling: >500 clients. upgrade: add index when real.
+```
+These are intentional choices, not bugs. They surface at phase boundaries via `/phase-audit`.
+
 ## Fix quality — always fix the root cause, not the symptom
 
 When something is broken — a failing test, a type error, a runtime bug — find out *why* before touching code.
@@ -89,6 +106,12 @@ When something is broken — a failing test, a type error, a runtime bug — fin
 - Run tests in an environment that matches production as closely as possible (e.g. `vite preview` not `vite dev` for SW tests that depend on the precache manifest)
 
 If you're not sure why something is failing, say so rather than speculating with a patch.
+
+## Key design decisions
+
+- **`role` vs `trainerMode`**: `role` is auth/permissions (`trainer` | `admin`). `trainerMode` is product UX (`trainer` | `athlete`). Every trainer row has `role = 'trainer'`; their *mode* determines whether they see the client roster or just their own training. These are different fields for different purposes.
+- **Email verification tokens use SHA-256, not argon2.** Verification tokens are single-use, 24h TTL, and 48 bytes of entropy. SHA-256 is deterministic — we can query the DB by hash directly. argon2 has random salts and is designed for passwords that get guessed repeatedly; it's wrong here and slow. Never change this without understanding the threat model.
+- **Never commit credentials to this repo**, even though it is private.
 
 ## Adding a column — 4-file checklist (same commit)
 
@@ -119,7 +142,9 @@ Some commands must be run from a specific directory. Always include the director
 
 | Command | Directory | Notes |
 |---|---|---|
-| `pnpm db:push` | `apps/backend/` | Applies schema changes to the local DB |
+| `pnpm db:push` | `apps/backend/` | Applies schema changes to the **local** DB only — never use against production |
+| `npx drizzle-kit generate` | `apps/backend/` | Generate migration file after schema change — run before every deploy |
+| `DATABASE_URL="..." npx drizzle-kit migrate` | `apps/backend/` | Apply pending migrations to production — get password from Railway Variables, never save it to a file |
 | `pnpm db:seed` | `apps/backend/` | Seeds exercises and default templates |
 | `pnpm --filter @trainer-app/shared build` | `/workspace` (root) | Compiles shared package to CJS |
 | `pnpm typecheck` | `/workspace` (root) | Typechecks all packages |

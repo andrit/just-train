@@ -41,6 +41,11 @@ import {
   revokeRefreshToken,
   refreshTokenCookieOptions,
   REFRESH_TOKEN_COOKIE,
+  generateVerificationToken,
+  storeVerificationToken,
+  sendVerificationEmail,
+  verifyEmailToken,
+  canResendVerification,
 } from '../services/auth.service'
 import { authenticate } from '../middleware/authenticate'
 import { seedExerciseLibrary } from '../db/seed-exercises'
@@ -208,6 +213,17 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       seedExerciseLibrary(trainer.id).catch((err) => {
         ;routeLog(app).warn({ err }, 'Exercise library seed failed for new trainer')
       })
+
+      // Send verification email — fire and forget, don't block registration.
+      ;(async () => {
+        try {
+          const { raw, hash } = generateVerificationToken()
+          await storeVerificationToken(trainer.id, hash)
+          await sendVerificationEmail(trainer.email, trainer.name, raw)
+        } catch (err) {
+          routeLog(app).warn({ err }, 'Verification email failed to send on registration')
+        }
+      })()
 
       // Issue tokens immediately
       const accessToken = generateAccessToken(trainer.id, trainer.role)
@@ -569,6 +585,94 @@ Called once from the onboarding screen after registration. Can be called again t
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to update profile' })
+    }
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // POST /auth/send-verification — Generate and send a verification email
+  //
+  // Protected. Generates a fresh token, stores its SHA-256 hash, and emails
+  // the raw token as a link. Caller must be authenticated (access token).
+  // Called once automatically after registration; also available for
+  // manual re-trigger from the unverified banner.
+  // ──────────────────────────────────────────────────────────────────────────
+  app.post('/auth/send-verification', {
+    preHandler: [authenticate],
+    config:     { rateLimit: { max: 5, timeWindow: '1 hour' } },
+    schema: {
+      tags:     ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Send or resend verification email',
+      response: {
+        200: MessageResponseSchema,
+        400: ErrorResponseSchema.describe('Too soon — resend cooldown (60s) not elapsed'),
+        409: ErrorResponseSchema.describe('Email already verified'),
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const trainerId = request.trainer.trainerId
+
+    try {
+      const trainer = await db.query.trainers.findFirst({ where: eq(trainers.id, trainerId) })
+      if (!trainer) return reply.status(404).send({ error: 'Trainer not found' })
+
+      if (trainer.emailVerified) {
+        return reply.status(409).send({ error: 'Email is already verified' })
+      }
+
+      const allowed = await canResendVerification(trainerId)
+      if (!allowed) {
+        return reply.status(400).send({ error: 'Please wait 60 seconds before requesting another verification email' })
+      }
+
+      const { raw, hash } = generateVerificationToken()
+      await storeVerificationToken(trainerId, hash)
+      await sendVerificationEmail(trainer.email, trainer.name, raw)
+
+      return reply.send({ message: 'Verification email sent' })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to send verification email' })
+    }
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // GET /auth/verify-email?token=<raw> — Verify email token from link
+  //
+  // Public (no auth required). Called by the frontend /verify-email page
+  // after the user clicks the link in the verification email.
+  // ──────────────────────────────────────────────────────────────────────────
+  app.get('/auth/verify-email', {
+    schema: {
+      tags:    ['Auth'],
+      summary: 'Verify email token',
+      querystring: z.object({ token: z.string().min(1) }),
+      response: {
+        200: MessageResponseSchema,
+        400: ErrorResponseSchema.describe('Token expired, already used, or not found'),
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { token } = request.query as { token: string }
+
+    try {
+      const result = await verifyEmailToken(token)
+
+      if (result === 'ok') {
+        return reply.send({ message: 'Email verified successfully' })
+      }
+
+      const messages: Record<string, string> = {
+        expired:   'This verification link has expired. Please request a new one.',
+        used:      'This verification link has already been used.',
+        not_found: 'Invalid verification link.',
+      }
+      return reply.status(400).send({ error: messages[result] ?? 'Verification failed' })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Verification failed' })
     }
   })
 

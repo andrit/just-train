@@ -467,6 +467,23 @@ These three items were scoped during the v2.14.0 → v3.0.0 planning window. Sch
 
 ---
 
+## Push Notification Permission UX — Phase 12 deferral
+
+**When:** Build alongside the push notification feature itself (Phase 6 of the PWA SDLC, deferred post-SaaS launch).
+
+**What:** Phase 12 (Support Automation) listed a push permission explanation as a deliverable — what the app will send, how to re-enable if denied. This cannot be built meaningfully until the push feature exists: there is nothing to explain until VAPID, the push endpoint, and the at-risk / report-delivery trigger are implemented.
+
+**What to build when the time comes:**
+- A one-time explanation card before the permission prompt fires: "We'll notify you when a client is at risk and when a report is delivered. You can turn this off in Settings."
+- A recovery path in Settings if the user previously denied: link to browser permission instructions (each browser has a different path to re-enable).
+- iOS caveat: push only works in standalone mode (installed PWA) on iOS 16.4+. Surface this before asking for permission on iOS so the user knows why it may not work.
+
+**Why deferred:** Push is gated on SaaS launch (trainer needs to be on a paid tier before at-risk alerts make sense). Building the permission UX before the feature exists creates dead UI.
+
+**Files to touch:** New `PushPermissionCard.tsx`, wire into onboarding or settings, add a `pushPermissionSeen` flag to localStorage.
+
+---
+
 ## SW Update Strategy — `registerType: 'prompt'`
 
 **When:** Review after the final PWA SDLC phase (Phase 18 — Ongoing) is reached, or at v3.0 SaaS launch — whichever comes first.

@@ -1,3 +1,8 @@
+# Private — not for version control
+design/brand/
+docs/product-development/
+docs/user-tasks/
+
 # Dependencies
 node_modules/
 .pnpm-store/

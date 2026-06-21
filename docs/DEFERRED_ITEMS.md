@@ -467,6 +467,28 @@ These three items were scoped during the v2.14.0 → v3.0.0 planning window. Sch
 
 ---
 
+## Cookie Consent Banner & Analytics — Phase 15 deferral
+
+**When:** Revisit if analytics tooling is added, or before operating under GDPR in the EU.
+
+**Current state:** No analytics, no advertising, no third-party tracking. The only cookie in use is the httpOnly refresh token — a strictly necessary cookie for authentication, which is exempt from consent requirements under GDPR and PECR. No consent banner is legally required right now.
+
+**Should this app have analytics?**
+
+The honest case for them: knowing which features are used and which are abandoned is valuable when deciding what to build next. A/B testing onboarding flow variants, understanding where trainers drop off in the report flow, knowing which workout types are logged most — all of this is genuinely useful for a solo or small-team product.
+
+The honest case against: this product's positioning is private and bare-metal. A trainer logging client data expects that data to stay inside the product. Introducing even lightweight analytics (PostHog, Mixpanel, Amplitude) means a third party receives event data — session starts, feature interactions, possibly user IDs. This is not a showstopper, but it is a posture question. Adding analytics to a product whose privacy policy currently says "we do not share your data with third parties beyond the infrastructure processors listed" requires updating the policy, adding a consent banner (for EU users), and accepting that the product's trust story gets more complicated.
+
+**The recommendation:** Add analytics after the first paying cohort, not before. The early user base is small enough to gather feedback directly. When the product is at scale and direct feedback is harder to collect, analytics become worth the tradeoff. If analytics are added:
+- Use a privacy-first tool (PostHog self-hosted, or Plausible) — these are GDPR-compliant without per-user consent banners for aggregate metrics.
+- Avoid session replay tools (Hotjar, FullStory) — client training data appearing in session recordings would be a trust violation.
+- Update the Privacy Policy to name the new processor.
+- Add a cookie consent banner only if using cookies beyond the strictly necessary refresh token (most analytics tools use cookies or localStorage for user identification).
+
+**Files to touch when adding analytics:** `index.html` or `main.tsx` for the SDK init, `Privacy Policy` to add the processor, possibly a `CookieBanner.tsx` component wired into `App.tsx`.
+
+---
+
 ## Push Notification Permission UX — Phase 12 deferral
 
 **When:** Build alongside the push notification feature itself (Phase 6 of the PWA SDLC, deferred post-SaaS launch).

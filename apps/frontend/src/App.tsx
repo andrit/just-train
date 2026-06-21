@@ -40,6 +40,8 @@ import { Spinner }                         from '@/components/ui/Spinner'
 const LoginPage           = lazy(() => import('@/pages/LoginPage'))
 const OnboardingPage      = lazy(() => import('@/pages/OnboardingPage'))
 const VerifyEmailPage     = lazy(() => import('@/pages/VerifyEmailPage'))
+const PrivacyPage         = lazy(() => import('@/pages/PrivacyPage'))
+const TermsPage           = lazy(() => import('@/pages/TermsPage'))
 const DashboardPage       = lazy(() => import('@/pages/DashboardPage'))
 const ClientsPage         = lazy(() => import('@/pages/ClientsPage'))
 const ClientProfilePage   = lazy(() => import('@/pages/ClientProfilePage'))
@@ -103,6 +105,8 @@ export default function App(): React.JSX.Element {
         {/* Public */}
         <Route path="/login"        element={<LoginPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/privacy"      element={<PrivacyPage />} />
+        <Route path="/terms"        element={<TermsPage />} />
 
         {/* Onboarding — protected but pre-layout */}
         <Route

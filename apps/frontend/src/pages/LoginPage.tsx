@@ -10,7 +10,7 @@
 // ------------------------------------------------------------
 
 import { useState }          from 'react'
-import { useNavigate }       from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useQueryClient }    from '@tanstack/react-query'
 import { apiClient }         from '@/lib/api'
 import { useAuthStore }      from '@/store/authStore'
@@ -185,6 +185,15 @@ export default function LoginPage(): React.JSX.Element {
           >
             {mode === 'login' ? 'Sign in' : 'Create account'}
           </Button>
+
+          {mode === 'register' && (
+            <p className="text-xs text-gray-600 text-center mt-3">
+              By creating an account you agree to our{' '}
+              <Link to="/terms" className="text-gray-400 hover:text-gray-200 underline underline-offset-2">Terms of Service</Link>
+              {' '}and{' '}
+              <Link to="/privacy" className="text-gray-400 hover:text-gray-200 underline underline-offset-2">Privacy Policy</Link>.
+            </p>
+          )}
         </form>
       </div>
     </div>

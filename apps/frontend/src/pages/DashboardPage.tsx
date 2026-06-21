@@ -27,6 +27,7 @@ import { useAuthStore }                 from '@/store/authStore'
 import { useSessionStore }              from '@/store/sessionStore'
 import { useUXEvent }                   from '@/hooks/useUXEvent'
 import { useNav }                       from '@/services/navService'
+import { apiClient }                   from '@/lib/api'
 import type { WidgetId }               from '@/lib/widgets'
 import type { ClientGoalResponse }     from '@trainer-app/shared'
 
@@ -53,17 +54,11 @@ function EmailVerificationBanner(): React.JSX.Element | null {
     if (sending || cooldown > 0) return
     setSending(true)
     try {
-      const BASE_URL = import.meta.env.VITE_API_URL ?? '/api/v1'
-      const { accessToken } = useAuthStore.getState()
-      const res = await fetch(`${BASE_URL}/auth/send-verification`, {
-        method:  'POST',
-        headers: { Authorization: `Bearer ${accessToken ?? ''}` },
-        credentials: 'include',
-      })
-      if (res.ok) {
-        setSent(true)
-        startCooldown()
-      }
+      await apiClient('/auth/send-verification', { method: 'POST' })
+      setSent(true)
+      startCooldown()
+    } catch {
+      // silent — banner remains, user can retry
     } finally {
       setSending(false)
     }

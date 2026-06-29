@@ -136,7 +136,10 @@ export function useStartSession(): UseMutationResult<SessionSummaryResponse, Err
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id) =>
-      apiClient.patch<SessionSummaryResponse>(`/sessions/${id}`, { status: 'in_progress' }),
+      apiClient.patch<SessionSummaryResponse>(`/sessions/${id}`, {
+        status:    'in_progress',
+        startTime: new Date().toISOString(),
+      }),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(data.id) })
       qc.invalidateQueries({ queryKey: sessionKeys.all() })

@@ -1,3 +1,5 @@
+@/workbench/CLAUDE.md
+
 # TrainerApp — Claude Code Project Memory
 
 > Claude reads this file at the start of every session.

@@ -11,7 +11,7 @@
 //              In standalone page mode this is undefined.
 // ------------------------------------------------------------
 
-import { useState }                      from 'react'
+import { useState, useEffect }           from 'react'
 import { useNavigate }                   from 'react-router-dom'
 import { cn }                             from '@/lib/cn'
 import { interactions }                   from '@/lib/interactions'
@@ -21,6 +21,7 @@ import { useRestTimer }                   from '@/hooks/useRestTimer'
 import { useAuthStore }                   from '@/store/authStore'
 import { useSessionStore }                from '@/store/sessionStore'
 import { useOverlayStore }                from '@/store/overlayStore'
+import { ApiError }                       from '@/lib/api'
 import { useSession, useEndSession, useDiscardSession, useUpdateSession } from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
@@ -44,11 +45,31 @@ export default function LiveSessionContent({
   const { fire }          = useUXEvent()
   const restTimer         = useRestTimer()
 
-  const { data: session, isLoading, error } = useSession(sessionId)
+  const { data: session, isLoading, error, refetch } = useSession(sessionId)
   const endSession                           = useEndSession()
   const discardSession                       = useDiscardSession()
   const updateSession                        = useUpdateSession()
-  const { endSession: clearSessionStore }    = useSessionStore()
+  const { activeSessions, endSession: clearSessionStore } = useSessionStore()
+
+  // On mount: if the query is already in error state (e.g. network blip on a
+  // previous open), fire a fresh fetch so re-opening the session always retries.
+  useEffect(() => {
+    if (error) void refetch()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // If the session is 404 on the backend the store is stale — clean it up so the
+  // user isn't stuck in a broken overlay with a phantom timer.
+  useEffect(() => {
+    if (error instanceof ApiError && error.status === 404) {
+      const clientId = Object.keys(activeSessions).find(
+        cid => activeSessions[cid]?.sessionId === sessionId
+      )
+      if (clientId) clearSessionStore(clientId)
+      useOverlayStore.getState().hide()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error])
 
   const [showEndModal,     setShowEndModal]     = useState(false)
   const [showDiscardMenu,  setShowDiscardMenu]  = useState(false)
@@ -115,13 +136,25 @@ export default function LiveSessionContent({
   }
 
   if (error || !session) {
+    const isNetworkError = error && !(error instanceof ApiError)
     return (
       <div className="p-6 text-center">
-        <p className="text-gray-400">Session not found.</p>
+        <p className="text-gray-400">
+          {isNetworkError ? "Can't reach server — check your connection." : "Session not found."}
+        </p>
+        {isNetworkError && (
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="mt-4 text-sm text-command-blue hover:underline block mx-auto"
+          >
+            Try again
+          </button>
+        )}
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="mt-4 text-sm text-command-blue hover:underline"
+          className="mt-4 text-sm text-command-blue hover:underline block mx-auto"
         >
           Go home
         </button>

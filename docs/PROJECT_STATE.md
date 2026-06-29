@@ -673,8 +673,12 @@ This tracks progress through the workbench phases, which are separate from the a
 | 10 | QA Gate | 🔄 In progress — user running QA tests |
 | 10.5 | Email Verification | ✅ Complete — schema, service, routes (register fire-and-forget, send-verification, verify-email), VerifyEmailPage, dashboard banner via apiClient, DB migration 002 (2026-06-20) |
 | 11 | Support Audit | ✅ Complete — docs/support-playbook.md: browser/PWA compatibility matrix, auth/email/session/template/report/media/SW failure inventory, DB quick-reference, FAQ stubs (2026-06-21) |
-| 12 | Support Automation | 🔜 |
-| 13–17 | Launch phases | 🔜 |
+| 12 | Support Automation | 🔄 In progress — InstallPromptBanner iOS wiring confirmed, push UX deferred to DEFERRED_ITEMS.md; offline indicator smoke test pending (docs/user-tasks/phase-12-offline-smoke-test.md) |
+| 13 | Infrastructure | 🔜 Not started — checklist written; needs DevTools manifest/SW clean check + custom domain decision (docs/user-tasks/phase-13-infra-checklist.md) |
+| 14 | Staging & Smoke Test | 🔜 Not started — Athlete + Trainer golden path checklist written (docs/user-tasks/phase-14-smoke-test.md) |
+| 15 | Legal & Compliance | ✅ Complete — /privacy + /terms pages live, register consent links, analytics/cookie consent deferred with recommendation (2026-06-21) |
+| 16 | Monitoring Setup | 🔄 In progress — Sentry SDK wired (DSN-gated), Lighthouse CI added to ci.yml; Sentry DSN + uptime monitor pending human setup (docs/user-tasks/phase-16-monitoring-setup.md) |
+| 17 | Go Live | 🔜 Not started — first real install + post-launch Lighthouse ≥ 90 required to close |
 | 18 | Ongoing | 🔜 |
 
 Phase 2 deliverables (from `pwa/project.json`):

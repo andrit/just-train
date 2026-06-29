@@ -21,7 +21,7 @@ import { useRestTimer }                   from '@/hooks/useRestTimer'
 import { useAuthStore }                   from '@/store/authStore'
 import { useSessionStore }                from '@/store/sessionStore'
 import { useOverlayStore }                from '@/store/overlayStore'
-import { ApiError }                       from '@/lib/api'
+import { apiClient, ApiError }            from '@/lib/api'
 import { useSession, useEndSession, useDiscardSession, useUpdateSession } from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
@@ -137,8 +137,19 @@ export default function LiveSessionContent({
 
   if (error || !session) {
     const isNetworkError = error && !(error instanceof ApiError)
+
+    const handleForceClose = (): void => {
+      // Best-effort delete on the backend — ignore failures (may be offline or already gone).
+      apiClient.delete(`/sessions/${sessionId}`).catch(() => {})
+      const clientId = Object.keys(activeSessions).find(
+        cid => activeSessions[cid]?.sessionId === sessionId
+      )
+      if (clientId) clearSessionStore(clientId)
+      useOverlayStore.getState().hide()
+    }
+
     return (
-      <div className="p-6 text-center">
+      <div className="p-6 text-center space-y-3">
         <p className="text-gray-400">
           {isNetworkError ? "Can't reach server — check your connection." : "Session not found."}
         </p>
@@ -146,17 +157,17 @@ export default function LiveSessionContent({
           <button
             type="button"
             onClick={() => void refetch()}
-            className="mt-4 text-sm text-command-blue hover:underline block mx-auto"
+            className="text-sm text-command-blue hover:underline block mx-auto"
           >
             Try again
           </button>
         )}
         <button
           type="button"
-          onClick={() => navigate('/')}
-          className="mt-4 text-sm text-command-blue hover:underline block mx-auto"
+          onClick={handleForceClose}
+          className="text-sm text-red-400 hover:underline block mx-auto"
         >
-          Go home
+          Close session
         </button>
       </div>
     )

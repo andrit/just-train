@@ -7,6 +7,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useQueryClient }        from '@tanstack/react-query'
 import { cn }              from '@/lib/cn'
 import { useOverlayStore } from '@/store/overlayStore'
+import { useSessionStore } from '@/store/sessionStore'
 import { useAuthStore }    from '@/store/authStore'
 import { useSyncStatus }   from '@/hooks/useSyncStatus'
 import { usePreferences }  from '@/hooks/usePreferences'
@@ -244,6 +245,8 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
     } finally {
       qc.clear()
       clearAuth()
+      useSessionStore.getState().clearAll()
+      useOverlayStore.getState().hide()
       navigate('/login', { replace: true })
     }
   }

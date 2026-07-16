@@ -5,6 +5,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [v2.14.1] — Offline Write Idempotency
+
+### Fixed
+- **Double-insert on offline write replay** (data-integrity). The offline queue replays POST/PATCH mutations on reconnect; a write the server had processed but whose HTTP response was lost was treated as failed and replayed, inserting a duplicate (e.g. a set logged twice). Writes now carry an `Idempotency-Key` (a per-operation UUID generated before the first attempt and reused on every replay), and the server deduplicates on it — returning the stored response instead of re-running the mutation.
+
+### Added
+- `apps/backend/src/db/schema/idempotency.ts` — `idempotency_keys` table (key PK, trainer, method, path, captured response status/body). Apply with `db:push`.
+- `apps/backend/src/lib/idempotency.ts` — preHandler (atomic claim-or-replay) + onSend (response capture) hooks, registered on the session routes after `authenticate`.
+
+### Changed
+- `lib/offlineAwareApi.ts` — generates the key once per logical op; sends it on the online attempt and stores it on the queued op.
+- `services/offlineQueue.ts` — `QueuedOperation.idempotencyKey`; `services/syncService.ts` — sends the key header on flush (tolerates legacy keyless ops).
+- `design/offline-contract.md` — documents the idempotent-replay semantics (binding contract).
+
+---
+
 ## [v2.14.0] — Color System
 
 ### Defined

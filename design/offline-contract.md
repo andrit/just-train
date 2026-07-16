@@ -46,6 +46,8 @@ These four mutation paths use `offlineAwareApi` and queue to IndexedDB `offlineQ
 
 **Flush order on reconnect:** workouts → sessionExercises → sets (parent before child, always).
 
+**Idempotent replay:** each queued op carries an `Idempotency-Key` (a UUID generated when the op is first attempted and reused on every replay), sent as the `Idempotency-Key` header on both the initial online attempt and the queued replay. The server records the key with the response it produced; a replay of a write the server already processed — but whose response was lost — returns the **stored response** instead of inserting a duplicate. This is what makes replay safe: without it, a set logged offline whose 201 never reached the client would be inserted twice on the next flush. Because the stored response is replayed verbatim, downstream child ops still resolve the server-generated parent id. Backend: `lib/idempotency.ts` + `idempotency_keys` table. Old ops queued before this existed carry no key → the server treats them as before (no dedup).
+
 **Sync log:** every successfully replayed item writes a `sync_log` entry server-side with `createdLocallyAt` (from `X-Local-Timestamp` header if present) and `syncedAt` (server time).
 
 **PR detection:** does not run for offline-logged sets. `isPR` is always `false` for queued sets until a post-sync recompute pass runs. This is a known gap — `POST /session-exercises/:id/recompute-prs` is in the backlog.

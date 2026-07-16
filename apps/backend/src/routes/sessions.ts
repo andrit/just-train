@@ -20,6 +20,7 @@ import { routeLog } from '../lib/logger'
 
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
+import { idempotencyPreHandler, idempotencyOnSend } from '../lib/idempotency'
 import { db, sessions, sessionExercises, sets, clients, exercises, templateExercises } from '../db'
 import { eq, and, desc } from 'drizzle-orm'
 import { updateChallengesForSet, updateChallengesForSessionComplete } from '../services/challenge.service'
@@ -93,6 +94,12 @@ function serializeSession(s: any): any {
 
 export async function sessionRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', authenticate)
+
+  // Idempotent replay of offline-queued writes. Registered AFTER authenticate so
+  // request.trainer is available. No-op unless an Idempotency-Key header is present,
+  // so GETs and non-offline clients are unaffected. See lib/idempotency.ts.
+  app.addHook('preHandler', idempotencyPreHandler)
+  app.addHook('onSend',     idempotencyOnSend)
 
   // ----------------------------------------------------------
   // GET /sessions — List sessions with optional filters

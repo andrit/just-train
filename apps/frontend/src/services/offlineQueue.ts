@@ -44,6 +44,12 @@ export interface QueuedOperation {
   enqueuedAt:  number   // Date.now()
   retries:     number   // incremented on failed flush attempts
   description: string   // human-readable, for debug/UI e.g. "Log set — Squat"
+  // Server-facing dedup key (crypto.randomUUID), generated when the logical
+  // operation is FIRST attempted and reused on every replay. Sent as the
+  // Idempotency-Key header so a write whose response was lost is not inserted
+  // twice on replay. Optional: ops queued before this field existed lack it —
+  // the flush then sends no header (old behavior, no crash). See lib/idempotency.ts (backend).
+  idempotencyKey?: string
 }
 
 // ── Interface — implement this to swap storage backends ──────────────────────

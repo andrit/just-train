@@ -72,4 +72,7 @@ export const {
 
   // Phase 10.5: email verification
   emailVerificationTokens,
+
+  // Offline write-replay dedup keys
+  idempotencyKeys,
 } = schema

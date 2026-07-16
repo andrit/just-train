@@ -33,12 +33,20 @@ async function mutate<T>(
   body:        unknown | undefined,
   description: string,
 ): Promise<T> {
-  // If online, attempt the request normally
+  // One idempotency key per LOGICAL operation, generated before the first
+  // attempt. The same key rides the online attempt AND any later queued replay,
+  // so a write the server processed but whose response was lost (the online
+  // attempt below throwing after the server committed) is deduped when replayed.
+  const idempotencyKey = crypto.randomUUID()
+
+  // If online, attempt the request normally — carrying the key.
   if (navigator.onLine) {
     try {
-      if (method === 'POST')   return await apiClient.post<T>(path, body)
-      if (method === 'PATCH')  return await apiClient.patch<T>(path, body)
-      if (method === 'DELETE') return await apiClient.delete<T>(path)
+      return await apiClient<T>(path, {
+        method,
+        headers: { 'Idempotency-Key': idempotencyKey },
+        ...(method !== 'DELETE' ? { body: JSON.stringify(body) } : {}),
+      })
     } catch (err: unknown) {
       // Network error despite being "online" — queue it
       const isNetworkError = err instanceof TypeError && err.message.includes('fetch')
@@ -47,8 +55,8 @@ async function mutate<T>(
     }
   }
 
-  // Offline (or network error) — queue the write
-  offlineQueue.enqueue({ method, path, body, description })
+  // Offline (or network error) — queue the write with the SAME key.
+  offlineQueue.enqueue({ method, path, body, description, idempotencyKey })
 
   // Return a stub so callers don't break.
   // TanStack Query mutations use onSuccess to update the cache —

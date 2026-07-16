@@ -66,6 +66,10 @@ async function flushQueue(): Promise<void> {
       await apiClient(op.path, {
         method: op.method,
         ...(op.body ? { body: JSON.stringify(op.body) } : {}),
+        // Reuse the op's idempotency key so a replay the server already applied
+        // (response lost) is deduped, not double-inserted. Ops queued before this
+        // field existed have no key → no header → old behavior, no crash.
+        ...(op.idempotencyKey ? { headers: { 'Idempotency-Key': op.idempotencyKey } } : {}),
       })
       offlineQueue.remove(op.id)
 

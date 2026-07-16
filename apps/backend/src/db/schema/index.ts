@@ -25,3 +25,4 @@ export * from './session-exercise-media' // v2.12.0: form check clips
 export * from './challenges' // v2.12.0: coach challenges
 export * from './auth'                  // Phase 2: refresh tokens
 export * from './email-verification'   // Phase 10.5: email verification
+export * from './idempotency'          // Offline write-replay dedup keys

@@ -71,15 +71,29 @@ UPSTASH_REDIS_URL     = rediss://...
 
 ### 1d. Run the database migration
 
-After the first deploy succeeds, open the Railway shell for the backend service and run:
-```bash
-pnpm --filter backend db:push
-```
+> ⚠️ **Never run `db:push` against production.** `drizzle-kit push` applies *additive*
+> changes (new tables/columns) but **silently skips destructive ones** (dropped/renamed
+> columns, dropped tables) to avoid data loss. Relying on it for prod is what caused the
+> 2026-07 template/session drift: the code was refactored nested→flat, the ADD columns
+> landed on prod but the DROP of `workout_id`/`workouts` (and `template_workout_id`/
+> `template_workouts`) never did, so prod ran an old nested schema against flat code and
+> `GET /sessions/:id` 500'd. Use generated migrations for prod — they apply drops.
 
-Or use the Railway CLI:
-```bash
-railway run pnpm --filter backend db:push
-```
+**Discipline (every schema change):**
+
+1. After changing anything in `apps/backend/src/db/schema/`, generate a migration and commit it alongside the schema change:
+   ```bash
+   cd apps/backend && npx drizzle-kit generate
+   ```
+2. Apply pending migrations to production (get the URL from Railway → Postgres → Variables → `DATABASE_PUBLIC_URL`; never save it to a file):
+   ```bash
+   cd apps/backend && DATABASE_URL="<prod-url>" npx drizzle-kit migrate
+   ```
+
+`db:push` is for the **local** dev DB only (fast iteration, no migration files). It must
+never touch production. If prod and code ever diverge, diff prod's live columns against
+the schema (`docs/utilities/dump-db-schema-csv.sh` in the workbench) before writing a
+reconciliation migration — the code in `db/schema/*` is the authority, not `push`.
 
 ### 1e. Note your Railway URL
 

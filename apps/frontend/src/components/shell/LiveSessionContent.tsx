@@ -136,7 +136,23 @@ export default function LiveSessionContent({
   }
 
   if (error || !session) {
-    const isNetworkError = error && !(error instanceof ApiError)
+    // Distinguish the failure so the message is truthful and the actions fit:
+    //   network error → transient, retry
+    //   500+          → server error (e.g. a schema/query fault), transient-ish, retry
+    //   404           → the session is genuinely gone, retry is pointless
+    // Previously every error rendered "Session not found", which masked 500s
+    // (e.g. a DB drift) and made real backend faults undiagnosable from the UI.
+    const apiStatus      = error instanceof ApiError ? error.status : null
+    const isNetworkError = !!error && !(error instanceof ApiError)
+    const isServerError  = apiStatus !== null && apiStatus >= 500
+    const isNotFound     = apiStatus === 404
+    const canRetry       = isNetworkError || isServerError
+
+    const message =
+      isNetworkError ? "Can't reach server — check your connection."
+      : isServerError ? `Something went wrong loading this session (server error ${apiStatus}). This is usually temporary — try again.`
+      : isNotFound    ? 'Session not found.'
+      :                 'Could not load this session.'
 
     const handleForceClose = (): void => {
       // Best-effort delete on the backend — ignore failures (may be offline or already gone).
@@ -150,10 +166,8 @@ export default function LiveSessionContent({
 
     return (
       <div className="p-6 text-center space-y-3">
-        <p className="text-gray-400">
-          {isNetworkError ? "Can't reach server — check your connection." : "Session not found."}
-        </p>
-        {isNetworkError && (
+        <p className="text-gray-400">{message}</p>
+        {canRetry && (
           <button
             type="button"
             onClick={() => void refetch()}

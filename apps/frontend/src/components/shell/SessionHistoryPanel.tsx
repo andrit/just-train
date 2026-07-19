@@ -11,6 +11,7 @@ import { useState }             from 'react'
 import { cn }                  from '@/lib/cn'
 import { interactions }        from '@/lib/interactions'
 import { useSession }          from '@/lib/queries/sessions'
+import { ApiError }            from '@/lib/api'
 import { useSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { formatDate, formatDuration, formatTotalVolume } from '@/lib/formatters'
 import { Spinner }             from '@/components/ui/Spinner'
@@ -34,7 +35,7 @@ interface SessionHistoryPanelProps {
 }
 
 export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelProps): React.JSX.Element {
-  const { data: session, isLoading } = useSession(sessionId)
+  const { data: session, isLoading, error, refetch } = useSession(sessionId)
   const [prFilterOn, setPrFilterOn]  = useState(false)
   const [mediaViewer, setMediaViewer] = useState<{ sessionExerciseId: string; startIdx: number } | null>(null)
 
@@ -46,11 +47,33 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
     )
   }
 
-  if (!session) {
+  if (error || !session) {
+    // Distinguish the failure so a 500 (e.g. a backend fault) isn't mislabelled
+    // as "Session not found" — only a real 404 means the session is gone.
+    const apiStatus      = error instanceof ApiError ? error.status : null
+    const isNetworkError = !!error && !(error instanceof ApiError)
+    const isServerError  = apiStatus !== null && apiStatus >= 500
+    const canRetry       = isNetworkError || isServerError
+
+    const message =
+      isNetworkError    ? "Can't reach server — check your connection."
+      : isServerError   ? `Something went wrong loading this session (server error ${apiStatus}). This is usually temporary — try again.`
+      : apiStatus === 404 ? 'Session not found.'
+      :                   'Could not load this session.'
+
     return (
-      <div className="p-6 text-center pt-20">
-        <p className="text-gray-400">Session not found.</p>
-        <button type="button" onClick={onClose} className="mt-4 text-sm text-command-blue hover:underline">
+      <div className="p-6 text-center pt-20 space-y-3">
+        <p className="text-gray-400">{message}</p>
+        {canRetry && (
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="text-sm text-command-blue hover:underline block mx-auto"
+          >
+            Try again
+          </button>
+        )}
+        <button type="button" onClick={onClose} className="text-sm text-command-blue hover:underline block mx-auto">
           Go back
         </button>
       </div>

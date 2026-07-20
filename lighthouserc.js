@@ -17,9 +17,13 @@ module.exports = {
         'categories:performance':     ['warn',  { minScore: 0.9 }],
         'categories:accessibility':   ['error', { minScore: 0.9 }],
         'categories:best-practices':  ['warn',  { minScore: 0.9 }],
-        'categories:pwa':             ['warn',  { minScore: 0.9 }],
-        // Hard-block on manifest being present — catches SW config regressions
-        'installable-manifest':       ['error', { minScore: 1 }],
+        'categories:seo':             ['warn',  { minScore: 0.9 }],
+        // NOTE: the PWA category and its audits (categories:pwa,
+        // installable-manifest, service-worker, etc.) were REMOVED in
+        // Lighthouse 12 (bundled by @lhci/cli@0.14.x). Asserting on them errors
+        // with "not a known audit". PWA/installability is no longer covered by
+        // Lighthouse — if we want to guard the manifest/SW again, do it with a
+        // dedicated check (e.g. a manifest-field validation script), not LHCI.
       },
     },
     upload: {

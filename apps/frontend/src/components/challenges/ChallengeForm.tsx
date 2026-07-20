@@ -61,9 +61,9 @@ export function ChallengeForm({
   const uid           = useId()
   const exerciseErrId = `${uid}-exercise-error`
   const deadlineErrId = `${uid}-deadline-error`
-  const targetErrId   = `${uid}-target-error`
+  const _targetErrId  = `${uid}-target-error`
 
-  const setFieldError = (field: string, msg: string): void =>
+  const _setFieldError = (field: string, msg: string): void =>
     setFieldErrors((prev) => ({ ...prev, [field]: msg }))
   const clearFieldError = (field: string): void =>
     setFieldErrors((prev) => { const next = { ...prev }; delete next[field]; return next })

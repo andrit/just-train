@@ -50,12 +50,6 @@ const SessionFilterSchema = z.object({
     .describe('Filter by session status'),
 })
 
-// Params for nested routes that have both sessionId and a child id
-const SessionChildParamSchema = z.object({
-  sessionId: z.string().uuid().describe('Parent session UUID'),
-  id: z.string().uuid().describe('Child resource UUID'),
-})
-
 // Serialize a session exercise row to match SessionExerciseResponseSchema
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeSessionExercise(se: any): any {

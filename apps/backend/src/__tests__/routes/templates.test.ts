@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
 import { buildTemplateTestApp } from '../helpers/buildApp'
 import {
-  makeTemplate, makeTemplateExercise,
+  makeTemplate,
   validTemplateBody,
   TEST_TRAINER_ID, TEST_TEMPLATE_ID, TEST_TEMPLATE_EXERCISE_ID, TEST_EXERCISE_ID,
 } from '../helpers/factories'

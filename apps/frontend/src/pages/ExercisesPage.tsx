@@ -114,7 +114,7 @@ export default function ExercisesPage(): React.JSX.Element {
 
         {/* Workout type tabs */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hidden px-4 md:px-6 pb-3">
-          {WORKOUT_TYPES.map(({ value, label, color }) => (
+          {WORKOUT_TYPES.map(({ value, label }) => (
             <button
               key={value}
               type="button"

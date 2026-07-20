@@ -7,7 +7,7 @@ import { buildSessionTestApp } from '../helpers/buildApp'
 import {
   makeClient, makeSession,
   validSessionBody,
-  TEST_TRAINER_ID, TEST_CLIENT_ID, TEST_SESSION_ID, TEST_UNKNOWN_ID,
+  TEST_TRAINER_ID, TEST_SESSION_ID, TEST_UNKNOWN_ID,
 } from '../helpers/factories'
 import { generateAccessToken } from '../../services/auth.service'
 

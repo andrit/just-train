@@ -9,6 +9,7 @@ node_modules/
 
 # Build outputs
 dist/
+dev-dist/
 build/
 
 # Environment files — never commit secrets
@@ -41,3 +42,5 @@ errors/
 # Local assets — not tracked in version control
 app-snapshots/
 images/
+# local DB dumps — never commit (contains PII)
+db-backups/

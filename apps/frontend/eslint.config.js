@@ -67,6 +67,7 @@ export default tseslint.config(
   {
     ignores: [
       'dist/**',
+      'dev-dist/**',   // vite-plugin-pwa dev output (generated SW + workbox) — never lint build artifacts
       'node_modules/**',
       '.storybook/**',
       'storybook-static/**',

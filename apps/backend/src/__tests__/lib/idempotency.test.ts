@@ -45,7 +45,6 @@ vi.mock('../../db', () => {
 
 import { idempotencyPreHandler, idempotencyOnSend } from '../../lib/idempotency'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function makeReq(over: Record<string, unknown> = {}): any {
   return {
     headers: {},
@@ -57,7 +56,6 @@ function makeReq(over: Record<string, unknown> = {}): any {
 }
 
 function makeReply() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reply: any = {
     statusCode: 200,
     sent:       false,

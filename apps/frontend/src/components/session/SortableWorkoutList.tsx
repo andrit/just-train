@@ -121,6 +121,7 @@ export function SortableWorkoutList({
 // Unused — kept for potential future per-exercise drag handles
 // If individual exercise drag handles are needed, wrap ExerciseRow in SortableExerciseItem
 function _SortableExerciseItem({ id, children }: { id: string; children: React.ReactNode }) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- deliberately-unused future stub (see comment above)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   return (
     <div

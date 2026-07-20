@@ -44,3 +44,6 @@ app-snapshots/
 images/
 # local DB dumps — never commit (contains PII)
 db-backups/
+
+# outbox to the workbench (Mode A) — local handoff, read via mount
+forModeA/

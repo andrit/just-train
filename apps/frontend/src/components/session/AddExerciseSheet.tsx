@@ -43,12 +43,16 @@ type IntensityLevel = typeof INTENSITY_OPTIONS[number]
 
 // ── Target config component ───────────────────────────────────────────────────
 
-type RepsMode = 'uniform' | 'per-set'
+type RepsMode = 'uniform' | 'ramp' | 'per-set'
+
+const REPS_MODE_LABEL: Record<RepsMode, string> = {
+  uniform: 'All same', ramp: 'Ramp', 'per-set': 'Per set',
+}
 
 function RepsModeToggle({ mode, onMode }: { mode: RepsMode; onMode: (v: RepsMode) => void }): React.JSX.Element {
   return (
     <div className="flex gap-2">
-      {(['uniform', 'per-set'] as RepsMode[]).map((m) => (
+      {(['uniform', 'ramp', 'per-set'] as RepsMode[]).map((m) => (
         <button
           key={m}
           type="button"
@@ -60,9 +64,33 @@ function RepsModeToggle({ mode, onMode }: { mode: RepsMode; onMode: (v: RepsMode
               : 'border-surface-border text-gray-500 hover:text-gray-300',
           )}
         >
-          {m === 'uniform' ? 'All same' : 'Per set'}
+          {REPS_MODE_LABEL[m]}
         </button>
       ))}
+    </div>
+  )
+}
+
+// Expand a start value + per-set step into a clamped sequence (e.g. 10, −2, 3 → 10/8/6).
+function rampSequence(start: number, step: number, sets: number, lo = 1, hi = 100): number[] {
+  return Array.from({ length: Math.max(1, sets) }, (_, i) =>
+    Math.min(hi, Math.max(lo, start + i * step)))
+}
+
+// Ramp editor — a start value and a per-set step, with a live preview of the result.
+function RampInputs({ start, step, sets, onStart, onStep }: {
+  start: number; step: number; sets: number
+  onStart: (v: number) => void; onStep: (v: number) => void
+}): React.JSX.Element {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-center gap-5">
+        <NumberField value={start} onChange={(v) => onStart(v ?? 1)} min={1} max={100} label="Start" />
+        <NumberField value={step} onChange={(v) => onStep(v ?? 0)} min={-50} max={50} label="Step / set" />
+      </div>
+      <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
+        {rampSequence(start, step, sets).join(' · ')}
+      </p>
     </div>
   )
 }
@@ -100,21 +128,49 @@ function PerSetRepsInputs({ repsPerSet, onChange }: {
   )
 }
 
+function UseLastTimeToggle({ on, onToggle }: { on: boolean; onToggle: (v: boolean) => void }): React.JSX.Element {
+  return (
+    <label className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-surface-border bg-surface/40 cursor-pointer">
+      <div>
+        <p className="text-sm text-gray-300">Use last time&rsquo;s weights</p>
+        <p className="text-[11px] text-gray-600">Prefill each set from your last session for this exercise</p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label="Use last time's weights"
+        onClick={() => onToggle(!on)}
+        className={cn('relative w-11 h-6 rounded-full transition-colors shrink-0', on ? 'bg-command-blue' : 'bg-surface-border')}
+      >
+        <span className={cn('absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform', on && 'translate-x-5')} />
+      </button>
+    </label>
+  )
+}
+
 function ResistanceTargets({
-  sets, reps, repsMode, repsPerSet, weight, weightUnit,
-  onSets, onReps, onRepsMode, onRepsPerSet, onWeight,
+  sets, reps, repsMode, repsStep, repsPerSet, weight, weightUnit, useLastWeight,
+  onSets, onReps, onRepsMode, onRepsStep, onRepsPerSet, onWeight, onUseLastWeight,
 }: {
   sets: number; reps: number; weight: number | null; weightUnit: string
   repsMode:    RepsMode
+  repsStep:    number
   repsPerSet:  number[]
+  useLastWeight: boolean
   onSets:      (v: number) => void
   onReps:      (v: number) => void
   onRepsMode:  (v: RepsMode) => void
+  onRepsStep:  (v: number) => void
   onRepsPerSet:(v: number[]) => void
   onWeight:    (v: number | null) => void
+  onUseLastWeight: (v: boolean) => void
 }): React.JSX.Element {
   return (
     <div className="space-y-6">
+      {/* Use last time — opt-in, kept at the top away from the numeric controls */}
+      <UseLastTimeToggle on={useLastWeight} onToggle={onUseLastWeight} />
+
       {/* Sets */}
       <div className="flex justify-center">
         <NumberField value={sets} onChange={(v) => onSets(v ?? 1)} min={1} max={10} label="Sets" />
@@ -128,25 +184,33 @@ function ResistanceTargets({
           <div className="flex justify-center">
             <NumberField value={reps} onChange={(v) => onReps(v ?? 1)} min={1} max={100} label="Reps per set" />
           </div>
+        ) : repsMode === 'ramp' ? (
+          <RampInputs start={reps} step={repsStep} sets={sets} onStart={onReps} onStep={onRepsStep} />
         ) : (
           <PerSetRepsInputs repsPerSet={repsPerSet} onChange={onRepsPerSet} />
         )}
       </div>
 
-      {/* Weight — starting weight, not a fixed target; the athlete's per-set
-          weights come from live entry / prefill-with-last. */}
-      <div className="flex justify-center">
-        <NumberField
-          value={weight}
-          onChange={onWeight}
-          min={0}
-          decimal
-          allowEmpty
-          placeholder="optional"
-          label="Starting weight"
-          suffix={weightUnit}
-        />
-      </div>
+      {/* Weight — a starting weight, not a fixed target. When "use last time" is on,
+          no target weight is sent and the live session prefills from history. */}
+      {useLastWeight ? (
+        <p className="text-center text-xs text-gray-500">
+          Weights will prefill from your last session for this exercise.
+        </p>
+      ) : (
+        <div className="flex justify-center">
+          <NumberField
+            value={weight}
+            onChange={onWeight}
+            min={0}
+            decimal
+            allowEmpty
+            placeholder="optional"
+            label="Starting weight"
+            suffix={weightUnit}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -241,16 +305,18 @@ function CardioTargets({
 }
 
 function CalisthenicsTargets({
-  mode, sets, reps, repsMode, repsPerSet, duration,
-  onMode, onSets, onReps, onRepsMode, onRepsPerSet, onDuration,
+  mode, sets, reps, repsMode, repsStep, repsPerSet, duration,
+  onMode, onSets, onReps, onRepsMode, onRepsStep, onRepsPerSet, onDuration,
 }: {
   mode: 'reps' | 'time'; sets: number; reps: number; duration: number
   repsMode:    RepsMode
+  repsStep:    number
   repsPerSet:  number[]
   onMode:      (v: 'reps' | 'time') => void
   onSets:      (v: number) => void
   onReps:      (v: number) => void
   onRepsMode:  (v: RepsMode) => void
+  onRepsStep:  (v: number) => void
   onRepsPerSet:(v: number[]) => void
   onDuration:  (v: number) => void
 }): React.JSX.Element {
@@ -277,7 +343,7 @@ function CalisthenicsTargets({
 
       {/* Sets */}
       <div className="flex justify-center">
-        <DragStepper value={sets} onChange={onSets} min={1} max={10} label="Sets" />
+        <NumberField value={sets} onChange={(v) => onSets(v ?? 1)} min={1} max={10} label="Sets" />
       </div>
 
       {mode === 'reps' ? (
@@ -286,8 +352,10 @@ function CalisthenicsTargets({
           <RepsModeToggle mode={repsMode} onMode={onRepsMode} />
           {repsMode === 'uniform' ? (
             <div className="flex justify-center">
-              <DragStepper value={reps} onChange={onReps} min={1} max={100} label="Reps per set" />
+              <NumberField value={reps} onChange={(v) => onReps(v ?? 1)} min={1} max={100} label="Reps per set" />
             </div>
+          ) : repsMode === 'ramp' ? (
+            <RampInputs start={reps} step={repsStep} sets={sets} onStart={onReps} onStep={onRepsStep} />
           ) : (
             <PerSetRepsInputs repsPerSet={repsPerSet} onChange={onRepsPerSet} />
           )}
@@ -353,7 +421,9 @@ export function AddExerciseSheet({
   const [targetReps,    setTargetReps]    = useState(10)
   const [targetWeight,  setTargetWeight]  = useState<number | null>(null)
   const [repsMode,      setRepsMode]      = useState<RepsMode>('uniform')
+  const [repsStep,      setRepsStep]      = useState(-2)
   const [repsPerSet,    setRepsPerSet]    = useState<number[]>([10, 10, 10])
+  const [useLastWeight, setUseLastWeight] = useState(false)
 
   // Cardio
   const [cardioRounds,   setCardioRounds]   = useState(4)
@@ -368,6 +438,7 @@ export function AddExerciseSheet({
   const [caliReps,      setCaliReps]      = useState(15)
   const [caliDuration,  setCaliDuration]  = useState(30)
   const [caliRepsMode,  setCaliRepsMode]  = useState<RepsMode>('uniform')
+  const [caliRepsStep,  setCaliRepsStep]  = useState(-2)
   const [caliRepsPerSet, setCaliRepsPerSet] = useState<number[]>([15, 15, 15])
 
   // Stretching
@@ -414,8 +485,14 @@ export function AddExerciseSheet({
   }
 
   const handleRepsMode = (mode: RepsMode): void => {
-    if (mode === 'per-set') setRepsPerSet(Array(targetSets).fill(targetReps))
-    else setTargetReps(repsPerSet[0] ?? targetReps)
+    if (mode === 'per-set') {
+      // Seed the per-set inputs from the current mode so switching is non-destructive.
+      setRepsPerSet(repsMode === 'ramp'
+        ? rampSequence(targetReps, repsStep, targetSets)
+        : Array(targetSets).fill(targetReps))
+    } else if (repsMode === 'per-set') {
+      setTargetReps(repsPerSet[0] ?? targetReps)
+    }
     setRepsMode(mode)
   }
 
@@ -428,8 +505,13 @@ export function AddExerciseSheet({
   }
 
   const handleCaliRepsMode = (mode: RepsMode): void => {
-    if (mode === 'per-set') setCaliRepsPerSet(Array(caliSets).fill(caliReps))
-    else setCaliReps(caliRepsPerSet[0] ?? caliReps)
+    if (mode === 'per-set') {
+      setCaliRepsPerSet(caliRepsMode === 'ramp'
+        ? rampSequence(caliReps, caliRepsStep, caliSets)
+        : Array(caliSets).fill(caliReps))
+    } else if (caliRepsMode === 'per-set') {
+      setCaliReps(caliRepsPerSet[0] ?? caliReps)
+    }
     setCaliRepsMode(mode)
   }
 
@@ -454,16 +536,21 @@ export function AddExerciseSheet({
   }
 
   // Build the AddExerciseInput based on workout type
+  // Resolve reps targets for a given mode: uniform → single value; ramp/per-set → comma list.
+  const repsFields = (mode: RepsMode, reps: number, step: number, perSet: number[], sets: number) => {
+    if (mode === 'uniform') return { targetReps: reps }
+    const seq = mode === 'ramp' ? rampSequence(reps, step, sets) : perSet
+    return { targetRepsPerSet: seq.join(','), targetReps: seq[0] ?? reps }
+  }
+
   const buildInput = (): Omit<AddExerciseInput, 'sessionId' | 'exerciseId'> => {
     switch (workoutType) {
       case 'resistance':
         return {
           targetSets,
-          ...(repsMode === 'uniform'
-            ? { targetReps }
-            : { targetRepsPerSet: repsPerSet.join(','), targetReps: repsPerSet[0] ?? targetReps }
-          ),
-          ...(targetWeight != null && { targetWeight, targetWeightUnit: weightUnit }),
+          ...repsFields(repsMode, targetReps, repsStep, repsPerSet, targetSets),
+          // "Use last time" sends no target weight → the live session prefills from history.
+          ...(useLastWeight ? {} : (targetWeight != null && { targetWeight, targetWeightUnit: weightUnit })),
         }
       case 'cardio':
         return {
@@ -475,11 +562,7 @@ export function AddExerciseSheet({
       case 'calisthenics':
         return {
           targetSets: caliSets,
-          ...(caliMode === 'reps' && (
-            caliRepsMode === 'uniform'
-              ? { targetReps: caliReps }
-              : { targetRepsPerSet: caliRepsPerSet.join(','), targetReps: caliRepsPerSet[0] ?? caliReps }
-          )),
+          ...(caliMode === 'reps' ? repsFields(caliRepsMode, caliReps, caliRepsStep, caliRepsPerSet, caliSets) : {}),
           ...(caliMode === 'time' && { targetDurationSeconds: caliDuration }),
         }
       case 'stretching':
@@ -671,10 +754,10 @@ export function AddExerciseSheet({
           {workoutType === 'resistance' && (
             <ResistanceTargets
               sets={targetSets} reps={targetReps} weight={targetWeight} weightUnit={weightUnit}
-              repsMode={repsMode} repsPerSet={repsPerSet}
+              repsMode={repsMode} repsStep={repsStep} repsPerSet={repsPerSet} useLastWeight={useLastWeight}
               onSets={handleTargetSetsChange} onReps={setTargetReps}
-              onRepsMode={handleRepsMode} onRepsPerSet={setRepsPerSet}
-              onWeight={setTargetWeight}
+              onRepsMode={handleRepsMode} onRepsStep={setRepsStep} onRepsPerSet={setRepsPerSet}
+              onWeight={setTargetWeight} onUseLastWeight={setUseLastWeight}
             />
           )}
           {workoutType === 'cardio' && (
@@ -688,9 +771,9 @@ export function AddExerciseSheet({
           {workoutType === 'calisthenics' && (
             <CalisthenicsTargets
               mode={caliMode} sets={caliSets} reps={caliReps} duration={caliDuration}
-              repsMode={caliRepsMode} repsPerSet={caliRepsPerSet}
+              repsMode={caliRepsMode} repsStep={caliRepsStep} repsPerSet={caliRepsPerSet}
               onMode={setCaliMode} onSets={handleCaliSetsChange} onReps={setCaliReps}
-              onRepsMode={handleCaliRepsMode} onRepsPerSet={setCaliRepsPerSet}
+              onRepsMode={handleCaliRepsMode} onRepsStep={setCaliRepsStep} onRepsPerSet={setCaliRepsPerSet}
               onDuration={setCaliDuration}
             />
           )}

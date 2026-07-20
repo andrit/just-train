@@ -89,10 +89,16 @@ jobs:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_db
           NODE_ENV:     production
 
+      # PWA manifest installability check — replaces Lighthouse's installable-manifest
+      # audit (removed in Lighthouse 12). Reads apps/frontend/dist/manifest.webmanifest
+      # and hard-fails if it lacks the fields required to install.
+      - name: Validate PWA manifest
+        run: node apps/frontend/scripts/validate-manifest.mjs
+
       # Lighthouse CI — audits the production build for performance, accessibility,
-      # and PWA manifest validity. Warns on score regressions, hard-blocks on
-      # missing manifest (catches SW config breakage before it hits production).
-      # Reports upload to temporary-public-storage; link printed in CI output.
+      # best-practices, and SEO. Accessibility is a hard gate; the rest warn.
+      # (PWA audits were removed in Lighthouse 12 — installability is covered by the
+      # manifest check above.) Reports upload to temporary-public-storage.
       - name: Lighthouse CI
         run: |
           npx serve --version > /dev/null 2>&1 || npm install -g serve

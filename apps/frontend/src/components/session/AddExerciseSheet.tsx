@@ -23,6 +23,7 @@ import { cn }                    from '@/lib/cn'
 import { interactions }          from '@/lib/interactions'
 import { BottomSheet }           from '@/components/ui/BottomSheet'
 import { DragStepper }           from '@/components/ui/DragStepper'
+import { NumberField }           from '@/components/ui/NumberField'
 import { Spinner }               from '@/components/ui/Spinner'
 import {
   useExercises,
@@ -103,20 +104,20 @@ function ResistanceTargets({
   sets, reps, repsMode, repsPerSet, weight, weightUnit,
   onSets, onReps, onRepsMode, onRepsPerSet, onWeight,
 }: {
-  sets: number; reps: number; weight: string; weightUnit: string
+  sets: number; reps: number; weight: number | null; weightUnit: string
   repsMode:    RepsMode
   repsPerSet:  number[]
   onSets:      (v: number) => void
   onReps:      (v: number) => void
   onRepsMode:  (v: RepsMode) => void
   onRepsPerSet:(v: number[]) => void
-  onWeight:    (v: string) => void
+  onWeight:    (v: number | null) => void
 }): React.JSX.Element {
   return (
     <div className="space-y-6">
       {/* Sets */}
       <div className="flex justify-center">
-        <DragStepper value={sets} onChange={onSets} min={1} max={10} label="Sets" />
+        <NumberField value={sets} onChange={(v) => onSets(v ?? 1)} min={1} max={10} label="Sets" />
       </div>
 
       {/* Reps section */}
@@ -125,25 +126,25 @@ function ResistanceTargets({
         <RepsModeToggle mode={repsMode} onMode={onRepsMode} />
         {repsMode === 'uniform' ? (
           <div className="flex justify-center">
-            <DragStepper value={reps} onChange={onReps} min={1} max={100} label="Reps per set" />
+            <NumberField value={reps} onChange={(v) => onReps(v ?? 1)} min={1} max={100} label="Reps per set" />
           </div>
         ) : (
           <PerSetRepsInputs repsPerSet={repsPerSet} onChange={onRepsPerSet} />
         )}
       </div>
 
-      {/* Weight */}
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center mb-2">
-          Target Weight ({weightUnit})
-        </p>
-        <input
-          type="number"
-          inputMode="decimal"
+      {/* Weight — starting weight, not a fixed target; the athlete's per-set
+          weights come from live entry / prefill-with-last. */}
+      <div className="flex justify-center">
+        <NumberField
           value={weight}
-          onChange={(e) => onWeight(e.target.value)}
+          onChange={onWeight}
+          min={0}
+          decimal
+          allowEmpty
           placeholder="optional"
-          className="field text-center text-2xl font-mono font-bold w-full"
+          label="Starting weight"
+          suffix={weightUnit}
         />
       </div>
     </div>
@@ -350,7 +351,7 @@ export function AddExerciseSheet({
   // Resistance
   const [targetSets,    setTargetSets]    = useState(3)
   const [targetReps,    setTargetReps]    = useState(10)
-  const [targetWeight,  setTargetWeight]  = useState('')
+  const [targetWeight,  setTargetWeight]  = useState<number | null>(null)
   const [repsMode,      setRepsMode]      = useState<RepsMode>('uniform')
   const [repsPerSet,    setRepsPerSet]    = useState<number[]>([10, 10, 10])
 
@@ -462,7 +463,7 @@ export function AddExerciseSheet({
             ? { targetReps }
             : { targetRepsPerSet: repsPerSet.join(','), targetReps: repsPerSet[0] ?? targetReps }
           ),
-          ...(targetWeight.trim() && { targetWeight: parseFloat(targetWeight), targetWeightUnit: weightUnit }),
+          ...(targetWeight != null && { targetWeight, targetWeightUnit: weightUnit }),
         }
       case 'cardio':
         return {
@@ -711,7 +712,7 @@ export function AddExerciseSheet({
           )}
 
           <p className="text-center text-xs text-gray-600">
-            Drag numbers up or down to adjust — or tap ▲ ▼
+            Type a value, or use the − / + steppers
           </p>
 
           <button

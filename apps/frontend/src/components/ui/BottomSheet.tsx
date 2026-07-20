@@ -38,13 +38,21 @@ export function BottomSheet({
 }: BottomSheetProps): React.JSX.Element {
   const sheetRef = useRef<HTMLDivElement>(null)
 
-  // Close on Escape + focus trap
+  // Move focus into the sheet ONLY when it opens — not on every re-render.
+  // This must depend on `open` alone. It used to live in the same effect as the
+  // keydown handler (deps [open, onClose]); parents pass an inline onClose that
+  // changes identity every render, so the effect re-fired on every keystroke and
+  // stole focus out of inputs mid-typing (the weight-entry focus-loss bug).
   useEffect(() => {
     if (!open) return
-
-    // Move focus into the sheet when it opens
     const firstFocusable = sheetRef.current ? getFocusable(sheetRef.current)[0] : null
     firstFocusable?.focus()
+  }, [open])
+
+  // Close on Escape + Tab focus-trap. Re-subscribing when onClose changes is
+  // harmless — this effect never moves focus on its own.
+  useEffect(() => {
+    if (!open) return
 
     const handler = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') { onClose(); return }

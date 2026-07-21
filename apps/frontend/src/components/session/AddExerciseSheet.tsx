@@ -77,6 +77,12 @@ function rampSequence(start: number, step: number, sets: number, lo = 1, hi = 10
     Math.min(hi, Math.max(lo, start + i * step)))
 }
 
+// Expand a starting weight + per-set step into a preview sequence (e.g. 100, +50 → 100/150/200).
+// Weights allow decimals and a floor of 0; only start + step are stored, not this expansion.
+function weightRampSequence(start: number, step: number, sets: number): number[] {
+  return Array.from({ length: Math.max(1, sets) }, (_, i) => Math.max(0, start + i * step))
+}
+
 // Ramp editor — a start value and a per-set step, with a live preview of the result.
 function RampInputs({ start, step, sets, onStart, onStep }: {
   start: number; step: number; sets: number
@@ -150,10 +156,10 @@ function UseLastTimeToggle({ on, onToggle }: { on: boolean; onToggle: (v: boolea
 }
 
 function ResistanceTargets({
-  sets, reps, repsMode, repsStep, repsPerSet, weight, weightUnit, useLastWeight,
-  onSets, onReps, onRepsMode, onRepsStep, onRepsPerSet, onWeight, onUseLastWeight,
+  sets, reps, repsMode, repsStep, repsPerSet, weight, weightStep, weightUnit, useLastWeight,
+  onSets, onReps, onRepsMode, onRepsStep, onRepsPerSet, onWeight, onWeightStep, onUseLastWeight,
 }: {
-  sets: number; reps: number; weight: number | null; weightUnit: string
+  sets: number; reps: number; weight: number | null; weightStep: number; weightUnit: string
   repsMode:    RepsMode
   repsStep:    number
   repsPerSet:  number[]
@@ -164,6 +170,7 @@ function ResistanceTargets({
   onRepsStep:  (v: number) => void
   onRepsPerSet:(v: number[]) => void
   onWeight:    (v: number | null) => void
+  onWeightStep:(v: number) => void
   onUseLastWeight: (v: boolean) => void
 }): React.JSX.Element {
   return (
@@ -191,24 +198,42 @@ function ResistanceTargets({
         )}
       </div>
 
-      {/* Weight — a starting weight, not a fixed target. When "use last time" is on,
-          no target weight is sent and the live session prefills from history. */}
+      {/* Weight — a starting weight, not a fixed target. Optional "+ / set" ramp
+          pre-fills each live set from the previous one (e.g. +50). Only the start
+          and the step are stored; the expansion happens live. When "use last time"
+          is on, no target weight is sent and the live session prefills from history. */}
       {useLastWeight ? (
         <p className="text-center text-xs text-gray-500">
           Weights will prefill from your last session for this exercise.
         </p>
       ) : (
-        <div className="flex justify-center">
-          <NumberField
-            value={weight}
-            onChange={onWeight}
-            min={0}
-            decimal
-            allowEmpty
-            placeholder="optional"
-            label="Starting weight"
-            suffix={weightUnit}
-          />
+        <div className="space-y-3">
+          <div className="flex items-start justify-center gap-5">
+            <NumberField
+              value={weight}
+              onChange={onWeight}
+              min={0}
+              decimal
+              allowEmpty
+              placeholder="optional"
+              label="Starting weight"
+              suffix={weightUnit}
+            />
+            <NumberField
+              value={weightStep}
+              onChange={(v) => onWeightStep(v ?? 0)}
+              min={-500}
+              max={500}
+              decimal
+              label="+ / set"
+              suffix={weightUnit}
+            />
+          </div>
+          {weightStep !== 0 && weight != null && (
+            <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
+              {weightRampSequence(weight, weightStep, sets).join(' · ')} {weightUnit}
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -420,6 +445,7 @@ export function AddExerciseSheet({
   const [targetSets,    setTargetSets]    = useState(3)
   const [targetReps,    setTargetReps]    = useState(10)
   const [targetWeight,  setTargetWeight]  = useState<number | null>(null)
+  const [weightStep,    setWeightStep]    = useState(0)
   const [repsMode,      setRepsMode]      = useState<RepsMode>('uniform')
   const [repsStep,      setRepsStep]      = useState(-2)
   const [repsPerSet,    setRepsPerSet]    = useState<number[]>([10, 10, 10])
@@ -551,6 +577,8 @@ export function AddExerciseSheet({
           ...repsFields(repsMode, targetReps, repsStep, repsPerSet, targetSets),
           // "Use last time" sends no target weight → the live session prefills from history.
           ...(useLastWeight ? {} : (targetWeight != null && { targetWeight, targetWeightUnit: weightUnit })),
+          // Ramp step: only meaningful alongside a starting weight (not with "use last time").
+          ...(!useLastWeight && targetWeight != null && weightStep !== 0 && { targetWeightStep: weightStep }),
         }
       case 'cardio':
         return {
@@ -753,11 +781,11 @@ export function AddExerciseSheet({
           {/* Type-aware targets */}
           {workoutType === 'resistance' && (
             <ResistanceTargets
-              sets={targetSets} reps={targetReps} weight={targetWeight} weightUnit={weightUnit}
+              sets={targetSets} reps={targetReps} weight={targetWeight} weightStep={weightStep} weightUnit={weightUnit}
               repsMode={repsMode} repsStep={repsStep} repsPerSet={repsPerSet} useLastWeight={useLastWeight}
               onSets={handleTargetSetsChange} onReps={setTargetReps}
               onRepsMode={handleRepsMode} onRepsStep={setRepsStep} onRepsPerSet={setRepsPerSet}
-              onWeight={setTargetWeight} onUseLastWeight={setUseLastWeight}
+              onWeight={setTargetWeight} onWeightStep={setWeightStep} onUseLastWeight={setUseLastWeight}
             />
           )}
           {workoutType === 'cardio' && (

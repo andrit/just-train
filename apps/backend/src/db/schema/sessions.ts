@@ -96,6 +96,10 @@ export const sessionExercises = pgTable('session_exercises', {
   targetReps:            integer('target_reps'),
   targetRepsPerSet:      text('target_reps_per_set'),  // comma-delimited per-set rep counts e.g. "10,8,6"
   targetWeight:          real('target_weight'),
+  // Per-set weight increment for a live "ramp" (e.g. +50 each set). Only the
+  // starting weight (targetWeight) and this step are stored — the expanded
+  // per-set values are computed live, never persisted.
+  targetWeightStep:      real('target_weight_step'),
   targetWeightUnit:      weightUnitEnum('target_weight_unit').notNull().default('lbs'),
   targetDurationSeconds: integer('target_duration_seconds'),
   targetDistance:        real('target_distance'),

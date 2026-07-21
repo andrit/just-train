@@ -296,6 +296,7 @@ export const AddSessionExerciseSchema = z.object({
   targetReps: z.number().int().min(1).optional(),
   targetRepsPerSet: z.string().optional().describe('Comma-delimited per-set rep counts e.g. "10,8,6"'),
   targetWeight: z.number().min(0).optional(),
+  targetWeightStep: z.number().optional().describe('Per-set weight increment for a live ramp, e.g. 50 = raise each set by 50. Negatives allowed for deload ramps.'),
   targetWeightUnit: WeightUnitEnum.default('lbs'),
   targetDurationSeconds: z.number().int().min(1).optional(),
   targetDistance: z.number().min(0).optional(),

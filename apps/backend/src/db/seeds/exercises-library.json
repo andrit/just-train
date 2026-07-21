@@ -1,6 +1,6 @@
 {
   "meta": {
-    "total": 99,
+    "total": 112,
     "note": "Add exercises by copying the structure. Upload back when ready.",
     "fields": {
       "name": "Display name",
@@ -280,6 +280,17 @@
         "visualization": null,
         "description": "Unilateral leg exercise. Works quad, glute, and balance simultaneously.",
         "instructions": "Place barbell over your shoulders like a back squat. Step forward into a split stance. Lower back knee toward the floor. Push off the front foot to return. Alternate legs."
+      },
+      {
+        "name": "Good Mornings",
+        "bodyPart": "legs",
+        "category": "compound",
+        "equipment": "barbell",
+        "difficulty": "intermediate",
+        "demonstration": null,
+        "visualization": null,
+        "description": "A hip-hinge that loads the hamstrings, glutes, and lower back. Builds posterior-chain strength and reinforces the hip-hinge pattern used in deadlifts and cleans.",
+        "instructions": "Rest a barbell across your upper back as in a back squat. With a soft bend in the knees, hinge at the hips and lower your torso toward parallel, keeping a flat back and the bar tracking over your midfoot. Drive the hips forward to return to standing."
       }
     ],
     "isolation": [
@@ -557,6 +568,17 @@
         "visualization": null,
         "description": "Anti-rotation core exercise. Builds stability rather than flexion strength.",
         "instructions": "Stand side-on to a cable machine. Hold the handle at chest level. Press it straight out in front of you. The challenge is resisting rotation."
+      },
+      {
+        "name": "Hip Flexors (Rotary Machine)",
+        "bodyPart": "legs",
+        "category": "isolation",
+        "equipment": "machine",
+        "difficulty": "beginner",
+        "demonstration": null,
+        "visualization": null,
+        "description": "A standing rotary-hip (multi-hip) machine movement that isolates the hip flexors by driving the working thigh forward and up against resistance. Strengthens the iliopsoas and rectus femoris for knee drive and sprint mechanics.",
+        "instructions": "Stand in the rotary hip machine with the pad against the front of the working thigh and hold the support handles. Drive your knee forward and up against the resistance, pause briefly at the top, then lower under control. Finish the set, then switch to the other leg."
       }
     ]
   },

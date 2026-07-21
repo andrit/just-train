@@ -5,6 +5,24 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased] — Weight Ramp + Library Additions
+
+### Session weight ramp (per-set increment)
+- `session_exercises.target_weight_step` (`real`, nullable) — the per-set weight increment for a live ramp (e.g. `50` = raise each set by 50). **Only the starting weight (`targetWeight`) and this step are stored** — the expanded per-set values are computed live, never persisted (no per-set weight array, consistent with the "athlete owns the weight" decision).
+  - Additive migration: `docs/sql/add-target-weight-step-column.sql` (prod) / `pnpm db:push` (local).
+  - Shared: `AddSessionExerciseSchema` (input) + `SessionExerciseResponseSchema` (response) gain `targetWeightStep`.
+- `AddExerciseSheet` — resistance targets add a **"+ / set"** control beside "Starting weight" with a live preview (`100 · 150 · 200 · 250`). Sent only when a starting weight is present and "Use last time" is off.
+- `ExerciseBlock` — live prefill: set 1 uses the starting weight; each later set pre-fills from the **previous in-session set's actual weight + step** (compounds from what was actually lifted; always editable). Non-ramp and "Use last time" prefill paths are unchanged.
+
+### Exercise library
+- Added **Good Mornings** (resistance/compound) and **Hip Flexors (Rotary Machine)** (resistance/isolation) to `exercises-library.json`. (Hip Abductors / Hip Adductors were already present.)
+- `docs/sql/add-hip-leg-exercises.sql` — idempotent prod insert for all four leg/hip exercises (guards on name; safe to re-run).
+
+### Task 6 (exercise-UI rework) — verification
+- Confirmed per-set **reps** prefill (`targetRepsPerSet` → `getSetTargetReps`) and per-set **weight-from-history** prefill (`GET /clients/:id/exercise-history/:exerciseId` returns every set of the last completed session, indexed by set position). The authored weight ramp was intentionally not built as a persisted per-set array — replaced by the start-+-step model above.
+
+---
+
 ## [v2.14.1] — Offline Write Idempotency
 
 ### Fixed

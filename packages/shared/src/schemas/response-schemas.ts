@@ -373,6 +373,7 @@ export const SessionExerciseResponseSchema = z.object({
   targetReps:            z.number().int().nullable(),
   targetRepsPerSet:      z.string().nullable().describe('Comma-delimited per-set rep counts e.g. "10,8,6"'),
   targetWeight:          z.number().nullable(),
+  targetWeightStep:      z.number().nullable().describe('Per-set weight increment for a live ramp (e.g. 50). Only start + step are stored; per-set values are computed live.'),
   targetWeightUnit:      WeightUnitEnum,
   targetDurationSeconds: z.number().int().nullable(),
   targetDistance:        z.number().nullable(),

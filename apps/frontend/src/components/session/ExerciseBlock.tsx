@@ -118,12 +118,13 @@ function IntensityPicker({ value, onChange }: { value: string; onChange: (v: str
 
 // ── Active set hero — workout-type-aware ──────────────────────────────────────
 
-function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, lastSet, targetRepsOverride, onLog, isLogging }: {
+function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, lastSet, priorInSession, targetRepsOverride, onLog, isLogging }: {
   setNumber:          number
   sessionExercise:    SessionExerciseResponse
   workoutType:        string
   weightUnit:         string
   lastSet:            SetResponse | null
+  priorInSession:     boolean   // true when lastSet is a set logged this session (not last-session history)
   targetRepsOverride: number | null
   onLog:              (data: LogData) => void
   isLogging:          boolean
@@ -132,8 +133,18 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
 
   const effectiveTargetReps = targetRepsOverride ?? sessionExercise.targetReps
 
+  // ── Weight ramp ───────────────────────────────────────────────────────────
+  // With a per-set step set (e.g. +50), each set after the first pre-fills from
+  // the previous in-session set's actual weight plus the step. Set 1 (and the
+  // non-ramp case) falls back to the starting weight / carry-forward as before.
+  const weightStep = sessionExercise.targetWeightStep ?? 0
+  const rampWeightStr = (): string =>
+    weightStep && priorInSession && lastSet?.weight != null
+      ? String(lastSet.weight + weightStep)
+      : String(sessionExercise.targetWeight ?? lastSet?.weight ?? '')
+
   // ── Resistance state ──────────────────────────────────────────────────────
-  const [weight, setWeight] = useState(String(sessionExercise.targetWeight ?? lastSet?.weight ?? ''))
+  const [weight, setWeight] = useState(rampWeightStr())
   const [reps,   setReps]   = useState(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
 
   // ── Cardio state ──────────────────────────────────────────────────────────
@@ -150,7 +161,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
 
   // Reset pre-fill when set number changes (effectiveTargetReps may differ per set)
   useEffect(() => {
-    setWeight(String(sessionExercise.targetWeight ?? lastSet?.weight ?? ''))
+    setWeight(rampWeightStr())
     setReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setCaliReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setDuration(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
@@ -572,6 +583,7 @@ export function ExerciseBlock({
             workoutType={workoutType}
             weightUnit={weightUnit}
             targetRepsOverride={getSetTargetReps(loggedCount)}
+            priorInSession={loggedSets.length > 0}
             lastSet={
               // In-session: use the most recently logged set (shows progression)
               loggedSets.length > 0

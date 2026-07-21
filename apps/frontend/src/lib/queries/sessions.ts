@@ -182,6 +182,7 @@ export interface AddExerciseInput {
   targetSets?:            number
   targetReps?:            number
   targetWeight?:          number
+  targetWeightStep?:      number
   targetWeightUnit?:      string
   targetDurationSeconds?: number
   targetDistance?:        number

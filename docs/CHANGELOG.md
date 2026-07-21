@@ -21,6 +21,9 @@ Versions follow [Semantic Versioning](https://semver.org/).
 ### Task 6 (exercise-UI rework) — verification
 - Confirmed per-set **reps** prefill (`targetRepsPerSet` → `getSetTargetReps`) and per-set **weight-from-history** prefill (`GET /clients/:id/exercise-history/:exerciseId` returns every set of the last completed session, indexed by set position). The authored weight ramp was intentionally not built as a persisted per-set array — replaced by the start-+-step model above.
 
+### Fixed
+- **Live-session weight/reps inputs stayed empty when the value came only from exercise history** (async race, pre-existing since v2.8.0 auto-populate). `exercise-history` loads after mount, so on set 1 the input initialised before it arrived and the re-fill effect only depended on `[setNumber]` — the "Last: …" line updated but the input didn't. The effect now also depends on the last-set primitives (`lastSet?.weight/reps/durationSeconds`), so inputs fill the moment history lands. Stable primitives mean it won't re-run and clobber a manual edit. (`ExerciseBlock.tsx`)
+
 ---
 
 ## [v2.14.1] — Offline Write Idempotency

@@ -159,14 +159,18 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
   const [caliReps, setCaliReps] = useState(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
   const [caliTime, setCaliTime] = useState(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
 
-  // Reset pre-fill when set number changes (effectiveTargetReps may differ per set)
+  // Re-apply the pre-fill when the set changes OR when the last-set values arrive.
+  // exercise-history loads asynchronously, so on set 1 `lastSet` is null on the first
+  // render and only populates a moment later — depend on its primitive values so the
+  // weight/reps inputs fill once history lands (not just the "Last:" summary line).
+  // Primitives keep this stable: once filled it won't re-run and clobber manual edits.
   useEffect(() => {
     setWeight(rampWeightStr())
     setReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setCaliReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setDuration(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setNumber])
+  }, [setNumber, lastSet?.weight, lastSet?.reps, lastSet?.durationSeconds])
 
   const canLog = (): boolean => {
     switch (workoutType) {

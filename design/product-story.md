@@ -1,7 +1,7 @@
-# Product Story — TrainerApp
+# Product Story — FORGE
 
-**Phase 0 artifact**
-**Last updated:** 2026-06-17
+**Phase 0 artifact** — the narrative below is preserved as written on 2026-06-17 (working name "TrainerApp").
+**Last updated:** 2026-07-22 — product renamed **TrainerApp → FORGE**; post-build section appended at the end.
 
 ---
 
@@ -158,3 +158,29 @@ TrainerApp does not have a React Native app. The PWA is sufficient. Native adds 
 ## The one-line version
 
 **TrainerApp is a progress narrative engine for athletes and the coaches who guide them — built for the gym floor, not the boardroom.**
+
+---
+
+## Post-build — what shipped, and the name  *(added 2026-07-22)*
+
+The narrative above is the Phase-0 story, written before the product was built and preserved as written. This section folds in what was actually learned and shipped by v2.14, and records the brand that emerged.
+
+### The name: TrainerApp → FORGE
+"TrainerApp" was always a working label. The product is **FORGE**, tagline **"Just Train."** — one hard, activity-agnostic word for *making your body your machine*. See `docs/product-development/brand-identity.md` and `design/brand/`. (Domain target `trainforge.io`, not yet acquired; USPTO Class 9/41 clearance pending — the only thing that reopens the name.)
+
+### What held from the Phase-0 thesis
+- **Athlete is the atom — confirmed in code.** `AthleteProfilePage` is a separate tree, `/clients` is route-guarded for Athletes, and the Athlete UI is first-person throughout. The Trainer layer sits on top via the isSelf bridge, exactly as the story argued.
+- **Capture → Compare → Communicate held** as the evaluation axis. Capture is offline-durable (write queue v2.4.0, idempotent replay v2.14.1 — no double-logged sets). Compare shipped as per-set history prefill, PR detection (Epley 1RM), KPIs and consistency. Communicate shipped as the PR flash, monthly reports (Resend), and at-risk alerts.
+- **The PWA promise was delivered** — installable, offline auth hold, home-screen launch, service-worker caching. Native was correctly never built.
+
+### What the build added beyond the original story
+PRs + personal-bests, gamification foundations (streaks, consistency, **coach challenges**), the **template library**, **camera / form-check clips** and **progress photos**, the named **color system** (v2.14.0 — Forge Black / Chalk White / Iron Grey / Ember Red / Command Blue / Signal Yellow), and security hardening (v2.13.0). The v2.5.0 execution rework (horizontal exercise navigation, rest timer in the footer) and the per-set weight ramp sharpened Capture.
+
+### The refusal positioning, made explicit
+The Phase-0 "What this product is not" section was the seed of the whole brand. Post-build it is the **positioning**, stated positively as five values: **Log the work · Progress, not engagement · Private by default · You're the coach · Forge yourself.** No feed, no AI coach, no meal plans — that refusal *is* the product.
+
+### What's still ahead (unchanged from the story, still true)
+Push notifications remain deferred (post-SaaS). SaaS / Stripe billing is v3.0. The Athlete → Trainer upgrade is still the one-way growth path. Leaderboards and the social/share layer stay Delighters.
+
+### The one-line version, post-build
+**FORGE is a bare-metal training record — where you make your body your machine. Log the work, get stronger, nothing else. Just train.**

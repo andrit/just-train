@@ -95,6 +95,22 @@ never touch production. If prod and code ever diverge, diff prod's live columns 
 the schema (`docs/utilities/dump-db-schema-csv.sh` in the workbench) before writing a
 reconciliation migration — the code in `db/schema/*` is the authority, not `push`.
 
+**One-off data migrations (dedup, backfill, repoint, delete) default to `ROLLBACK`.**
+Any hand-written SQL that mutates production *data* (not schema) must be authored so the
+**safe path is the no-edit path**: wrap the whole thing in a single `BEGIN … ROLLBACK`
+transaction, and include report `SELECT`s — before/after counts, a preview of any
+name→id mapping, and a "what remains" check. Running the file as-is is then a **dry run**
+that prints exactly what *would* change and discards it. Applying is a deliberate edit:
+change the final `ROLLBACK;` → `COMMIT;` only after the report looks right.
+
+Two reasons this matters: (1) a single transaction auto-rolls-back on any SQL *error*, but
+a result that is *logically wrong yet valid* (wrong rows deleted, mis-repointed FK) commits
+silently — the dry run is the only gate that catches it; (2) resolve targets by name/key,
+never hardcoded UUIDs, and structure JOINs so an unmatched row is simply skipped, so a
+typo'd mapping fails safe (row left untouched) instead of being orphaned or deleted.
+See `docs/sql/migrate-exercises-to-public-library.sql` and
+`docs/sql/merge-casual-draft-exercises.sql` for the pattern.
+
 ### 1e. Note your Railway URL
 
 From the Railway service → **Settings** → **Domains** → copy the generated URL.

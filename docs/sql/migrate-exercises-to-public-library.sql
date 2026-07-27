@@ -15,9 +15,8 @@
 -- FK note: session_exercises.exercise_id and template_exercises.exercise_id are
 -- ON DELETE RESTRICT, so references MUST be repointed before deleting duplicates.
 --
--- SAFE TO INSPECT FIRST: this runs in one transaction. Run it as-is with the final
--- COMMIT changed to ROLLBACK for a dry run (the report SELECTs still print), then
--- re-run with COMMIT once the numbers look right.
+-- APPLIED TO PROD 2026-07-27. Defaults to ROLLBACK (dry run): running as-is prints the
+-- before/after report and discards. Change the final ROLLBACK -> COMMIT to apply.
 --
 -- Run: psql "<DATABASE_PUBLIC_URL>" -f docs/sql/migrate-exercises-to-public-library.sql
 
@@ -87,5 +86,5 @@ FROM exercises;
 SELECT 'remaining private (custom)' AS note, trainer_id, name
 FROM exercises WHERE trainer_id IS NOT NULL ORDER BY trainer_id, name;
 
--- Change COMMIT -> ROLLBACK for a dry run.
-COMMIT;
+-- Change ROLLBACK -> COMMIT to apply. (Already applied to prod 2026-07-27.)
+ROLLBACK;

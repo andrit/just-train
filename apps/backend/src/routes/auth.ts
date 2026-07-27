@@ -48,7 +48,6 @@ import {
   canResendVerification,
 } from '../services/auth.service'
 import { authenticate } from '../middleware/authenticate'
-import { seedExerciseLibrary } from '../db/seed-exercises'
 import { seedDefaultTemplates } from '../db/seeds/defaultTemplates'
 import {
   CreateTrainerSchema,
@@ -208,10 +207,13 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         startDate:        new Date().toISOString().split('T')[0],
       })
 
-      // Seed the starter exercise library for this trainer — fire and forget,
-      // don't block the registration response if it fails.
-      seedExerciseLibrary(trainer.id).catch((err) => {
-        ;routeLog(app).warn({ err }, 'Exercise library seed failed for new trainer')
+      // Seed the trainer's default templates — fire and forget, don't block the
+      // registration response if it fails. Exercises are no longer copied per
+      // trainer: the library is a single shared set of public rows (trainerId
+      // IS NULL), visible to every trainer via the exercises visibility query.
+      // seedDefaultTemplates resolves exercise names against those public rows.
+      seedDefaultTemplates(trainer.id).catch((err) => {
+        ;routeLog(app).warn({ err }, 'Default template seed failed for new trainer')
       })
 
       // Send verification email — fire and forget, don't block registration.

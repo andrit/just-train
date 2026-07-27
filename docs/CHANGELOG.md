@@ -20,8 +20,8 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - Added **7 back & shoulder exercises** to `exercises-library.json` (seed total 112 → 119):
   - Back: **Pendlay Row** (compound/barbell), **Yates Row** (compound/barbell), **Overhead Face Pulls** (isolation/cable), **Machine Shrugs** (isolation/machine), **Diamond Bar Shrugs** (isolation/barbell).
   - Shoulders: **Dumbbell Upright Row** (compound/dumbbell), **Monkey Rows** (compound/dumbbell — wide upright-row variant, lateral-delt/trap bias).
-- Reclassified the existing **Face Pull** from `shoulders` → `back` (it's a trap/upper-back movement).
-- `docs/sql/add-back-shoulder-exercises.sql` — idempotent prod insert for the 7 new exercises (guards on name; safe to re-run) plus an idempotent `UPDATE` moving the existing public Face Pull to `back`.
+- Reclassified **Face Pull** in the seed from `shoulders` → `back` (it's a trap/upper-back movement). In prod the existing Face Pull rows are trainer-owned copies and were already `back`, so no data change was needed there.
+- `docs/sql/add-back-shoulder-exercises.sql` — idempotent prod insert for the 7 new exercises (guards on name; safe to re-run) plus an idempotent `UPDATE` that moves a *public* Face Pull to `back` if one exists (no-op against current prod, where Face Pull rows are trainer-owned and already `back`).
 
 ### Task 6 (exercise-UI rework) — verification
 - Confirmed per-set **reps** prefill (`targetRepsPerSet` → `getSetTargetReps`) and per-set **weight-from-history** prefill (`GET /clients/:id/exercise-history/:exerciseId` returns every set of the last completed session, indexed by set position). The authored weight ramp was intentionally not built as a persisted per-set array — replaced by the start-+-step model above.

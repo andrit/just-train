@@ -162,9 +162,12 @@ What: Cloudinary generates thumbnails automatically — just need correct URL fo
 When: If trainer requests it
 What: Add/edit body parts beyond the seeded list. The seeded 7 cover all standard training.
 
-### Public Exercise Library (Multi-trainer)
-When: Multi-trainer launch
-What: `isPublic = true` exercises visible across all trainer accounts. Schema and query already support this. Currently scoped to `trainerId = current OR trainerId IS NULL`.
+### Public Exercise Library (Multi-trainer) ✅ DONE (2026-07-27)
+The library is now a single shared **public** set (`trainerId IS NULL`), visible to all trainers via the `trainerId = current OR trainerId IS NULL` query. Registration no longer copies the library per trainer (`auth.ts` calls `seedDefaultTemplates`, not the old `seedExerciseLibrary`). Existing per-trainer duplicate copies were collapsed into public rows in prod (`docs/sql/migrate-exercises-to-public-library.sql`), and casual-named drafts merged in (`docs/sql/merge-casual-draft-exercises.sql`). The dead per-trainer seed (`db/seed-exercises.ts`) was deleted.
+
+### Reconcile `exercises-library.json` to prod (seed drift)
+When: Before relying on `pnpm db:seed` to reproduce prod locally (local-dev fidelity; not a prod risk).
+What: The deleted hardcoded seed and the JSON had drifted ~120 names apart, and **prod's public library was built from the hardcoded list's naming** (`Pull-up`, `Push-up`, `Chin-up`, …). So `exercises-library.json` — now the only seed source — does **not** match prod. Regenerate the JSON from a dump of prod's public rows (`trainer_id IS NULL`) so `db:seed` reproduces prod. Full plan + dump query in `docs/LOCAL_DEV_CATCHUP.md`. Note: many prod rows have null instructions (the hardcoded list had none) — decide per-row whether to keep prod's null or preserve the JSON's richer instruction text.
 
 ### Media Upload Retry / Progress
 When: UX polish pass

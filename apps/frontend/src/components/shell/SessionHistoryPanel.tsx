@@ -170,7 +170,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
             </div>
             <div className="space-y-1">
               {se.sets
-                .filter(set => !prFilterOn || set.isPR || set.isPRVolume)
+                .filter(set => !prFilterOn || set.isLoadRecord || set.isVolumeRecord)
                 .map((set, i) => {
                 const hitReps   = !se.targetReps   || (set.reps ?? 0) >= se.targetReps
                 const hitWeight = !se.targetWeight || (set.weight ?? 0) >= se.targetWeight
@@ -189,17 +189,17 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
                       {set.durationSeconds != null && <span>{set.durationSeconds}s</span>}
                     </div>
                     <div className="flex gap-1 shrink-0">
-                      {set.isPR && (
+                      {set.isLoadRecord && (
                         <span className="text-[9px] font-medium bg-amber-500/15 border border-amber-500/30 text-amber-400 px-1.5 py-0.5 rounded-full">
-                          1RM
+                          Load
                         </span>
                       )}
-                      {set.isPRVolume && (
+                      {set.isVolumeRecord && (
                         <span className="text-[9px] font-medium bg-command-blue/10 border border-command-blue/30 text-command-blue px-1.5 py-0.5 rounded-full">
                           Vol
                         </span>
                       )}
-                      {!set.isPR && !set.isPRVolume && (se.targetReps || se.targetWeight) && (
+                      {!set.isLoadRecord && !set.isVolumeRecord && (se.targetReps || se.targetWeight) && (
                         <span className="text-gray-700 text-[10px]">
                           {se.targetWeight && `${se.targetWeight}×`}{se.targetReps}
                         </span>

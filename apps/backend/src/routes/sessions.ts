@@ -22,7 +22,8 @@ import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
 import { idempotencyPreHandler, idempotencyOnSend } from '../lib/idempotency'
 import { db, sessions, sessionExercises, sets, clients, exercises, templateExercises } from '../db'
-import { eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc, inArray } from 'drizzle-orm'
+import { deriveRecordSetIds, type RecordSetIds } from '../lib/prRecords'
 import { updateChallengesForSet, updateChallengesForSessionComplete } from '../services/challenge.service'
 import { logSyncWrite } from '../services/syncLog.service'
 import {
@@ -52,7 +53,7 @@ const SessionFilterSchema = z.object({
 
 // Serialize a session exercise row to match SessionExerciseResponseSchema
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeSessionExercise(se: any): any {
+function serializeSessionExercise(se: any, records?: RecordSetIds): any {
   return {
     ...se,
     exercise: se.exercise ? {
@@ -66,13 +67,16 @@ function serializeSessionExercise(se: any): any {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sets: (se.sets ?? []).map((set: any) => ({
       ...set,
+      // Derived record chips — only the current record holder is flagged (see lib/prRecords).
+      isLoadRecord:   records?.loadIds.has(set.id)   ?? false,
+      isVolumeRecord: records?.volumeIds.has(set.id) ?? false,
       createdAt: set.createdAt instanceof Date ? set.createdAt.toISOString() : set.createdAt,
     })),
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeSession(s: any): any {
+function serializeSession(s: any, records?: RecordSetIds): any {
   return {
     ...s,
     client:           s.client
@@ -82,8 +86,33 @@ function serializeSession(s: any): any {
     endTime:          s.endTime   instanceof Date ? s.endTime.toISOString()   : (s.endTime   ?? null),
     createdAt:        s.createdAt instanceof Date ? s.createdAt.toISOString() : s.createdAt,
     updatedAt:        s.updatedAt instanceof Date ? s.updatedAt.toISOString() : s.updatedAt,
-    sessionExercises: (s.sessionExercises ?? []).map(serializeSessionExercise),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sessionExercises: (s.sessionExercises ?? []).map((se: any) => serializeSessionExercise(se, records)),
   }
+}
+
+// Fetch every resistance set for this client across the given exercises and
+// derive which sets currently hold the Load / Volume records. One query, used
+// only on the full-session read (detail/history) where per-set chips render.
+async function computeSessionRecords(clientId: string, exerciseIds: string[]): Promise<RecordSetIds | undefined> {
+  const ids = [...new Set(exerciseIds.filter(Boolean))]
+  if (ids.length === 0) return undefined
+  // ponytail: scans all of a client's sets for these exercises on each detail
+  // read. Fine at per-client volumes. ceiling: thousands of sets/exercise.
+  // upgrade: cache per (client, exercise) max rows, or precompute on write.
+  const rows = await db
+    .select({
+      id:         sets.id,
+      exerciseId: sessionExercises.exerciseId,
+      weight:     sets.weight,
+      reps:       sets.reps,
+      createdAt:  sets.createdAt,
+    })
+    .from(sets)
+    .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
+    .innerJoin(sessions, eq(sessionExercises.sessionId, sessions.id))
+    .where(and(eq(sessions.clientId, clientId), inArray(sessionExercises.exerciseId, ids)))
+  return deriveRecordSetIds(rows)
 }
 
 export async function sessionRoutes(app: FastifyInstance): Promise<void> {
@@ -124,7 +153,8 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
         orderBy: desc(sessions.date),
       })
 
-      return reply.send(result.map(serializeSession))
+      // List view has no per-set chips, so no record map is computed here.
+      return reply.send(result.map((s) => serializeSession(s)))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch sessions' })
@@ -178,7 +208,11 @@ This is the primary payload for the active workout view — loaded once when the
         return reply.status(404).send({ error: 'Session not found' })
       }
 
-      return reply.send(serializeSession(result))
+      const records = await computeSessionRecords(
+        result.clientId,
+        (result.sessionExercises ?? []).map((se) => se.exerciseId),
+      )
+      return reply.send(serializeSession(result, records))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch session' })
@@ -538,51 +572,50 @@ Which fields you populate depends on the workout type:
         },
       })
 
-      // ── PR detection ────────────────────────────────────────────────────
-      // Only meaningful for resistance sets with both weight and reps
-      let isPR       = false
-      let isPRVolume = false
+      // ── Record detection (at log time — drives the live "New PR" flash) ──
+      // A set becomes the current record when it strictly beats the client's
+      // prior best for this exercise: Load = heaviest weight, Volume = weight ×
+      // reps. The first-ever set (no prior) is a baseline and earns nothing.
+      // Persistent chips are DERIVED on read (see computeSessionRecords) so the
+      // marker moves off the old holder automatically; these two booleans only
+      // tell the just-logged set whether to flash.
+      let isLoadRecord   = false
+      let isVolumeRecord = false
 
-      if (body.weight != null && body.reps != null && body.reps > 0) {
-        const epley = (w: number, r: number): number => w * (1 + r / 30)
-        const newEpley  = epley(body.weight, body.reps)
-        const newVolume = body.weight * body.reps
-
-        if (seRow) {
-          const clientId    = seRow.session.clientId
-          const exerciseId  = seRow.exerciseId
-
-          // Query all historical sets for this client + exercise
-          const historicalSets = await db
-            .select({ weight: sets.weight, reps: sets.reps })
-            .from(sets)
-            .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
-            .innerJoin(sessions, eq(sessionExercises.sessionId, sessions.id))
-            .where(
-              and(
-                eq(sessions.clientId, clientId),
-                eq(sessionExercises.exerciseId, exerciseId),
-              )
+      if (body.weight != null && body.reps != null && body.reps > 0 && seRow) {
+        const priorSets = await db
+          .select({ weight: sets.weight, reps: sets.reps })
+          .from(sets)
+          .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
+          .innerJoin(sessions, eq(sessionExercises.sessionId, sessions.id))
+          .where(
+            and(
+              eq(sessions.clientId, seRow.session.clientId),
+              eq(sessionExercises.exerciseId, seRow.exerciseId),
             )
+          )
 
-          let bestEpley  = 0
-          let bestVolume = 0
-          for (const row of historicalSets) {
-            if (row.weight != null && row.reps != null && row.reps > 0) {
-              bestEpley  = Math.max(bestEpley,  epley(row.weight, row.reps))
-              bestVolume = Math.max(bestVolume, row.weight * row.reps)
-            }
+        let bestWeight = 0
+        let bestVolume = 0
+        let hadPrior   = false
+        for (const row of priorSets) {
+          if (row.weight != null && row.reps != null && row.reps > 0) {
+            hadPrior   = true
+            bestWeight = Math.max(bestWeight, row.weight)
+            bestVolume = Math.max(bestVolume, row.weight * row.reps)
           }
+        }
 
-          isPR       = newEpley  > bestEpley
-          isPRVolume = newVolume > bestVolume
+        if (hadPrior) {
+          isLoadRecord   = body.weight > bestWeight
+          isVolumeRecord = body.weight * body.reps > bestVolume
         }
       }
-      // ── End PR detection ────────────────────────────────────────────────
+      // ── End record detection ────────────────────────────────────────────
 
       const [newSet] = await db
         .insert(sets)
-        .values({ ...body, sessionExerciseId, isPR, isPRVolume })
+        .values({ ...body, sessionExerciseId })
         .returning()
 
       if (!newSet) {
@@ -618,6 +651,8 @@ Which fields you populate depends on the workout type:
 
       return reply.status(201).send({
         ...newSet,
+        isLoadRecord,
+        isVolumeRecord,
         createdAt: newSet.createdAt instanceof Date ? newSet.createdAt.toISOString() : newSet.createdAt,
       })
     } catch (error) {

@@ -351,8 +351,10 @@ export const SetResponseSchema = z.object({
   side:              SideEnum.nullable(),
   rpe:               z.number().int().nullable().describe('Rate of Perceived Exertion 1–10'),
   notes:             z.string().nullable(),
-  isPR:              z.boolean().describe('True if Epley 1RM estimate exceeds all prior sets for this client + exercise'),
-  isPRVolume:        z.boolean().describe('True if weight × reps exceeds all prior sets for this client + exercise'),
+  isLoadRecord:      z.boolean().default(false).describe('Derived: this set currently holds the client\'s heaviest weight for this exercise (any reps). Baseline first-ever set excluded; chip moves when beaten.'),
+  isVolumeRecord:    z.boolean().default(false).describe('Derived: this set currently holds the client\'s highest weight × reps for this exercise. Baseline first-ever set excluded; chip moves when beaten.'),
+  isPR:              z.boolean().default(false).describe('DEPRECATED — frozen Epley-1RM flag, no longer used by the UI. Superseded by isLoadRecord. Column retained until a cleanup migration drops it.'),
+  isPRVolume:        z.boolean().default(false).describe('DEPRECATED — frozen volume flag, no longer used by the UI. Superseded by isVolumeRecord.'),
   createdAt:         z.string().datetime(),
 })
 export type SetResponse = z.infer<typeof SetResponseSchema>

@@ -409,13 +409,19 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
         )}
       </div>
 
-      {/* PR chip — amber pill, persists in history */}
-      {(set.isPR || set.isPRVolume) && (
-        <span className={cn(
-          'shrink-0 text-[9px] font-medium px-1.5 py-0.5 rounded-full',
-          'bg-amber-500/15 text-amber-400 border border-amber-500/30',
-        )}>
-          {set.isPR && set.isPRVolume ? 'PR ×2' : 'PR'}
+      {/* Record chips — only the set that currently holds the record is flagged */}
+      {(set.isLoadRecord || set.isVolumeRecord) && (
+        <span className="shrink-0 flex gap-1">
+          {set.isLoadRecord && (
+            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+              Load
+            </span>
+          )}
+          {set.isVolumeRecord && (
+            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-command-blue/10 text-command-blue border border-command-blue/30">
+              Vol
+            </span>
+          )}
         </span>
       )}
     </div>
@@ -458,7 +464,7 @@ interface ExerciseBlockProps {
   weightUnit:          string
   clientId:            string | null   // for exercise history auto-populate
   restDurationSeconds?: number
-  onSetLogged:         (restSeconds?: number, pr?: { isPR: boolean; isPRVolume: boolean; weight?: number | null; reps?: number | null }) => void
+  onSetLogged:         (restSeconds?: number, pr?: { isLoadRecord: boolean; isVolumeRecord: boolean; weight?: number | null; reps?: number | null }) => void
 }
 
 export function ExerciseBlock({
@@ -514,10 +520,10 @@ export function ExerciseBlock({
           // Reset keepGoing so UI returns to complete state with updated count
           if (keepGoing) setKeepGoing(false)
           onSetLogged(restDurationSeconds, {
-            isPR:       newSet?.isPR       ?? false,
-            isPRVolume: newSet?.isPRVolume ?? false,
-            weight:     data.weight,
-            reps:       data.reps,
+            isLoadRecord:   newSet?.isLoadRecord   ?? false,
+            isVolumeRecord: newSet?.isVolumeRecord ?? false,
+            weight:         data.weight,
+            reps:           data.reps,
           })
         },
       },
@@ -609,6 +615,8 @@ export function ExerciseBlock({
                       intensity:       null,
                       isPR:            false,
                       isPRVolume:      false,
+                      isLoadRecord:    false,
+                      isVolumeRecord:  false,
                       createdAt:       '',
                     } as SetResponse
                   })()

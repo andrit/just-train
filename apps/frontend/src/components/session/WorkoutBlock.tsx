@@ -67,9 +67,9 @@ export function WorkoutBlock({
   }
 
   // PR flash — shown for ~1.5s then fades, chip stays on set row
-  const handleSetLoggedWithPR = (restSeconds = restDurationSeconds, pr?: { isPR: boolean; isPRVolume: boolean; weight?: number | null; reps?: number | null }): void => {
+  const handleSetLoggedWithPR = (restSeconds = restDurationSeconds, pr?: { isLoadRecord: boolean; isVolumeRecord: boolean; weight?: number | null; reps?: number | null }): void => {
     onSetLogged(restSeconds)
-    if (pr?.isPR || pr?.isPRVolume) {
+    if (pr?.isLoadRecord || pr?.isVolumeRecord) {
       const label = pr.weight && pr.reps
         ? `${pr.weight} × ${pr.reps}`
         : 'New best'

@@ -40,7 +40,7 @@ export function PostSessionWrapUp({
     if (s.weight == null || s.reps == null) return sum
     return sum + s.weight * s.reps
   }, 0)
-  const prCount      = allSets.filter(s => s.isPR || s.isPRVolume).length
+  const prCount      = allSets.filter(s => s.isLoadRecord || s.isVolumeRecord).length
   const exercisesDone = allExercises.filter(se => se.sets.length > 0).length
 
   // Duration
@@ -86,10 +86,10 @@ export function PostSessionWrapUp({
             <p className="text-xs text-amber-400 font-medium mb-1.5">Personal records</p>
             <div className="space-y-1">
               {allExercises
-                .filter(se => se.sets.some(s => s.isPR || s.isPRVolume))
+                .filter(se => se.sets.some(s => s.isLoadRecord || s.isVolumeRecord))
                 .map(se => (
                   <p key={se.id} className="text-sm text-amber-300">
-                    {se.exercise?.name ?? 'Exercise'} — new {se.sets.some(s => s.isPR) ? '1RM' : 'volume'} PR
+                    {se.exercise?.name ?? 'Exercise'} — new {se.sets.some(s => s.isLoadRecord) ? 'load' : 'volume'} PR
                   </p>
                 ))}
             </div>

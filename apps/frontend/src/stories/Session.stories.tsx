@@ -28,6 +28,8 @@ const makeSet = (overrides: Partial<SetResponse> = {}): SetResponse => ({
   notes:             null,
   isPR:              false,
   isPRVolume:        false,
+  isLoadRecord:      false,
+  isVolumeRecord:    false,
   createdAt:         new Date().toISOString(),
   ...overrides,
 })

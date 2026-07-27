@@ -827,6 +827,7 @@ Full details in `DEFERRED_ITEMS.md`.
 | Offline sync | v1.8.0 |
 | Playwright E2E tests | Phase 5+ (noted in CI yml) |
 | Database migration dry-run in CI | Phase 6 (noted in CI yml) |
+| Reconcile `exercises-library.json` to prod (seed drift after single-public-library refactor, 2026-07-27) | Before relying on local `db:seed` — see `DEFERRED_ITEMS.md` + `LOCAL_DEV_CATCHUP.md` |
 
 ---
 
@@ -958,10 +959,20 @@ Nav hides when active session overlay is full-screen. Swipe down → overlay min
 - `ExerciseDetailResponseSchema` — updated to include both fields + nullable trainerId/bodyPartId
 
 ### Exercise library source
-`apps/backend/src/db/seeds/exercises-library.json` — 109 exercises, editable JSON.
+`apps/backend/src/db/seeds/exercises-library.json` — editable JSON, seeded as **public** rows
+(`trainerId IS NULL`) via `seedExercises` (`db:seed`). This is now the **only** seed source.
+
+**Single shared public library (2026-07-27):** the library is one public set visible to all
+trainers via `trainerId = current OR trainerId IS NULL`. Registration no longer copies the
+library per trainer. The old per-trainer seed (`db/seed-exercises.ts`) and its
+`seedExerciseLibrary` were deleted; prod's per-trainer duplicate copies were collapsed into
+public rows (`docs/sql/migrate-exercises-to-public-library.sql`). Prod currently has ~139
+public exercises. ⚠️ The JSON has drifted from prod and does not yet reproduce it — see the
+reconciliation deferred item (`DEFERRED_ITEMS.md` / `LOCAL_DEV_CATCHUP.md`).
 
 To re-seed after editing the JSON: delete public exercises from DB, then run `pnpm db:seed`.
-To add individual exercises after initial seed: use `POST /exercises` or direct DB insert/update.
+To add individual exercises after initial seed: use `POST /exercises`, or an idempotent
+`docs/sql/*.sql` insert against prod (see `add-back-shoulder-exercises.sql` for the pattern).
 
 ### Exercise counts
 | Category | Count |

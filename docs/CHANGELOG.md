@@ -35,6 +35,15 @@ Versions follow [Semantic Versioning](https://semver.org/).
 ### Tooling / process
 - **Prod-mutating SQL now defaults to `ROLLBACK`.** One-off data migrations are authored as a single `BEGIN … ROLLBACK` transaction with before/after report SELECTs, so running as-is is a dry run; applying is a deliberate `ROLLBACK`→`COMMIT` edit. Rationale + fail-safe conventions (resolve by name not UUID; unmatched rows skip) added to `docs/DEPLOYMENT.md`.
 
+### Personal records — Load / Volume PRs (replaces the auto-1RM chip)
+- **Chips are now derived "current record holder," not a frozen per-set flag.** Previously every qualifying set stored `isPR` (Epley 1RM) + `isPRVolume` at log time and kept the badge forever — so every set (and the first-ever baseline) showed a badge that never cleared when beaten. Now the badge lives only on the set that *currently* holds the record and moves off the old holder automatically.
+- **Two markers: Load PR** (heaviest `weight`, any reps) and **Volume PR** (`weight × reps`). The auto **1RM** chip is gone — 1RM belongs to planned/analysis contexts (est. Epley + true singles), deferred to the records section. This also fixes "10-rep sets showing a 1-rep-max badge."
+- **Baseline excluded:** the first-ever set of a client+exercise earns nothing (there was nothing to beat); the next set can. **Ties:** the earliest set keeps the record (strict `>`).
+- Backend: `apps/backend/src/lib/prRecords.ts` — pure `deriveRecordSetIds` (unit-tested, `__tests__/lib/prRecords.test.ts`). `GET /sessions/:id` derives records across the client's full history for the session's exercises and annotates each set with `isLoadRecord` / `isVolumeRecord`; `POST …/sets` computes them at log time (baseline-suppressed) for the live flash. Epley `isPR` detection removed; the `is_pr` / `is_pr_volume` columns are deprecated (unread; a later migration can drop them).
+- Shared: `SetResponseSchema` gains `isLoadRecord` / `isVolumeRecord`; `isPR` / `isPRVolume` marked deprecated.
+- Frontend: live chips (`ExerciseBlock`), history chips (`SessionHistoryPanel`, `Load` / `Vol`), the "New PR" flash (`WorkoutBlock`), and the post-session PR count/callouts (`PostSessionWrapUp`) all read the derived fields. `useLogSet` already invalidates the session query, so logging a new record refreshes and moves the chip.
+- **Next:** per-exercise records section in history (Load PR, Volume PR, true 1RM, est. 1RM), where the 1RM analytics land.
+
 ### Task 6 (exercise-UI rework) — verification
 - Confirmed per-set **reps** prefill (`targetRepsPerSet` → `getSetTargetReps`) and per-set **weight-from-history** prefill (`GET /clients/:id/exercise-history/:exerciseId` returns every set of the last completed session, indexed by set position). The authored weight ramp was intentionally not built as a persisted per-set array — replaced by the start-+-step model above.
 

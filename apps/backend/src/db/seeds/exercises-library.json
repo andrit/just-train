@@ -1,6 +1,6 @@
 {
   "meta": {
-    "total": 112,
+    "total": 119,
     "note": "Add exercises by copying the structure. Upload back when ready.",
     "fields": {
       "name": "Display name",
@@ -291,6 +291,50 @@
         "visualization": null,
         "description": "A hip-hinge that loads the hamstrings, glutes, and lower back. Builds posterior-chain strength and reinforces the hip-hinge pattern used in deadlifts and cleans.",
         "instructions": "Rest a barbell across your upper back as in a back squat. With a soft bend in the knees, hinge at the hips and lower your torso toward parallel, keeping a flat back and the bar tracking over your midfoot. Drive the hips forward to return to standing."
+      },
+      {
+        "name": "Pendlay Row",
+        "bodyPart": "back",
+        "category": "compound",
+        "equipment": "barbell",
+        "difficulty": "intermediate",
+        "demonstration": null,
+        "visualization": null,
+        "description": "An explosive barbell row performed from a dead stop on the floor each rep. Builds mid-back thickness and reinforces a strong, flat-backed hinge.",
+        "instructions": "Set the bar on the floor over your midfoot. Hinge until your torso is roughly parallel to the ground with a flat back. Pull the bar explosively to your lower chest/upper abdomen, then return it to the floor and reset before each rep."
+      },
+      {
+        "name": "Yates Row",
+        "bodyPart": "back",
+        "category": "compound",
+        "equipment": "barbell",
+        "difficulty": "intermediate",
+        "demonstration": null,
+        "visualization": null,
+        "description": "An underhand-grip barbell row done with a more upright torso (~45 degrees), popularized by Dorian Yates. Emphasizes the lower lats and biceps with heavier loads.",
+        "instructions": "Grip the bar underhand, slightly wider than shoulder width. Hinge to about a 45-degree torso angle with a flat back. Drive the bar toward your waistline, keeping elbows close to the body, then lower under control."
+      },
+      {
+        "name": "Dumbbell Upright Row",
+        "bodyPart": "shoulders",
+        "category": "compound",
+        "equipment": "dumbbell",
+        "difficulty": "intermediate",
+        "demonstration": null,
+        "visualization": null,
+        "description": "A vertical pull that targets the lateral delts and traps. Multi-joint through the shoulder and elbow.",
+        "instructions": "Hold a dumbbell in each hand in front of your thighs, palms facing you. Pull the dumbbells straight up along the body, leading with the elbows until the upper arms are roughly parallel to the floor. Keep the elbows above the wrists, then lower under control. Avoid pulling too high if it causes shoulder pinching."
+      },
+      {
+        "name": "Monkey Rows",
+        "bodyPart": "shoulders",
+        "category": "compound",
+        "equipment": "dumbbell",
+        "difficulty": "intermediate",
+        "demonstration": null,
+        "visualization": null,
+        "description": "A wide dumbbell upright-row variant that drives the elbows high and out to the sides, biasing the lateral delts and traps.",
+        "instructions": "Hold a dumbbell in each hand in front of your thighs, palms facing your body. Pull the dumbbells up close to the torso toward the chest, flaring your elbows high and out to the sides (wider than a standard upright row). Pause at the top with the elbows above the hands, then lower under control."
       }
     ],
     "isolation": [
@@ -373,7 +417,7 @@
       },
       {
         "name": "Face Pull",
-        "bodyPart": "shoulders",
+        "bodyPart": "back",
         "category": "isolation",
         "equipment": "cable",
         "difficulty": "beginner",
@@ -579,6 +623,39 @@
         "visualization": null,
         "description": "A standing rotary-hip (multi-hip) machine movement that isolates the hip flexors by driving the working thigh forward and up against resistance. Strengthens the iliopsoas and rectus femoris for knee drive and sprint mechanics.",
         "instructions": "Stand in the rotary hip machine with the pad against the front of the working thigh and hold the support handles. Drive your knee forward and up against the resistance, pause briefly at the top, then lower under control. Finish the set, then switch to the other leg."
+      },
+      {
+        "name": "Overhead Face Pulls",
+        "bodyPart": "back",
+        "category": "isolation",
+        "equipment": "cable",
+        "difficulty": "beginner",
+        "demonstration": null,
+        "visualization": null,
+        "description": "A face pull performed with the cable set overhead, pulling down and apart. Targets the rear delts and upper-back rotators for posture and shoulder health.",
+        "instructions": "Set a cable with a rope attachment above head height. Grip the rope with palms facing in and step back into tension. Pull the rope down and toward your forehead, driving the elbows down and out and externally rotating at the end. Return under control."
+      },
+      {
+        "name": "Machine Shrugs",
+        "bodyPart": "back",
+        "category": "isolation",
+        "equipment": "machine",
+        "difficulty": "beginner",
+        "demonstration": null,
+        "visualization": null,
+        "description": "A trap-focused shrug performed on a machine, which fixes the movement path and lets you load the upper traps with minimal grip demand.",
+        "instructions": "Grip the handles or rest your shoulders under the pads. Keeping the arms straight, elevate your shoulders straight up toward your ears, pause and squeeze at the top, then lower under control. Avoid rolling the shoulders."
+      },
+      {
+        "name": "Diamond Bar Shrugs",
+        "bodyPart": "back",
+        "category": "isolation",
+        "equipment": "barbell",
+        "difficulty": "beginner",
+        "demonstration": null,
+        "visualization": null,
+        "description": "A shrug performed with a diamond (hex/trap) bar, so the load sits at your sides for a neutral, spine-friendly line of pull on the upper traps.",
+        "instructions": "Stand inside a loaded diamond/trap bar and grip the neutral handles. With arms straight and a tall chest, elevate your shoulders straight up toward your ears, squeeze at the top, then lower under control."
       }
     ]
   },

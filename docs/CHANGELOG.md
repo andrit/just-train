@@ -17,6 +17,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 ### Exercise library
 - Added **Good Mornings** (resistance/compound) and **Hip Flexors (Rotary Machine)** (resistance/isolation) to `exercises-library.json`. (Hip Abductors / Hip Adductors were already present.)
 - `docs/sql/add-hip-leg-exercises.sql` — idempotent prod insert for all four leg/hip exercises (guards on name; safe to re-run).
+- Added **7 back & shoulder exercises** to `exercises-library.json` (seed total 112 → 119):
+  - Back: **Pendlay Row** (compound/barbell), **Yates Row** (compound/barbell), **Overhead Face Pulls** (isolation/cable), **Machine Shrugs** (isolation/machine), **Diamond Bar Shrugs** (isolation/barbell).
+  - Shoulders: **Dumbbell Upright Row** (compound/dumbbell), **Monkey Rows** (compound/dumbbell — wide upright-row variant, lateral-delt/trap bias).
+- Reclassified the existing **Face Pull** from `shoulders` → `back` (it's a trap/upper-back movement).
+- `docs/sql/add-back-shoulder-exercises.sql` — idempotent prod insert for the 7 new exercises (guards on name; safe to re-run) plus an idempotent `UPDATE` moving the existing public Face Pull to `back`.
 
 ### Task 6 (exercise-UI rework) — verification
 - Confirmed per-set **reps** prefill (`targetRepsPerSet` → `getSetTargetReps`) and per-set **weight-from-history** prefill (`GET /clients/:id/exercise-history/:exerciseId` returns every set of the last completed session, indexed by set position). The authored weight ramp was intentionally not built as a persisted per-set array — replaced by the start-+-step model above.

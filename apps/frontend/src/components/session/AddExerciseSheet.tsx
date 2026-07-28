@@ -548,12 +548,15 @@ export function AddExerciseSheet({
 
   // Quick-add with default targets (swipe-to-add or "Add with defaults" button)
   const handleSwipeAdd = (exercise: ExerciseSummaryResponse): void => {
+    // Defaults follow the exercise's own type, not the block's — a cardio machine
+    // dropped into a resistance block still gets time/intensity, not reps/weight.
+    const t = exercise.workoutType ?? workoutType
     const defaults: Omit<AddExerciseInput, 'sessionId' | 'exerciseId'> =
-      workoutType === 'resistance'   ? { targetSets: 3, targetReps: 10 }
-      : workoutType === 'cardio'     ? { targetSets: 4, targetDurationSeconds: 60 }
-      : workoutType === 'calisthenics' ? { targetSets: 3, targetReps: 15 }
-      : workoutType === 'stretching' ? { targetSets: 2, targetDurationSeconds: 30 }
-      : workoutType === 'cooldown'   ? { targetDurationSeconds: 120 }
+      t === 'resistance'   ? { targetSets: 3, targetReps: 10 }
+      : t === 'cardio'     ? { targetSets: 4, targetDurationSeconds: 60 }
+      : t === 'calisthenics' ? { targetSets: 3, targetReps: 15 }
+      : t === 'stretching' ? { targetSets: 2, targetDurationSeconds: 30 }
+      : t === 'cooldown'   ? { targetDurationSeconds: 120 }
       : { targetSets: 3, targetReps: 10 }
     addExercise.mutate(
       { sessionId, exerciseId: exercise.id, ...defaults },
@@ -569,8 +572,15 @@ export function AddExerciseSheet({
     return { targetRepsPerSet: seq.join(','), targetReps: seq[0] ?? reps }
   }
 
+  // Target config follows the SELECTED exercise's own workout type (falling back to
+  // the block type for quick-add drafts / when no exercise is chosen). The backend
+  // already stores the exercise's library workoutType on the session-exercise, so this
+  // keeps the target form, the stored type, and live logging consistent — a cardio
+  // exercise added to any block gets cardio metrics (time / distance / intensity).
+  const effectiveType = selected?.workoutType ?? workoutType
+
   const buildInput = (): Omit<AddExerciseInput, 'sessionId' | 'exerciseId'> => {
-    switch (workoutType) {
+    switch (effectiveType) {
       case 'resistance':
         return {
           targetSets,
@@ -631,11 +641,11 @@ export function AddExerciseSheet({
 
   const isPending = addExercise.isPending || createExercise.isPending
 
-  // Label for the targets step
+  // Label for the targets step — follows the exercise's own type (matches the inputs shown)
   const targetsTitle =
-    workoutType === 'cardio'       ? 'Set targets — Cardio'
-    : workoutType === 'stretching' ? 'Set targets — Stretch'
-    : workoutType === 'cooldown'   ? 'Set duration'
+    effectiveType === 'cardio'       ? 'Set targets — Cardio'
+    : effectiveType === 'stretching' ? 'Set targets — Stretch'
+    : effectiveType === 'cooldown'   ? 'Set duration'
     : 'Set targets'
 
   return (
@@ -778,8 +788,8 @@ export function AddExerciseSheet({
             )}
           </div>
 
-          {/* Type-aware targets */}
-          {workoutType === 'resistance' && (
+          {/* Type-aware targets — driven by the exercise's own type, not the block's */}
+          {effectiveType === 'resistance' && (
             <ResistanceTargets
               sets={targetSets} reps={targetReps} weight={targetWeight} weightStep={weightStep} weightUnit={weightUnit}
               repsMode={repsMode} repsStep={repsStep} repsPerSet={repsPerSet} useLastWeight={useLastWeight}
@@ -788,7 +798,7 @@ export function AddExerciseSheet({
               onWeight={setTargetWeight} onWeightStep={setWeightStep} onUseLastWeight={setUseLastWeight}
             />
           )}
-          {workoutType === 'cardio' && (
+          {effectiveType === 'cardio' && (
             <CardioTargets
               rounds={cardioRounds} metric={cardioMetric}
               distance={cardioDistance} duration={cardioDuration} intensity={cardioIntensity}
@@ -796,7 +806,7 @@ export function AddExerciseSheet({
               onDistance={setCardioDistance} onDuration={setCardioDuration} onIntensity={setCardioIntensity}
             />
           )}
-          {workoutType === 'calisthenics' && (
+          {effectiveType === 'calisthenics' && (
             <CalisthenicsTargets
               mode={caliMode} sets={caliSets} reps={caliReps} duration={caliDuration}
               repsMode={caliRepsMode} repsStep={caliRepsStep} repsPerSet={caliRepsPerSet}
@@ -805,16 +815,16 @@ export function AddExerciseSheet({
               onDuration={setCaliDuration}
             />
           )}
-          {workoutType === 'stretching' && (
+          {effectiveType === 'stretching' && (
             <StretchTargets
               sets={stretchSets} duration={stretchHold}
               onSets={setStretchSets} onDuration={setStretchHold}
             />
           )}
-          {workoutType === 'cooldown' && (
+          {effectiveType === 'cooldown' && (
             <CooldownTargets duration={cooldownDur} onDuration={setCooldownDur} />
           )}
-          {!['resistance','cardio','calisthenics','stretching','cooldown'].includes(workoutType) && (
+          {!['resistance','cardio','calisthenics','stretching','cooldown'].includes(effectiveType) && (
             <div className="flex justify-around items-start">
               <DragStepper value={targetSets} onChange={setTargetSets} min={1} max={10} label="Sets" />
               <div className="text-2xl text-gray-700 pt-8">×</div>

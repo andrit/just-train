@@ -271,7 +271,10 @@ export default function DashboardPage(): React.JSX.Element {
   const visibleWidgets = useMemo(() => {
     return widgetOrder.filter((id: WidgetId) => {
       if (id === 'atRisk' && !showAlert) return false
-      if (trainerMode === 'athlete' && ['atRisk', 'activeClients', 'newClients'].includes(id)) return false
+      // Phase 7 widgets have no renderer yet — exclude so they don't leave empty slots.
+      if (['volume', 'streak', 'newClients'].includes(id)) return false
+      // 'selfTraining' (Start Training / Profile) duplicates the action hub for athletes.
+      if (trainerMode === 'athlete' && ['atRisk', 'activeClients', 'selfTraining'].includes(id)) return false
       return true
     })
   }, [widgetOrder, showAlert, trainerMode])

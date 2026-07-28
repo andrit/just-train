@@ -105,10 +105,8 @@ export const DEFAULT_TRAINER_WIDGET_ORDER: WidgetId[] = [
 ]
 
 export const DEFAULT_ATHLETE_WIDGET_ORDER: WidgetId[] = [
-  'selfTraining',
   'recentSessions',
   'goals',
-  'streak',
 ]
 
 // ── Parse / serialize ─────────────────────────────────────────────────────────

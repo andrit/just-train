@@ -6,43 +6,9 @@
 // each metric.
 // ------------------------------------------------------------
 
-import { useState }                     from 'react'
-import { cn }                           from '@/lib/cn'
 import { useClientPersonalBests }       from '@/lib/queries/clients'
 import { Spinner }                      from '@/components/ui/Spinner'
-
-// ── Info tooltip ──────────────────────────────────────────────────────────────
-
-function InfoTip({ text }: { text: string }): React.JSX.Element {
-  const [open, setOpen] = useState(false)
-  return (
-    <span className="relative inline-block">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-4 h-4 rounded-full border border-gray-600 text-gray-600 hover:border-gray-400 hover:text-gray-400 text-[9px] font-bold leading-none flex items-center justify-center transition-colors"
-        aria-label="More info"
-      >
-        i
-      </button>
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setOpen(false)}
-          />
-          <div className={cn(
-            'absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50',
-            'w-56 px-3 py-2 rounded-xl text-xs text-gray-300 leading-relaxed',
-            'bg-brand-primary border border-surface-border shadow-lg',
-          )}>
-            {text}
-          </div>
-        </>
-      )}
-    </span>
-  )
-}
+import { HintPopover }                  from '@/components/ui/HintPopover'
 
 // ── Personal bests table ──────────────────────────────────────────────────────
 
@@ -86,11 +52,11 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
         <p className="flex-1 text-[10px] uppercase tracking-widest text-gray-600">Exercise</p>
         <div className="flex items-center gap-1 w-28 justify-end">
           <p className="text-[10px] uppercase tracking-widest text-gray-600">1RM est.</p>
-          <InfoTip text="Estimated max single rep using the Epley formula: weight × (1 + reps ÷ 30)" />
+          <HintPopover glyph="i" side="top" text="Estimated max single rep using the Epley formula: weight × (1 + reps ÷ 30). Swipe to dismiss." />
         </div>
         <div className="flex items-center gap-1 w-28 justify-end">
           <p className="text-[10px] uppercase tracking-widest text-gray-600">Vol. PR</p>
-          <InfoTip text="Highest single-set volume: weight × reps. e.g. 80kg × 10 = 800" />
+          <HintPopover glyph="i" side="top" text="Highest single-set volume: weight × reps. e.g. 80kg × 10 = 800. Swipe to dismiss." />
         </div>
       </div>
 

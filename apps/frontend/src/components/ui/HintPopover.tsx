@@ -1,12 +1,12 @@
 // ------------------------------------------------------------
 // components/ui/HintPopover.tsx
 //
-// A small circular "?" button that opens a hint bubble. The bubble is
-// swipe-to-dismiss (drag horizontally past a threshold to fling it away) and
-// also closes on backdrop tap, Escape, or tapping the button again.
+// A small circular "?"/"i" button (see `glyph`) that opens a hint bubble. The
+// bubble is swipe-to-dismiss (drag horizontally past a threshold to fling it
+// away) and also closes on backdrop tap, Escape, or tapping the button again.
 //
-// Reusable tip affordance — see PersonalBestsTab's inline InfoTip, which this
-// is intended to replace (tracked as a follow-up task).
+// Reusable tip affordance — used for the {date} hint (PostSessionWrapUp) and the
+// metric tooltips on the Personal Bests tab.
 // ------------------------------------------------------------
 
 import { useEffect, useRef, useState } from 'react'
@@ -15,6 +15,8 @@ import { cn } from '@/lib/cn'
 interface HintPopoverProps {
   /** Hint body text. */
   text:       string
+  /** Glyph inside the circular button — "?" (help) or "i" (info). */
+  glyph?:     string
   /** Extra classes on the button wrapper (usually positioning). */
   className?: string
   /** Bubble placement relative to the button. */
@@ -26,6 +28,7 @@ const DISMISS_THRESHOLD = 50   // px of horizontal travel to fling-dismiss
 
 export function HintPopover({
   text,
+  glyph = '?',
   className,
   side = 'bottom',
   ariaLabel = 'More info',
@@ -70,7 +73,7 @@ export function HintPopover({
         aria-expanded={open}
         className="w-4 h-4 rounded-full border border-gray-600 text-gray-500 hover:border-gray-400 hover:text-gray-300 text-[10px] font-bold leading-none flex items-center justify-center transition-colors"
       >
-        ?
+        {glyph}
       </button>
 
       {open && (

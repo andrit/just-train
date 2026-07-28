@@ -15,6 +15,13 @@
       "when": 1781976060507,
       "tag": "0001_milky_morgan_stark",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785250928351,
+      "tag": "0002_reconcile_idempotency_and_weight_step",
+      "breakpoints": true
     }
   ]
 }

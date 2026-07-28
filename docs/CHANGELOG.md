@@ -61,6 +61,10 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - **`BottomSheet` now closes on a swipe-down of its drag handle** (handle-scoped, mirroring `ActiveSessionOverlay`; tap-backdrop + Esc unchanged) — its header already advertised "swipe down" but it was never wired. `GESTURE_GUIDE.md` updated to match (gap closed).
 - Extracted the drag-handle swipe-to-dismiss into `hooks/useSwipeDismiss` — `ActiveSessionOverlay` (minimise) and `BottomSheet` (close) now share it (`<div {...useSwipeDismiss(onClose)} />`) instead of duplicating the touch math. Behaviour unchanged.
 
+### Database
+- **Reconciled Drizzle migration drift.** `idempotency_keys` (v2.14.1) and `session_exercises.target_weight_step` were applied to prod via `db:push` / manual SQL but never captured in a generated migration. `drizzle/0002_reconcile_idempotency_and_weight_step.sql` now adds both — fully **idempotent** (`CREATE TABLE IF NOT EXISTS`, FK guarded by a `duplicate_object` exception, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`) — plus the updated `meta/` snapshot + journal, so `drizzle-kit generate` is clean going forward and a fresh DB builds the complete schema.
+  - **Prod:** already has both changes and has never used the migration runner, so treat `0002` as **already-applied (baseline the migration table)** rather than running it. Because every statement is guarded, an accidental run against prod is a harmless no-op.
+
 ### Task 6 (exercise-UI rework) — verification
 - Confirmed per-set **reps** prefill (`targetRepsPerSet` → `getSetTargetReps`) and per-set **weight-from-history** prefill (`GET /clients/:id/exercise-history/:exerciseId` returns every set of the last completed session, indexed by set position). The authored weight ramp was intentionally not built as a persisted per-set array — replaced by the start-+-step model above.
 

@@ -86,7 +86,8 @@ Motion is feedback — it tells you something happened. Here's the vocabulary yo
 
 - **`lib/interactions.ts`** — the reusable press / hover / pulse / lift class values (`button`, `fab`, `card`, `danger`, `icon`). Import these instead of re-styling motion per component.
 - **`lib/ux-events.ts`** — a semantic motion engine: `fire('type', { target })` plays a consistent animation and runs any registered side effect. See the Developer section for the full palette.
-- **Per-component** — physical gestures (swipe, drag, pinch) are hand-rolled with touch/pointer handlers in the component named in each entry above. There is no shared `useSwipe` hook yet; if you add a third swipe, consider extracting one.
+- **`hooks/useSwipeDismiss`** — the shared drag-handle swipe-down used by the session overlay (minimise) and bottom sheets (close). Spread it onto a handle element: `<div {...useSwipeDismiss(onClose)} />`.
+- **Per-component** — other physical gestures are still hand-rolled with touch/pointer handlers in the component named in each entry above.
 
 ---
 
@@ -122,7 +123,7 @@ If the shipping set above isn't enough, most of what you'd want already exists a
 Note: some of these overlap gestures already built by hand (e.g. `swipe_right` exists physically in `ExerciseAccordionRow` without going through `fire()`). The table describes the *animation engine's* intent — wiring a bespoke gesture to also `fire()` the matching event gives it the shared look for free.
 
 **Known gaps:**
-- **No shared swipe/drag hook** — each gesture re-implements its own touch/pointer math, and the `ActiveSessionOverlay` and `BottomSheet` handle-swipes are now near-identical. Extract a `useSwipeDismiss` next time you touch either.
+- **Most gestures still roll their own touch math** — the handle swipe-to-dismiss is now shared (`hooks/useSwipeDismiss`), but `ExerciseAccordionRow` (swipe-right), `HintPopover` (sideways fling) and `DragStepper` each implement their own. Fold into shared hooks if a pattern repeats.
 
 ---
 

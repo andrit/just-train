@@ -18,7 +18,8 @@
 // (timer state, input focus) is never lost on navigation.
 // ------------------------------------------------------------
 
-import { useEffect, useRef, useState }    from 'react'
+import { useEffect, useState }            from 'react'
+import { useSwipeDismiss }                from '@/hooks/useSwipeDismiss'
 import { cn }                              from '@/lib/cn'
 import { interactions }                    from '@/lib/interactions'
 import { useSessionStore }                 from '@/store/sessionStore'
@@ -97,7 +98,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
   const { state, focusedClientId, expand, minimise, sidebarOpen } = useOverlayStore()
   const { data: clients }                                      = useClients()
   const { data: selfClient }                                   = useSelfClient()
-  const dragStartY                                             = useRef<number | null>(null)
+  const swipeToMinimise                                        = useSwipeDismiss(minimise)
 
   // Match sidebar width: collapsed = w-14 (3.5rem), full = w-56 (14rem)
   const sidebarOffset = (state === 'expanded' && !sidebarOpen) ? 'md:left-14' : 'md:left-56'
@@ -127,19 +128,6 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
     return clients?.find(c => c.id === clientId)?.name
       ?? activeSessions[clientId]?.clientName
       ?? 'Session'
-  }
-
-  // ── Swipe down to minimise ────────────────────────────────────────────────
-
-  const onTouchStart = (e: React.TouchEvent): void => {
-    dragStartY.current = e.touches[0]?.clientY ?? null
-  }
-
-  const onTouchEnd = (e: React.TouchEvent): void => {
-    if (dragStartY.current === null) return
-    const dy = (e.changedTouches[0]?.clientY ?? 0) - dragStartY.current
-    if (dy > 60) minimise()
-    dragStartY.current = null
   }
 
   // ── Minimised pill(s) ────────────────────────────────────────────────────
@@ -181,8 +169,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
           can never register as a downward swipe and minimise by accident. */}
       <div
         className="flex justify-center pt-2 pb-3 shrink-0 cursor-grab touch-none"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
+        {...swipeToMinimise}
       >
         <div className="w-10 h-1 rounded-full bg-surface-border" />
       </div>

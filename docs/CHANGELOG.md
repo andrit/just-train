@@ -48,6 +48,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - The `SESSION DONE` screen (`SessionSummaryPage`) now shows a per-exercise breakdown below the stat tiles: each exercise → its sets (reps × weight, colour-coded green/amber vs target), Load/Vol record chips, a per-exercise **volume subtotal** and **est. 1RM** (Epley of the best set), and a **grand-total volume** footer row. Frontend-only — the data was already on the page via `useSession`.
 - New shared component `components/session/SessionExerciseBreakdown.tsx` (props: `sessionExercises`, `showVolumeTotals`, `showEst1rm`, `prFilter`, `renderMediaThumbs`). `SessionHistoryPanel` was refactored to render through it (behaviour-preserving — keeps its PR filter + media thumbs, no totals/est-1RM), removing the duplicated set-row markup that had already drifted once during the Load/Volume rename.
 
+### Post-completion workout name — {date} token
+- The post-session name field (`PostSessionWrapUp`) accepts a `{date}` token that resolves to the workout's date in a short friendly form — "Leg Day - {date}" saves as "Leg Day - Jul-28-26". Resolved at save time (`LiveSessionContent.handleWrapUpDone`) and stored as the literal string (what's stored is what's shown). A live "Saves as …" preview appears under the input while typing.
+- `lib/sessionName.ts` — pure `resolveNameTokens` (extensible token map, case-insensitive, unknown `{tokens}` pass through) + `formatShortDate`. Unit-tested (7 cases).
+- New `components/ui/HintPopover.tsx` — reusable circular "?" info button + popover with **swipe-to-dismiss** (fling horizontally past ~50px, animates out; backdrop-tap + Escape fallbacks). Used for the token hint; a follow-up task tracks migrating `PersonalBestsTab`'s inline `InfoTip` to it.
+
 ### Task 6 (exercise-UI rework) — verification
 - Confirmed per-set **reps** prefill (`targetRepsPerSet` → `getSetTargetReps`) and per-set **weight-from-history** prefill (`GET /clients/:id/exercise-history/:exerciseId` returns every set of the last completed session, indexed by set position). The authored weight ramp was intentionally not built as a persisted per-set array — replaced by the start-+-step model above.
 

@@ -12,6 +12,8 @@ import { interactions }                       from '@/lib/interactions'
 import { Spinner }                            from '@/components/ui/Spinner'
 import { useChallenges }                      from '@/lib/queries/challenges'
 import { markFirstSessionCompleted }          from '@/lib/installPrompt'
+import { resolveNameTokens }                  from '@/lib/sessionName'
+import { HintPopover }                        from '@/components/ui/HintPopover'
 import type { SessionDetailResponse }         from '@trainer-app/shared'
 
 interface PostSessionWrapUpProps {
@@ -133,9 +135,24 @@ export function PostSessionWrapUp({
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
-            placeholder="e.g. Push Day, Monday Strength…"
+            placeholder="e.g. Push Day, Leg Day - {date}…"
             className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
           />
+          {name.trim() !== '' && (
+            <div className="relative mt-2 pr-5">
+              <p className="text-[11px] text-gray-500">
+                Saves as{' '}
+                <span className="text-gray-300 font-medium">
+                  {resolveNameTokens(name, { date: session.date })}
+                </span>
+              </p>
+              <HintPopover
+                className="absolute top-0 right-0"
+                side="bottom"
+                text="Use {date} in the name to insert the workout's date — “Leg Day - {date}” becomes “Leg Day - Jul-28-26”. Swipe this hint away to dismiss."
+              />
+            </div>
+          )}
         </div>
 
         {/* Done button */}

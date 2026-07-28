@@ -27,6 +27,7 @@ import { WorkoutBlock }                   from '@/components/session/WorkoutBloc
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
 import { EndSessionModal }                from '@/components/session/EndSessionModal'
 import { PostSessionWrapUp }              from '@/components/session/PostSessionWrapUp'
+import { resolveNameTokens }              from '@/lib/sessionName'
 import { Spinner }                        from '@/components/ui/Spinner'
 
 interface LiveSessionContentProps {
@@ -118,8 +119,10 @@ export default function LiveSessionContent({
 
   const handleWrapUpDone = (name?: string): void => {
     if (name && session?.id) {
+      // Resolve {date} (and any future tokens) to a literal before saving.
+      const resolved = resolveNameTokens(name, { date: session.date })
       updateSession.mutate(
-        { id: session.id, name },
+        { id: session.id, name: resolved },
         { onSuccess: () => navigate(`/session/${sessionId}/summary`) },
       )
     } else {

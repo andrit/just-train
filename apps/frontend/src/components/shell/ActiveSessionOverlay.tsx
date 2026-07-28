@@ -175,11 +175,15 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
       aria-modal="true"
       aria-label={sessionLabel}
       className={cn('fixed inset-0 z-[20] bg-brand-primary flex flex-col transition-all duration-300', sidebarOffset)}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
     >
-      {/* Drag handle */}
-      <div className="flex justify-center pt-2 pb-0 shrink-0">
+      {/* Drag handle — swipe down HERE to minimise. Scoped to the handle (not the
+          whole overlay) so scrolling the content or tapping a control like "End"
+          can never register as a downward swipe and minimise by accident. */}
+      <div
+        className="flex justify-center pt-2 pb-3 shrink-0 cursor-grab touch-none"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="w-10 h-1 rounded-full bg-surface-border" />
       </div>
 

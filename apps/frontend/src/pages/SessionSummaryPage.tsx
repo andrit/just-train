@@ -12,6 +12,7 @@ import { interactions }                  from '@/lib/interactions'
 import { useSession }                    from '@/lib/queries/sessions'
 import { Spinner }                       from '@/components/ui/Spinner'
 import { ErrorState }                   from '@/components/ui/ErrorState'
+import { SessionExerciseBreakdown }      from '@/components/session/SessionExerciseBreakdown'
 
 function ScoreBar({ label, value }: { label: string; value: number }): React.JSX.Element {
   return (
@@ -108,6 +109,18 @@ export default function SessionSummaryPage(): React.JSX.Element {
           <p className="text-sm text-gray-400">
             Duration: <span className="font-mono text-white">{durationMin} min</span>
           </p>
+        </div>
+      )}
+
+      {/* Exercise breakdown — per-exercise sets, est. 1RM, volume subtotals + total */}
+      {sessionExercises.length > 0 && (
+        <div className="mb-6">
+          <h3 className="section-label mb-2">Exercise breakdown</h3>
+          <SessionExerciseBreakdown
+            sessionExercises={sessionExercises}
+            showVolumeTotals
+            showEst1rm
+          />
         </div>
       )}
 

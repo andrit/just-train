@@ -15,6 +15,7 @@ import { ApiError }            from '@/lib/api'
 import { useSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { formatDate, formatDuration, formatTotalVolume } from '@/lib/formatters'
 import { Spinner }             from '@/components/ui/Spinner'
+import { SessionExerciseBreakdown } from '@/components/session/SessionExerciseBreakdown'
 import { MediaPlaybackModal }  from '@/components/session/MediaPlaybackModal'
 
 function ScoreRow({ label, value }: { label: string; value: number }): React.JSX.Element {
@@ -157,63 +158,16 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
 
       {/* Exercise breakdown */}
       <div className="px-4 py-4 space-y-3 flex-1">
-        {(session.sessionExercises ?? []).map((se) => (
-          <div key={se.id} className="bg-surface rounded-xl px-3 py-3 border border-surface-border">
-            <div className="flex items-center gap-2 mb-2">
-              <p className="font-medium text-sm text-gray-200">
-                {se.exercise?.name ?? 'Unknown'}
-              </p>
-              <ExerciseMediaThumbs
-                sessionExerciseId={se.id}
-                onTap={(idx) => setMediaViewer({ sessionExerciseId: se.id, startIdx: idx })}
-              />
-            </div>
-            <div className="space-y-1">
-              {se.sets
-                .filter(set => !prFilterOn || set.isLoadRecord || set.isVolumeRecord)
-                .map((set, i) => {
-                const hitReps   = !se.targetReps   || (set.reps ?? 0) >= se.targetReps
-                const hitWeight = !se.targetWeight || (set.weight ?? 0) >= se.targetWeight
-                const hit = hitReps && hitWeight
-
-                return (
-                  <div key={set.id} className="flex items-center gap-3 text-xs font-mono">
-                    <span className="text-gray-600 w-5">{i + 1}</span>
-                    <div className={cn(
-                      'flex items-center gap-1 flex-1',
-                      hit ? 'text-emerald-400' : 'text-amber-400',
-                    )}>
-                      {set.weight != null && <span>{set.weight}</span>}
-                      {set.weight != null && set.reps != null && <span className="text-gray-600">×</span>}
-                      {set.reps != null && <span>{set.reps}</span>}
-                      {set.durationSeconds != null && <span>{set.durationSeconds}s</span>}
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      {set.isLoadRecord && (
-                        <span className="text-[9px] font-medium bg-amber-500/15 border border-amber-500/30 text-amber-400 px-1.5 py-0.5 rounded-full">
-                          Load
-                        </span>
-                      )}
-                      {set.isVolumeRecord && (
-                        <span className="text-[9px] font-medium bg-command-blue/10 border border-command-blue/30 text-command-blue px-1.5 py-0.5 rounded-full">
-                          Vol
-                        </span>
-                      )}
-                      {!set.isLoadRecord && !set.isVolumeRecord && (se.targetReps || se.targetWeight) && (
-                        <span className="text-gray-700 text-[10px]">
-                          {se.targetWeight && `${se.targetWeight}×`}{se.targetReps}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-              {se.sets.length === 0 && (
-                <p className="text-xs text-gray-600 italic">No sets logged</p>
-              )}
-            </div>
-          </div>
-        ))}
+        <SessionExerciseBreakdown
+          sessionExercises={session.sessionExercises ?? []}
+          prFilter={prFilterOn}
+          renderMediaThumbs={(se) => (
+            <ExerciseMediaThumbs
+              sessionExerciseId={se.id}
+              onTap={(idx) => setMediaViewer({ sessionExerciseId: se.id, startIdx: idx })}
+            />
+          )}
+        />
 
         {/* Subjective scores */}
         {(session.energyLevel || session.mobilityFeel || session.stressLevel) && (

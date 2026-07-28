@@ -53,6 +53,9 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - `lib/sessionName.ts` — pure `resolveNameTokens` (extensible token map, case-insensitive, unknown `{tokens}` pass through) + `formatShortDate`. Unit-tested (7 cases).
 - New `components/ui/HintPopover.tsx` — reusable circular info button + popover with **swipe-to-dismiss** (fling horizontally past ~50px, animates out; backdrop-tap + Escape fallbacks). Takes a `glyph` prop ("?" for help, "i" for info). Used for the `{date}` token hint and the Personal Bests metric tooltips — the inline `InfoTip` in `PersonalBestsTab` was removed in favour of it (DRY; adds swipe-to-dismiss there too).
 
+### Docs
+- `docs/GESTURE_GUIDE.md` — new plain-language map of every shipping touch gesture and interaction animation (what it does, where, and the component behind it), written to be read by an end user. Includes a **developer palette** of the `ux-events` motion vocabulary (8 wired today; the rest defined and ready) and a **known-gaps** note (e.g. `BottomSheet` advertises "swipe down" in its comment but only tap-backdrop/Esc are wired). Governing rule: update it in the same commit as any interaction change.
+
 ### Task 6 (exercise-UI rework) — verification
 - Confirmed per-set **reps** prefill (`targetRepsPerSet` → `getSetTargetReps`) and per-set **weight-from-history** prefill (`GET /clients/:id/exercise-history/:exerciseId` returns every set of the last completed session, indexed by set position). The authored weight ramp was intentionally not built as a persisted per-set array — replaced by the start-+-step model above.
 

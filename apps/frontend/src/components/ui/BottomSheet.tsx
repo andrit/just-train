@@ -36,7 +36,8 @@ export function BottomSheet({
   children,
   maxHeight = '80vh',
 }: BottomSheetProps): React.JSX.Element {
-  const sheetRef = useRef<HTMLDivElement>(null)
+  const sheetRef   = useRef<HTMLDivElement>(null)
+  const dragStartY = useRef<number | null>(null)
 
   // Move focus into the sheet ONLY when it opens — not on every re-render.
   // This must depend on `open` alone. It used to live in the same effect as the
@@ -110,8 +111,19 @@ export function BottomSheet({
         )}
         style={{ maxHeight }}
       >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
+        {/* Drag handle — swipe down here to dismiss. Scoped to the handle (not the
+            sheet body) so scrolling the content never closes it; mirrors the
+            handle-swipe on ActiveSessionOverlay. */}
+        <div
+          className="flex justify-center pt-3 pb-2 cursor-grab touch-none"
+          onTouchStart={(e) => { dragStartY.current = e.touches[0]?.clientY ?? null }}
+          onTouchEnd={(e) => {
+            if (dragStartY.current === null) return
+            const dy = (e.changedTouches[0]?.clientY ?? 0) - dragStartY.current
+            if (dy > 60) onClose()
+            dragStartY.current = null
+          }}
+        >
           <div className="w-10 h-1 rounded-full bg-surface-border" />
         </div>
 

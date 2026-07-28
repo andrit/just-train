@@ -53,8 +53,8 @@ Sets, reps, scores and the like use a drag-stepper: drag up to raise the value, 
 
 ### Sheets & hints
 
-**Tap outside or press Esc → close a sheet.**
-Bottom sheets (add exercise, pick template, camera, etc.) close when you tap the dark area behind them or press Escape. The grey bar at the top is a visual handle — see *Known gaps* about swiping it.
+**Swipe the handle down, tap outside, or press Esc → close a sheet.**
+Bottom sheets (add exercise, pick template, camera, etc.) close when you drag the grey handle at the top downward, tap the dark area behind them, or press Escape. Dragging is scoped to the handle, so scrolling through a long sheet won't close it.
 *Where:* all bottom sheets · *Under the hood:* `BottomSheet`
 
 **Swipe a hint away → dismiss it.**
@@ -121,9 +121,8 @@ If the shipping set above isn't enough, most of what you'd want already exists a
 
 Note: some of these overlap gestures already built by hand (e.g. `swipe_right` exists physically in `ExerciseAccordionRow` without going through `fire()`). The table describes the *animation engine's* intent — wiring a bespoke gesture to also `fire()` the matching event gives it the shared look for free.
 
-**Known gaps** (documented so nobody assumes they work):
-- **Swipe-to-close on bottom sheets** — `BottomSheet` shows a drag handle and its header comment says "swipe down," but only tap-backdrop and Esc are wired. Add a drag-dismiss handler (mirror `ActiveSessionOverlay`'s handle-scoped swipe) if you want the gesture to be real.
-- **No shared swipe/drag hook** — each gesture re-implements its own touch/pointer math. Extract a `useSwipe` when the count justifies it.
+**Known gaps:**
+- **No shared swipe/drag hook** — each gesture re-implements its own touch/pointer math, and the `ActiveSessionOverlay` and `BottomSheet` handle-swipes are now near-identical. Extract a `useSwipeDismiss` next time you touch either.
 
 ---
 

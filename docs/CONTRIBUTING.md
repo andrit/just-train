@@ -86,6 +86,22 @@ pnpm typecheck                     # must pass before push
 
 ---
 
+## UI interactions & gestures
+
+Any time you add, remove, or change a touch gesture or interaction animation — a
+swipe, drag, tap target, slide, flash, or a `fire()`d motion event — update
+[`GESTURE_GUIDE.md`](./GESTURE_GUIDE.md) **in the same commit**. It's the
+plain-language source of truth for what the interface does in response to touch;
+an entry that lies is worse than no entry.
+
+- New physical gesture → add it under *Gestures that ship*.
+- New motion/feedback → add it under *What the app does back*.
+- Wired up a previously-idle `ux-events` type → move it to "wired" in the developer palette.
+- **Before hand-rolling animation,** reach for an existing `ux-events` type via
+  `fire('type', { target })` — the palette in the guide lists what's available.
+
+---
+
 ## Test-driven development (backend routes)
 
 New backend routes use TDD. Write the test file before the implementation.
@@ -141,4 +157,5 @@ Before tagging a release:
 - [ ] `PROJECT_STATE.md` current version + roadmap updated
 - [ ] `DEFERRED_ITEMS.md` reviewed — completed items marked, new deferred items added
 - [ ] `CHANGELOG.md` entry written
+- [ ] `GESTURE_GUIDE.md` updated if any gesture/interaction changed
 - [ ] `pnpm db:push` run if schema changed

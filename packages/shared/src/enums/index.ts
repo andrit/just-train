@@ -45,6 +45,13 @@ export type Side = z.infer<typeof SideEnum>
 export const DifficultyEnum = z.enum(['beginner', 'intermediate', 'advanced'])
 export type Difficulty = z.infer<typeof DifficultyEnum>
 
+// Laterality — whether the two sides of the body are trained together or one at a time.
+// bilateral  = both limbs move together; one rep count covers both (barbell squat, bench).
+// unilateral = may be trained one side at a time; surfaces the per-side toggle + L/R
+//              drill-down (Bulgarian split squat, single-arm row, dumbbell curl).
+export const LateralityEnum = z.enum(['bilateral', 'unilateral'])
+export type Laterality = z.infer<typeof LateralityEnum>
+
 // Compound = multi-joint (squat, bench, row). Isolation = single-joint (curl, extension).
 // Primarily used for resistance exercises. Optional for other workout types.
 export const ExerciseCategoryEnum = z.enum(['compound', 'isolation'])

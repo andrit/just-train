@@ -18,6 +18,7 @@
 import type {
   Trainer, Client, RefreshToken, ClientGoal, ClientSnapshot,
   Session, Challenge, Template, TemplateExercise,
+  Exercise, SessionExercise, Set,
 } from '../../db/schema'
 
 // Stable test IDs — using fixed UUIDs makes test output easier to read
@@ -34,6 +35,8 @@ export const TEST_TEMPLATE_ID         = 'cccccccc-cccc-cccc-cccc-cccccccccccc'
 export const TEST_TEMPLATE_WORKOUT_ID = 'dddddddd-dddd-dddd-dddd-dddddddddddd'
 export const TEST_TEMPLATE_EXERCISE_ID= 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
 export const TEST_EXERCISE_ID         = 'ffffffff-0000-0000-0000-ffffffffffff'
+export const TEST_SESSION_EXERCISE_ID = 'ffffffff-1111-1111-1111-ffffffffffff'
+export const TEST_SET_ID              = 'ffffffff-2222-2222-2222-ffffffffffff'
 
 // ── Trainer ───────────────────────────────────────────────────────────────────
 
@@ -314,4 +317,82 @@ export function makeTemplateExercise(overrides: Partial<TemplateExercise> = {}):
 
 export const validTemplateBody = {
   name: 'Push Day A',
+}
+
+// ── Exercise ────────────────────────────────────────────────────────────────
+// Bilateral by default. Pass { laterality: 'unilateral' } for single-limb work.
+export function makeExercise(overrides: Partial<Exercise> = {}): Exercise {
+  return {
+    id:            TEST_EXERCISE_ID,
+    trainerId:     null,          // public library exercise
+    name:          'Barbell Back Squat',
+    description:   null,
+    instructions:  null,
+    bodyPartId:    TEST_UNKNOWN_ID,
+    workoutType:   'resistance' as const,
+    equipment:     'barbell' as const,
+    difficulty:    'intermediate' as const,
+    category:      'compound' as const,
+    laterality:    'bilateral' as const,
+    isDraft:       false,
+    isPublic:      true,
+    visualization: null,
+    demonstration: null,
+    createdAt:     new Date(),
+    updatedAt:     new Date(),
+    ...overrides,
+  }
+}
+
+// ── Session Exercise ──────────────────────────────────────────────────────────
+// trackPerSide defaults false; set it true to simulate a unilateral exercise
+// added to a live session (the route derives this from exercise.laterality).
+export function makeSessionExercise(overrides: Partial<SessionExercise> = {}): SessionExercise {
+  return {
+    id:                    TEST_SESSION_EXERCISE_ID,
+    sessionId:             TEST_SESSION_ID,
+    exerciseId:            TEST_EXERCISE_ID,
+    workoutType:           'resistance' as const,
+    orderIndex:            0,
+    trackPerSide:          false,
+    targetSets:            3,
+    targetReps:            8,
+    targetRepsPerSet:      null,
+    targetWeight:          60,
+    targetWeightStep:      null,
+    targetWeightUnit:      'lbs' as const,
+    targetDurationSeconds: null,
+    targetDistance:        null,
+    targetIntensity:       null,
+    notes:                 null,
+    ...overrides,
+  }
+}
+
+// ── Set ───────────────────────────────────────────────────────────────────────
+// Bilateral by default. For per-side work pass { perSide: true } and, for an
+// asymmetric split, { repsLeft, repsRight }.
+export function makeSet(overrides: Partial<Set> = {}): Set {
+  return {
+    id:                TEST_SET_ID,
+    sessionExerciseId: TEST_SESSION_EXERCISE_ID,
+    setNumber:         1,
+    reps:              10,
+    weight:            100,
+    weightUnit:        'lbs' as const,
+    durationSeconds:   null,
+    distance:          null,
+    speed:             null,
+    intensity:         null,
+    side:              null,
+    perSide:           false,
+    repsLeft:          null,
+    repsRight:         null,
+    rpe:               null,
+    notes:             null,
+    isPR:              false,
+    isPRVolume:        false,
+    createdAt:         new Date(),
+    ...overrides,
+  }
 }

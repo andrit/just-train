@@ -15,6 +15,7 @@ import { markFirstSessionCompleted }          from '@/lib/installPrompt'
 import { resolveNameTokens }                  from '@/lib/sessionName'
 import { HintPopover }                        from '@/components/ui/HintPopover'
 import type { SessionDetailResponse }         from '@trainer-app/shared'
+import { setVolume }                           from '@trainer-app/shared'
 
 interface PostSessionWrapUpProps {
   session:    SessionDetailResponse
@@ -38,10 +39,7 @@ export function PostSessionWrapUp({
   const allSets      = allExercises.flatMap(se => se.sets)
 
   const totalSets    = allSets.length
-  const totalVolume  = allSets.reduce((sum, s) => {
-    if (s.weight == null || s.reps == null) return sum
-    return sum + s.weight * s.reps
-  }, 0)
+  const totalVolume  = allSets.reduce((sum, s) => sum + setVolume(s), 0)
   const prCount      = allSets.filter(s => s.isLoadRecord || s.isVolumeRecord).length
   const exercisesDone = allExercises.filter(se => se.sets.length > 0).length
 

@@ -298,6 +298,9 @@ export interface ExerciseHistorySet {
   reps:            number | null
   weight:          number | null
   weightUnit:      string
+  perSide:         boolean
+  repsLeft:        number | null
+  repsRight:       number | null
   durationSeconds: number | null
 }
 

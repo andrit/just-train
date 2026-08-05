@@ -9,12 +9,20 @@
 //   - Ties: the earliest set keeps the record — equalling is not beating (strict >).
 //   - Baseline: the chronologically-first set for a client+exercise never earns a
 //     chip (there was nothing to beat). If the record holder IS that first set, no chip.
+//
+// Volume counts both sides for per-side (unilateral) sets via sideReps — Load is
+// weight-only and unaffected.
+
+import { sideReps } from '@trainer-app/shared'
 
 export interface RecordCandidate {
   id:         string
   exerciseId: string
   weight:     number | null
   reps:       number | null
+  perSide?:   boolean | null
+  repsLeft?:  number | null
+  repsRight?: number | null
   createdAt:  Date | string
 }
 
@@ -56,8 +64,9 @@ export function deriveRecordSetIds(rows: RecordCandidate[]): RecordSetIds {
     for (const s of sorted) {
       // strict > means the earliest set at a given max keeps the record
       if ((s.weight as number) > (load.weight as number)) load = s
-      const sv = (s.weight as number) * (s.reps as number)
-      const lv = (vol.weight as number) * (vol.reps as number)
+      // Volume counts both sides for per-side work (sideReps), not raw reps.
+      const sv = (s.weight as number) * sideReps(s)
+      const lv = (vol.weight as number) * sideReps(vol)
       if (sv > lv) vol = s
     }
 

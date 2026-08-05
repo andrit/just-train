@@ -18,10 +18,11 @@
 import { useState, useEffect }    from 'react'
 import { cn }                      from '@/lib/cn'
 import { interactions }            from '@/lib/interactions'
-import { useLogSet, useDeleteSessionExercise } from '@/lib/queries/sessions'
+import { useLogSet, useDeleteSessionExercise, useUpdateSessionExercise } from '@/lib/queries/sessions'
 import { useExerciseHistory }      from '@/lib/queries/clients'
 import { useSessionExerciseMedia, useUploadSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { useUXEventRef }           from '@/hooks/useUXEvent'
+import { formatSetReps }           from '@/lib/formatters'
 import { InlineCameraSheet }       from '@/components/session/InlineCameraSheet'
 import { FormCheckBadge }          from '@/components/session/FormCheckBadge'
 import type { SessionExerciseResponse, SetResponse } from '@trainer-app/shared'
@@ -147,6 +148,19 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
   const [weight, setWeight] = useState(rampWeightStr())
   const [reps,   setReps]   = useState(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
 
+  // ── Per-side (unilateral) state ─────────────────────────────────────────────
+  // trackPerSide comes from the session-exercise toggle. When on, the single
+  // "Reps / side" count is presumed equal and doubled server-side; the L/R
+  // drill-down records an asymmetric split (e.g. left leg fatigues first).
+  const perSide = !!sessionExercise.trackPerSide
+  const [splitOpen, setSplitOpen] = useState(false)
+  const [repsLeft,  setRepsLeft]  = useState('')
+  const [repsRight, setRepsRight] = useState('')
+  const toggleSplit = (): void => {
+    if (!splitOpen) { setRepsLeft(reps); setRepsRight(reps) }
+    setSplitOpen((o) => !o)
+  }
+
   // ── Cardio state ──────────────────────────────────────────────────────────
   const cardioMode = detectCardioMode(sessionExercise)
   const [distance,  setDistance]  = useState(String(sessionExercise.targetDistance ?? ''))
@@ -169,12 +183,23 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
     setReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setCaliReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setDuration(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
+    // Restore an asymmetric L/R split when last time was uneven; otherwise close it.
+    if (perSide && lastSet?.repsLeft != null && lastSet?.repsRight != null && lastSet.repsLeft !== lastSet.repsRight) {
+      setSplitOpen(true)
+      setRepsLeft(String(lastSet.repsLeft))
+      setRepsRight(String(lastSet.repsRight))
+    } else {
+      setSplitOpen(false)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setNumber, lastSet?.weight, lastSet?.reps, lastSet?.durationSeconds])
+  }, [setNumber, lastSet?.weight, lastSet?.reps, lastSet?.durationSeconds, lastSet?.repsLeft, lastSet?.repsRight])
 
   const canLog = (): boolean => {
     switch (workoutType) {
-      case 'resistance':   return reps.trim().length > 0
+      case 'resistance':
+        return perSide && splitOpen
+          ? repsLeft.trim().length > 0 && repsRight.trim().length > 0
+          : reps.trim().length > 0
       case 'cardio':
         if (cardioMode === 'distance')  return distance.trim().length > 0
         if (cardioMode === 'time')      return duration.trim().length > 0
@@ -192,13 +217,29 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
     fireLog('set_logged', { entity: 'set' })
 
     switch (workoutType) {
-      case 'resistance':
-        onLog({
-          reps:       parseInt(reps, 10) || undefined,
-          weight:     weight.trim() ? parseFloat(weight) : undefined,
-          weightUnit,
-        })
+      case 'resistance': {
+        const w = weight.trim() ? parseFloat(weight) : undefined
+        if (perSide && splitOpen) {
+          const l = parseInt(repsLeft, 10)
+          const r = parseInt(repsRight, 10)
+          const asym = Number.isFinite(l) && Number.isFinite(r) && l !== r
+          onLog({
+            reps:    Number.isFinite(l) ? l : undefined, // representative per-side count
+            weight:  w,
+            weightUnit,
+            perSide: true,
+            ...(asym && { repsLeft: l, repsRight: r }),
+          })
+        } else {
+          onLog({
+            reps:    parseInt(reps, 10) || undefined,
+            weight:  w,
+            weightUnit,
+            ...(perSide && { perSide: true }),
+          })
+        }
         break
+      }
       case 'cardio':
         onLog({
           ...(cardioMode === 'distance'  && { distance:        parseFloat(distance) }),
@@ -249,24 +290,47 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
           Set {setNumber}
         </p>
 
-        {/* ── Resistance: Weight × Reps ──────────────────────────── */}
+        {/* ── Resistance: Weight × Reps (per-side aware) ─────────── */}
         {workoutType === 'resistance' && (
-          <div className="flex gap-3 items-center mb-3">
-            <BigInput
-              label={`Weight (${weightUnit})`}
-              value={weight}
-              onChange={setWeight}
-              placeholder={sessionExercise.targetWeight ? String(sessionExercise.targetWeight) : 'optional'}
-            />
-            <span className="text-gray-600 font-display text-2xl pb-0.5">×</span>
-            <BigInput
-              label="Reps"
-              value={reps}
-              onChange={setReps}
-              mode="numeric"
-              placeholder={effectiveTargetReps ? String(effectiveTargetReps) : '—'}
-              onEnter={handleLog}
-            />
+          <div className="mb-3">
+            <div className="flex gap-3 items-center">
+              <BigInput
+                label={`Weight (${weightUnit})`}
+                value={weight}
+                onChange={setWeight}
+                placeholder={sessionExercise.targetWeight ? String(sessionExercise.targetWeight) : 'optional'}
+              />
+              <span className="text-gray-600 font-display text-2xl pb-0.5">×</span>
+              {perSide && splitOpen ? (
+                <div className="flex-1 flex gap-2">
+                  <BigInput label="Left" value={repsLeft} onChange={setRepsLeft} mode="numeric" placeholder="—" />
+                  <BigInput label="Right" value={repsRight} onChange={setRepsRight} mode="numeric" placeholder="—" onEnter={handleLog} />
+                </div>
+              ) : (
+                <BigInput
+                  label={perSide ? 'Reps / side' : 'Reps'}
+                  value={reps}
+                  onChange={setReps}
+                  mode="numeric"
+                  placeholder={effectiveTargetReps ? String(effectiveTargetReps) : '—'}
+                  onEnter={handleLog}
+                />
+              )}
+            </div>
+            {perSide && (
+              <div className="flex items-center justify-between mt-2 px-1">
+                <span className="text-[10px] text-gray-600">
+                  {splitOpen ? 'Left / right logged separately' : '×2 · both sides counted'}
+                </span>
+                <button
+                  type="button"
+                  onClick={toggleSplit}
+                  className="text-[10px] font-medium text-command-blue/70 hover:text-command-blue transition-colors"
+                >
+                  {splitOpen ? 'Even — same both sides' : 'Uneven? Log L / R'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -387,7 +451,7 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
           <>
             {set.weight != null && <span className={cn(OUTCOME_COLOR[weightOk], 'font-medium')}>{set.weight}</span>}
             {set.weight != null && set.reps != null && <span className="text-gray-600 text-xs">×</span>}
-            {set.reps   != null && <span className={cn(OUTCOME_COLOR[repsOk], 'font-medium')}>{set.reps}</span>}
+            {set.reps   != null && <span className={cn(OUTCOME_COLOR[repsOk], 'font-medium')}>{formatSetReps(set)}</span>}
           </>
         )}
         {workoutType === 'cardio' && (
@@ -453,6 +517,9 @@ interface LogData {
   durationSeconds?: number
   distance?:        number
   intensity?:       string
+  perSide?:         boolean
+  repsLeft?:        number
+  repsRight?:       number
 }
 
 // ── Exercise block ────────────────────────────────────────────────────────────
@@ -472,7 +539,14 @@ export function ExerciseBlock({
 }: ExerciseBlockProps): React.JSX.Element {
   const logSet         = useLogSet()
   const deleteExercise = useDeleteSessionExercise()
+  const updateExercise = useUpdateSessionExercise()
   const uploadMedia    = useUploadSessionExerciseMedia()
+
+  const isUnilateral = sessionExercise.exercise?.laterality === 'unilateral'
+  const setTrackPerSide = (trackPerSide: boolean): void => {
+    if (trackPerSide === !!sessionExercise.trackPerSide) return
+    updateExercise.mutate({ sessionExerciseId: sessionExercise.id, sessionId, trackPerSide })
+  }
   const { data: mediaList } = useSessionExerciseMedia(sessionExercise.id)
   const [cameraOpen, setCameraOpen] = useState(false)
 
@@ -514,6 +588,9 @@ export function ExerciseBlock({
         durationSeconds:  data.durationSeconds,
         distance:         data.distance,
         intensity:        data.intensity,
+        perSide:          data.perSide,
+        repsLeft:         data.repsLeft,
+        repsRight:        data.repsRight,
       },
       {
         onSuccess: (newSet) => {
@@ -571,6 +648,31 @@ export function ExerciseBlock({
         <p className="text-xs text-gray-600 mb-2 px-1">{sessionExercise.notes}</p>
       )}
 
+      {/* Per-side tracking toggle — unilateral exercises only */}
+      {isUnilateral && (
+        <div className="flex items-center gap-2 mb-3 px-1">
+          <span className="text-[10px] uppercase tracking-wider text-gray-600">Track</span>
+          <div className="inline-flex rounded-lg border border-surface-border overflow-hidden">
+            {([['Each side', true], ['Together', false]] as const).map(([label, value]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setTrackPerSide(value)}
+                disabled={updateExercise.isPending}
+                className={cn(
+                  'px-2.5 py-1 text-[11px] font-medium transition-colors',
+                  !!sessionExercise.trackPerSide === value
+                    ? 'bg-command-blue/15 text-command-blue'
+                    : 'text-gray-500 hover:text-gray-300',
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Spine + sets */}
       <div className="relative pl-0">
         <div className="absolute left-2.5 top-0 bottom-0 w-px bg-surface-border" aria-hidden />
@@ -613,6 +715,9 @@ export function ExerciseBlock({
                       durationSeconds: h.durationSeconds,
                       distance:        null,
                       intensity:       null,
+                      perSide:         h.perSide ?? false,
+                      repsLeft:        h.repsLeft ?? null,
+                      repsRight:       h.repsRight ?? null,
                       isPR:            false,
                       isPRVolume:      false,
                       isLoadRecord:    false,

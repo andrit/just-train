@@ -31,6 +31,7 @@ import {
   ClientKpiResponseSchema,
   UuidParamSchema,
   ErrorResponseSchema,
+  setVolume,
 } from '@trainer-app/shared'
 import { z } from 'zod'
 import type { FocusKpi } from '@trainer-app/shared'
@@ -152,6 +153,9 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         workoutType:  string
         weight:       number | null
         reps:         number | null
+        perSide:      boolean | null
+        repsLeft:     number | null
+        repsRight:    number | null
         durationSeconds: number | null
         distance:     number | null
       }
@@ -164,6 +168,9 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
             workoutType:     se.exercise?.workoutType ?? 'resistance',
             weight:          set.weight,
             reps:            set.reps,
+            perSide:         set.perSide,
+            repsLeft:        set.repsLeft,
+            repsRight:       set.repsRight,
             durationSeconds: set.durationSeconds,
             distance:        set.distance,
           }))
@@ -175,7 +182,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         const vol = (ss: typeof allSessions) => ss.reduce(
           (acc, s) => acc + s.sessionExercises.reduce(
             (b, se) => b + se.sets.reduce(
-              (c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0
+              (c, set) => c + setVolume(set), 0
             ), 0
           ), 0
         )
@@ -252,7 +259,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
           }
         } else {
           const totalVol = recentSets.reduce(
-            (a, s) => a + ((s.weight ?? 0) * (s.reps ?? 0)), 0
+            (a, s) => a + setVolume(s), 0
           )
           focusKpi = {
             type:           'mixed',
@@ -270,7 +277,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       const volumeThisMonthLbs = monthSessions.reduce(
         (acc, s) => acc + s.sessionExercises.reduce(
           (b, se) => b + se.sets.reduce(
-            (c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0
+            (c, set) => c + setVolume(set), 0
           ), 0
         ), 0
       )
@@ -398,6 +405,11 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       for (const row of rows) {
         if (!row.weight || !row.reps || row.reps <= 0) continue
         const e1rm   = epley(row.weight, row.reps)
+        // ponytail: per-side volume shown raw here (weight × entered reps) so the
+        // Personal Bests card stays internally consistent. Doubling is monotonic
+        // per-exercise, so the winning set is identical either way — only the
+        // displayed magnitude differs. ceiling: when the records section lands
+        // (see CHANGELOG "per-exercise records"), fold in sideReps there.
         const volume = row.weight * row.reps
         const cur    = bests.get(row.exerciseId)
 
@@ -463,6 +475,9 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
             reps:        z.number().int().nullable(),
             weight:      z.number().nullable(),
             weightUnit:  z.string(),
+            perSide:     z.boolean().default(false),
+            repsLeft:    z.number().int().nullable(),
+            repsRight:   z.number().int().nullable(),
             durationSeconds: z.number().int().nullable(),
           })).describe('Sets from the most recent session this exercise was performed, ordered by set number'),
         }),
@@ -492,6 +507,9 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
           reps:        sets.reps,
           weight:      sets.weight,
           weightUnit:  sets.weightUnit,
+          perSide:     sets.perSide,
+          repsLeft:    sets.repsLeft,
+          repsRight:   sets.repsRight,
           durationSeconds: sets.durationSeconds,
         })
         .from(sets)

@@ -50,6 +50,18 @@ describe('deriveRecordSetIds', () => {
     expect([...volumeIds]).toEqual(['vol'])
   })
 
+  it('counts both sides for a per-side set when deriving the volume record', () => {
+    // A lighter unilateral set can out-volume a heavier bilateral one because
+    // its reps count for both sides (sideReps). Load stays weight-only.
+    const { loadIds, volumeIds } = deriveRecordSetIds([
+      { id: 'base', exerciseId: 'ex1', weight: 50,  reps: 10, createdAt: new Date(2026, 0, 1, 0, 0, 0) }, // baseline
+      { id: 'bi',   exerciseId: 'ex1', weight: 100, reps: 10, createdAt: new Date(2026, 0, 1, 0, 0, 1) }, // 1000 vol, heaviest
+      { id: 'uni',  exerciseId: 'ex1', weight: 60,  reps: 10, perSide: true, createdAt: new Date(2026, 0, 1, 0, 0, 2) }, // 60 × 20 = 1200 vol
+    ])
+    expect([...loadIds]).toEqual(['bi'])    // 100 is heaviest — per-side reps don't change load
+    expect([...volumeIds]).toEqual(['uni']) // 1200 > 1000 — only true when both sides are counted
+  })
+
   it('keeps the record on the earliest set when a later set ties it', () => {
     const { loadIds } = deriveRecordSetIds([
       row('a', 'ex1', 100, 10, 0), // baseline

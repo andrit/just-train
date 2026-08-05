@@ -39,6 +39,8 @@ import {
   ErrorResponseSchema,
   UuidParamSchema,
   SessionStatusEnum,
+  UpdateSessionExerciseSchema,
+  sideReps,
 } from '@trainer-app/shared'
 import { z } from 'zod'
 
@@ -106,6 +108,9 @@ async function computeSessionRecords(clientId: string, exerciseIds: string[]): P
       exerciseId: sessionExercises.exerciseId,
       weight:     sets.weight,
       reps:       sets.reps,
+      perSide:    sets.perSide,
+      repsLeft:   sets.repsLeft,
+      repsRight:  sets.repsRight,
       createdAt:  sets.createdAt,
     })
     .from(sets)
@@ -268,12 +273,26 @@ This is the primary payload for the active workout view — loaded once when the
           orderBy: templateExercises.orderIndex,
         })
 
+        // Per-side default inherited from each exercise's laterality (v1: templates
+        // carry no per-side field of their own). One lookup, not one per row.
+        const exIds = [...new Set(templateData.map((te) => te.exerciseId))]
+        const lateralityRows = exIds.length
+          ? await db.query.exercises.findMany({
+              where:   inArray(exercises.id, exIds),
+              columns: { id: true, laterality: true },
+            })
+          : []
+        const unilateralIds = new Set(
+          lateralityRows.filter((e) => e.laterality === 'unilateral').map((e) => e.id),
+        )
+
         for (const te of templateData) {
           await db.insert(sessionExercises).values({
             sessionId:             newSession.id,
             exerciseId:            te.exerciseId,
             workoutType:           te.workoutType as never,
             orderIndex:            te.orderIndex,
+            trackPerSide:          unilateralIds.has(te.exerciseId),
             targetSets:            te.targetSets            ?? null,
             targetReps:            te.targetReps            ?? null,
             targetRepsPerSet:      te.targetRepsPerSet      ?? null,
@@ -446,14 +465,18 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
     const body = request.body as z.infer<typeof AddSessionExerciseSchema>
 
     try {
-      // Look up workoutType from exercise library
+      // Look up workoutType + laterality from exercise library
       const exercise = await db.query.exercises.findFirst({
         where: eq(exercises.id, body.exerciseId),
-        columns: { workoutType: true },
+        columns: { workoutType: true, laterality: true },
       })
       if (!exercise) {
         return reply.status(404).send({ error: 'Exercise not found' })
       }
+
+      // Per-side input mode: honour an explicit choice, otherwise default it on
+      // for unilateral exercises (Bulgarian split squat, single-arm row, etc.).
+      const trackPerSide = body.trackPerSide ?? (exercise.laterality === 'unilateral')
 
       // Auto-assign orderIndex if not provided — append after existing exercises
       let { orderIndex } = body
@@ -471,6 +494,7 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
           ...body,
           sessionId,
           workoutType: exercise.workoutType as never,
+          trackPerSide,
           orderIndex,
         })
         .returning()
@@ -483,6 +507,63 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to add exercise to session' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // PATCH /session-exercises/:id — Update a session exercise
+  //
+  // Used from the live session to flip the per-side input mode
+  // ("Each side" ⟷ "Together") and to adjust targets in place.
+  // ----------------------------------------------------------
+  app.patch('/session-exercises/:id', {
+    schema: {
+      tags: ['Sessions'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Update a session exercise',
+      description: 'Partial update of a session exercise — flip the per-side tracking mode or adjust target values. Only provided fields change.',
+      params: UuidParamSchema,
+      body: UpdateSessionExerciseSchema,
+      response: {
+        200: SessionExerciseResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id } = request.params as z.infer<typeof UuidParamSchema>
+    const body = request.body as z.infer<typeof UpdateSessionExerciseSchema>
+
+    try {
+      const [updated] = await db
+        .update(sessionExercises)
+        .set(body)
+        .where(eq(sessionExercises.id, id))
+        .returning()
+
+      if (!updated) {
+        return reply.status(404).send({ error: 'Session exercise not found' })
+      }
+
+      // Reload with the exercise + sets so the response matches the schema and
+      // the client can re-render the row (record chips derived on the full read).
+      const full = await db.query.sessionExercises.findFirst({
+        where: eq(sessionExercises.id, id),
+        with: {
+          exercise: { with: { bodyPart: true, media: true } },
+          sets:     { orderBy: (s, { asc }) => asc(s.setNumber) },
+          session:  { columns: { clientId: true } },
+        },
+      })
+      if (!full) {
+        return reply.status(404).send({ error: 'Session exercise not found' })
+      }
+
+      const records = await computeSessionRecords(full.session.clientId, [full.exerciseId])
+      return reply.status(200).send(serializeSessionExercise(full, records))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to update session exercise' })
     }
   })
 
@@ -579,12 +660,23 @@ Which fields you populate depends on the workout type:
       // Persistent chips are DERIVED on read (see computeSessionRecords) so the
       // marker moves off the old holder automatically; these two booleans only
       // tell the just-logged set whether to flash.
+      // Per-side input mode: honour an explicit body value, else inherit the
+      // session-exercise's toggle. Snapshotted onto the set so its volume is
+      // self-describing and never recomputes if the toggle later changes.
+      const perSide = body.perSide ?? seRow?.trackPerSide ?? false
+
       let isLoadRecord   = false
       let isVolumeRecord = false
 
       if (body.weight != null && body.reps != null && body.reps > 0 && seRow) {
         const priorSets = await db
-          .select({ weight: sets.weight, reps: sets.reps })
+          .select({
+            weight:    sets.weight,
+            reps:      sets.reps,
+            perSide:   sets.perSide,
+            repsLeft:  sets.repsLeft,
+            repsRight: sets.repsRight,
+          })
           .from(sets)
           .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
           .innerJoin(sessions, eq(sessionExercises.sessionId, sessions.id))
@@ -602,20 +694,27 @@ Which fields you populate depends on the workout type:
           if (row.weight != null && row.reps != null && row.reps > 0) {
             hadPrior   = true
             bestWeight = Math.max(bestWeight, row.weight)
-            bestVolume = Math.max(bestVolume, row.weight * row.reps)
+            // Volume counts both sides for per-side sets (sideReps), not raw reps.
+            bestVolume = Math.max(bestVolume, row.weight * sideReps(row))
           }
         }
 
         if (hadPrior) {
+          const curVolume = body.weight * sideReps({
+            reps:      body.reps,
+            perSide,
+            repsLeft:  body.repsLeft,
+            repsRight: body.repsRight,
+          })
           isLoadRecord   = body.weight > bestWeight
-          isVolumeRecord = body.weight * body.reps > bestVolume
+          isVolumeRecord = curVolume > bestVolume
         }
       }
       // ── End record detection ────────────────────────────────────────────
 
       const [newSet] = await db
         .insert(sets)
-        .values({ ...body, sessionExerciseId })
+        .values({ ...body, sessionExerciseId, perSide })
         .returning()
 
       if (!newSet) {

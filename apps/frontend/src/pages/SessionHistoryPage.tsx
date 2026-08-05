@@ -16,6 +16,7 @@
 // ------------------------------------------------------------
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { setVolume } from '@trainer-app/shared'
 import { cn }                                   from '@/lib/cn'
 import { useSession }                           from '@/lib/queries/sessions'
 import { useRestoreScroll }                     from '@/hooks/useScrollRestoration'
@@ -97,7 +98,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
   const exercises    = session.sessionExercises ?? []
   const totalSets    = exercises.reduce((a, se) => a + se.sets.length, 0)
   const totalVolume  = exercises.reduce(
-    (a, se) => a + se.sets.reduce((c, s) => c + ((s.weight ?? 0) * (s.reps ?? 0)), 0), 0
+    (a, se) => a + se.sets.reduce((c, s) => c + setVolume(s), 0), 0
   )
   const duration = formatDuration(session.startTime, session.endTime)
 

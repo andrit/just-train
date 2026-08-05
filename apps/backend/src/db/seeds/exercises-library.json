@@ -36,8 +36,8 @@
         "difficulty": "intermediate",
         "demonstration": null,
         "visualization": null,
-        "description": "Upper chest emphasis. Bench set to 30\u201345 degrees.",
-        "instructions": "Set bench to 30\u201345\u00b0. Grip slightly wider than shoulders. Lower the bar to upper chest, press back to lockout. Keep feet flat and back in contact with the pad."
+        "description": "Upper chest emphasis. Bench set to 30–45 degrees.",
+        "instructions": "Set bench to 30–45°. Grip slightly wider than shoulders. Lower the bar to upper chest, press back to lockout. Keep feet flat and back in contact with the pad."
       },
       {
         "name": "Decline Barbell Bench Press",
@@ -48,7 +48,7 @@
         "demonstration": null,
         "visualization": null,
         "description": "Lower chest emphasis. Bench set to -30 to -45 degrees.",
-        "instructions": "Set bench to  -30\u00b0 to -45\u00b0. Grip slightly wider than shoulders. Lower the bar to lower chest, press back to lockout. Keep feet flat and back in contact with the pad."
+        "instructions": "Set bench to  -30° to -45°. Grip slightly wider than shoulders. Lower the bar to lower chest, press back to lockout. Keep feet flat and back in contact with the pad."
       },
       {
         "name": "Dumbbell Bench Press",
@@ -92,7 +92,7 @@
         "demonstration": null,
         "visualization": null,
         "description": "Horizontal pull. Builds back thickness and helps counteract pressing movements.",
-        "instructions": "Hinge to roughly 45\u00b0. Pull bar to lower chest / upper abdomen. Lead with the elbows. Lower with control."
+        "instructions": "Hinge to roughly 45°. Pull bar to lower chest / upper abdomen. Lead with the elbows. Lower with control."
       },
       {
         "name": "Dumbbell Row",
@@ -103,7 +103,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Single-arm horizontal pull. Allows full range of motion and helps fix imbalances.",
-        "instructions": "Brace one hand and knee on a bench. Pull the dumbbell to your hip, keeping elbow close. Lower with control. Full stretch at the bottom."
+        "instructions": "Brace one hand and knee on a bench. Pull the dumbbell to your hip, keeping elbow close. Lower with control. Full stretch at the bottom.",
+        "laterality": "unilateral"
       },
       {
         "name": "Pull-Up",
@@ -169,7 +170,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Overhead press with dumbbells. Greater range of motion and unilateral balance demand.",
-        "instructions": "Seated or standing. Press from ear level to full lockout. Avoid excessive arching. Lower with control."
+        "instructions": "Seated or standing. Press from ear level to full lockout. Avoid excessive arching. Lower with control.",
+        "laterality": "unilateral"
       },
       {
         "name": "Arnold Press",
@@ -235,7 +237,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Unilateral squat with rear foot elevated. High quad and glute demand, good for balance.",
-        "instructions": "Rear foot elevated on a bench. Lower the back knee toward the floor, keeping front shin vertical. Drive through the front heel to stand."
+        "instructions": "Rear foot elevated on a bench. Lower the back knee toward the floor, keeping front shin vertical. Drive through the front heel to stand.",
+        "laterality": "unilateral"
       },
       {
         "name": "Leg Press",
@@ -246,7 +249,7 @@
         "demonstration": null,
         "visualization": null,
         "description": "Machine squat pattern. Lower back load is reduced compared to barbell squat.",
-        "instructions": "Feet shoulder-width on platform. Lower sled until knees reach 90\u00b0. Press through heels to extend. Do not lock knees at top."
+        "instructions": "Feet shoulder-width on platform. Lower sled until knees reach 90°. Press through heels to extend. Do not lock knees at top."
       },
       {
         "name": "Hip Thrust",
@@ -268,7 +271,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Unilateral leg exercise. Works quad, glute, and balance simultaneously.",
-        "instructions": "Step forward into a split stance. Lower back knee toward the floor. Push off the front foot to return. Alternate legs."
+        "instructions": "Step forward into a split stance. Lower back knee toward the floor. Push off the front foot to return. Alternate legs.",
+        "laterality": "unilateral"
       },
       {
         "name": "Barbell Lunges",
@@ -279,7 +283,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Unilateral leg exercise. Works quad, glute, and balance simultaneously.",
-        "instructions": "Place barbell over your shoulders like a back squat. Step forward into a split stance. Lower back knee toward the floor. Push off the front foot to return. Alternate legs."
+        "instructions": "Place barbell over your shoulders like a back squat. Step forward into a split stance. Lower back knee toward the floor. Push off the front foot to return. Alternate legs.",
+        "laterality": "unilateral"
       },
       {
         "name": "Good Mornings",
@@ -358,7 +363,7 @@
         "demonstration": null,
         "visualization": null,
         "description": "Upper chest isolation with a deep stretch. Greater range of motion than barbell incline press.",
-        "instructions": "Set bench to 30\u201345\u00b0. Hold dumbbells above upper chest with slight elbow bend. Lower in a wide arc until you feel a stretch. Squeeze chest to bring bells back together at the top."
+        "instructions": "Set bench to 30–45°. Hold dumbbells above upper chest with slight elbow bend. Lower in a wide arc until you feel a stretch. Squeeze chest to bring bells back together at the top."
       },
       {
         "name": "Hip Abductors",
@@ -369,7 +374,7 @@
         "demonstration": null,
         "visualization": null,
         "description": "a seated isolation exercise designed to strengthen the outer hips and glutes by forcing the legs apart against resistance. It effectively targets the gluteus medius, minimus, and tensor fasciae latae (TFL) to improve pelvic stability, enhance hip strength, and shape the outer thighs.",
-        "instructions": "Sit with your back against the pad, feet on the rests, and knees against the pads. Push outward slowly, hold for 1\u20132 seconds, and return to center without letting the weights touch."
+        "instructions": "Sit with your back against the pad, feet on the rests, and knees against the pads. Push outward slowly, hold for 1–2 seconds, and return to center without letting the weights touch."
       },
       {
         "name": "Hip Adductors",
@@ -446,7 +451,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Anterior deltoid isolation.",
-        "instructions": "Hold dumbbells in front of thighs. Raise one or both arms straight ahead to shoulder height. Lower with control."
+        "instructions": "Hold dumbbells in front of thighs. Raise one or both arms straight ahead to shoulder height. Lower with control.",
+        "laterality": "unilateral"
       },
       {
         "name": "Reverse Fly",
@@ -479,7 +485,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Unilateral bicep curl. Allows supination through the movement.",
-        "instructions": "Curl from neutral to supinated as you raise. One arm at a time or alternating. Keep elbows stationary."
+        "instructions": "Curl from neutral to supinated as you raise. One arm at a time or alternating. Keep elbows stationary.",
+        "laterality": "unilateral"
       },
       {
         "name": "Hammer Curl",
@@ -490,7 +497,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Neutral grip curl. Works brachialis and brachioradialis in addition to biceps.",
-        "instructions": "Keep palms neutral throughout the movement. Curl to shoulder height. Lower fully."
+        "instructions": "Keep palms neutral throughout the movement. Curl to shoulder height. Lower fully.",
+        "laterality": "unilateral"
       },
       {
         "name": "Preacher Curl",
@@ -501,7 +509,7 @@
         "demonstration": null,
         "visualization": null,
         "description": "Bicep curl with the upper arm anchored on a pad. Removes cheating.",
-        "instructions": "Rest upper arm on the preacher pad. Curl through full range. Lower slowly \u2014 the eccentric is key here."
+        "instructions": "Rest upper arm on the preacher pad. Curl through full range. Lower slowly — the eccentric is key here."
       },
       {
         "name": "Tricep Pushdown",
@@ -512,7 +520,7 @@
         "demonstration": null,
         "visualization": null,
         "description": "Cable tricep isolation. Good for high rep pump work.",
-        "instructions": "Cable set high with bar or rope. Elbows close to sides. Extend arms fully, squeezing triceps. Return only to 90\u00b0."
+        "instructions": "Cable set high with bar or rope. Elbows close to sides. Extend arms fully, squeezing triceps. Return only to 90°."
       },
       {
         "name": "Skull Crusher",
@@ -548,7 +556,7 @@
         "instructions": "Adjust machine so the pad sits above the ankles. Extend both legs to full lockout. Squeeze quads at the top. Lower with control."
       },
       {
-        "name": "Leg Curl",
+        "name": "Hamstring Curl",
         "bodyPart": "legs",
         "category": "isolation",
         "equipment": "machine",
@@ -589,7 +597,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Cable glute isolation. Targets the gluteus maximus directly.",
-        "instructions": "Attach ankle strap to cable set low. Stand facing the machine. Extend one leg back until hip fully extended. Squeeze glute at peak. Return with control."
+        "instructions": "Attach ankle strap to cable set low. Stand facing the machine. Extend one leg back until hip fully extended. Squeeze glute at peak. Return with control.",
+        "laterality": "unilateral"
       },
       {
         "name": "Cable Crunch",
@@ -611,7 +620,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "Anti-rotation core exercise. Builds stability rather than flexion strength.",
-        "instructions": "Stand side-on to a cable machine. Hold the handle at chest level. Press it straight out in front of you. The challenge is resisting rotation."
+        "instructions": "Stand side-on to a cable machine. Hold the handle at chest level. Press it straight out in front of you. The challenge is resisting rotation.",
+        "laterality": "unilateral"
       },
       {
         "name": "Hip Flexors (Rotary Machine)",
@@ -622,7 +632,8 @@
         "demonstration": null,
         "visualization": null,
         "description": "A standing rotary-hip (multi-hip) machine movement that isolates the hip flexors by driving the working thigh forward and up against resistance. Strengthens the iliopsoas and rectus femoris for knee drive and sprint mechanics.",
-        "instructions": "Stand in the rotary hip machine with the pad against the front of the working thigh and hold the support handles. Drive your knee forward and up against the resistance, pause briefly at the top, then lower under control. Finish the set, then switch to the other leg."
+        "instructions": "Stand in the rotary hip machine with the pad against the front of the working thigh and hold the support handles. Drive your knee forward and up against the resistance, pause briefly at the top, then lower under control. Finish the set, then switch to the other leg.",
+        "laterality": "unilateral"
       },
       {
         "name": "Overhead Face Pulls",
@@ -691,7 +702,7 @@
       "demonstration": null,
       "visualization": null,
       "description": "Road or outdoor cycling. Great for endurance base building.",
-      "instructions": "Maintain a cadence of 70\u2013100 RPM. Keep a neutral spine. Use gears to manage effort rather than grinding at low cadence."
+      "instructions": "Maintain a cadence of 70–100 RPM. Keep a neutral spine. Use gears to manage effort rather than grinding at low cadence."
     },
     {
       "name": "Rowing Machine",
@@ -702,7 +713,7 @@
       "demonstration": null,
       "visualization": null,
       "description": "Full body cardio with 60% leg drive and 40% upper body pull. Low impact.",
-      "instructions": "Drive sequence: legs \u2192 lean back \u2192 arms. Return: arms \u2192 lean forward \u2192 legs. Keep the chain level and the stroke smooth."
+      "instructions": "Drive sequence: legs → lean back → arms. Return: arms → lean forward → legs. Keep the chain level and the stroke smooth."
     },
     {
       "name": "Jump Rope",
@@ -735,7 +746,7 @@
       "demonstration": null,
       "visualization": null,
       "description": "Loaded pushing cardio. Builds explosive leg power and cardiovascular endurance simultaneously.",
-      "instructions": "Lean into the sled handles at a 45\u00b0 angle. Drive through the legs in short powerful strides. Keep hips low."
+      "instructions": "Lean into the sled handles at a 45° angle. Drive through the legs in short powerful strides. Keep hips low."
     },
     {
       "name": "Sled Pull",
@@ -789,8 +800,8 @@
       "difficulty": "intermediate",
       "demonstration": null,
       "visualization": null,
-      "description": "Air resistance bike \u2014 the harder you push the more resistance it creates. Full body.",
-      "instructions": "Pedal and push/pull the handles simultaneously. Pace yourself \u2014 the resistance is infinite. Often used for intervals."
+      "description": "Air resistance bike — the harder you push the more resistance it creates. Full body.",
+      "instructions": "Pedal and push/pull the handles simultaneously. Pace yourself — the resistance is infinite. Often used for intervals."
     },
     {
       "name": "Stair Climber",
@@ -836,7 +847,7 @@
       "demonstration": null,
       "visualization": null,
       "description": "Explosive lower body plyometric. Builds power and coordination.",
-      "instructions": "Dip into a quarter squat, swing arms, explode upward. Land softly with bent knees. Step down \u2014 don't jump down."
+      "instructions": "Dip into a quarter squat, swing arms, explode upward. Land softly with bent knees. Step down — don't jump down."
     },
     {
       "name": "Jump Squat",
@@ -924,7 +935,8 @@
       "demonstration": null,
       "visualization": null,
       "description": "Lateral core stability. Works the obliques and hip abductors.",
-      "instructions": "On one forearm, feet stacked. Raise hips until body is in a straight line. Hold. Keep hips from sagging."
+      "instructions": "On one forearm, feet stacked. Raise hips until body is in a straight line. Hold. Keep hips from sagging.",
+      "laterality": "unilateral"
     },
     {
       "name": "V-Up",
@@ -934,7 +946,7 @@
       "difficulty": "intermediate",
       "demonstration": null,
       "visualization": null,
-      "description": "Full ab contraction \u2014 upper and lower simultaneously.",
+      "description": "Full ab contraction — upper and lower simultaneously.",
       "instructions": "Lie flat. Simultaneously raise arms and legs, bringing hands to feet at the top. Lower with control."
     },
     {
@@ -1047,7 +1059,7 @@
       "demonstration": null,
       "visualization": null,
       "description": "Standing yoga pose. Hip flexor and thoracic stretch.",
-      "instructions": "Lunge forward with the front knee over the ankle. Back foot at 45\u00b0. Raise arms overhead. Square hips forward. Hold."
+      "instructions": "Lunge forward with the front knee over the ankle. Back foot at 45°. Raise arms overhead. Square hips forward. Hold."
     },
     {
       "name": "Warrior II",
@@ -1190,7 +1202,7 @@
       "demonstration": null,
       "visualization": null,
       "description": "Passive pec and anterior shoulder stretch using a doorframe.",
-      "instructions": "Place forearm against a doorframe at 90\u00b0. Step forward until a stretch is felt across the chest. Hold. Adjust arm height to target different portions."
+      "instructions": "Place forearm against a doorframe at 90°. Step forward until a stretch is felt across the chest. Hold. Adjust arm height to target different portions."
     },
     {
       "name": "Calf Stretch",
@@ -1280,7 +1292,7 @@
       "demonstration": null,
       "visualization": null,
       "description": "4-4-4-4 breathing pattern for nervous system regulation.",
-      "instructions": "Inhale for 4 counts. Hold for 4. Exhale for 4. Hold for 4. Repeat for 4\u20138 cycles."
+      "instructions": "Inhale for 4 counts. Hold for 4. Exhale for 4. Hold for 4. Repeat for 4–8 cycles."
     },
     {
       "name": "Supine Savasana",
@@ -1291,7 +1303,7 @@
       "demonstration": null,
       "visualization": null,
       "description": "Total relaxation. Final resting pose from yoga. Allows the nervous system to downregulate.",
-      "instructions": "Lie flat on your back, arms at sides, palms up. Close your eyes. Relax every muscle. Focus on breathing. Hold for 2\u20135 minutes."
+      "instructions": "Lie flat on your back, arms at sides, palms up. Close your eyes. Relax every muscle. Focus on breathing. Hold for 2–5 minutes."
     },
     {
       "name": "Walking",
@@ -1305,7 +1317,7 @@
       "instructions": "Walk at a comfortable pace. Allow breathing to normalise. Continue until heart rate approaches resting."
     },
     {
-      "name": "Foam Rolling \u2014 Quads",
+      "name": "Foam Rolling — Quads",
       "bodyPart": "legs",
       "category": null,
       "equipment": "other",
@@ -1313,10 +1325,10 @@
       "demonstration": null,
       "visualization": null,
       "description": "Self-myofascial release for the quadriceps.",
-      "instructions": "Lie face down with roller under the quads. Slowly roll from hip to knee. Pause on tender spots for 20\u201330 seconds."
+      "instructions": "Lie face down with roller under the quads. Slowly roll from hip to knee. Pause on tender spots for 20–30 seconds."
     },
     {
-      "name": "Foam Rolling \u2014 IT Band",
+      "name": "Foam Rolling — IT Band",
       "bodyPart": "legs",
       "category": null,
       "equipment": "other",
@@ -1327,7 +1339,7 @@
       "instructions": "Lie on one side with roller under the outer thigh. Roll from hip to knee. Adjust body angle to find tender spots."
     },
     {
-      "name": "Foam Rolling \u2014 Upper Back",
+      "name": "Foam Rolling — Upper Back",
       "bodyPart": "back",
       "category": null,
       "equipment": "other",

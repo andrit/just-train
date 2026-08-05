@@ -110,20 +110,46 @@ export function formatVolume(
 }
 
 /**
+ * Reps label for a logged set, aware of per-side (unilateral) tracking:
+ *   bilateral            → "10"
+ *   per-side symmetric   → "10 ea"
+ *   per-side asymmetric  → "9 / 10"  (left → right)
+ * Returns null when reps is null (e.g. time-only sets).
+ * Single source of truth so live, summary, and history rows never drift.
+ */
+export function formatSetReps(set: {
+  reps?:      number | null
+  perSide?:   boolean | null
+  repsLeft?:  number | null
+  repsRight?: number | null
+}): string | null {
+  if (set.reps == null) return null
+  if (!set.perSide) return String(set.reps)
+  if (set.repsLeft != null && set.repsRight != null && set.repsLeft !== set.repsRight) {
+    return `${set.repsLeft} / ${set.repsRight}`
+  }
+  return `${set.reps} ea`
+}
+
+/**
  * Formats a set's logged values as a compact string.
- * e.g. "100 × 8", "30s", "400m", "moderate"
+ * e.g. "100 × 8", "100 × 8 ea", "30s", "400m", "moderate"
  */
 export function formatSetSummary(set: {
   weight?:          number | null
   reps?:            number | null
+  perSide?:         boolean | null
+  repsLeft?:        number | null
+  repsRight?:       number | null
   durationSeconds?: number | null
   distance?:        number | null
   intensity?:       string | null
 }): string {
   const parts: string[] = []
+  const repsStr = formatSetReps(set)
   if (set.weight         != null) parts.push(String(set.weight))
-  if (set.weight != null && set.reps != null) parts.push('×')
-  if (set.reps           != null) parts.push(String(set.reps))
+  if (set.weight != null && repsStr != null) parts.push('×')
+  if (repsStr            != null) parts.push(repsStr)
   if (set.durationSeconds!= null) parts.push(`${set.durationSeconds}s`)
   if (set.distance       != null) parts.push(`${set.distance}m`)
   if (set.intensity      != null) parts.push(set.intensity)

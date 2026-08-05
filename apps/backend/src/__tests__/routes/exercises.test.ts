@@ -73,6 +73,7 @@ function makeExercise(overrides: Record<string, unknown> = {}) {
     equipment:     'barbell' as const,
     difficulty:    'intermediate' as const,
     category:      'compound' as const,
+    laterality:    'bilateral' as const,
     isDraft:       false,
     isPublic:      false,
     description:   null,

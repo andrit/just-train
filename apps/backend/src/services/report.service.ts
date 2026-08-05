@@ -386,6 +386,7 @@ export async function sendReport(data: ReportData): Promise<{ id: string }> {
 
 import { db, clients, sessions, trainers, clientGoals, challenges } from '../db'
 import { eq, and, desc } from 'drizzle-orm'
+import { setVolume } from '@trainer-app/shared'
 
 export async function buildReportData(
   clientId:    string,
@@ -424,7 +425,7 @@ export async function buildReportData(
   const reportSessions = periodSessions.map(s => {
     const sets = s.sessionExercises.reduce((b, se) => b + se.sets.length, 0)
     const volumeLbs = s.sessionExercises.reduce(
-      (b, se) => b + se.sets.reduce((c, set) => c + ((set.weight ?? 0) * (set.reps ?? 0)), 0), 0
+      (b, se) => b + se.sets.reduce((c, set) => c + setVolume(set), 0), 0
     )
     return {
       date:        s.date,

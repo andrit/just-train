@@ -5,9 +5,9 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
 import { buildSessionTestApp } from '../helpers/buildApp'
 import {
-  makeClient, makeSession,
+  makeClient, makeSession, makeSessionExercise,
   validSessionBody,
-  TEST_TRAINER_ID, TEST_SESSION_ID, TEST_UNKNOWN_ID,
+  TEST_TRAINER_ID, TEST_SESSION_ID, TEST_UNKNOWN_ID, TEST_EXERCISE_ID,
 } from '../helpers/factories'
 import { generateAccessToken } from '../../services/auth.service'
 
@@ -27,6 +27,8 @@ vi.mock('../../db', () => {
       query: {
         clients:  { findFirst: vi.fn().mockResolvedValue(undefined) },
         sessions: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
+        exercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
+        sessionExercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
       },
       insert:      vi.fn().mockReturnValue(chain),
       update:      vi.fn().mockReturnValue(chain),
@@ -38,6 +40,7 @@ vi.mock('../../db', () => {
     sessions:        {},
     sessionExercises: {},
     sets:            {},
+    exercises:       {},
     templateExercises: {},
   }
 })
@@ -225,5 +228,57 @@ describe('DELETE /sessions/:id', () => {
       method: 'DELETE', url: `/api/v1/sessions/${TEST_SESSION_ID}`, headers: authHeader(),
     })
     expect(res.statusCode).toBe(204)
+  })
+})
+
+// ── POST /sessions/:id/exercises — per-side default derivation ──────────────────
+// trackPerSide defaults from the exercise's laterality, and an explicit body
+// value overrides it. Asserted by inspecting what the route passes to insert().
+
+describe('POST /sessions/:id/exercises — trackPerSide', () => {
+  let app: Awaited<ReturnType<typeof buildSessionTestApp>>
+  beforeAll(async () => { app = await buildSessionTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  async function addExercise(laterality: 'bilateral' | 'unilateral', body: Record<string, unknown> = {}) {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.exercises.findFirst).mockResolvedValueOnce({ workoutType: 'resistance', laterality } as never)
+    // returning() echoes a row; the assertion is on what was passed to values()
+    vi.mocked(db.insert({} as never).values({} as never).returning)
+      .mockResolvedValueOnce([makeSessionExercise({ trackPerSide: laterality === 'unilateral' })])
+    return app.inject({
+      method:  'POST',
+      url:     `/api/v1/sessions/${TEST_SESSION_ID}/exercises`,
+      headers: authHeader(),
+      payload: { exerciseId: TEST_EXERCISE_ID, orderIndex: 0, ...body },
+    })
+  }
+
+  it('defaults trackPerSide=true for a unilateral exercise', async () => {
+    const { db } = await import('../../db')
+    const res = await addExercise('unilateral')
+    expect(res.statusCode).toBe(201)
+    expect(vi.mocked(db.insert({} as never).values)).toHaveBeenCalledWith(
+      expect.objectContaining({ trackPerSide: true }),
+    )
+  })
+
+  it('defaults trackPerSide=false for a bilateral exercise', async () => {
+    const { db } = await import('../../db')
+    const res = await addExercise('bilateral')
+    expect(res.statusCode).toBe(201)
+    expect(vi.mocked(db.insert({} as never).values)).toHaveBeenCalledWith(
+      expect.objectContaining({ trackPerSide: false }),
+    )
+  })
+
+  it('honours an explicit trackPerSide=false even on a unilateral exercise', async () => {
+    const { db } = await import('../../db')
+    const res = await addExercise('unilateral', { trackPerSide: false })
+    expect(res.statusCode).toBe(201)
+    expect(vi.mocked(db.insert({} as never).values)).toHaveBeenCalledWith(
+      expect.objectContaining({ trackPerSide: false }),
+    )
   })
 })

@@ -19,6 +19,7 @@ import {
   SideEnum,
   DifficultyEnum,
   ExerciseCategoryEnum,
+  LateralityEnum,
   ClientFocusEnum,
   ProgressionStateEnum,
   TrainerModeEnum,
@@ -232,6 +233,8 @@ export const CreateExerciseSchema = z.object({
   difficulty: DifficultyEnum.default('beginner'),
   category: ExerciseCategoryEnum.optional()
     .describe('compound = multi-joint, isolation = single-joint. Mainly for resistance exercises.'),
+  laterality: LateralityEnum.default('bilateral')
+    .describe('bilateral = both limbs together; unilateral = trained one side at a time (surfaces per-side tracking).'),
   isDraft: z.boolean().default(false)
     .describe('true = quick-added mid-session, needs enriching in the library later'),
   isPublic: z.boolean().default(false)
@@ -292,6 +295,7 @@ export type UpdateSessionInput = z.infer<typeof UpdateSessionSchema>
 export const AddSessionExerciseSchema = z.object({
   exerciseId: z.string().uuid(),
   orderIndex: z.number().int().min(0).optional(),
+  trackPerSide: z.boolean().optional().describe('Per-side input mode. Omitted = server derives from the exercise (true when unilateral).'),
   targetSets: z.number().int().min(1).optional(),
   targetReps: z.number().int().min(1).optional(),
   targetRepsPerSet: z.string().optional().describe('Comma-delimited per-set rep counts e.g. "10,8,6"'),
@@ -304,6 +308,18 @@ export const AddSessionExerciseSchema = z.object({
   notes: z.string().max(1000).optional(),
 })
 export type AddSessionExerciseInput = z.infer<typeof AddSessionExerciseSchema>
+
+// Partial update of a session-exercise. Currently used to flip the per-side
+// input mode from the live session ("Each side" ⟷ "Together").
+export const UpdateSessionExerciseSchema = z.object({
+  trackPerSide: z.boolean().optional(),
+  targetSets: z.number().int().min(1).optional(),
+  targetReps: z.number().int().min(1).optional(),
+  targetWeight: z.number().min(0).optional(),
+  targetWeightStep: z.number().optional(),
+  notes: z.string().max(1000).optional(),
+})
+export type UpdateSessionExerciseInput = z.infer<typeof UpdateSessionExerciseSchema>
 
 // ============================================================
 // SET
@@ -321,6 +337,9 @@ export const CreateSetSchema = z.object({
   speed: z.number().min(0).optional(),
   intensity: IntensityEnum.optional(),
   side: SideEnum.optional(),
+  perSide: z.boolean().optional().describe('true = per-side effort; reps is the per-side count. Omitted = server derives from the session-exercise trackPerSide.'),
+  repsLeft: z.number().int().min(0).optional().describe('Left-side reps when the L/R drill-down splits them; omit for symmetric.'),
+  repsRight: z.number().int().min(0).optional().describe('Right-side reps when the L/R drill-down splits them; omit for symmetric.'),
   rpe: z.number().int().min(1).max(10).optional()
     .describe('Rate of Perceived Exertion 1-10'),
   notes: z.string().max(500).optional(),

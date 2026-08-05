@@ -16,6 +16,7 @@ import { relations } from 'drizzle-orm'
 import {
   BodyPartEnum, WorkoutTypeEnum, EquipmentEnum,
   DifficultyEnum, MediaTypeEnum, ExerciseCategoryEnum,
+  LateralityEnum,
 } from '@trainer-app/shared'
 import { trainers } from './trainers'
 
@@ -28,6 +29,7 @@ export const equipmentEnum       = pgEnum('equipment',       EquipmentEnum.optio
 export const difficultyEnum      = pgEnum('difficulty',      DifficultyEnum.options)
 export const mediaTypeEnum       = pgEnum('media_type',      MediaTypeEnum.options)
 export const exerciseCategoryEnum = pgEnum('exercise_category', ExerciseCategoryEnum.options)
+export const lateralityEnum      = pgEnum('laterality',      LateralityEnum.options)
 
 // ------------------------------------------------------------
 // BODY PARTS — lookup/reference table
@@ -69,6 +71,11 @@ export const exercises = pgTable('exercises', {
   // compound = multi-joint (squat, bench). isolation = single-joint (curl, extension).
   // Optional — mainly relevant for resistance exercises.
   category:    exerciseCategoryEnum('exercise_category'),
+
+  // bilateral = both limbs together (one rep count covers both).
+  // unilateral = may be trained one side at a time — surfaces the per-side
+  // toggle + L/R drill-down in the live session. Default bilateral.
+  laterality:  lateralityEnum('laterality').notNull().default('bilateral'),
 
   // true = quick-added mid-session, needs description/media added in library
   isDraft: boolean('is_draft').notNull().default(false),

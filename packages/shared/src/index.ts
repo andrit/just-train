@@ -19,3 +19,6 @@ export * from './types/index'
 
 // Utilities
 export * from './utils/weight'
+
+// Per-side reps + set volume (unilateral tracking) — the single volume source.
+export * from './utils/setMath'

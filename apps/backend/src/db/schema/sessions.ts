@@ -91,6 +91,11 @@ export const sessionExercises = pgTable('session_exercises', {
   workoutType: workoutTypeEnum('workout_type').notNull(),
   orderIndex:  integer('order_index').notNull().default(0),
 
+  // Per-side input mode. Defaults true when a unilateral exercise is added;
+  // the athlete can flip it to "together". This is the input mode only — each
+  // logged set snapshots its own per_side value, so history never recomputes.
+  trackPerSide: boolean('track_per_side').notNull().default(false),
+
   // Target / planned values
   targetSets:            integer('target_sets'),
   targetReps:            integer('target_reps'),
@@ -150,6 +155,16 @@ export const sets = pgTable('sets', {
 
   // Stretching
   side: sideEnum('side'),
+
+  // Per-side (unilateral) tracking. per_side is snapshotted from the parent
+  // session-exercise's trackPerSide at log time (like weight_unit) so a set is
+  // self-describing and its volume never recomputes if the toggle later changes.
+  //   per_side=false            -> total reps = reps           (bilateral / "together")
+  //   per_side=true,  L/R null  -> total reps = reps * 2       (symmetric, presumed equal)
+  //   per_side=true,  L/R set   -> total reps = repsLeft+Right (asymmetric drill-down)
+  perSide:   boolean('per_side').notNull().default(false),
+  repsLeft:  integer('reps_left'),
+  repsRight: integer('reps_right'),
 
   // Universal — Rate of Perceived Exertion 1 (easy) to 10 (max effort)
   rpe:   integer('rpe'),

@@ -38,6 +38,7 @@ function serializeExerciseSummary(ex: any) {
     workoutType: ex.workoutType,
     equipment:   ex.equipment,
     difficulty:  ex.difficulty,
+    laterality:  ex.laterality ?? 'bilateral',
     isDraft:     ex.isDraft,
     bodyPart:    ex.bodyPart ?? null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -216,6 +216,9 @@ export interface LogSetInput {
   durationSeconds?:  number
   distance?:         number
   intensity?:        string
+  perSide?:          boolean
+  repsLeft?:         number
+  repsRight?:        number
   rpe?:              number
   notes?:            string
 }
@@ -251,6 +254,30 @@ export function useEditSet(): UseMutationResult<SetResponse, Error, EditSetInput
   return useMutation({
     mutationFn: ({ setId, sessionId: _sid, ...body }) =>
       apiClient.patch<SetResponse>(`/sets/${setId}`, body),
+    onSuccess: (_, { sessionId }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+    },
+  })
+}
+
+// ── Update session exercise (per-side toggle, targets) ─────────────────────────
+
+export interface UpdateSessionExerciseInput {
+  sessionExerciseId: string
+  sessionId:         string
+  trackPerSide?:     boolean
+  targetSets?:       number
+  targetReps?:       number
+  targetWeight?:     number
+  targetWeightStep?: number
+  notes?:            string
+}
+
+export function useUpdateSessionExercise(): UseMutationResult<SessionExerciseResponse, Error, UpdateSessionExerciseInput> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ sessionExerciseId, sessionId: _sid, ...body }) =>
+      apiClient.patch<SessionExerciseResponse>(`/session-exercises/${sessionExerciseId}`, body),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
     },

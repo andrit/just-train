@@ -35,6 +35,10 @@ The minimised session sits as a pill above the tab bar. Tap it to expand back to
 Inside a block, exercises sit side by side. Swipe left/right to move through them, or tap the faded *peek* card on either edge to jump to the previous or next one. Blocks move the same way along the top.
 *Where:* live session execution · *Under the hood:* `WorkoutBlock`
 
+**Single-limb exercises: log once, count both sides.**
+For exercises trained one leg/arm at a time (Bulgarian split squat, single-arm row, dumbbell curls…), the reps box reads **"Reps / side"** — type the count for one side and the app counts both toward your volume ("×2 · both sides counted"). If one side lagged, tap **"Uneven? Log L / R"** to enter left and right separately; the logged set then reads `9 / 10` instead of `10 ea`. A small **"Each side ⟷ Together"** switch on the exercise header lets you flip a lift back to a single combined count.
+*Where:* live session, resistance exercises flagged unilateral · *Under the hood:* `ExerciseBlock`
+
 ### Lists & builders
 
 **Swipe an exercise right → add it.**

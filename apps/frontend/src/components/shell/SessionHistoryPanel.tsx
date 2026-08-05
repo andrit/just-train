@@ -8,6 +8,7 @@
 // ------------------------------------------------------------
 
 import { useState }             from 'react'
+import { setVolume }            from '@trainer-app/shared'
 import { cn }                  from '@/lib/cn'
 import { interactions }        from '@/lib/interactions'
 import { useSession }          from '@/lib/queries/sessions'
@@ -84,7 +85,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
   const duration    = formatDuration(session.startTime ?? null, session.endTime ?? null)
   const totalSets   = (session.sessionExercises ?? []).reduce((acc, se) => acc + se.sets.length, 0)
   const totalVolume = (session.sessionExercises ?? []).reduce((acc, se) =>
-    acc + se.sets.reduce((s, set) => s + ((set.reps ?? 0) * (set.weight ?? 0)), 0), 0
+    acc + se.sets.reduce((s, set) => s + setVolume(set), 0), 0
   )
 
   return (

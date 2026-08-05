@@ -11,8 +11,9 @@
 
 import type { ReactNode } from 'react'
 import type { SessionExerciseResponse } from '@trainer-app/shared'
-import { cn }           from '@/lib/cn'
-import { formatEpley }  from '@/lib/formatters'
+import { setVolume }     from '@trainer-app/shared'
+import { cn }            from '@/lib/cn'
+import { formatEpley, formatSetReps } from '@/lib/formatters'
 
 interface SessionExerciseBreakdownProps {
   sessionExercises:  SessionExerciseResponse[]
@@ -27,7 +28,7 @@ interface SessionExerciseBreakdownProps {
 }
 
 function exerciseVolume(se: SessionExerciseResponse): number {
-  return se.sets.reduce((sum, set) => sum + ((set.weight ?? 0) * (set.reps ?? 0)), 0)
+  return se.sets.reduce((sum, set) => sum + setVolume(set), 0)
 }
 
 /** Best Epley 1RM estimate across an exercise's sets; null for non-resistance. */
@@ -80,7 +81,7 @@ export function SessionExerciseBreakdown({
                       )}>
                         {set.weight != null && <span>{set.weight}</span>}
                         {set.weight != null && set.reps != null && <span className="text-gray-600">×</span>}
-                        {set.reps != null && <span>{set.reps}</span>}
+                        {set.reps != null && <span>{formatSetReps(set)}</span>}
                         {set.durationSeconds != null && <span>{set.durationSeconds}s</span>}
                       </div>
                       <div className="flex gap-1 shrink-0">

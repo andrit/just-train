@@ -91,6 +91,12 @@ export const sessionExercises = pgTable('session_exercises', {
   workoutType: workoutTypeEnum('workout_type').notNull(),
   orderIndex:  integer('order_index').notNull().default(0),
 
+  // Circuit grouping. NULL = standalone. Members sharing a circuit_id are
+  // performed round-major (interwoven); rounds = the shared target_sets, order
+  // = order_index (members contiguous). Plain grouping id, not a FK. The display
+  // label is derived from the members' shared body part ("Shoulder Circuit").
+  circuitId:   uuid('circuit_id'),
+
   // Per-side input mode. Defaults true when a unilateral exercise is added;
   // the athlete can flip it to "together". This is the input mode only — each
   // logged set snapshots its own per_side value, so history never recomputes.

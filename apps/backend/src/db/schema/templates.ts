@@ -57,6 +57,11 @@ export const templateExercises = pgTable('template_exercises', {
   workoutType: workoutTypeEnum('workout_type').notNull(),
   orderIndex:  integer('order_index').notNull().default(0),
 
+  // Circuit grouping. NULL = standalone. Members sharing a circuit_id are
+  // performed round-major (interwoven); rounds = the shared target_sets, order
+  // = order_index (members contiguous). Plain grouping id, not a FK.
+  circuitId:   uuid('circuit_id'),
+
   // Target / planned performance values
   targetSets:            integer('target_sets'),
   targetReps:            integer('target_reps'),

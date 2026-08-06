@@ -27,6 +27,7 @@ import type {
   SessionSummaryResponse,
   SessionExerciseResponse,
   SetResponse,
+  CreateCircuitInput,
 } from '@trainer-app/shared'
 
 // ── Query key factory ─────────────────────────────────────────────────────────
@@ -254,6 +255,19 @@ export function useEditSet(): UseMutationResult<SetResponse, Error, EditSetInput
   return useMutation({
     mutationFn: ({ setId, sessionId: _sid, ...body }) =>
       apiClient.patch<SetResponse>(`/sets/${setId}`, body),
+    onSuccess: (_, { sessionId }) => {
+      qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+    },
+  })
+}
+
+// ── Create a circuit (interwoven exercise group) ───────────────────────────────
+
+export function useCreateCircuit(): UseMutationResult<SessionExerciseResponse[], Error, CreateCircuitInput & { sessionId: string }> {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ sessionId, ...body }) =>
+      apiClient.post<SessionExerciseResponse[]>(`/sessions/${sessionId}/circuits`, body),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
     },

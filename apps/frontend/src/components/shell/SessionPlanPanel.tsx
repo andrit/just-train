@@ -31,6 +31,7 @@ import {
   useDiscardSession,
 } from '@/lib/queries/sessions'
 import { AddBlockSheet }                         from '@/components/session/AddBlockSheet'
+import { CircuitBuilderSheet }                   from '@/components/session/CircuitBuilderSheet'
 import { Spinner }                               from '@/components/ui/Spinner'
 import { NamePromptModal }                       from '@/components/ui/NamePromptModal'
 import { SortableWorkoutList }                       from '@/components/session/SortableWorkoutList'
@@ -95,6 +96,7 @@ export function SessionPlanPanel({
   const [sessionName,   setSessionName]   = useState('')
   const [nameEditing,   setNameEditing]   = useState(false)
   const [addBlockOpen,  setAddBlockOpen]  = useState(false)
+  const [circuitOpen,   setCircuitOpen]   = useState(false)
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false)
   const [namePromptOpen,     setNamePromptOpen]     = useState(false)
   const [savingAsTemplate,   setSavingAsTemplate]   = useState(false)
@@ -145,6 +147,15 @@ export function SessionPlanPanel({
     try {
       await ensureSession()
       setAddBlockOpen(true)
+    } catch (_e) {
+      setError('Please select a client first')
+    }
+  }
+
+  const handleAddCircuit = async (): Promise<void> => {
+    try {
+      await ensureSession()
+      setCircuitOpen(true)
     } catch (_e) {
       setError('Please select a client first')
     }
@@ -455,6 +466,27 @@ export function SessionPlanPanel({
                 </svg>
                 Load session template
               </button>
+
+              <button
+                type="button"
+                onClick={handleAddCircuit}
+                disabled={!selectedClientId}
+                className={cn(
+                  'flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium',
+                  'border border-surface-border text-sm',
+                  interactions.button.base,
+                  interactions.button.press,
+                  selectedClientId
+                    ? 'text-gray-300 hover:border-command-blue/40 hover:text-command-blue'
+                    : 'text-gray-600 cursor-not-allowed',
+                )}
+              >
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                  <path d="M8 2a6 6 0 106 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M8 5v3l2 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Add circuit
+              </button>
             </div>
           </div>
         ) : (
@@ -466,6 +498,27 @@ export function SessionPlanPanel({
           />
         )}
       </div>
+
+      {/* Add circuit — secondary pill above the block FAB */}
+      {sessionId && sessionExercises.length > 0 && (
+        <button
+          type="button"
+          onClick={handleAddCircuit}
+          className={cn(
+            'fixed bottom-[4.75rem] right-4 z-30',
+            'flex items-center gap-1.5 px-3 py-2 rounded-full',
+            'bg-brand-secondary border border-command-blue/40 text-command-blue text-xs font-medium shadow-lg',
+            interactions.button.base,
+            interactions.button.press,
+          )}
+        >
+          <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+            <path d="M8 2a6 6 0 106 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M8 5v3l2 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Circuit
+        </button>
+      )}
 
       {/* Add block FAB */}
       {sessionId && sessionExercises.length > 0 && (
@@ -495,6 +548,16 @@ export function SessionPlanPanel({
           open={addBlockOpen}
           sessionId={sessionId}
           onClose={() => setAddBlockOpen(false)}
+        />
+      )}
+
+      {/* Circuit builder sheet */}
+      {sessionId && (
+        <CircuitBuilderSheet
+          open={circuitOpen}
+          sessionId={sessionId}
+          weightUnit={weightUnit}
+          onClose={() => setCircuitOpen(false)}
         />
       )}
 

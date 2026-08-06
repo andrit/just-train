@@ -24,6 +24,7 @@ import { useOverlayStore }                from '@/store/overlayStore'
 import { apiClient, ApiError }            from '@/lib/api'
 import { useSession, useEndSession, useDiscardSession, useUpdateSession } from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
+import { CircuitBlock }                   from '@/components/session/CircuitBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
 import { EndSessionModal }                from '@/components/session/EndSessionModal'
 import { PostSessionWrapUp }              from '@/components/session/PostSessionWrapUp'
@@ -193,14 +194,20 @@ export default function LiveSessionContent({
   const sessionExercises = session.sessionExercises ?? []
   const clientName       = session.client?.name ?? 'Training Session'
 
-  // Group exercises by workoutType for visual block rendering
-  const exerciseGroups: { type: string; items: typeof sessionExercises }[] = []
+  // Group exercises for visual block rendering. A circuit (shared circuitId) is
+  // its own group performed round-major; everything else groups by consecutive
+  // workoutType as before.
+  const exerciseGroups: { key: string; type: string; circuitId: string | null; items: typeof sessionExercises }[] = []
   for (const ex of sessionExercises) {
+    const cid  = ex.circuitId ?? null
     const last = exerciseGroups[exerciseGroups.length - 1]
-    if (last && last.type === ex.workoutType) {
+    const canMerge = last && (cid !== null
+      ? last.circuitId === cid
+      : last.circuitId === null && last.type === ex.workoutType)
+    if (canMerge) {
       last.items.push(ex)
     } else {
-      exerciseGroups.push({ type: ex.workoutType, items: [ex] })
+      exerciseGroups.push({ key: ex.id, type: ex.workoutType, circuitId: cid, items: [ex] })
     }
   }
 
@@ -324,7 +331,7 @@ export default function LiveSessionContent({
             {exerciseGroups.length > 1 && (
               <div className="flex justify-center gap-1.5 py-3 shrink-0">
                 {exerciseGroups.map((g) => (
-                  <div key={g.type} className="w-1.5 h-1.5 rounded-full bg-surface-border" />
+                  <div key={g.key} className="w-1.5 h-1.5 rounded-full bg-surface-border" />
                 ))}
               </div>
             )}
@@ -333,19 +340,32 @@ export default function LiveSessionContent({
               style={{ scrollSnapType: 'x mandatory' }}
             >
               {exerciseGroups.map((group) => (
-                <div key={group.type} className="snap-center">
-                  <WorkoutBlock
-                    workoutType={group.type}
-                    sessionExercises={group.items}
-                    sessionId={sessionId}
-                    weightUnit={weightUnit}
-                    layout="horizontal"
-                    clientId={session.clientId}
-                    onSetLogged={handleSetLogged}
-                    onAddBlock={() => setAddBlockOpen(true)}
-                    restDurationSeconds={restDurationSeconds}
-                    restTimer={restTimer}
-                  />
+                <div key={group.key} className="snap-center">
+                  {group.circuitId ? (
+                    <CircuitBlock
+                      sessionExercises={group.items}
+                      sessionId={sessionId}
+                      weightUnit={weightUnit}
+                      layout="horizontal"
+                      clientId={session.clientId}
+                      onSetLogged={handleSetLogged}
+                      restDurationSeconds={restDurationSeconds}
+                      restTimer={restTimer}
+                    />
+                  ) : (
+                    <WorkoutBlock
+                      workoutType={group.type}
+                      sessionExercises={group.items}
+                      sessionId={sessionId}
+                      weightUnit={weightUnit}
+                      layout="horizontal"
+                      clientId={session.clientId}
+                      onSetLogged={handleSetLogged}
+                      onAddBlock={() => setAddBlockOpen(true)}
+                      restDurationSeconds={restDurationSeconds}
+                      restTimer={restTimer}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -353,19 +373,33 @@ export default function LiveSessionContent({
         ) : (
           <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-6">
             {exerciseGroups.map((group) => (
-              <WorkoutBlock
-                key={group.type}
-                workoutType={group.type}
-                sessionExercises={group.items}
-                sessionId={sessionId}
-                weightUnit={weightUnit}
-                layout="vertical"
-                clientId={session.clientId}
-                onSetLogged={handleSetLogged}
-                onAddBlock={() => setAddBlockOpen(true)}
-                restDurationSeconds={restDurationSeconds}
-                restTimer={restTimer}
-              />
+              group.circuitId ? (
+                <CircuitBlock
+                  key={group.key}
+                  sessionExercises={group.items}
+                  sessionId={sessionId}
+                  weightUnit={weightUnit}
+                  layout="vertical"
+                  clientId={session.clientId}
+                  onSetLogged={handleSetLogged}
+                  restDurationSeconds={restDurationSeconds}
+                  restTimer={restTimer}
+                />
+              ) : (
+                <WorkoutBlock
+                  key={group.key}
+                  workoutType={group.type}
+                  sessionExercises={group.items}
+                  sessionId={sessionId}
+                  weightUnit={weightUnit}
+                  layout="vertical"
+                  clientId={session.clientId}
+                  onSetLogged={handleSetLogged}
+                  onAddBlock={() => setAddBlockOpen(true)}
+                  restDurationSeconds={restDurationSeconds}
+                  restTimer={restTimer}
+                />
+              )
             ))}
           </div>
         )}

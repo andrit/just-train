@@ -589,6 +589,61 @@ export const ClientKpiResponseSchema = z.object({
 export type ClientKpiResponse = z.infer<typeof ClientKpiResponseSchema>
 
 // ============================================================
+// EXERCISE PROGRESS — per-exercise history + progression analytics
+// (athlete-first; resistance only for v1)
+// ============================================================
+
+export const WeightTrendSchema = z.object({
+  direction:        z.enum(['up', 'flat', 'down']),
+  deltaFirstToLast: z.number().describe('Latest − earliest weight (the display number)'),
+  slopePerWeek:     z.number().describe('Least-squares slope, weight units per week (drives direction)'),
+  spanWeeks:        z.number(),
+  points:           z.number().int(),
+})
+export type WeightTrend = z.infer<typeof WeightTrendSchema>
+
+const ProgressSetSchema = z.object({
+  setNumber: z.number().int(),
+  weight:    z.number().nullable(),
+  reps:      z.number().int().nullable(),
+  perSide:   z.boolean().default(false),
+  repsLeft:  z.number().int().nullable(),
+  repsRight: z.number().int().nullable(),
+})
+
+const ProgressSessionSchema = z.object({
+  sessionId: z.string().uuid(),
+  date:      z.string().describe('YYYY-MM-DD'),
+  est1rm:    z.number().nullable().describe('Best Epley estimate across the session\'s sets'),
+  volume:    z.number(),
+  topSet:    z.object({ weight: z.number().nullable(), reps: z.number().int().nullable() }).nullable(),
+  sets:      z.array(ProgressSetSchema),
+})
+
+const ProgressRankSchema = z.object({
+  rank:         z.number().int().describe('1 = heaviest set of the session, 2 = second heaviest, 3 = third'),
+  latestWeight: z.number().nullable(),
+  series:       z.array(z.object({ date: z.string(), weight: z.number() })),
+  trend:        WeightTrendSchema,
+})
+
+export const ExerciseProgressResponseSchema = z.object({
+  exerciseId:  z.string().uuid(),
+  workoutType: WorkoutTypeEnum,
+  supported:   z.boolean().describe('false for non-resistance exercises — v1 covers resistance only'),
+  sessions:    z.array(ProgressSessionSchema).describe('Completed sessions with this exercise, newest first'),
+  byRank:      z.array(ProgressRankSchema).describe('Top-3-heaviest set positions tracked over time (ranks present in ≥1 session)'),
+  overall: z.object({
+    currentEst1rm:       z.number().nullable(),
+    currentTopSetWeight: z.number().nullable(),
+    bestEst1rm:          z.number().nullable(),
+    bestVolume:          z.number().nullable(),
+    highestWeightTrend:  WeightTrendSchema.describe('Trend of the heaviest set per session (== rank 1)'),
+  }),
+})
+export type ExerciseProgressResponse = z.infer<typeof ExerciseProgressResponseSchema>
+
+// ============================================================
 // SNAPSHOT MEDIA (v2.12.0) — progress photos attached to snapshots
 // ============================================================
 

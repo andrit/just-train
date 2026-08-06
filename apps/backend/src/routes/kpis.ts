@@ -25,10 +25,12 @@ import { routeLog } from '../lib/logger'
 
 import type { FastifyInstance }  from 'fastify'
 import { authenticate }          from '../middleware/authenticate'
-import { db, clients, sessions, sessionExercises, sets } from '../db'
+import { db, clients, sessions, sessionExercises, sets, exercises } from '../db'
 import { eq, and, desc }         from 'drizzle-orm'
+import { buildExerciseProgress } from '../lib/exerciseProgress'
 import {
   ClientKpiResponseSchema,
+  ExerciseProgressResponseSchema,
   UuidParamSchema,
   ErrorResponseSchema,
   setVolume,
@@ -541,6 +543,79 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercise history' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // GET /clients/:id/exercise-progress/:exerciseId
+  //
+  // Athlete-first per-exercise progression. Returns the client's full history
+  // for one exercise plus analytics: est. 1RM, top-set weight, volume per
+  // session, and the rate-of-change of the top-3-heaviest set positions over
+  // time (ranked by weight, so a warm-up drops out when there are ≥3 work sets).
+  // Resistance only for v1 — non-resistance returns supported:false.
+  // ----------------------------------------------------------
+  app.get('/clients/:id/exercise-progress/:exerciseId', {
+    schema: {
+      tags:     ['Clients'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Per-exercise progression analytics',
+      description: 'History + est-1RM / top-set / volume per session, plus the weight rate-of-change of the top-3-heaviest sets. Self-client (athlete) scoped; resistance only for v1.',
+      params: z.object({
+        id:         z.string().uuid(),
+        exerciseId: z.string().uuid(),
+      }),
+      response: {
+        200: ExerciseProgressResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: clientId, exerciseId } = request.params as { id: string; exerciseId: string }
+
+    try {
+      // Ownership — the client must belong to this trainer.
+      const client = await db.query.clients.findFirst({
+        where: and(eq(clients.id, clientId), eq(clients.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!client) return reply.status(404).send({ error: 'Client not found' })
+
+      const exercise = await db.query.exercises.findFirst({
+        where: eq(exercises.id, exerciseId),
+        columns: { id: true, workoutType: true },
+      })
+      if (!exercise) return reply.status(404).send({ error: 'Exercise not found' })
+
+      const workoutType = exercise.workoutType as string
+
+      // Every set of this exercise across the client's completed sessions.
+      const rows = await db
+        .select({
+          sessionId: sessions.id,
+          date:      sessions.date,
+          setNumber: sets.setNumber,
+          weight:    sets.weight,
+          reps:      sets.reps,
+          perSide:   sets.perSide,
+          repsLeft:  sets.repsLeft,
+          repsRight: sets.repsRight,
+        })
+        .from(sets)
+        .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
+        .innerJoin(sessions,         eq(sessionExercises.sessionId, sessions.id))
+        .where(and(
+          eq(sessions.clientId, clientId),
+          eq(sessionExercises.exerciseId, exerciseId),
+          eq(sessions.status, 'completed'),
+        ))
+        .orderBy(sessions.date, sets.setNumber)
+
+      return reply.send(buildExerciseProgress(rows, exerciseId, workoutType))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to fetch exercise progress' })
     }
   })
 }

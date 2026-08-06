@@ -376,6 +376,7 @@ export const SessionExerciseResponseSchema = z.object({
   exercise:    ExerciseSummaryResponseSchema.nullable()
     .describe('Null if exercise was deleted after being added to this session'),
   orderIndex:            z.number().int(),
+  circuitId:             z.string().uuid().nullable().default(null).describe('Grouping id — members sharing it are performed round-major (a circuit). null = standalone. Rounds = the shared targetSets.'),
   trackPerSide:          z.boolean().default(false).describe('Per-side input mode for this session-exercise. Defaults true when the exercise is unilateral; the athlete can flip to "together". Sets the default for logged sets; the set snapshots the actual value.'),
   targetSets:            z.number().int().nullable(),
   targetReps:            z.number().int().nullable().describe('Target reps — per side when trackPerSide is true'),
@@ -446,6 +447,7 @@ const TemplateExerciseResponseSchema = z.object({
   workoutType: WorkoutTypeEnum,
   exercise:    ExerciseSummaryResponseSchema.nullable(),
   orderIndex:            z.number().int(),
+  circuitId:             z.string().uuid().nullable().default(null).describe('Circuit grouping id — members sharing it are performed round-major. null = standalone.'),
   targetSets:            z.number().int().nullable(),
   targetReps:            z.number().int().nullable(),
   targetRepsPerSet:      z.string().nullable().describe('Comma-delimited per-set rep counts e.g. "10,8,6"'),

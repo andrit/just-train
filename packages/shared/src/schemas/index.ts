@@ -321,6 +321,20 @@ export const UpdateSessionExerciseSchema = z.object({
 })
 export type UpdateSessionExerciseInput = z.infer<typeof UpdateSessionExerciseSchema>
 
+// Create a circuit: adds N exercises as one interwoven group performed
+// round-major. `rounds` becomes each member's targetSets; the shared reps/weight
+// are applied to every member (still individually editable afterwards). The
+// exercises must share a workoutType (v1 single-type) — enforced server-side.
+export const CreateCircuitSchema = z.object({
+  exerciseIds:      z.array(z.string().uuid()).min(2).describe('Exercises in the circuit, in round order'),
+  rounds:           z.number().int().min(1).describe('Number of rounds — becomes each member\'s targetSets'),
+  targetReps:       z.number().int().min(1).optional().describe('Shared target reps applied to every member'),
+  targetWeight:     z.number().min(0).optional().describe('Shared starting weight applied to every member'),
+  targetWeightUnit: WeightUnitEnum.default('lbs'),
+  notes:            z.string().max(1000).optional(),
+})
+export type CreateCircuitInput = z.infer<typeof CreateCircuitSchema>
+
 // ============================================================
 // SET
 // ============================================================

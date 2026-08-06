@@ -9,6 +9,7 @@
 // ------------------------------------------------------------
 
 import { useEffect, useRef } from 'react'
+import { createPortal }      from 'react-dom'
 import { cn }                from '@/lib/cn'
 import { useSwipeDismiss }   from '@/hooks/useSwipeDismiss'
 
@@ -85,12 +86,20 @@ export function BottomSheet({
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  return (
+  // Portal to <body> so the sheet is NOT a DOM descendant of Layout's scrollable
+  // <main> (overflow-y-auto). Rendered inside it, touch-drags on the sheet chain
+  // through and scroll the page behind (body-overflow-hidden can't stop it — the
+  // scroller is the inner <main>, not <body>). Portaling isolates the sheet; the
+  // transform on the sheet div is preserved, so the panel's fixed footer still
+  // anchors to the sheet.
+  return createPortal(
     <>
-      {/* Backdrop */}
+      {/* Backdrop — z above the mobile tab bar (z-50) so the modal sheet covers
+          it. Otherwise the nav paints over the sheet's bottom, hiding footer
+          CTAs / last content behind the tab bar (exercise-detail scroll bug). */}
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm',
+          'fixed inset-0 z-[54] bg-black/60 backdrop-blur-sm',
           'transition-opacity duration-200',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
         )}
@@ -141,11 +150,16 @@ export function BottomSheet({
           </div>
         )}
 
-        {/* Content */}
-        <div className="overflow-y-auto" style={{ maxHeight: `calc(${maxHeight} - 80px)` }}>
+        {/* Content — overscroll-contain stops scroll from chaining past the
+            sheet even when it does reach its bounds. */}
+        <div
+          className="overflow-y-auto overscroll-contain"
+          style={{ maxHeight: `calc(${maxHeight} - 80px)` }}
+        >
           {children}
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   )
 }

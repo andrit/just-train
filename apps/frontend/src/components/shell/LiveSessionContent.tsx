@@ -26,6 +26,7 @@ import { useSession, useEndSession, useDiscardSession, useUpdateSession } from '
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
 import { CircuitBlock }                   from '@/components/session/CircuitBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
+import { CircuitBuilderSheet }            from '@/components/session/CircuitBuilderSheet'
 import { EndSessionModal }                from '@/components/session/EndSessionModal'
 import { PostSessionWrapUp }              from '@/components/session/PostSessionWrapUp'
 import { resolveNameTokens }              from '@/lib/sessionName'
@@ -77,6 +78,7 @@ export default function LiveSessionContent({
   const [showDiscardMenu,  setShowDiscardMenu]  = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [addBlockOpen,     setAddBlockOpen]     = useState(false)
+  const [circuitOpen,      setCircuitOpen]      = useState(false)
   const [showWrapUp,       setShowWrapUp]       = useState(false)
 
   const weightUnit = trainer?.weightUnitPreference ?? 'lbs'
@@ -309,21 +311,39 @@ export default function LiveSessionContent({
               <p className="text-4xl mb-4" aria-hidden>🏋️</p>
               <p className="text-gray-300 font-medium mb-1">Ready to train</p>
               <p className="text-gray-600 text-sm mb-6">Add your first exercise to get started</p>
-              <button
-                type="button"
-                onClick={() => setAddBlockOpen(true)}
-                className={cn(
-                  'flex items-center gap-2 px-5 py-3 rounded-xl mx-auto',
-                  'bg-command-blue text-white font-medium',
-                  interactions.button.base,
-                  interactions.button.press,
-                )}
-              >
-                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
-                  <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                Add Exercise
-              </button>
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAddBlockOpen(true)}
+                  className={cn(
+                    'flex items-center gap-2 px-5 py-3 rounded-xl',
+                    'bg-command-blue text-white font-medium',
+                    interactions.button.base,
+                    interactions.button.press,
+                  )}
+                >
+                  <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                    <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  Add Exercise
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCircuitOpen(true)}
+                  className={cn(
+                    'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm',
+                    'border border-surface-border text-gray-300 hover:border-command-blue/40 hover:text-command-blue',
+                    interactions.button.base,
+                    interactions.button.press,
+                  )}
+                >
+                  <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                    <path d="M8 2a6 6 0 106 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M8 5v3l2 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Add Circuit
+                </button>
+              </div>
             </div>
           </div>
         ) : sessionLayout === 'horizontal' ? (
@@ -405,6 +425,27 @@ export default function LiveSessionContent({
         )}
       </div>
 
+      {/* Add circuit — secondary pill above the FAB */}
+      {exerciseGroups.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setCircuitOpen(true)}
+          className={cn(
+            'fixed bottom-[4.75rem] right-4 z-30',
+            'flex items-center gap-1.5 px-3 py-2 rounded-full',
+            'bg-brand-secondary border border-command-blue/40 text-command-blue text-xs font-medium shadow-lg',
+            interactions.button.base,
+            interactions.button.press,
+          )}
+        >
+          <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+            <path d="M8 2a6 6 0 106 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M8 5v3l2 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Circuit
+        </button>
+      )}
+
       {/* Add Exercise FAB */}
       {exerciseGroups.length > 0 && (
         <button
@@ -431,6 +472,13 @@ export default function LiveSessionContent({
         open={addBlockOpen}
         sessionId={sessionId}
         onClose={() => setAddBlockOpen(false)}
+      />
+
+      <CircuitBuilderSheet
+        open={circuitOpen}
+        sessionId={sessionId}
+        weightUnit={weightUnit}
+        onClose={() => setCircuitOpen(false)}
       />
 
       <EndSessionModal

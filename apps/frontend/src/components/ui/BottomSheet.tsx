@@ -129,7 +129,7 @@ export function BottomSheet({
         aria-modal
         aria-label={title}
         className={cn(
-          'fixed bottom-0 left-0 right-0 z-50',
+          'fixed bottom-0 left-0 right-0 z-[55]',
           'bg-brand-secondary rounded-t-2xl border-t border-surface-border',
           'transition-transform duration-300 ease-out',
           open ? 'translate-y-0' : 'translate-y-full',

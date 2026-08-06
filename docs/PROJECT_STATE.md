@@ -313,7 +313,8 @@ The language used in code, conversations, and documentation is the same. When in
 | **Client** | A person whose training a Trainer manages. Always owned by exactly one Trainer. Never used to describe an Athlete. | Athlete (when in trainer context), student, member |
 | **Self-client** | The Client record that represents the Trainer's own Athlete experience (`isSelf=true`). Auto-created at registration. The Trainer accesses it via "My Training". To an Athlete, their entire profile is equivalent to a self-client — the term "self-client" is Trainer vocabulary. | Personal profile, own record |
 | **Session** | A single training event. Has a date, a status lifecycle, and belongs to one Client. | Workout (the whole thing), training, class |
-| **Workout** | A typed block within a Session (e.g. "Resistance", "Cardio"). Groups related exercises. | Block (informally ok in discussion), circuit |
+| **Workout** | A typed block within a Session (e.g. "Resistance", "Cardio"). Groups related exercises. | Block (informally ok in discussion) |
+| **Circuit** | A group of exercises performed round-major (interwoven) — one set of each exercise per round, then loop. Members share a `circuit_id`; rounds = the shared target sets. Executed via `CircuitBlock`; created via `CircuitBuilderSheet`. | Superset (a circuit is 2+, superset implies 2), giant set (ok informally) |
 | **Exercise** | A named movement in the library (Squat, Run, Plank). Belongs to a Trainer or is shared. | Move, lift, drill |
 | **Set** | One recorded effort within a SessionExercise. The atomic unit of performance data. | Rep (a set contains reps), log entry |
 | **Template** | A reusable Session plan. Contains Workouts and target values. Applied to create a Session. | Program, plan, routine |

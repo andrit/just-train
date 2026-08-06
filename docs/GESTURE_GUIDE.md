@@ -39,6 +39,10 @@ Inside a block, exercises sit side by side. Swipe left/right to move through the
 For exercises trained one leg/arm at a time (Bulgarian split squat, single-arm row, dumbbell curls…), the reps box reads **"Reps / side"** — type the count for one side and the app counts both toward your volume ("×2 · both sides counted"). If one side lagged, tap **"Uneven? Log L / R"** to enter left and right separately; the logged set then reads `9 / 10` instead of `10 ea`. A small **"Each side ⟷ Together"** switch on the exercise header lets you flip a lift back to a single combined count.
 *Where:* live session, resistance exercises flagged unilateral · *Under the hood:* `ExerciseBlock`
 
+**Circuits: log a set, jump straight to the next exercise.**
+A circuit (an interwoven group — "Add Circuit" beside "Add Exercise") runs *round-major*: you do one set of each exercise, then loop. Logging the current set advances you to the **next exercise in the box**, not the next set of the same one; a progress grid (exercise × round) shows where you are. After the last exercise of a round, **rest fires once for the whole round** (not after each set), then round two begins. Bail whenever — unlogged sets just stay empty.
+*Where:* live session, inside a circuit · *Under the hood:* `CircuitBlock`
+
 ### Lists & builders
 
 **Swipe an exercise right → add it.**

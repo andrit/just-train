@@ -54,6 +54,7 @@ TrainerApp is a mobile-first PWA for fitness trainers and athletes. Progress nar
 - **Workout** = typed block within a session (resistance, cardio, etc.)
 - **Exercise** = named movement in the library
 - **Set** = one recorded effort (atomic tracking unit)
+- **Circuit** = a group of exercises performed round-major (interwoven) — one set of each per round; members share a `circuit_id`, rounds = shared target sets
 - **Template** = reusable session plan
 - **Trainer** = app's primary user (never "user" or "coach")
 - **Client** = person whose training a Trainer manages

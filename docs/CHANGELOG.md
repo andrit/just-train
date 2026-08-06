@@ -7,6 +7,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Circuits (interwoven exercises)
+- **Log a group of exercises round-major.** A circuit is a named group performed in rounds — one set of each exercise, then loop — instead of finishing one exercise before the next. You log each set the instant you finish it (1-for-1) rather than doing the whole box then catching up. Motivating case: a 5-exercise shoulder box, same weight, 3 rounds.
+- **Model:** one nullable `circuit_id` on `session_exercises` (+ `template_exercises`). Members sharing it are one circuit; **rounds = the shared `target_sets`**; order = `order_index`. Sets stay per-exercise, so volume, PRs, per-side, and per-exercise history/progress all keep working untouched — the circuit is a grouping + execution-order overlay, not a fork. Migration `0004` (idempotent, additive). No `circuit_label` column — the label is derived from the members' shared body part ("Shoulder Circuit").
+- **Create:** `POST /sessions/:id/circuits` — generates one shared `circuit_id`, stamps rounds→`target_sets` + shared reps/weight across members, contiguous `order_index`, per-side inherited from laterality; guards single workout type (v1). Shared `CreateCircuitSchema`.
+- **Live execution (`CircuitBlock`):** the live session groups by `circuit_id` and renders round-major — header "Shoulder Circuit · Round 2 of 3", a progress grid (exercise × round), and the current exercise's full input (reusing `ExerciseBlock`, so per-side/prefill work inside it). Logging advances to the next exercise in the box; **rest fires only when a round completes** (not per set); PR flash still per set. Position is derived from logged set counts, so it's reload-proof. Ending early leaves unlogged work simply absent (sets only exist once logged).
+- **Creation UX (`CircuitBuilderSheet`):** "Add Circuit" sits beside "Add Exercise" in the live Start-Training flow **and** the plan builder. Batch multi-select (exercises numbered in round order) + rounds/reps/weight → create. v1 resistance-only (mixed-type deferred).
+- **Deferred:** templates carrying circuits (re-create a saved box on apply); mixed-type circuits; per-exercise round counts; circuit-membership editing; bracketing the circuit in history/summary read views.
+
 ### Per-exercise history + progress analytics (athlete-first)
 - **The exercise detail now shows your own history + progression for that one exercise** — answers "is my bench actually growing?" without digging through session history. Resistance only for v1 (non-resistance hides the section); athlete/self-client scoped (trainer-per-client deferred as the product focus shifts athlete-first).
 - **Headline:** estimated 1RM (Epley) with an est-1RM **sparkline** over time, plus current top-set weight and best volume, and the overall highest-weight rate-of-change (`▲ +20 lb · 6 wks`).

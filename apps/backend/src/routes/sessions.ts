@@ -40,8 +40,10 @@ import {
   UuidParamSchema,
   SessionStatusEnum,
   UpdateSessionExerciseSchema,
+  CreateCircuitSchema,
   sideReps,
 } from '@trainer-app/shared'
+import { randomUUID } from 'crypto'
 import { z } from 'zod'
 
 
@@ -507,6 +509,89 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to add exercise to session' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // POST /sessions/:id/circuits — Create a circuit (interwoven group)
+  //
+  // Adds N exercises as one group performed round-major. One shared circuitId is
+  // stamped on every member; rounds becomes each member's targetSets; the shared
+  // reps/weight are applied to all (still editable per exercise afterwards).
+  // v1: all exercises must share a workoutType.
+  // ----------------------------------------------------------
+  app.post('/sessions/:id/circuits', {
+    schema: {
+      tags: ['Sessions'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Create a circuit in a session',
+      description: 'Groups exercises into a circuit performed round-major (interwoven). `rounds` becomes each member\'s target sets; shared reps/weight apply to all. All exercises must share a workout type (v1).',
+      params: UuidParamSchema,
+      body: CreateCircuitSchema,
+      response: {
+        201: z.array(SessionExerciseResponseSchema),
+        400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: sessionId } = request.params as z.infer<typeof UuidParamSchema>
+    const body = request.body as z.infer<typeof CreateCircuitSchema>
+
+    try {
+      // Session must belong to this trainer.
+      const session = await db.query.sessions.findFirst({
+        where: and(eq(sessions.id, sessionId), eq(sessions.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!session) return reply.status(404).send({ error: 'Session not found' })
+
+      // Look up the exercises — validate existence, single workout type, laterality.
+      const exRows = await db.query.exercises.findMany({
+        where: inArray(exercises.id, body.exerciseIds),
+        columns: { id: true, workoutType: true, laterality: true },
+      })
+      const found = new Map(exRows.map((e) => [e.id, e]))
+      if (found.size !== new Set(body.exerciseIds).size) {
+        return reply.status(400).send({ error: 'One or more exercises not found' })
+      }
+      const types = new Set(exRows.map((e) => e.workoutType))
+      if (types.size > 1) {
+        return reply.status(400).send({ error: 'Circuit exercises must share a workout type' })
+      }
+      const workoutType = exRows[0]?.workoutType
+      if (!workoutType) return reply.status(400).send({ error: 'Circuit exercises not found' })
+
+      // Append after existing exercises, preserving the given round order.
+      const existing = await db.query.sessionExercises.findMany({
+        where: eq(sessionExercises.sessionId, sessionId),
+        columns: { orderIndex: true },
+      })
+      const startIndex = existing.length
+      const circuitId = randomUUID()
+
+      const values = body.exerciseIds.map((exId, i) => ({
+        sessionId,
+        exerciseId:       exId,
+        circuitId,
+        workoutType:      workoutType as never,
+        orderIndex:       startIndex + i,
+        // Per-side default inherited from each exercise's laterality (as elsewhere).
+        trackPerSide:     found.get(exId)?.laterality === 'unilateral',
+        targetSets:       body.rounds,
+        targetReps:       body.targetReps       ?? null,
+        targetWeight:     body.targetWeight      ?? null,
+        targetWeightUnit: body.targetWeightUnit,
+        notes:            body.notes             ?? null,
+      }))
+
+      const inserted = await db.insert(sessionExercises).values(values).returning()
+
+      return reply.status(201).send(inserted.map((se) => ({ ...se, exercise: null, sets: [] })))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to create circuit' })
     }
   })
 

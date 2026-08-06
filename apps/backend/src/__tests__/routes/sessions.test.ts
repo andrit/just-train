@@ -282,3 +282,97 @@ describe('POST /sessions/:id/exercises — trackPerSide', () => {
     )
   })
 })
+
+// ── POST /sessions/:id/circuits ─────────────────────────────────────────────────
+// One shared circuitId across members, rounds → targetSets, single-type guard.
+
+describe('POST /sessions/:id/circuits', () => {
+  const EX_A = 'ffffffff-0000-0000-0000-ffffffffffff'
+  const EX_B = 'ffffffff-3333-3333-3333-ffffffffffff'
+
+  let app: Awaited<ReturnType<typeof buildSessionTestApp>>
+  beforeAll(async () => { app = await buildSessionTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  function insertedValues(db: any): any[] | undefined {
+    const call = vi.mocked(db.insert({} as never).values).mock.calls.find((c: unknown[]) => Array.isArray(c[0]))
+    return call?.[0] as unknown[] as any[] | undefined
+  }
+
+  it('stamps one shared circuitId and rounds→targetSets across members', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce({ id: TEST_SESSION_ID } as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, workoutType: 'resistance', laterality: 'bilateral' },
+      { id: EX_B, workoutType: 'resistance', laterality: 'unilateral' },
+    ] as never)
+    vi.mocked(db.query.sessionExercises.findMany).mockResolvedValueOnce([] as never) // startIndex 0
+    vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([
+      makeSessionExercise({ exerciseId: EX_A }),
+      makeSessionExercise({ exerciseId: EX_B }),
+    ])
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/sessions/${TEST_SESSION_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3, targetReps: 10, targetWeight: 40 },
+    })
+    expect(res.statusCode).toBe(201)
+
+    const values = insertedValues(db)
+    expect(values).toHaveLength(2)
+    expect(values?.[0].circuitId).toBeTruthy()
+    expect(values?.[0].circuitId).toBe(values?.[1].circuitId)      // shared id
+    expect(values?.every((v) => v.targetSets === 3)).toBe(true)     // rounds → targetSets
+    expect(values?.[0].orderIndex).toBe(0)
+    expect(values?.[1].orderIndex).toBe(1)                          // contiguous
+    expect(values?.[1].trackPerSide).toBe(true)                    // EX_B is unilateral
+  })
+
+  it('rejects a circuit whose exercises span workout types', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce({ id: TEST_SESSION_ID } as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, workoutType: 'resistance', laterality: 'bilateral' },
+      { id: EX_B, workoutType: 'cardio',     laterality: 'bilateral' },
+    ] as never)
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/sessions/${TEST_SESSION_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('rejects when an exercise is missing', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce({ id: TEST_SESSION_ID } as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, workoutType: 'resistance', laterality: 'bilateral' },
+    ] as never) // only 1 of 2 found
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/sessions/${TEST_SESSION_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 404 when the session is not the trainer\'s', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce(undefined)
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/sessions/${TEST_SESSION_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
+    })
+    expect(res.statusCode).toBe(404)
+  })
+})

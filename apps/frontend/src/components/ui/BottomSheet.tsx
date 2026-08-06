@@ -9,7 +9,6 @@
 // ------------------------------------------------------------
 
 import { useEffect, useRef } from 'react'
-import { createPortal }      from 'react-dom'
 import { cn }                from '@/lib/cn'
 import { useSwipeDismiss }   from '@/hooks/useSwipeDismiss'
 
@@ -20,6 +19,22 @@ function getFocusable(container: HTMLElement): HTMLElement[] {
       'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
     )
   )
+}
+
+// Walk up from a node to the nearest actually-scrollable ancestor. The app's
+// scroll container is Layout's <main> (overflow-y-auto), NOT <body> — so a plain
+// body overflow-hidden can't stop touch scroll-through behind the sheet. We lock
+// this element instead.
+function findScrollParent(node: HTMLElement | null): HTMLElement | null {
+  let el = node?.parentElement ?? null
+  while (el && el !== document.body) {
+    const { overflowY } = getComputedStyle(el)
+    if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+      return el
+    }
+    el = el.parentElement
+  }
+  return null
 }
 
 interface BottomSheetProps {
@@ -76,23 +91,23 @@ export function BottomSheet({
     return () => document.removeEventListener('keydown', handler)
   }, [open, onClose])
 
-  // Prevent body scroll when open
+  // Prevent scroll-through when open. Lock BOTH <body> and the real scroll
+  // container behind the sheet (Layout's <main>), else touch-drags on the sheet
+  // scroll the page behind it. Restore each element's prior overflow on close.
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    if (!open) return
+    const scroller = findScrollParent(sheetRef.current)
+    const prevBody     = document.body.style.overflow
+    const prevScroller = scroller?.style.overflow ?? ''
+    document.body.style.overflow = 'hidden'
+    if (scroller) scroller.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prevBody
+      if (scroller) scroller.style.overflow = prevScroller
     }
-    return () => { document.body.style.overflow = '' }
   }, [open])
 
-  // Portal to <body> so the sheet is NOT a DOM descendant of Layout's scrollable
-  // <main> (overflow-y-auto). Rendered inside it, touch-drags on the sheet chain
-  // through and scroll the page behind (body-overflow-hidden can't stop it — the
-  // scroller is the inner <main>, not <body>). Portaling isolates the sheet; the
-  // transform on the sheet div is preserved, so the panel's fixed footer still
-  // anchors to the sheet.
-  return createPortal(
+  return (
     <>
       {/* Backdrop — z above the mobile tab bar (z-50) so the modal sheet covers
           it. Otherwise the nav paints over the sheet's bottom, hiding footer
@@ -159,7 +174,6 @@ export function BottomSheet({
           {children}
         </div>
       </div>
-    </>,
-    document.body,
+    </>
   )
 }

@@ -7,6 +7,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Per-exercise history + progress analytics (athlete-first)
+- **The exercise detail now shows your own history + progression for that one exercise** — answers "is my bench actually growing?" without digging through session history. Resistance only for v1 (non-resistance hides the section); athlete/self-client scoped (trainer-per-client deferred as the product focus shifts athlete-first).
+- **Headline:** estimated 1RM (Epley) with an est-1RM **sparkline** over time, plus current top-set weight and best volume, and the overall highest-weight rate-of-change (`▲ +20 lb · 6 wks`).
+- **Per-set rate-of-change:** the **top-3-heaviest** sets per session tracked independently over time (Heaviest / 2nd / 3rd), each with its own weight trend. Ranking by weight (not set order) means a warm-up drops out on its own once there are ≥3 work sets.
+- **History list:** every session with the exercise — date, top set (wt×reps), est 1RM, volume — tap a row to open that session.
+- Backend: `GET /clients/:id/exercise-progress/:exerciseId` (self-client scoped, resistance-aware). Pure, unit-tested cores: `lib/progression.ts` `weightTrend()` (least-squares slope for direction, first→last delta for display) and `lib/exerciseProgress.ts` `buildExerciseProgress()` (grouping, top-3 ranking, est-1RM/volume). Volume/1RM route through the shared `setMath` so per-side work counts correctly. Shared `ExerciseProgressResponseSchema` + `WeightTrend`.
+- Frontend: `components/charts/Sparkline.tsx` (dependency-free inline SVG, `currentColor`), `useExerciseProgress` hook, `ExerciseProgressSection` rendered on `ExerciseDetailPanel` below the description.
+
+### Fixed — exercise detail bottom sheet (scroll + layering)
+- **Background no longer scroll-through.** The `BottomSheet` sits inside Layout's scrollable `<main>`, so touch-drags on the sheet scrolled the page behind it (`body { overflow: hidden }` couldn't stop it — the scroller is `<main>`, not `<body>`). The open effect now locks both `<body>` and the nearest scrollable ancestor, restoring each on close; `overscroll-contain` on the sheet's own scroll area as a backstop.
+- **Sheet no longer hidden behind / dimmed by chrome.** Backdrop → `z-[54]`, sheet → `z-[55]` (above the mobile tab bar's `z-50`), so the footer CTA and lower content are visible and tappable, and the sheet isn't dimmed by its own backdrop.
+
 ### Unilateral (per-side) set tracking
 - **Single-limb exercises are now counted correctly.** A Bulgarian split squat logged as "10" means 10 *per side* — the athlete still enters one number, but volume, PRs, and totals count both sides (20). An L/R drill-down captures asymmetry ("left leg got 9, right got 10") without complicating the default flow.
 - **Schema (additive):**

@@ -31,6 +31,7 @@ import type {
   UpdateClientGoalInput,
   CreateClientSnapshotInput,
   ClientKpiResponse,
+  ExerciseProgressResponse,
 } from '@trainer-app/shared'
 
 // ── Query key factory ─────────────────────────────────────────────────────────
@@ -314,6 +315,24 @@ export function useExerciseHistory(
     queryFn:  () =>
       apiClient<{ lastSets: ExerciseHistorySet[] }>(
         `/clients/${clientId}/exercise-history/${exerciseId}`
+      ),
+    enabled:  !!accessToken && !!clientId && !!exerciseId,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+// Full per-exercise progression: history + est-1RM / top-set / volume + the
+// weight rate-of-change of the top-3-heaviest sets. Athlete self-client scoped.
+export function useExerciseProgress(
+  clientId: string | null,
+  exerciseId: string | null,
+): UseQueryResult<ExerciseProgressResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  return useQuery({
+    queryKey: ['exercise-progress', clientId, exerciseId],
+    queryFn:  () =>
+      apiClient<ExerciseProgressResponse>(
+        `/clients/${clientId}/exercise-progress/${exerciseId}`
       ),
     enabled:  !!accessToken && !!clientId && !!exerciseId,
     staleTime: 1000 * 60 * 5,

@@ -19,6 +19,7 @@
 // ------------------------------------------------------------
 
 import { useState }                              from 'react'
+import { useNavigate }                           from 'react-router-dom'
 import { cn }                                    from '@/lib/cn'
 import { interactions }                          from '@/lib/interactions'
 import { useExercise, useDeleteExercise }        from '@/lib/queries/exercises'
@@ -38,6 +39,7 @@ import {
 }                                                from '@/lib/exerciseLabels'
 import ExerciseForm                              from './ExerciseForm'
 import MediaUploader                             from './MediaUploader'
+import { ExerciseProgressSection }               from './ExerciseProgressSection'
 import type { ActiveSession }                    from '@/store/sessionStore'
 
 // ── Hero section ──────────────────────────────────────────────────────────────
@@ -284,11 +286,18 @@ export default function ExerciseDetailPanel({
   const [showAddSheet,       setShowAddSheet]       = useState(false)
   const [pickedSession,      setPickedSession]      = useState<ActiveSession | null>(null)
 
+  const navigate                              = useNavigate()
   const { data: exercise, isLoading, error } = useExercise(exerciseId)
   const deleteExercise                        = useDeleteExercise()
   const { activeSessions }                   = useSessionStore()
   const { data: clients }                    = useClients()
   const { data: selfClient }                 = useSelfClient()
+
+  // Athlete-first: progression is the current user's own history (self-client).
+  const handleOpenSession = (sessionId: string): void => {
+    onClose()
+    navigate(`/session/${sessionId}/history`)
+  }
 
   // Build enriched session list with client names
   const openSessions = Object.values(activeSessions).map((session) => {
@@ -436,6 +445,15 @@ export default function ExerciseDetailPanel({
             <h3 className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">Form Instructions</h3>
             <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{exercise.instructions}</p>
           </section>
+        )}
+
+        {/* Your progress — athlete's own history for this exercise (resistance only) */}
+        {selfClient?.id && (
+          <ExerciseProgressSection
+            clientId={selfClient.id}
+            exerciseId={exercise.id}
+            onOpenSession={handleOpenSession}
+          />
         )}
 
         {/* Media uploader — trainer-owned exercises only */}

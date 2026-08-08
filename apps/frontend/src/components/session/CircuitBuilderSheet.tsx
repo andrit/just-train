@@ -19,12 +19,15 @@ import { NumberField }           from '@/components/ui/NumberField'
 import { Spinner }               from '@/components/ui/Spinner'
 import { useExercises, useBodyParts } from '@/lib/queries/exercises'
 import { useCreateCircuit }      from '@/lib/queries/sessions'
+import { useCreateTemplateCircuit } from '@/lib/queries/templates'
 import type { BodyPart }         from '@trainer-app/shared'
 
 interface CircuitBuilderSheetProps {
   open:      boolean
   onClose:   () => void
-  sessionId: string
+  /** Provide exactly one of sessionId / templateId — it decides where the circuit lands. */
+  sessionId?:  string
+  templateId?: string
   weightUnit: string
   onCreated?: () => void
 }
@@ -35,11 +38,18 @@ function niceBodyPart(name: string): string {
 }
 
 export function CircuitBuilderSheet({
-  open, onClose, sessionId, weightUnit, onCreated,
+  open, onClose, sessionId, templateId, weightUnit, onCreated,
 }: CircuitBuilderSheetProps): React.JSX.Element {
   const { data: exercises, isLoading } = useExercises()
   const { data: bodyParts }            = useBodyParts()
-  const createCircuit = useCreateCircuit()
+  const createCircuit         = useCreateCircuit()
+  const createTemplateCircuit = useCreateTemplateCircuit()
+
+  // Template circuits have no weight-ramp column, so the "+ / set" control is
+  // session-only. `isTemplate` also selects which mutation runs.
+  const isTemplate = templateId != null
+  const pending    = isTemplate ? createTemplateCircuit.isPending : createCircuit.isPending
+  const submitError = isTemplate ? createTemplateCircuit.isError : createCircuit.isError
 
   const [search,      setSearch]      = useState('')
   const [bodyPart,    setBodyPart]    = useState<BodyPart | null>(null)
@@ -68,28 +78,43 @@ export function CircuitBuilderSheet({
     setSelectedIds([]); setRounds(3); setReps(10); setWeight(null); setWeightStep(0)
   }
 
-  const canCreate = selectedIds.length >= 2 && (rounds ?? 0) >= 1 && !createCircuit.isPending
+  const canCreate = selectedIds.length >= 2 && (rounds ?? 0) >= 1 && !pending
 
   const handleCreate = (): void => {
     if (!canCreate) return
-    createCircuit.mutate(
-      {
-        sessionId,
-        exerciseIds:      selectedIds,
-        rounds:           rounds ?? 1,
-        targetReps:       reps ?? undefined,
-        targetWeight:     weight ?? undefined,
-        targetWeightStep: weightStep !== 0 ? weightStep : undefined,
-        targetWeightUnit: weightUnit === 'kg' ? 'kg' : 'lbs',
-      },
-      {
-        onSuccess: () => { reset(); onCreated?.(); onClose() },
-      },
-    )
+    const onSuccess = (): void => { reset(); onCreated?.(); onClose() }
+    const targetWeightUnit = weightUnit === 'kg' ? 'kg' : 'lbs'
+
+    if (isTemplate && templateId) {
+      createTemplateCircuit.mutate(
+        {
+          templateId,
+          exerciseIds:  selectedIds,
+          rounds:       rounds ?? 1,
+          targetReps:   reps ?? undefined,
+          targetWeight: weight ?? undefined,
+          targetWeightUnit,
+        },
+        { onSuccess },
+      )
+    } else if (sessionId) {
+      createCircuit.mutate(
+        {
+          sessionId,
+          exerciseIds:      selectedIds,
+          rounds:           rounds ?? 1,
+          targetReps:       reps ?? undefined,
+          targetWeight:     weight ?? undefined,
+          targetWeightStep: weightStep !== 0 ? weightStep : undefined,
+          targetWeightUnit,
+        },
+        { onSuccess },
+      )
+    }
   }
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="New circuit" maxHeight="90vh">
+    <BottomSheet open={open} onClose={onClose} title={isTemplate ? 'New template circuit' : 'New circuit'} maxHeight="90vh">
       <div className="px-4 pb-6 space-y-5">
         <p className="text-xs text-gray-600">
           Pick the exercises for your box — you'll do one set of each per round, in this order.
@@ -126,17 +151,19 @@ export function CircuitBuilderSheet({
                 label="Starting weight"
                 suffix={weightUnit}
               />
-              <NumberField
-                value={weightStep}
-                onChange={(v) => setWeightStep(v ?? 0)}
-                min={-500}
-                max={500}
-                decimal
-                label="+ / set"
-                suffix={weightUnit}
-              />
+              {!isTemplate && (
+                <NumberField
+                  value={weightStep}
+                  onChange={(v) => setWeightStep(v ?? 0)}
+                  min={-500}
+                  max={500}
+                  decimal
+                  label="+ / set"
+                  suffix={weightUnit}
+                />
+              )}
             </div>
-            {weightStep !== 0 && weight != null && (
+            {!isTemplate && weightStep !== 0 && weight != null && (
               <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
                 {weightRampSequence(weight, weightStep, rounds ?? 1).join(' · ')} {weightUnit}
               </p>
@@ -252,7 +279,7 @@ export function CircuitBuilderSheet({
           )}
         </div>
 
-        {createCircuit.isError && (
+        {submitError && (
           <p className="text-sm text-red-400">Couldn't create the circuit. All exercises must be resistance.</p>
         )}
 
@@ -268,7 +295,7 @@ export function CircuitBuilderSheet({
             canCreate ? 'bg-command-blue text-white' : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
           )}
         >
-          {createCircuit.isPending
+          {pending
             ? <Spinner size="sm" />
             : selectedIds.length < 2
             ? 'Pick at least 2 exercises'

@@ -12,6 +12,7 @@ import type {
   TemplateListResponse,
   TemplateDetailResponse,
   TemplateSummaryResponse,
+  CreateTemplateCircuitInput,
 } from '@trainer-app/shared'
 
 export const templateKeys = {
@@ -107,6 +108,18 @@ export function useAddTemplateExercise() {
   return useMutation({
     mutationFn: ({ templateId, exerciseId }: { templateId: string; exerciseId: string }) =>
       apiClient.post(`/templates/${templateId}/exercises`, { exerciseId }),
+    onSuccess: (_data, { templateId }) =>
+      qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
+  })
+}
+
+// ── Create circuit (interwoven group) in a template ────────────────────────────
+
+export function useCreateTemplateCircuit() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ templateId, ...body }: CreateTemplateCircuitInput & { templateId: string }) =>
+      apiClient.post(`/templates/${templateId}/circuits`, body),
     onSuccess: (_data, { templateId }) =>
       qc.invalidateQueries({ queryKey: templateKeys.detail(templateId) }),
   })

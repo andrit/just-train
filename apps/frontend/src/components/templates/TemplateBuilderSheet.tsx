@@ -41,6 +41,8 @@ import {
 import { toast }                              from '@/store/toastStore'
 import { WORKOUT_TYPE_LABEL, WORKOUT_TYPE_COLOR } from '@/lib/exerciseLabels'
 import { TemplateExercisePickerSheet }        from './TemplateExercisePickerSheet'
+import { CircuitBuilderSheet }                from '@/components/session/CircuitBuilderSheet'
+import { useAuthStore }                       from '@/store/authStore'
 import type { TemplateDetailResponse }        from '@trainer-app/shared'
 
 interface TemplateBuilderSheetProps {
@@ -56,6 +58,9 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
   const [saving,      setSaving]      = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
   const [pickerOpen,  setPickerOpen]  = useState(false)
+  const [circuitOpen, setCircuitOpen] = useState(false)
+
+  const weightUnit = useAuthStore((s) => s.trainer?.weightUnitPreference) ?? 'lbs'
 
   const { data: existing, isLoading } = useTemplate(activeId)
   const createTemplate = useCreateTemplate()
@@ -165,20 +170,37 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-gray-500 uppercase tracking-wider">Exercises</p>
-                    <button
-                      type="button"
-                      onClick={() => setPickerOpen(true)}
-                      className={cn(
-                        'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs',
-                        'text-command-blue border border-command-blue/30',
-                        interactions.button.base,
-                      )}
-                    >
-                      <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
-                        <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                      Add exercise
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCircuitOpen(true)}
+                        className={cn(
+                          'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs',
+                          'text-command-blue border border-command-blue/30',
+                          interactions.button.base,
+                        )}
+                      >
+                        <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+                          <path d="M2 4a2 2 0 012-2h4M10 8a2 2 0 01-2 2H4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          <path d="M8 1L10 3 8 5M4 7L2 9l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Add circuit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPickerOpen(true)}
+                        className={cn(
+                          'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs',
+                          'text-command-blue border border-command-blue/30',
+                          interactions.button.base,
+                        )}
+                      >
+                        <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+                          <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                        Add exercise
+                      </button>
+                    </div>
                   </div>
 
                   {exercises.length === 0 ? (
@@ -209,6 +231,15 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
           open={pickerOpen}
           templateId={activeId}
           onClose={() => setPickerOpen(false)}
+        />
+      )}
+
+      {activeId && (
+        <CircuitBuilderSheet
+          open={circuitOpen}
+          templateId={activeId}
+          weightUnit={weightUnit}
+          onClose={() => setCircuitOpen(false)}
         />
       )}
 

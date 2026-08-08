@@ -14,6 +14,7 @@ import type { SessionExerciseResponse } from '@trainer-app/shared'
 import { setVolume }     from '@trainer-app/shared'
 import { cn }            from '@/lib/cn'
 import { formatEpley, formatSetReps } from '@/lib/formatters'
+import { groupExercisesByCircuit }    from '@/lib/circuits'
 
 interface SessionExerciseBreakdownProps {
   sessionExercises:  SessionExerciseResponse[]
@@ -49,10 +50,10 @@ export function SessionExerciseBreakdown({
   renderMediaThumbs,
 }: SessionExerciseBreakdownProps): React.JSX.Element {
   const grandTotalVolume = sessionExercises.reduce((acc, se) => acc + exerciseVolume(se), 0)
+  const groups = groupExercisesByCircuit(sessionExercises)
 
-  return (
-    <div className="space-y-3">
-      {sessionExercises.map((se) => {
+  // One exercise card — shared by standalone exercises and circuit members.
+  const renderCard = (se: SessionExerciseResponse): React.JSX.Element => {
         const vol    = exerciseVolume(se)
         const est1rm = showEst1rm ? bestEpley(se) : null
         const showFooter = (showEst1rm && est1rm != null) || (showVolumeTotals && vol > 0)
@@ -125,7 +126,30 @@ export function SessionExerciseBreakdown({
             )}
           </div>
         )
-      })}
+  }
+
+  return (
+    <div className="space-y-3">
+      {groups.map((g) =>
+        g.kind === 'solo' ? (
+          renderCard(g.exercise)
+        ) : (
+          <div
+            key={g.circuitId}
+            className="rounded-xl border border-command-blue/30 bg-command-blue/[0.04] p-2 space-y-2"
+          >
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] uppercase tracking-widest font-medium text-command-blue">
+                {g.label}
+              </span>
+              <span className="text-[10px] uppercase tracking-widest text-gray-500">
+                {g.rounds} rounds · interwoven
+              </span>
+            </div>
+            {g.members.map(renderCard)}
+          </div>
+        ),
+      )}
 
       {showVolumeTotals && grandTotalVolume > 0 && (
         <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-surface border border-surface-border">

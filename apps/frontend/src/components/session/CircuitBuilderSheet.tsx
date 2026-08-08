@@ -77,11 +77,12 @@ export function CircuitBuilderSheet({
           Pick the exercises for your box — you'll do one set of each per round, in this order.
         </p>
 
-        {/* Rounds / reps / weight */}
-        <div className="flex gap-3">
+        {/* Rounds / reps / weight — wraps so the weight field can't be pushed
+            off-screen on narrow phones (three stepper fields don't fit one row). */}
+        <div className="flex flex-wrap justify-center gap-3">
           <NumberField value={rounds} onChange={setRounds} min={1} max={10} label="Rounds" />
           <NumberField value={reps} onChange={setReps} min={1} max={50} label="Reps / set" allowEmpty />
-          <NumberField value={weight} onChange={setWeight} min={0} label="Weight" suffix={weightUnit} allowEmpty />
+          <NumberField value={weight} onChange={setWeight} min={0} label="Weight" suffix={weightUnit} allowEmpty decimal />
         </div>
 
         {/* Selected order preview */}

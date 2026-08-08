@@ -12,6 +12,7 @@
 import { useState }              from 'react'
 import { cn }                    from '@/lib/cn'
 import { formatSeconds }         from '@/lib/formatters'
+import { circuitLabel }          from '@/lib/circuits'
 import { ExerciseBlock }         from './ExerciseBlock'
 import type { SessionExerciseResponse } from '@trainer-app/shared'
 
@@ -28,17 +29,6 @@ interface CircuitBlockProps {
     remaining:  number
     skip:       () => void
   }
-}
-
-// "Shoulder Circuit" when every member shares a body part, else "Circuit".
-function circuitLabel(members: SessionExerciseResponse[]): string {
-  const parts = new Set(members.map((m) => m.exercise?.bodyPart?.name).filter(Boolean))
-  if (parts.size === 1) {
-    const p = [...parts][0] as string
-    const nice = p.replace('_', ' ')
-    return `${nice.charAt(0).toUpperCase()}${nice.slice(1)} Circuit`
-  }
-  return 'Circuit'
 }
 
 export function CircuitBlock({

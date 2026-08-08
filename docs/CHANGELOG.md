@@ -29,6 +29,13 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - **Background no longer scroll-through.** The `BottomSheet` sits inside Layout's scrollable `<main>`, so touch-drags on the sheet scrolled the page behind it (`body { overflow: hidden }` couldn't stop it — the scroller is `<main>`, not `<body>`). The open effect now locks both `<body>` and the nearest scrollable ancestor, restoring each on close; `overscroll-contain` on the sheet's own scroll area as a backstop.
 - **Sheet no longer hidden behind / dimmed by chrome.** Backdrop → `z-[54]`, sheet → `z-[55]` (above the mobile tab bar's `z-50`), so the footer CTA and lower content are visible and tappable, and the sheet isn't dimmed by its own backdrop.
 
+### Fixed — content/buttons hidden behind the mobile tab bar
+- **All in-`main` content now clears the bar with margin.** `<main>` used a flat `pb-20` (80px) that (a) never added the device safe-area inset, so on a notched phone the ~89px-tall nav overlapped page content, and (b) left only ~13px on a normal phone. New `pb-nav-clear` = `calc(6rem + env(safe-area-inset-bottom))` (tab-bar height + safe area + ≥15px margin), defined as a spacing token in `tailwind.config.js` (`nav-clear`, plus `sheet-bottom`) so the `env()` calc lives in config, not a fragile arbitrary-value class. `md:pb-0` unchanged.
+- **Post-session wrap-up "View summary" button no longer sits under the bar.** `PostSessionWrapUp` was `z-50` — equal to the nav, so the bar painted over its bottom. Raised to `z-[55]`; panel gets `pb-sheet-bottom` so the button also clears the home indicator. (It only collided on the `/session/:id` inline path, where the nav is visible; in the full-screen overlay the nav is already hidden.)
+- **`TemplateExercisePickerSheet`** (renders in `<main>`) raised `z-50` → `z-[55]`; its scroll list gets `pb-sheet-bottom`.
+- **`NamePromptModal`** mounts inside `SessionPlanPanel` (a `z-[10]` stacking context), so a z-index bump would be capped and can't out-stack the nav — instead its card is lifted clear of the bar with `pb-nav-clear` (`items-end`), keeping its bottom-docked design while clearing the bar.
+- Docs: `PROJECT_STATE.md` Z-Index Layer Stack corrected (sheets/modals over the nav are 54–55, not the original 30/40) with the stacking-context caveat.
+
 ### Unilateral (per-side) set tracking
 - **Single-limb exercises are now counted correctly.** A Bulgarian split squat logged as "10" means 10 *per side* — the athlete still enters one number, but volume, PRs, and totals count both sides (20). An L/R drill-down captures asymmetry ("left leg got 9, right got 10") without complicating the default flow.
 - **Schema (additive):**

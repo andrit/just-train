@@ -49,8 +49,8 @@ export function PostSessionWrapUp({
     : null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/70 backdrop-blur-sm">
-      <div className="w-full bg-brand-secondary rounded-t-3xl border-t border-surface-border p-6 space-y-6">
+    <div className="fixed inset-0 z-[55] flex items-end bg-black/70 backdrop-blur-sm">
+      <div className="w-full bg-brand-secondary rounded-t-3xl border-t border-surface-border p-6 pb-sheet-bottom space-y-6">
 
         {/* Header */}
         <div className="text-center">

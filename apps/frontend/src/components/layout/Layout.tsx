@@ -438,7 +438,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
       {/* ── Main content ─────────────────────────────────────────────── */}
       <main
         className={cn(
-          'flex-1 pb-20 md:pb-0 min-h-screen overflow-y-auto',
+          'flex-1 pb-nav-clear md:pb-0 min-h-screen overflow-y-auto',
           'transition-all duration-300 ease-in-out',
           sidebarCollapsed ? 'md:ml-14' : 'md:ml-56',
         )}

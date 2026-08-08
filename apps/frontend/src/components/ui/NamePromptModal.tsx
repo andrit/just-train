@@ -48,8 +48,9 @@ export function NamePromptModal({
   }
 
   return (
-    // Backdrop
-    <div className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-4">
+    // Backdrop. Mounts inside SessionPlanPanel (z-10), so it can't out-stack the
+    // nav (z-50); instead the card is lifted clear of the bar with nav-clear pad.
+    <div className="fixed inset-0 z-50 flex items-end justify-center pb-nav-clear px-4">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onCancel}

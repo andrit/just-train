@@ -58,6 +58,13 @@ export default {
       spacing: {
         'safe-bottom': 'env(safe-area-inset-bottom)',
         '18': '4.5rem',
+        // Bottom padding that clears the fixed mobile tab bar (~59px content +
+        // its own safe-area padding) with margin to spare. Use on scroll
+        // containers whose content must not sit under the nav. See Layout.tsx.
+        'nav-clear': 'calc(6rem + env(safe-area-inset-bottom))',
+        // Bottom padding for a bottom-anchored sheet/modal panel: normal inset
+        // plus the device home-indicator safe area.
+        'sheet-bottom': 'calc(1.5rem + env(safe-area-inset-bottom))',
       },
 
       // ── Shadow tokens ──────────────────────────────────────────────────────

@@ -927,10 +927,11 @@ Active session uses the Spotify model: full-screen overlay, swipe down to minimi
 | 2 — Planned session pill | Minimised planned sessions indicator | 15 |
 | 3 — Active session overlay | Live executing session (full-screen) | 20 |
 | 4 — Active session pill | Minimised active session (Spotify bar) | 25 |
-| 5 — Sheet | Bottom sheets | 30 |
-| 6 — Modal | Destructive confirms | 40 |
 | 7 — Nav | Tab bar — hidden when active session is full-screen | 50 |
+| 5 — Sheet/Modal (over nav) | Bottom sheets + bottom-anchored modals that must show while the nav is visible: `BottomSheet` (54 backdrop / 55 sheet), `PostSessionWrapUp`, `TemplateExercisePickerSheet` | 54–55 |
 | 8 — Toast | Notifications | 60 |
+
+**Actual convention (supersedes the original 30/40 plan):** a bottom-anchored sheet/modal that can appear while the mobile nav (z-50) is showing must sit **above** it — `z-[55]` — or its lower content is painted over by the bar. The original "Sheet 30 / Modal 40 (below nav)" only works when the nav is hidden; it isn't for plan-builder/template/summary flows, so those use 54–55. **Caveat — stacking contexts:** a component mounted inside the active-session overlay (`z-[20]`) or a slide-in panel (`z-[10]`) is *capped* by that ancestor — a child `z-[55]` can't exceed it globally. For those (e.g. `NamePromptModal` inside `SessionPlanPanel`), don't rely on z-index; give the panel `nav-clear` bottom padding so its content clears the bar physically. In-`main` page content clears the bar via `pb-nav-clear` on `<main>` (tab bar height + safe-area inset + margin; see `tailwind.config.js`).
 
 Nav hides when active session overlay is full-screen. Swipe down → overlay minimises → pill appears above nav → nav reappears.
 

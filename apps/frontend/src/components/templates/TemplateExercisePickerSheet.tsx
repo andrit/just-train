@@ -61,7 +61,7 @@ export function TemplateExercisePickerSheet({
   if (!open) return <></>
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end">
+    <div className="fixed inset-0 z-[55] flex items-end">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full bg-brand-secondary rounded-t-2xl border-t border-surface-border flex flex-col" style={{ maxHeight: '80vh' }}>
         {/* Header */}
@@ -111,7 +111,7 @@ export function TemplateExercisePickerSheet({
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto p-3 pb-sheet-bottom">
           {isLoading ? (
             <div className="flex justify-center py-8"><Spinner size="md" className="text-command-blue" /></div>
           ) : filtered.length === 0 ? (

@@ -6,6 +6,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import { buildTemplateTestApp } from '../helpers/buildApp'
 import {
   makeTemplate,
+  makeTemplateExercise,
   validTemplateBody,
   TEST_TRAINER_ID, TEST_TEMPLATE_ID, TEST_TEMPLATE_EXERCISE_ID, TEST_EXERCISE_ID,
 } from '../helpers/factories'
@@ -34,6 +35,7 @@ vi.mock('../../db', () => {
         },
         exercises: {
           findFirst: vi.fn().mockResolvedValue(undefined),
+          findMany:  vi.fn().mockResolvedValue([]),
         },
       },
       insert: vi.fn().mockReturnValue(chain),
@@ -282,6 +284,135 @@ describe('POST /templates/:id/fork', () => {
       headers: authHeader(), payload: {},
     })
     expect(res.statusCode).toBe(201)
+  })
+
+  it('remaps circuitId on forked exercises (fresh, shared, distinct from source)', async () => {
+    const { db } = await import('../../db')
+    const SRC_CID = 'aaaaaaaa-0000-0000-0000-aaaaaaaaaaaa'
+    const source = {
+      ...makeTemplate(),
+      templateExercises: [
+        makeTemplateExercise({ id: 'e1', exerciseId: TEST_EXERCISE_ID, circuitId: SRC_CID, orderIndex: 0 }),
+        makeTemplateExercise({ id: 'e2', exerciseId: TEST_EXERCISE_ID, circuitId: SRC_CID, orderIndex: 1 }),
+      ],
+    }
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce(source as never)
+    vi.mocked(db.insert({} as never).values({} as never).returning)
+      .mockResolvedValueOnce([{ id: 'ffffffff-1111-1111-1111-111111111111', trainerId: TEST_TRAINER_ID, name: 'copy', type: 'session', description: null, notes: null, createdAt: new Date(), updatedAt: new Date() }])
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ ...makeTemplate(), templateExercises: [] } as never)
+
+    const res = await app.inject({
+      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/fork`,
+      headers: authHeader(), payload: {},
+    })
+    expect(res.statusCode).toBe(201)
+
+    // Collect the per-exercise inserts (single-object .values calls with an exerciseId).
+    const exValues = vi.mocked(db.insert({} as never).values).mock.calls
+      .map((c) => c[0] as any)
+      .filter((v) => v && !Array.isArray(v) && v.exerciseId)
+    expect(exValues).toHaveLength(2)
+    expect(exValues[0].circuitId).toBeTruthy()
+    expect(exValues[0].circuitId).toBe(exValues[1].circuitId)   // shared within the circuit
+    expect(exValues[0].circuitId).not.toBe(SRC_CID)             // fresh, not the source's
+  })
+})
+
+// ── POST /templates/:id/circuits ──────────────────────────────────────────────
+
+describe('POST /templates/:id/circuits', () => {
+  const EX_A = 'ffffffff-0000-0000-0000-ffffffffffff'
+  const EX_B = 'ffffffff-3333-3333-3333-ffffffffffff'
+
+  let app: Awaited<ReturnType<typeof buildTemplateTestApp>>
+  beforeAll(async () => { app = await buildTemplateTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  function insertedValues(db: any): any[] | undefined {
+    const call = vi.mocked(db.insert({} as never).values).mock.calls.find((c: unknown[]) => Array.isArray(c[0]))
+    return call?.[0] as unknown[] as any[] | undefined
+  }
+
+  it('returns 401 without auth', async () => {
+    const res = await app.inject({ method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/circuits`, payload: {} })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('stamps one shared circuitId and rounds→targetSets across members', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TEST_TEMPLATE_ID } as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, workoutType: 'resistance' },
+      { id: EX_B, workoutType: 'resistance' },
+    ] as never)
+    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([] as never) // startIndex 0
+    vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([
+      makeTemplateExercise({ id: 'te1', exerciseId: EX_A }),
+      makeTemplateExercise({ id: 'te2', exerciseId: EX_B }),
+    ])
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/templates/${TEST_TEMPLATE_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 4, targetReps: 10, targetWeight: 40 },
+    })
+    expect(res.statusCode).toBe(201)
+
+    const values = insertedValues(db)
+    expect(values).toHaveLength(2)
+    expect(values?.[0].circuitId).toBeTruthy()
+    expect(values?.[0].circuitId).toBe(values?.[1].circuitId)   // shared id
+    expect(values?.every((v) => v.targetSets === 4)).toBe(true) // rounds → targetSets
+    expect(values?.[0].orderIndex).toBe(0)
+    expect(values?.[1].orderIndex).toBe(1)                      // contiguous
+  })
+
+  it('rejects a circuit whose exercises span workout types', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TEST_TEMPLATE_ID } as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, workoutType: 'resistance' },
+      { id: EX_B, workoutType: 'cardio' },
+    ] as never)
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/templates/${TEST_TEMPLATE_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('appends after existing exercises using max(orderIndex)+1', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TEST_TEMPLATE_ID } as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, workoutType: 'resistance' },
+      { id: EX_B, workoutType: 'resistance' },
+    ] as never)
+    // Existing rows with a gap (count 2, but max index 5) — append must start at 6.
+    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([
+      { orderIndex: 0 }, { orderIndex: 5 },
+    ] as never)
+    vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([
+      makeTemplateExercise({ id: 'te1', exerciseId: EX_A }),
+      makeTemplateExercise({ id: 'te2', exerciseId: EX_B }),
+    ])
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/templates/${TEST_TEMPLATE_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
+    })
+    expect(res.statusCode).toBe(201)
+
+    const values = insertedValues(db)
+    expect(values?.[0].orderIndex).toBe(6)
+    expect(values?.[1].orderIndex).toBe(7)
   })
 })
 

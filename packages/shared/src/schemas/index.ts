@@ -336,6 +336,13 @@ export const CreateCircuitSchema = z.object({
 })
 export type CreateCircuitInput = z.infer<typeof CreateCircuitSchema>
 
+// Same as CreateCircuitSchema, minus targetWeightStep — template_exercises has no
+// weight-step column yet, so a template circuit can't carry a ramp. Omitting the
+// field (rather than accepting and dropping it) keeps the API honest: a caller that
+// tries to send a step fails typecheck instead of losing data silently.
+export const CreateTemplateCircuitSchema = CreateCircuitSchema.omit({ targetWeightStep: true })
+export type CreateTemplateCircuitInput = z.infer<typeof CreateTemplateCircuitSchema>
+
 // ============================================================
 // SET
 // ============================================================

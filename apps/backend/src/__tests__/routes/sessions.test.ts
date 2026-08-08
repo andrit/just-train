@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
 import { buildSessionTestApp } from '../helpers/buildApp'
 import {
-  makeClient, makeSession, makeSessionExercise,
+  makeClient, makeSession, makeSessionExercise, makeTemplateExercise,
   validSessionBody,
   TEST_TRAINER_ID, TEST_SESSION_ID, TEST_UNKNOWN_ID, TEST_EXERCISE_ID,
 } from '../helpers/factories'
@@ -29,6 +29,7 @@ vi.mock('../../db', () => {
         sessions: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
         exercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
         sessionExercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
+        templateExercises: { findMany: vi.fn().mockResolvedValue([]) },
       },
       insert:      vi.fn().mockReturnValue(chain),
       update:      vi.fn().mockReturnValue(chain),
@@ -153,6 +154,46 @@ describe('POST /sessions', () => {
       method: 'POST', url: '/api/v1/sessions', headers: authHeader(), payload: validSessionBody,
     })
     expect(res.statusCode).toBe(201)
+  })
+
+  it('remaps template circuitIds to fresh per-session ids when applying a template', async () => {
+    const { db } = await import('../../db')
+    const TPL_ID  = 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa'
+    const TPL_CID = 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb'
+    const EX_A = 'ffffffff-0000-0000-0000-ffffffffffff'
+    const EX_B = 'ffffffff-3333-3333-3333-ffffffffffff'
+    const EX_C = 'ffffffff-4444-4444-4444-ffffffffffff'
+
+    vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([makeSession()])
+    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([
+      makeTemplateExercise({ exerciseId: EX_A, circuitId: TPL_CID, orderIndex: 0 }),
+      makeTemplateExercise({ exerciseId: EX_B, circuitId: TPL_CID, orderIndex: 1 }),
+      makeTemplateExercise({ exerciseId: EX_C, circuitId: null,    orderIndex: 2 }),
+    ] as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, laterality: 'bilateral' },
+      { id: EX_B, laterality: 'bilateral' },
+      { id: EX_C, laterality: 'bilateral' },
+    ] as never)
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+
+    const res = await app.inject({
+      method: 'POST', url: '/api/v1/sessions', headers: authHeader(),
+      payload: { ...validSessionBody, templateId: TPL_ID },
+    })
+    expect(res.statusCode).toBe(201)
+
+    // Collect the per-exercise session_exercise inserts (single-object .values with sessionId + exerciseId).
+    const seValues = vi.mocked(db.insert({} as never).values).mock.calls
+      .map((c) => c[0] as any)
+      .filter((v) => v && !Array.isArray(v) && v.sessionId && v.exerciseId)
+    expect(seValues).toHaveLength(3)
+
+    const byEx = Object.fromEntries(seValues.map((v) => [v.exerciseId, v]))
+    expect(byEx[EX_A].circuitId).toBeTruthy()
+    expect(byEx[EX_A].circuitId).toBe(byEx[EX_B].circuitId)   // members still grouped
+    expect(byEx[EX_A].circuitId).not.toBe(TPL_CID)            // fresh, not the template's id
+    expect(byEx[EX_C].circuitId).toBeNull()                   // standalone stays null
   })
 })
 

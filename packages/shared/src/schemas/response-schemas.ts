@@ -440,7 +440,7 @@ export type SessionListResponse = z.infer<typeof SessionListResponseSchema>
 // TEMPLATE
 // ============================================================
 
-const TemplateExerciseResponseSchema = z.object({
+export const TemplateExerciseResponseSchema = z.object({
   id:         z.string().uuid(),
   templateId: z.string().uuid(),
   exerciseId: z.string().uuid(),

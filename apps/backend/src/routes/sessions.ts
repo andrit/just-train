@@ -288,12 +288,26 @@ This is the primary payload for the active workout view — loaded once when the
           lateralityRows.filter((e) => e.laterality === 'unilateral').map((e) => e.id),
         )
 
+        // Remap circuit grouping: each distinct template circuitId → one fresh
+        // circuitId for THIS session, so applied sessions have independent circuits
+        // (members that shared a group in the template still share one here).
+        const circuitIdMap = new Map<string, string>()
+        const sessionCircuitId = (templateCircuitId: string | null): string | null => {
+          if (!templateCircuitId) return null
+          const existing = circuitIdMap.get(templateCircuitId)
+          if (existing) return existing
+          const fresh = randomUUID()
+          circuitIdMap.set(templateCircuitId, fresh)
+          return fresh
+        }
+
         for (const te of templateData) {
           await db.insert(sessionExercises).values({
             sessionId:             newSession.id,
             exerciseId:            te.exerciseId,
             workoutType:           te.workoutType as never,
             orderIndex:            te.orderIndex,
+            circuitId:             sessionCircuitId(te.circuitId),
             trackPerSide:          unilateralIds.has(te.exerciseId),
             targetSets:            te.targetSets            ?? null,
             targetReps:            te.targetReps            ?? null,

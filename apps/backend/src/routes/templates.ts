@@ -18,13 +18,16 @@ import { routeLog } from '../lib/logger'
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
 import { db, templates, templateExercises, exercises } from '../db'
-import { eq, and, ilike, or, exists, sql } from 'drizzle-orm'
+import { eq, and, ilike, or, exists, sql, inArray } from 'drizzle-orm'
+import { randomUUID } from 'crypto'
 import {
   CreateTemplateSchema,
   AddTemplateExerciseSchema,
+  CreateTemplateCircuitSchema,
   TemplateListResponseSchema,
   TemplateDetailResponseSchema,
   TemplateSummaryResponseSchema,
+  TemplateExerciseResponseSchema,
   ErrorResponseSchema,
   UuidParamSchema,
 } from '@trainer-app/shared'
@@ -264,11 +267,22 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
 
     try {
       const source = await db.query.templates.findFirst({
-        where: eq(templates.id, id),
+        where: and(eq(templates.id, id), eq(templates.trainerId, request.trainer.trainerId)),
         with: { templateExercises: { orderBy: templateExercises.orderIndex } },
       })
 
       if (!source) return reply.status(404).send({ error: 'Template not found' })
+
+      // Remap circuit grouping so the fork's circuits are independent of the source.
+      const forkCircuitIdMap = new Map<string, string>()
+      const forkedCircuitId = (srcCircuitId: string | null): string | null => {
+        if (!srcCircuitId) return null
+        const existing = forkCircuitIdMap.get(srcCircuitId)
+        if (existing) return existing
+        const fresh = randomUUID()
+        forkCircuitIdMap.set(srcCircuitId, fresh)
+        return fresh
+      }
 
       const [forked] = await db.insert(templates).values({
         trainerId:   request.trainer.trainerId,
@@ -286,6 +300,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
           exerciseId:            te.exerciseId,
           workoutType:           te.workoutType,
           orderIndex:            te.orderIndex,
+          circuitId:             forkedCircuitId(te.circuitId),
           targetSets:            te.targetSets       ?? null,
           targetReps:            te.targetReps       ?? null,
           targetRepsPerSet:      te.targetRepsPerSet ?? null,
@@ -377,6 +392,91 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to add exercise' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // POST /templates/:id/circuits — Create a circuit in a template
+  //
+  // The template mirror of POST /sessions/:id/circuits: adds N exercises as one
+  // round-major group. One shared circuitId is stamped on every member; rounds
+  // becomes each member's targetSets; shared reps/weight apply to all. All
+  // exercises must share a workout type (v1). Applying the template later remaps
+  // this circuitId to a fresh one per session (see POST /sessions).
+  // ----------------------------------------------------------
+  app.post('/templates/:id/circuits', {
+    config: { rateLimit: { max: 60, timeWindow: '1 hour' } },
+    schema: {
+      tags: ['Templates'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Create a circuit in a template',
+      description: 'Groups exercises into a circuit performed round-major (interwoven). `rounds` becomes each member\'s target sets; shared reps/weight apply to all. All exercises must share a workout type (v1). Templates do not carry a weight ramp — `targetWeightStep` is not accepted.',
+      params: UuidParamSchema,
+      body: CreateTemplateCircuitSchema,
+      response: {
+        201: z.array(TemplateExerciseResponseSchema),
+        400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: templateId } = request.params as z.infer<typeof UuidParamSchema>
+    const body = request.body as z.infer<typeof CreateTemplateCircuitSchema>
+
+    try {
+      // Template must belong to this trainer.
+      const template = await db.query.templates.findFirst({
+        where: and(eq(templates.id, templateId), eq(templates.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!template) return reply.status(404).send({ error: 'Template not found' })
+
+      // Look up the exercises — validate existence and a single workout type.
+      const exRows = await db.query.exercises.findMany({
+        where:   inArray(exercises.id, body.exerciseIds),
+        columns: { id: true, workoutType: true },
+      })
+      const found = new Map(exRows.map((e) => [e.id, e]))
+      if (found.size !== new Set(body.exerciseIds).size) {
+        return reply.status(400).send({ error: 'One or more exercises not found' })
+      }
+      const types = new Set(exRows.map((e) => e.workoutType))
+      if (types.size > 1) {
+        return reply.status(400).send({ error: 'Circuit exercises must share a workout type' })
+      }
+      const workoutType = exRows[0]?.workoutType
+      if (!workoutType) return reply.status(400).send({ error: 'Circuit exercises not found' })
+
+      // Append after existing exercises. Use max(orderIndex)+1, not the row count —
+      // after deletions the count can be < max, which would duplicate an index and
+      // make sort order (and thus circuit contiguity) unstable.
+      const existing = await db.query.templateExercises.findMany({
+        where:   eq(templateExercises.templateId, templateId),
+        columns: { orderIndex: true },
+      })
+      const startIndex = existing.length ? Math.max(...existing.map((e) => e.orderIndex)) + 1 : 0
+      const circuitId  = randomUUID()
+
+      const values = body.exerciseIds.map((exId, i) => ({
+        templateId,
+        exerciseId:       exId,
+        circuitId,
+        workoutType:      workoutType as never,
+        orderIndex:       startIndex + i,
+        targetSets:       body.rounds,
+        targetReps:       body.targetReps  ?? null,
+        targetWeight:     body.targetWeight ?? null,
+        targetWeightUnit: body.targetWeightUnit,
+        notes:            body.notes ?? null,
+      }))
+
+      const inserted = await db.insert(templateExercises).values(values).returning()
+
+      return reply.status(201).send(inserted.map((te) => ({ ...te, exercise: null })))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to create circuit' })
     }
   })
 

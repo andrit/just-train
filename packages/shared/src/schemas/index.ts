@@ -330,6 +330,7 @@ export const CreateCircuitSchema = z.object({
   rounds:           z.number().int().min(1).describe('Number of rounds — becomes each member\'s targetSets'),
   targetReps:       z.number().int().min(1).optional().describe('Shared target reps applied to every member'),
   targetWeight:     z.number().min(0).optional().describe('Shared starting weight applied to every member'),
+  targetWeightStep: z.number().optional().describe('Shared per-set weight step (ramp) applied to every member'),
   targetWeightUnit: WeightUnitEnum.default('lbs'),
   notes:            z.string().max(1000).optional(),
 })

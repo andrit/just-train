@@ -582,6 +582,7 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
         targetSets:       body.rounds,
         targetReps:       body.targetReps       ?? null,
         targetWeight:     body.targetWeight      ?? null,
+        targetWeightStep: body.targetWeightStep  ?? null,
         targetWeightUnit: body.targetWeightUnit,
         notes:            body.notes             ?? null,
       }))

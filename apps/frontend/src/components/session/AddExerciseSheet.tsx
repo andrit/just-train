@@ -25,6 +25,7 @@ import { BottomSheet }           from '@/components/ui/BottomSheet'
 import { DragStepper }           from '@/components/ui/DragStepper'
 import { NumberField }           from '@/components/ui/NumberField'
 import { Spinner }               from '@/components/ui/Spinner'
+import { weightRampSequence }    from '@/lib/weightRamp'
 import {
   useExercises,
   useCreateExercise,
@@ -79,10 +80,6 @@ function rampSequence(start: number, step: number, sets: number, lo = 1, hi = 10
 
 // Expand a starting weight + per-set step into a preview sequence (e.g. 100, +50 → 100/150/200).
 // Weights allow decimals and a floor of 0; only start + step are stored, not this expansion.
-function weightRampSequence(start: number, step: number, sets: number): number[] {
-  return Array.from({ length: Math.max(1, sets) }, (_, i) => Math.max(0, start + i * step))
-}
-
 // Ramp editor — a start value and a per-set step, with a live preview of the result.
 function RampInputs({ start, step, sets, onStart, onStep }: {
   start: number; step: number; sets: number

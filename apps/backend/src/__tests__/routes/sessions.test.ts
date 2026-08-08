@@ -331,6 +331,56 @@ describe('POST /sessions/:id/circuits', () => {
     expect(values?.[1].trackPerSide).toBe(true)                    // EX_B is unilateral
   })
 
+  it('applies a shared targetWeightStep to every member', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce({ id: TEST_SESSION_ID } as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, workoutType: 'resistance', laterality: 'bilateral' },
+      { id: EX_B, workoutType: 'resistance', laterality: 'bilateral' },
+    ] as never)
+    vi.mocked(db.query.sessionExercises.findMany).mockResolvedValueOnce([] as never)
+    vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([
+      makeSessionExercise({ exerciseId: EX_A }),
+      makeSessionExercise({ exerciseId: EX_B }),
+    ])
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/sessions/${TEST_SESSION_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3, targetWeight: 40, targetWeightStep: 50 },
+    })
+    expect(res.statusCode).toBe(201)
+
+    const values = insertedValues(db)
+    expect(values?.every((v) => v.targetWeightStep === 50)).toBe(true)
+  })
+
+  it('defaults targetWeightStep to null when omitted', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce({ id: TEST_SESSION_ID } as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: EX_A, workoutType: 'resistance', laterality: 'bilateral' },
+      { id: EX_B, workoutType: 'resistance', laterality: 'bilateral' },
+    ] as never)
+    vi.mocked(db.query.sessionExercises.findMany).mockResolvedValueOnce([] as never)
+    vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([
+      makeSessionExercise({ exerciseId: EX_A }),
+      makeSessionExercise({ exerciseId: EX_B }),
+    ])
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     `/api/v1/sessions/${TEST_SESSION_ID}/circuits`,
+      headers: authHeader(),
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
+    })
+    expect(res.statusCode).toBe(201)
+
+    const values = insertedValues(db)
+    expect(values?.every((v) => v.targetWeightStep === null)).toBe(true)
+  })
+
   it('rejects a circuit whose exercises span workout types', async () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce({ id: TEST_SESSION_ID } as never)

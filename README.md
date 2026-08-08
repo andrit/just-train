@@ -227,7 +227,7 @@ All project documentation lives in [`./docs`](./docs):
 |---|---|
 | `CONTRIBUTING.md` | Column checklist, exercise join rules, hotfix/release workflow |
 | `STYLE_GUIDE.md` | Functional patterns, pre-commit checklist, React/backend conventions |
-| `SQL_COMMANDS.md` | Common SQL for templates, sessions, exercises, PRs |
+| `Database-Management.md` | Common SQL for accounts, templates, sessions, exercises, PRs + maintenance/backup |
 | `DEPLOYMENT.md` | Railway + Vercel hosting setup, environment variables, troubleshooting |
 | `SECURITY.md` | Security assessment, rate limiting, CSP, auth, roadmap |
 | `CHANGELOG.md` | Version history |

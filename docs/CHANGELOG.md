@@ -719,7 +719,7 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - `exercises-library.json` — renamed `Dumbbell Fly` → `Dumbbell Flye`
 - `exercises-library.json` — added `Incline Dumbbell Flye` to isolation chest exercises
 - `defaultTemplates.ts` — updated `Incline Dumbbell Fly` → `Incline Dumbbell Flye` in two templates
-- SQL fix instructions added to `docs/SQL_COMMANDS.md` for production DB duplicate cleanup
+- SQL fix instructions added to `docs/Database-Management.md` for production DB duplicate cleanup
 
 ### Hosting
 - `vercel.json` — updated for `apps/frontend` root directory deployment; `buildCommand` uses `cd ../..` to reach monorepo root
@@ -733,7 +733,7 @@ When search finds no match, "Create as draft" creates an `isDraft: true` exercis
 - `docs/RAILWAY_ERRORS.md` — full error log from Railway deploy debugging
 - `docs/SECURITY.md` — security assessment across all 6 areas
 - `PWA_DEBUG_GUIDE.md` — PWA debugging guide (kept outside version control)
-- `docs/SQL_COMMANDS.md` — production DB exercise fix queries added
+- `docs/Database-Management.md` — production DB exercise fix queries added
 
 ### PWA icons
 - `public/icons/` — all 8 required sizes generated (72–512px)

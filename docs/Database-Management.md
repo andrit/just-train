@@ -120,7 +120,12 @@ Timestamps use `NOW()` for the current time in UTC.
 
 ## User Accounts
 
-### List all trainer accounts
+### List all accounts
+
+> The `trainers` table holds **every** account, athlete-mode and trainer-mode alike.
+> `role` (`trainer` | `admin`) is auth/permissions; **`trainer_mode` (`athlete` | `trainer`)
+> is the product experience**. This query returns everyone — it is *not* trainer-mode only.
+
 ```sql
 SELECT
   id,
@@ -135,6 +140,29 @@ SELECT
   created_at
 FROM trainers
 ORDER BY created_at DESC;
+```
+
+Filter by product mode — **athlete accounts only**:
+```sql
+SELECT id, name, email, subscription_tier, subscription_status,
+       email_verified, last_login_at, created_at
+FROM trainers
+WHERE trainer_mode = 'athlete'
+ORDER BY created_at DESC;
+```
+
+**Trainer-mode accounts only** (roster users):
+```sql
+SELECT id, name, email, subscription_tier, subscription_status,
+       email_verified, last_login_at, created_at
+FROM trainers
+WHERE trainer_mode = 'trainer'
+ORDER BY created_at DESC;
+```
+
+Quick split by mode:
+```sql
+SELECT trainer_mode, COUNT(*) FROM trainers GROUP BY trainer_mode;
 ```
 
 ### Look up a trainer by email

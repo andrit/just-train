@@ -629,12 +629,24 @@ const ProgressRankSchema = z.object({
   trend:        WeightTrendSchema,
 })
 
+// Average weight/reps per set position over a recent window. Distinct from
+// ProgressRankSchema above: that ranks by weight within each session, this keys on
+// the set's position in the session ("what do I do on my 2nd set?").
+const SetPositionAverageSchema = z.object({
+  setNumber:    z.number().int().describe('1-based set position within the session'),
+  avgWeight:    z.number().nullable().describe('Mean weight at this position, 1 decimal — null if no set at this position recorded a weight'),
+  avgReps:      z.number().int().nullable().describe('Mean reps at this position, rounded to a whole rep (half-up) — entered reps, not doubled side-reps'),
+  sessionCount: z.number().int().describe('How many sessions in the window had a set at this position — a low count means a thin average'),
+})
+export type SetPositionAverage = z.infer<typeof SetPositionAverageSchema>
+
 export const ExerciseProgressResponseSchema = z.object({
   exerciseId:  z.string().uuid(),
   workoutType: WorkoutTypeEnum,
   supported:   z.boolean().describe('false for non-resistance exercises — v1 covers resistance only'),
   sessions:    z.array(ProgressSessionSchema).describe('Completed sessions with this exercise, newest first'),
   byRank:      z.array(ProgressRankSchema).describe('Top-3-heaviest set positions tracked over time (ranks present in ≥1 session)'),
+  bySetPosition: z.array(SetPositionAverageSchema).describe('Average weight/reps per set position over the last 5 sessions, ordered by set number'),
   overall: z.object({
     currentEst1rm:       z.number().nullable(),
     currentTopSetWeight: z.number().nullable(),

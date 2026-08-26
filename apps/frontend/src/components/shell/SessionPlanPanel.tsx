@@ -547,6 +547,7 @@ export function SessionPlanPanel({
         <AddBlockSheet
           open={addBlockOpen}
           sessionId={sessionId}
+          clientId={selectedClientId ?? undefined}
           onClose={() => setAddBlockOpen(false)}
         />
       )}

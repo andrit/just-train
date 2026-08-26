@@ -71,7 +71,13 @@ export function ExerciseProgressSection({ clientId, exerciseId, onOpenSession }:
     )
   }
 
-  const { overall, byRank, sessions } = data
+  const { overall, byRank, sessions, bySetPosition } = data
+  // Every session in the window logs at least a set 1, so the busiest position's
+  // count IS the window size. Deriving it beats hardcoding the backend's 5 here —
+  // it stays truthful when the athlete has only trained twice.
+  const windowSessions = bySetPosition.length
+    ? Math.max(...bySetPosition.map((s) => s.sessionCount))
+    : 0
   // Sparkline reads oldest → newest; sessions come newest-first.
   const est1rmSeries = [...sessions].reverse()
     .map((s) => s.est1rm)
@@ -120,6 +126,38 @@ export function ExerciseProgressSection({ clientId, exerciseId, onOpenSession }:
               <div className="flex-1"><TrendChip trend={r.trend} unit={unit} /></div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Average per set position — "what do I typically do on my 2nd set?"
+          Distinct from the per-rank block above, which ranks by weight. */}
+      {bySetPosition.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">
+            Average per set
+            <span className="ml-1 normal-case tracking-normal text-gray-600">
+              · last {windowSessions} session{windowSessions === 1 ? '' : 's'}
+            </span>
+          </p>
+          <div className="space-y-1">
+            {bySetPosition.map((s) => (
+              <div key={s.setNumber} className="flex items-center gap-3">
+                <span className="text-[11px] text-gray-500 w-16 shrink-0">Set {s.setNumber}</span>
+                <span className="font-mono text-sm text-gray-200">
+                  {s.avgWeight ?? '—'}
+                  {s.avgWeight != null && <span className="text-xs text-gray-500 ml-0.5">{unit}</span>}
+                  {s.avgReps != null && <span className="text-gray-400"> × {s.avgReps}</span>}
+                </span>
+                {/* Only flag positions thinner than the rest — a "3 of 5" on every
+                    row would be noise, but a lone thin row deserves the caveat. */}
+                {s.sessionCount < windowSessions && (
+                  <span className="ml-auto text-[10px] text-gray-600 shrink-0">
+                    {s.sessionCount} of {windowSessions}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

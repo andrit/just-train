@@ -326,6 +326,7 @@ export function WorkoutBlock({
         open={addExerciseOpen}
         sessionId={sessionId}
         workoutType={workoutType}
+        clientId={clientId ?? undefined}
         onClose={handleExerciseAdded}
       />
     </>

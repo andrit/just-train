@@ -11,17 +11,20 @@ import { AddExerciseSheet } from './AddExerciseSheet'
 interface AddBlockSheetProps {
   open:      boolean
   sessionId: string
+  /** Optional: lets the sheet show what "use last time" will actually prefill. */
+  clientId?: string
   onClose:   () => void
 }
 
 export function AddBlockSheet({
-  open, sessionId, onClose,
+  open, sessionId, clientId, onClose,
 }: AddBlockSheetProps): React.JSX.Element {
   return (
     <AddExerciseSheet
       open={open}
       sessionId={sessionId}
       workoutType="resistance"
+      clientId={clientId}
       onClose={onClose}
     />
   )

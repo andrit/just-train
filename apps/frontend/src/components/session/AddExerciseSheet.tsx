@@ -31,6 +31,7 @@ import {
   useCreateExercise,
 }                                from '@/lib/queries/exercises'
 import { useAddExercise }        from '@/lib/queries/sessions'
+import { useExerciseHistory }    from '@/lib/queries/clients'
 import { useAuthStore }          from '@/store/authStore'
 import { ExerciseAccordionRow }  from '@/components/exercises/ExerciseAccordionRow'
 import type { ExerciseSummaryResponse } from '@trainer-app/shared'
@@ -154,6 +155,7 @@ function UseLastTimeToggle({ on, onToggle }: { on: boolean; onToggle: (v: boolea
 
 function ResistanceTargets({
   sets, reps, repsMode, repsStep, repsPerSet, weight, weightStep, weightUnit, useLastWeight,
+  lastWeights,
   onSets, onReps, onRepsMode, onRepsStep, onRepsPerSet, onWeight, onWeightStep, onUseLastWeight,
 }: {
   sets: number; reps: number; weight: number | null; weightStep: number; weightUnit: string
@@ -161,6 +163,8 @@ function ResistanceTargets({
   repsStep:    number
   repsPerSet:  number[]
   useLastWeight: boolean
+  /** Last session's weights in set order — empty when unknown or no history. */
+  lastWeights: number[]
   onSets:      (v: number) => void
   onReps:      (v: number) => void
   onRepsMode:  (v: RepsMode) => void
@@ -200,9 +204,18 @@ function ResistanceTargets({
           and the step are stored; the expansion happens live. When "use last time"
           is on, no target weight is sent and the live session prefills from history. */}
       {useLastWeight ? (
-        <p className="text-center text-xs text-gray-500">
-          Weights will prefill from your last session for this exercise.
-        </p>
+        lastWeights.length > 0 ? (
+          <div className="space-y-1">
+            <p className="text-center text-[10px] uppercase tracking-widest text-gray-500">Last time</p>
+            <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
+              {lastWeights.join(' · ')} {weightUnit}
+            </p>
+          </div>
+        ) : (
+          <p className="text-center text-xs text-gray-500">
+            Weights will prefill from your last session for this exercise.
+          </p>
+        )
       ) : (
         <div className="space-y-3">
           <div className="flex items-start justify-center gap-5">
@@ -424,11 +437,14 @@ interface AddExerciseSheetProps {
   open:        boolean
   sessionId:   string
   workoutType: string
+  /** Optional: enables the real "last time" weight preview. Omit where no client
+      is in scope (the plan builder) — the toggle then shows generic copy. */
+  clientId?:   string
   onClose:     () => void
 }
 
 export function AddExerciseSheet({
-  open, sessionId, workoutType, onClose,
+  open, sessionId, workoutType, clientId, onClose,
 }: AddExerciseSheetProps): React.JSX.Element {
   const trainer = useAuthStore((s) => s.trainer)
   const weightUnit = trainer?.weightUnitPreference ?? 'lbs'
@@ -447,6 +463,13 @@ export function AddExerciseSheet({
   const [repsStep,      setRepsStep]      = useState(-2)
   const [repsPerSet,    setRepsPerSet]    = useState<number[]>([10, 10, 10])
   const [useLastWeight, setUseLastWeight] = useState(false)
+
+  // What "use last time" will actually prefill, so the toggle can show it rather
+  // than promise it. Only fetches once an exercise is picked.
+  const { data: lastTime } = useExerciseHistory(clientId ?? null, selected?.id ?? null)
+  const lastWeights = (lastTime?.lastSets ?? [])
+    .map((s) => s.weight)
+    .filter((w): w is number => w != null)
 
   // Cardio
   const [cardioRounds,   setCardioRounds]   = useState(4)
@@ -790,6 +813,7 @@ export function AddExerciseSheet({
             <ResistanceTargets
               sets={targetSets} reps={targetReps} weight={targetWeight} weightStep={weightStep} weightUnit={weightUnit}
               repsMode={repsMode} repsStep={repsStep} repsPerSet={repsPerSet} useLastWeight={useLastWeight}
+              lastWeights={lastWeights}
               onSets={handleTargetSetsChange} onReps={setTargetReps}
               onRepsMode={handleRepsMode} onRepsStep={setRepsStep} onRepsPerSet={setRepsPerSet}
               onWeight={setTargetWeight} onWeightStep={setWeightStep} onUseLastWeight={setUseLastWeight}

@@ -20,6 +20,7 @@ import { cn }                      from '@/lib/cn'
 import { interactions }            from '@/lib/interactions'
 import { useLogSet, useDeleteSessionExercise, useUpdateSessionExercise } from '@/lib/queries/sessions'
 import { useExerciseHistory }      from '@/lib/queries/clients'
+import { pickPrefillSet, isPriorInSession } from '@/lib/setPrefill'
 import { useSessionExerciseMedia, useUploadSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { useUXEventRef }           from '@/hooks/useUXEvent'
 import { formatSetReps }           from '@/lib/formatters'
@@ -569,6 +570,16 @@ export function ExerciseBlock({
     const vals = sessionExercise.targetRepsPerSet.split(',').map((n) => parseInt(n, 10))
     return vals[setIndex] ?? sessionExercise.targetReps
   }
+  // Which set seeds the active input: ramp → last session's set at this position
+  // → today's previous set. See lib/setPrefill.ts for why `source` comes back too.
+  const prefill = pickPrefillSet({
+    setIndex:          loggedCount,
+    loggedSets,
+    lastSessionSets,
+    weightStep:        sessionExercise.targetWeightStep ?? 0,
+    sessionExerciseId: sessionExercise.id,
+  })
+
   const futureSets  = Math.max(0, targetSets - loggedCount - 1)
   const hitTarget   = loggedCount >= targetSets
 
@@ -695,37 +706,12 @@ export function ExerciseBlock({
             workoutType={workoutType}
             weightUnit={weightUnit}
             targetRepsOverride={getSetTargetReps(loggedCount)}
-            priorInSession={loggedSets.length > 0}
-            lastSet={
-              // In-session: use the most recently logged set (shows progression)
-              loggedSets.length > 0
-                ? (loggedSets[loggedSets.length - 1] ?? null)
-                // No sets yet this session: use the matching set from last session
-                // so inputs start pre-filled (e.g. set 1 → last session's set 1)
-                : (() => {
-                    const h = lastSessionSets[loggedCount]
-                    if (!h) return null
-                    return {
-                      id:              '',
-                      sessionExerciseId: sessionExercise.id,
-                      setNumber:       h.setNumber,
-                      reps:            h.reps,
-                      weight:          h.weight,
-                      weightUnit:      h.weightUnit,
-                      durationSeconds: h.durationSeconds,
-                      distance:        null,
-                      intensity:       null,
-                      perSide:         h.perSide ?? false,
-                      repsLeft:        h.repsLeft ?? null,
-                      repsRight:       h.repsRight ?? null,
-                      isPR:            false,
-                      isPRVolume:      false,
-                      isLoadRecord:    false,
-                      isVolumeRecord:  false,
-                      createdAt:       '',
-                    } as SetResponse
-                  })()
-            }
+            // priorInSession is derived from which branch won, not from
+            // loggedSets.length — history can now win while in-session sets exist,
+            // and treating that as "prior in session" would compound the ramp off
+            // a weight from a different day.
+            priorInSession={isPriorInSession(prefill.source)}
+            lastSet={prefill.set}
             onLog={handleLog}
             isLogging={logSet.isPending}
           />

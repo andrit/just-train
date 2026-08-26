@@ -2,7 +2,8 @@
 //
 // Covers: per-rank series + trend, top-3-heaviest (warm-up drops out),
 // newest-first history, non-resistance (supported:false), empty input,
-// and ranks when sessions have fewer than 3 sets.
+// ranks when sessions have fewer than 3 sets, and the per-set-position
+// averages (window, uneven positions, null handling, rep rounding).
 
 import { describe, it, expect } from 'vitest'
 import { buildExerciseProgress, type ProgressSetRow } from '../../lib/exerciseProgress'
@@ -96,5 +97,121 @@ describe('buildExerciseProgress', () => {
     expect(p.byRank.find((r) => r.rank === 1)?.series.map((s) => s.weight)).toEqual([120, 140])
     // rank 3 = 3rd heaviest; only session B has 3 sets (110/130/140 → 3rd = 110)
     expect(p.byRank.find((r) => r.rank === 3)?.series.map((s) => s.weight)).toEqual([110])
+  })
+})
+
+// ── bySetPosition — average weight/reps per set position, last 5 sessions ─────
+
+describe('buildExerciseProgress — bySetPosition', () => {
+  const at = (p: ReturnType<typeof buildExerciseProgress>, setNumber: number) =>
+    p.bySetPosition.find((s) => s.setNumber === setNumber)
+
+  it('averages only the newest 5 sessions, ignoring older ones', () => {
+    // Six sessions of set 1. The oldest is a wild outlier that must fall outside
+    // the window — if it leaked in, the average would be 250, not 100.
+    const rows = [
+      row('A', '2026-01-01', 1, 1000, 5),
+      row('B', '2026-01-08', 1, 100, 5),
+      row('C', '2026-01-15', 1, 100, 5),
+      row('D', '2026-01-22', 1, 100, 5),
+      row('E', '2026-01-29', 1, 100, 5),
+      row('F', '2026-02-05', 1, 100, 5),
+    ]
+    const p = buildExerciseProgress(rows, 'ex1', 'resistance')
+    expect(at(p, 1)?.avgWeight).toBe(100)
+    expect(at(p, 1)?.sessionCount).toBe(5) // the window, not all six
+  })
+
+  it('averages each position over only the sessions that reached it', () => {
+    const rows = [
+      row('A', '2026-01-01', 1, 100, 10),
+      row('A', '2026-01-01', 2, 110, 8),
+      row('B', '2026-01-08', 1, 200, 10),
+      row('B', '2026-01-08', 2, 210, 8),
+      row('B', '2026-01-08', 3, 300, 6), // only B has a 3rd set
+    ]
+    const p = buildExerciseProgress(rows, 'ex1', 'resistance')
+    expect(p.bySetPosition.map((s) => s.setNumber)).toEqual([1, 2, 3]) // ordered
+    expect(at(p, 1)?.avgWeight).toBe(150)
+    expect(at(p, 1)?.sessionCount).toBe(2)
+    expect(at(p, 3)?.avgWeight).toBe(300)
+    expect(at(p, 3)?.sessionCount).toBe(1) // thin position is visible as such
+  })
+
+  it('skips null weights without dropping the position', () => {
+    const rows = [
+      row('A', '2026-01-01', 1, null, 10), // bodyweight / unrecorded
+      row('B', '2026-01-08', 1, 100,  10),
+    ]
+    const p = buildExerciseProgress(rows, 'ex1', 'resistance')
+    expect(at(p, 1)?.avgWeight).toBe(100) // averages the one real weight
+    expect(at(p, 1)?.avgReps).toBe(10)    // reps unaffected
+    expect(at(p, 1)?.sessionCount).toBe(2)
+  })
+
+  it('reports reps even when no set at that position recorded a weight', () => {
+    const rows = [
+      row('A', '2026-01-01', 1, null, 12),
+      row('B', '2026-01-08', 1, null, 10),
+    ]
+    const p = buildExerciseProgress(rows, 'ex1', 'resistance')
+    expect(at(p, 1)?.avgWeight).toBeNull()
+    expect(at(p, 1)?.avgReps).toBe(11)
+  })
+
+  it('rounds reps half-up: 8.4 → 8', () => {
+    // 8 + 8 + 8 + 9 + 9 = 42 over 5 sessions = 8.4
+    const rows = [
+      row('A', '2026-01-01', 1, 100, 8),
+      row('B', '2026-01-08', 1, 100, 8),
+      row('C', '2026-01-15', 1, 100, 8),
+      row('D', '2026-01-22', 1, 100, 9),
+      row('E', '2026-01-29', 1, 100, 9),
+    ]
+    expect(at(buildExerciseProgress(rows, 'ex1', 'resistance'), 1)?.avgReps).toBe(8)
+  })
+
+  it('rounds reps half-up: 8.5 → 9', () => {
+    // 8 + 8 + 9 + 9 = 34 over 4 sessions = 8.5 — the boundary rounds up
+    const rows = [
+      row('A', '2026-01-01', 1, 100, 8),
+      row('B', '2026-01-08', 1, 100, 8),
+      row('C', '2026-01-15', 1, 100, 9),
+      row('D', '2026-01-22', 1, 100, 9),
+    ]
+    expect(at(buildExerciseProgress(rows, 'ex1', 'resistance'), 1)?.avgReps).toBe(9)
+  })
+
+  it('keeps weight to one decimal', () => {
+    // (100 + 105 + 111) / 3 = 105.333…
+    const rows = [
+      row('A', '2026-01-01', 1, 100, 5),
+      row('B', '2026-01-08', 1, 105, 5),
+      row('C', '2026-01-15', 1, 111, 5),
+    ]
+    expect(at(buildExerciseProgress(rows, 'ex1', 'resistance'), 1)?.avgWeight).toBe(105.3)
+  })
+
+  it('averages entered reps for a per-side set, not the doubled side count', () => {
+    // The live input takes reps-per-side, so the average must be in the same unit
+    // the athlete types — 10, not 20. (Volume still counts both sides; see above.)
+    const rows = [row('A', '2026-01-01', 1, 20, 10, { perSide: true })]
+    const p = buildExerciseProgress(rows, 'ex1', 'resistance')
+    expect(at(p, 1)?.avgReps).toBe(10)
+  })
+
+  it('handles a single session', () => {
+    const rows = [
+      row('A', '2026-01-01', 1, 100, 10),
+      row('A', '2026-01-01', 2, 120, 8),
+    ]
+    const p = buildExerciseProgress(rows, 'ex1', 'resistance')
+    expect(p.bySetPosition).toHaveLength(2)
+    expect(at(p, 2)?.avgWeight).toBe(120)
+    expect(at(p, 2)?.sessionCount).toBe(1)
+  })
+
+  it('is empty with no history', () => {
+    expect(buildExerciseProgress([], 'ex1', 'resistance').bySetPosition).toEqual([])
   })
 })

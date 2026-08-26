@@ -471,6 +471,7 @@ export default function LiveSessionContent({
       <AddBlockSheet
         open={addBlockOpen}
         sessionId={sessionId}
+        clientId={session?.clientId}
         onClose={() => setAddBlockOpen(false)}
       />
 

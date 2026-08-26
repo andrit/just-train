@@ -28,6 +28,7 @@ import { authenticate }          from '../middleware/authenticate'
 import { db, clients, sessions, sessionExercises, sets, exercises } from '../db'
 import { eq, and, desc }         from 'drizzle-orm'
 import { buildExerciseProgress } from '../lib/exerciseProgress'
+import { mostRecentSessionSets } from '../lib/exerciseHistory'
 import {
   ClientKpiResponseSchema,
   ExerciseProgressResponseSchema,
@@ -504,6 +505,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       // Find the most recent completed session where this exercise was logged
       const recentSets = await db
         .select({
+          sessionId:   sessions.id,
           sessionDate: sessions.date,
           setNumber:   sets.setNumber,
           reps:        sets.reps,
@@ -524,22 +526,15 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
             eq(sessions.status, 'completed'),
           )
         )
-        .orderBy(desc(sessions.date), sets.setNumber)
+        // createdAt breaks ties within a date: `date` is text 'YYYY-MM-DD' with no
+        // time component, so two sessions on the same day are otherwise
+        // indistinguishable and their rows interleave.
+        .orderBy(desc(sessions.date), desc(sessions.createdAt), sets.setNumber)
         .limit(20)
 
-      // Group by session date and return only the most recent session's sets
-      if (recentSets.length === 0) {
-        return reply.send({ lastSets: [] })
-      }
-
-      const mostRecentDate = recentSets[0]?.sessionDate
-      if (!mostRecentDate) return reply.send({ lastSets: [] })
-
-      const lastSets = recentSets
-        .filter(s => s.sessionDate === mostRecentDate)
-        .slice(0, 10)
-
-      return reply.send({ lastSets })
+      // Narrow to the last session's sets — grouped by session id, not by date.
+      // See lib/exerciseHistory.ts for why the distinction matters.
+      return reply.send({ lastSets: mostRecentSessionSets(recentSets) })
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercise history' })

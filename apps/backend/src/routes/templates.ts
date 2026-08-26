@@ -323,7 +323,13 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
         },
       })
 
-      return reply.status(201).send(result)
+      if (!result) return reply.status(500).send({ error: 'Failed to fork template' })
+
+      // serializeDates is not optional here: Drizzle returns `timestamp` columns as
+      // Date objects and the response schema requires z.string().datetime(), so
+      // sending the row raw fails serialization and 500s. Every other template
+      // response goes through it — this one was missed.
+      return reply.status(201).send(serializeDates(result))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fork template' })

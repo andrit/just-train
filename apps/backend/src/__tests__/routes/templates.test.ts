@@ -323,6 +323,11 @@ describe('POST /templates/:id/fork', () => {
 describe('POST /templates/:id/circuits', () => {
   const EX_A = 'ffffffff-0000-0000-0000-ffffffffffff'
   const EX_B = 'ffffffff-3333-3333-3333-ffffffffffff'
+  // Returned-row ids must be real UUIDs: the 201 body is validated against
+  // TemplateExerciseResponseSchema, whose `id` is z.string().uuid(). A short stub
+  // id fails serialization and surfaces as a 500, not as a validation message.
+  const TE_A = 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee'
+  const TE_B = 'eeeeeeee-2222-2222-2222-eeeeeeeeeeee'
 
   let app: Awaited<ReturnType<typeof buildTemplateTestApp>>
   beforeAll(async () => { app = await buildTemplateTestApp() })
@@ -334,8 +339,16 @@ describe('POST /templates/:id/circuits', () => {
     return call?.[0] as unknown[] as any[] | undefined
   }
 
+  // The payload must satisfy the body schema even though this asserts on auth:
+  // Fastify validates the body *before* the authenticate preHandler runs, so an
+  // empty {} returns 400 for the missing exerciseIds/rounds and the auth path is
+  // never reached. Every other 401 test in this file sends a schema-valid body for
+  // the same reason.
   it('returns 401 without auth', async () => {
-    const res = await app.inject({ method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/circuits`, payload: {} })
+    const res = await app.inject({
+      method: 'POST', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/circuits`,
+      payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
+    })
     expect(res.statusCode).toBe(401)
   })
 
@@ -348,8 +361,8 @@ describe('POST /templates/:id/circuits', () => {
     ] as never)
     vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([] as never) // startIndex 0
     vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([
-      makeTemplateExercise({ id: 'te1', exerciseId: EX_A }),
-      makeTemplateExercise({ id: 'te2', exerciseId: EX_B }),
+      makeTemplateExercise({ id: TE_A, exerciseId: EX_A }),
+      makeTemplateExercise({ id: TE_B, exerciseId: EX_B }),
     ])
 
     const res = await app.inject({
@@ -398,8 +411,8 @@ describe('POST /templates/:id/circuits', () => {
       { orderIndex: 0 }, { orderIndex: 5 },
     ] as never)
     vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([
-      makeTemplateExercise({ id: 'te1', exerciseId: EX_A }),
-      makeTemplateExercise({ id: 'te2', exerciseId: EX_B }),
+      makeTemplateExercise({ id: TE_A, exerciseId: EX_A }),
+      makeTemplateExercise({ id: TE_B, exerciseId: EX_B }),
     ])
 
     const res = await app.inject({

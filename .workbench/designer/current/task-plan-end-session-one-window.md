@@ -33,16 +33,22 @@ first end, and the designer confirms they re-enter through it. That card renders
 `sessionStore.hasSession(selfClientId)` is true — so the store was **never cleared**, which means
 line 113 never executed and the block above never ran at all.
 
-That points at the ordering inside React Query. `useEndSession`'s own `onSuccess`
+The leading explanation is the ordering inside React Query. `useEndSession`'s own `onSuccess`
 (`queries/sessions.ts:170`) calls `invalidateQueries`, which returns a promise; React Query **awaits**
-the hook-level `onSuccess` before invoking the per-call one. The invalidation refetches the session,
-which now returns `status: 'completed'` — and by the time that settles the component has gone, so the
-per-call `mutate(_, { onSuccess })` callback is **dropped**. Per-call callbacks are skipped on
-unmount; hook-level ones are not.
+the hook-level `onSuccess` before invoking the per-call one, and per-call callbacks are **dropped** if
+the observer unmounts in the meantime (hook-level ones are not).
 
-So the live defect is the dropped callback (task 2), and the clear-before-render at line 113 is a
-second, latent bug that would start firing the moment the callback is made reliable (task 1). Both
-are fixed; task 5 confirms on device.
+**This is a hypothesis, not a finding.** For it to hold, something must unmount `LiveSessionContent`
+between the PATCH resolving and the callback firing — and a search of both `LiveSessionContent` and
+`ActiveSessionOverlay` shows **nothing branches on `status === 'completed'`**. So the trigger is
+unidentified. What is certain is the observable pair: the session completes on the server, and the
+store is not cleared, which means that callback block never ran.
+
+Tasks 1 and 2 are therefore written to be correct under *either* cause — 1 removes the unmount that
+clearing would itself provoke, 2 removes the callback's dependence on staying mounted. Task 5 on
+device is what actually settles which was operative; if the flow still misbehaves after both, the
+remaining suspect is whatever unmounts the component, and that needs finding before anything else is
+built on top.
 
 ## Tasks
 

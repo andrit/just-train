@@ -100,37 +100,49 @@ export default function LiveSessionContent({
     )
   }
 
-  const handleEndSession = (scores: {
+  // The store clear happens HERE and nowhere earlier. `activeSessions` going empty
+  // makes ActiveSessionOverlay return null (it bails at sessionCount === 0), which
+  // unmounts this component — so clearing it before the wrap-up has been shown and
+  // dismissed destroys the very tree the wrap-up renders into.
+  const finishSession = (): void => {
+    if (session?.clientId) clearSessionStore(session.clientId)
+    navigate(`/session/${sessionId}/summary`)
+  }
+
+  // `await mutateAsync` rather than `mutate(_, { onSuccess })`: React Query drops
+  // per-call callbacks when the calling component unmounts before the mutation
+  // settles, and the hook-level onSuccess awaits an invalidateQueries round-trip
+  // first. That leaves a window where the session is completed on the server and
+  // the client never runs its follow-up. Awaiting keeps the continuation in this
+  // closure, where nothing can prune it.
+  const handleEndSession = async (scores: {
     energyLevel:  number
     mobilityFeel: number
     stressLevel:  number
     sessionNotes?: string
-  }): void => {
-    endSession.mutate(
-      { id: sessionId, ...scores },
-      {
-        onSuccess: () => {
-          if (session?.clientId) clearSessionStore(session.clientId)
-          fire('session_end', { entityId: sessionId })
-          // Show wrap-up before navigating to summary
-          setShowEndModal(false)
-          setShowWrapUp(true)
-        },
-      },
-    )
+  }): Promise<void> => {
+    try {
+      await endSession.mutateAsync({ id: sessionId, ...scores })
+    } catch {
+      return // error surfaces through endSession.isError; leave the modal open
+    }
+    fire('session_end', { entityId: sessionId })
+    // Show wrap-up before navigating to summary
+    setShowEndModal(false)
+    setShowWrapUp(true)
   }
 
-  const handleWrapUpDone = (name?: string): void => {
+  const handleWrapUpDone = async (name?: string): Promise<void> => {
     if (name && session?.id) {
       // Resolve {date} (and any future tokens) to a literal before saving.
       const resolved = resolveNameTokens(name, { date: session.date })
-      updateSession.mutate(
-        { id: session.id, name: resolved },
-        { onSuccess: () => navigate(`/session/${sessionId}/summary`) },
-      )
-    } else {
-      navigate(`/session/${sessionId}/summary`)
+      try {
+        await updateSession.mutateAsync({ id: session.id, name: resolved })
+      } catch {
+        return // keep the wrap-up open so the name isn't silently lost
+      }
     }
+    finishSession()
   }
 
   if (isLoading) {

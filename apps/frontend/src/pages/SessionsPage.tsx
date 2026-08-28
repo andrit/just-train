@@ -31,7 +31,6 @@ import {
   useExecuteSession,
   useUpdateSession,
 }                                        from '@/lib/queries/sessions'
-import { DeleteSessionButton }           from '@/components/session/DeleteSessionButton'
 import { formatDate, formatDuration }    from '@/lib/formatters'
 import { Spinner }                       from '@/components/ui/Spinner'
 import { ErrorState }                   from '@/components/ui/ErrorState'
@@ -247,13 +246,12 @@ function SessionCard({
               </div>
             )}
 
+            {/* No delete here — a list row is for choosing, not for destroying.
+                Deleting lives in the session view you land on after tapping in. */}
             {isCompleted && (
-              <div className="flex items-center gap-1">
-                <DeleteSessionButton session={{ id: session.id, clientId: session.clientId }} />
-                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-600">
-                  <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-600">
+                <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             )}
           </div>
         </div>

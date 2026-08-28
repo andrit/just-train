@@ -344,6 +344,30 @@
     ],
     "isolation": [
       {
+        "name": "Overhead Internal Cable Rotation",
+        "bodyPart": "shoulders",
+        "category": "isolation",
+        "equipment": "cable",
+        "difficulty": "intermediate",
+        "demonstration": null,
+        "visualization": null,
+        "description": "Single-arm rotator cuff work from a high pulley. Facing away from the machine, the arm rolls inward toward the midline — targets the subscapularis, the rotator cuff muscle on the front of the shoulder blade, with the chest and lats assisting.",
+        "instructions": "Set the cable at or above head height with a single handle. Face AWAY from the machine and take the handle overhead with one arm, elbow bent and the upper arm roughly at shoulder height. Pull down and forward across the body, rotating the shoulder inward, keeping the elbow bent throughout — the forearm sweeps, the elbow does not travel far. Control the return until the shoulder is fully rotated back. One arm at a time.",
+        "laterality": "unilateral"
+      },
+      {
+        "name": "Low External Cable Rotation",
+        "bodyPart": "shoulders",
+        "category": "isolation",
+        "equipment": "cable",
+        "difficulty": "intermediate",
+        "demonstration": null,
+        "visualization": null,
+        "description": "Single-arm rotator cuff work from a low pulley — the counterpart to the overhead internal rotation. Facing the machine and driving up and back, the arm rotates away from the midline and the shoulder extends.",
+        "instructions": "Set the cable at or near the floor with a single handle. FACE the machine and take the handle with one arm, palm turned so the back of the hand leads forward. Drive up and back, rotating the shoulder outward and taking the arm behind the body. Keep the torso still — no leaning back to gain range. Control the return. One arm at a time.",
+        "laterality": "unilateral"
+      },
+      {
         "name": "Dumbbell Flye",
         "bodyPart": "chest",
         "category": "isolation",

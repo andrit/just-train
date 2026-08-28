@@ -25,9 +25,12 @@ import { setVolume }                            from '@trainer-app/shared'
 
 export interface SessionCloseoutData {
   name?:         string
-  energyLevel:   number
-  mobilityFeel:  number
-  stressLevel:   number
+  /** Omitted entirely unless the athlete actually moved a slider. Defaults that
+   *  nobody chose are not data — they used to be written on every session and
+   *  quietly skewed the Avg energy / Avg stress cards. */
+  energyLevel?:  number
+  mobilityFeel?: number
+  stressLevel?:  number
   sessionNotes?: string
 }
 
@@ -50,14 +53,24 @@ export function SessionCloseout({
   const [stress,   setStress]   = useState(5)
   const [notes,    setNotes]    = useState('')
 
+  // The sliders have to start somewhere, but a starting position is not a report.
+  // Scores are sent only once one has actually been moved.
+  const [feelTouched,   setFeelTouched]   = useState(false)
+  const [feelDismissed, setFeelDismissed] = useState(false)
+  const recordFeel = feelTouched && !feelDismissed
+
+  const touch = <T,>(set: (v: T) => void) => (v: T): void => { setFeelTouched(true); set(v) }
+
   const { data: activeChallenges } = useChallenges(session.clientId, 'active')
 
   const handleConfirm = (): void => {
     onConfirm({
       name:         name.trim() || undefined,
-      energyLevel:  energy,
-      mobilityFeel: mobility,
-      stressLevel:  stress,
+      // Spread-or-nothing: the keys must be ABSENT, not null — the schema declares
+      // them .optional() but not .nullable(), so null would be rejected outright.
+      ...(recordFeel
+        ? { energyLevel: energy, mobilityFeel: mobility, stressLevel: stress }
+        : {}),
       sessionNotes: notes.trim() || undefined,
     })
   }
@@ -204,18 +217,50 @@ export function SessionCloseout({
           </div>
         )}
 
-        {/* How you felt + note */}
+        {/* How you felt — skippable. The note below is a separate field and is
+            deliberately NOT part of this block: dismissing the sliders must never
+            discard text the athlete has typed. */}
         <div className="space-y-5 pt-2 border-t border-surface-border/60">
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">How you felt</p>
-            <p className="text-[11px] text-gray-600 mt-0.5">
-              Tracked over time, these tell the whole story.
-            </p>
-          </div>
+          {feelDismissed ? (
+            <button
+              type="button"
+              onClick={() => setFeelDismissed(false)}
+              className="text-xs text-command-blue hover:underline"
+            >
+              + Add how you felt
+            </button>
+          ) : (
+            <>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">
+                    How you felt <span className="normal-case tracking-normal text-gray-700">(optional)</span>
+                  </p>
+                  <p className="text-[11px] text-gray-600 mt-0.5">
+                    {recordFeel
+                      ? 'Tracked over time, these tell the whole story.'
+                      : 'Not recorded — move a slider to log how you felt.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFeelDismissed(true)}
+                  aria-label="Skip how you felt"
+                  className="shrink-0 w-7 h-7 rounded-full border border-surface-border text-gray-500 leading-none hover:text-gray-300 hover:border-gray-600 transition-colors"
+                >
+                  ×
+                </button>
+              </div>
 
-          <SliderRow label="Energy"   hint="How energised did you feel?"    value={energy}   onChange={setEnergy}   lowLabel="Exhausted" highLabel="Full energy" />
-          <SliderRow label="Mobility" hint="How did your body feel moving?" value={mobility} onChange={setMobility} lowLabel="Very stiff" highLabel="Full range" />
-          <SliderRow label="Stress"   hint="General stress level today"     value={stress}   onChange={setStress}   lowLabel="Calm"      highLabel="Very stressed" />
+              {/* Muted until touched — a control reading "7" that saves nothing
+                  would be lying about what it is about to do. */}
+              <div className={cn('space-y-5 transition-opacity', !recordFeel && 'opacity-50')}>
+                <SliderRow label="Energy"   hint="How energised did you feel?"    value={energy}   onChange={touch(setEnergy)}   lowLabel="Exhausted" highLabel="Full energy" />
+                <SliderRow label="Mobility" hint="How did your body feel moving?" value={mobility} onChange={touch(setMobility)} lowLabel="Very stiff" highLabel="Full range" />
+                <SliderRow label="Stress"   hint="General stress level today"     value={stress}   onChange={touch(setStress)}   lowLabel="Calm"      highLabel="Very stressed" />
+              </div>
+            </>
+          )}
 
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">

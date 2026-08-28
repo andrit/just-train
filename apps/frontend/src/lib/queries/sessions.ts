@@ -152,9 +152,14 @@ export function useStartSession(): UseMutationResult<SessionSummaryResponse, Err
 
 export interface EndSessionInput {
   id:           string
-  energyLevel:  number
-  mobilityFeel: number
-  stressLevel:  number
+  /** The three "how you felt" scores are omitted entirely when the athlete did not
+   *  record them. They must be ABSENT, never null: UpdateSessionSchema declares
+   *  them .optional() but not .nullable(), so a literal null is a 400. Omitting
+   *  leaves the columns untouched — the PATCH handler spreads the parsed body and
+   *  Drizzle drops undefined keys from the SET clause. */
+  energyLevel?:  number
+  mobilityFeel?: number
+  stressLevel?:  number
   sessionNotes?: string
   /** Optional session name, sent in the same PATCH as the completion. Keeping it
    *  in one request removes the window where a session is completed but unnamed,

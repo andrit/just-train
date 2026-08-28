@@ -112,6 +112,38 @@ Consequence to accept knowingly: historical rows keep their synthetic 7/7/5, so 
 straddles two meanings. Not backfilled — inventing or deleting past values is worse than a documented
 discontinuity.
 
+## Task 6 (dismissible feel section) — plan and vet
+
+**Verified before building:**
+
+- `PATCH /sessions/:id` does `.set({ ...body, … })` (`sessions.ts:362-369`) and Zod strips absent
+  optional keys, so an omitted score never reaches the SET clause and the column is left untouched.
+- Scores are `.optional()` but **not** `.nullable()` — sending `null` returns 400. Omit the keys.
+- KPI and report code already treat an absent score as "no data" (task 5): both `avg()` helpers
+  return `null` on an empty array and the report omits the section. Nothing downstream reads 0.
+- `EndSessionInput` types the three scores as required `number`; they must become optional.
+
+**Decisions:**
+
+1. **Omit unless *touched*, not merely unless dismissed.** Most people will ignore the section
+   rather than tap the ×. If omission required an explicit dismiss, 7/7/5 would still be written for
+   everyone who scrolls past — which is precisely the pollution this task exists to stop. The × is a
+   way to say "not today" and reclaim the space, not the only path to not recording.
+2. **Sliders render muted until touched**, with copy stating they are not being recorded. A control
+   showing "7" that silently saves nothing is a lie; a muted control that says so is honest.
+3. **Dismiss is reversible** via an "Add how you felt" link. A mis-tap should not force cancelling
+   the whole closeout to recover.
+4. **The session note is a separate field and is unaffected.** It stays visible and saves on its own
+   merits. Dismissing "how you felt" must never silently discard text the user typed — notes are not
+   scores, and collapsing one should not destroy the other.
+5. **Bug introduced in task 3, fixed here:** the `hasWork === false` path ("End Anyway") calls the
+   same confirm handler and currently sends 7/7/5 — for a session where the sliders were never even
+   rendered and the user was never asked. That path must always omit.
+
+**Consequence, accepted:** historical rows keep their synthetic 7/7/5 while new un-touched sessions
+write nothing, so Avg energy / Avg stress straddle two meanings. Document the cutover in the
+changelog; do **not** backfill.
+
 ## Unknowns
 
 - Whether the KPI/report code paths treat a null score as "no data" or coerce it to 0. Must be

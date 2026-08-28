@@ -156,6 +156,10 @@ export interface EndSessionInput {
   mobilityFeel: number
   stressLevel:  number
   sessionNotes?: string
+  /** Optional session name, sent in the same PATCH as the completion. Keeping it
+   *  in one request removes the window where a session is completed but unnamed,
+   *  and queues as a single operation when offline. */
+  name?:        string
 }
 
 export function useEndSession(): UseMutationResult<SessionSummaryResponse, Error, EndSessionInput> {

@@ -22,7 +22,7 @@ import { useAuthStore }                   from '@/store/authStore'
 import { useSessionStore }                from '@/store/sessionStore'
 import { useOverlayStore }                from '@/store/overlayStore'
 import { apiClient, ApiError }            from '@/lib/api'
-import { useSession, useEndSession, useDiscardSession, useUpdateSession } from '@/lib/queries/sessions'
+import { useSession, useEndSession, useDiscardSession } from '@/lib/queries/sessions'
 import { WorkoutBlock }                   from '@/components/session/WorkoutBlock'
 import { CircuitBlock }                   from '@/components/session/CircuitBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
@@ -52,7 +52,6 @@ export default function LiveSessionContent({
   const { data: session, isLoading, error, refetch } = useSession(sessionId)
   const endSession                           = useEndSession()
   const discardSession                       = useDiscardSession()
-  const updateSession                        = useUpdateSession()
   const { activeSessions, endSession: clearSessionStore } = useSessionStore()
 
   // On mount: if the query is already in error state (e.g. network blip on a
@@ -121,16 +120,15 @@ export default function LiveSessionContent({
   // closure, where nothing can prune it.
   const handleCloseout = async ({ name, ...scores }: SessionCloseoutData): Promise<void> => {
     try {
-      await endSession.mutateAsync({ id: sessionId, ...scores })
-      if (name && session?.id) {
+      await endSession.mutateAsync({
+        id: sessionId,
+        ...scores,
         // Resolve {date} (and any future tokens) to a literal before saving.
-        // ponytail: still a second request. Folds into the end PATCH in the
-        // one-request task — /sessions/:id already accepts `name`.
-        await updateSession.mutateAsync({
-          id:   session.id,
-          name: resolveNameTokens(name, { date: session.date }),
-        })
-      }
+        // Sent in the SAME PATCH as the completion — one request, so there is no
+        // window where the session is closed but still unnamed, and offline it
+        // queues as a single operation instead of two.
+        ...(name && session ? { name: resolveNameTokens(name, { date: session.date }) } : {}),
+      })
     } catch {
       return // errors surface via isError; leave the window open so nothing is lost
     }
@@ -497,7 +495,7 @@ export default function LiveSessionContent({
           onConfirm={handleCloseout}
           onCancel={() => setShowEndModal(false)}
           onDiscard={handleDiscard}
-          loading={endSession.isPending || discardSession.isPending || updateSession.isPending}
+          loading={endSession.isPending || discardSession.isPending}
           hasWork={sessionExercises.some(se => se.sets.length > 0)}
         />
       )}

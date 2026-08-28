@@ -5,7 +5,7 @@
 // bubble is swipe-to-dismiss (drag horizontally past a threshold to fling it
 // away) and also closes on backdrop tap, Escape, or tapping the button again.
 //
-// Reusable tip affordance — used for the {date} hint (PostSessionWrapUp) and the
+// Reusable tip affordance — used for the {date} hint (SessionCloseout) and the
 // metric tooltips on the Personal Bests tab.
 // ------------------------------------------------------------
 

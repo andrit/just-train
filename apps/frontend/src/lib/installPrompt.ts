@@ -60,7 +60,8 @@ export function isFirstSessionCompleted(): boolean {
   return typeof window !== 'undefined' && localStorage.getItem(FIRST_SESSION_KEY) === 'true'
 }
 
-// Called from PostSessionWrapUp on the first ever session completion.
+// Called from LiveSessionContent once the session closeout actually succeeds —
+// not when the closeout window opens, since it can be abandoned without completing.
 export function markFirstSessionCompleted(): void {
   if (typeof window === 'undefined') return
   if (localStorage.getItem(FIRST_SESSION_KEY)) return

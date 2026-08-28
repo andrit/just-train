@@ -44,7 +44,7 @@ but all reduce launch risk. Ordered here by estimated effort, not priority.
 - `ExerciseBlock` — set accordion (past/active/future states exist in Session.stories but ExerciseBlock itself doesn't)
 - `AddBlockSheet` — workout type picker
 - `AddExerciseSheet` — search, quick-add, swipe-to-add gesture
-- `PostSessionWrapUp` — PR count, volume summary, session naming
+- `SessionCloseout` — the single end-of-session window: name field (+ `{date}` token preview and the date-stamped default), results, dismissible "how you felt", and the no-work Discard / End Anyway variant. Needs a `SessionDetailResponse` fixture and a `QueryClientProvider` (it reads active challenges).
 - `InlineCameraSheet` — viewfinder, photo/video capture, preview/confirm states
 - `FormCheckBadge` — media count indicator on exercise header
 
@@ -84,7 +84,7 @@ but all reduce launch risk. Ordered here by estimated effort, not priority.
 | File | Components covered |
 |---|---|
 | `Session2.stories.tsx` | WorkoutBlock, ExerciseBlock, AddBlockSheet, AddExerciseSheet |
-| `PostSession.stories.tsx` | PostSessionWrapUp |
+| `PostSession.stories.tsx` | SessionCloseout |
 | `Camera.stories.tsx` | InlineCameraSheet, FormCheckBadge, MediaPlaybackModal |
 | `KPI.stories.tsx` | KpiCard (all variants), KpiCarousel, KpiHero, TipIcon |
 | `Challenges.stories.tsx` | ChallengeProgressCard (all states), ChallengeForm |

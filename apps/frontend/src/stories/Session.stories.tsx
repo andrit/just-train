@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { MemoryRouter }        from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { PastSetRow, ActiveSetRow, FutureSetRow } from '@/components/session/SetRow'
 import { RestTimerBanner }     from '@/components/session/RestTimerBanner'
-import { EndSessionModal }     from '@/components/session/EndSessionModal'
 import type { SetResponse }    from '@trainer-app/shared'
 
 export default {
@@ -244,32 +242,7 @@ export const RestTimer_Hidden: StoryObj = {
   },
 }
 
-// ── End session modal ─────────────────────────────────────────────────────────
-
-export const EndSession_Modal: StoryObj = {
-  name: 'EndSessionModal / Default',
-  render: () => {
-    function Demo() {
-      const [open, setOpen] = useState(true)
-      return (
-        <div>
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="px-4 py-2 bg-command-blue text-white rounded-lg text-sm"
-          >
-            Open modal
-          </button>
-          <EndSessionModal
-            open={open}
-            onConfirm={(scores) => { console.log('Scores:', scores); setOpen(false) }}
-            onCancel={() => setOpen(false)}
-            loading={false}
-            hasWork={true}
-          />
-        </div>
-      )
-    }
-    return <MemoryRouter><Demo /></MemoryRouter>
-  },
-}
+// The EndSessionModal story was removed with the component: the two-step end flow
+// (scores modal → wrap-up) is now the single SessionCloseout window. No story for
+// it yet — it needs a full SessionDetailResponse fixture and a QueryClientProvider
+// (it reads active challenges). Covered by the "Storybook Updates" deferred item.

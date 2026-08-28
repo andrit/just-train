@@ -23,6 +23,7 @@ import { useRestoreScroll }                     from '@/hooks/useScrollRestorati
 import { formatDuration, formatDateLong }       from '@/lib/formatters'
 import { Spinner }                              from '@/components/ui/Spinner'
 import { ErrorState }                          from '@/components/ui/ErrorState'
+import { DeleteSessionButton }                 from '@/components/session/DeleteSessionButton'
 
 
 // ── Score bar ─────────────────────────────────────────────────────────────────
@@ -129,14 +130,26 @@ export default function SessionHistoryPage(): React.JSX.Element {
         </div>
 
         {/* Session identity */}
-        <div className="py-5 border-b border-surface-border">
-          <p className="text-xs text-gray-600 uppercase tracking-wider mb-1">
-            {workoutTypeLabels}
-          </p>
-          <h1 className="font-display text-2xl uppercase tracking-wide text-white">
-            {session.name ?? 'Training Session'}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">{formatDateLong(session.date)}</p>
+        <div className="py-5 border-b border-surface-border flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs text-gray-600 uppercase tracking-wider mb-1">
+              {workoutTypeLabels}
+            </p>
+            <h1 className="font-display text-2xl uppercase tracking-wide text-white">
+              {session.name ?? 'Training Session'}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">{formatDateLong(session.date)}</p>
+          </div>
+
+          {/* This page is still reached from the client timeline and from the
+              per-exercise history rows, so it needs the same affordance as the
+              panel — otherwise delete exists on some routes to a session but not
+              others. */}
+          <DeleteSessionButton
+            session={{ id: session.id, clientId: session.clientId }}
+            onDeleted={handleBack}
+            className="shrink-0"
+          />
         </div>
 
         {/* Stats row */}

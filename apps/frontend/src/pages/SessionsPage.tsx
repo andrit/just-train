@@ -30,8 +30,8 @@ import {
   useSessions,
   useExecuteSession,
   useUpdateSession,
-  useDiscardSession,
 }                                        from '@/lib/queries/sessions'
+import { DeleteSessionButton }           from '@/components/session/DeleteSessionButton'
 import { formatDate, formatDuration }    from '@/lib/formatters'
 import { Spinner }                       from '@/components/ui/Spinner'
 import { ErrorState }                   from '@/components/ui/ErrorState'
@@ -77,10 +77,8 @@ function SessionCard({
   onExecute,
   onResume,
   onCancel,
-  onDelete,
   isExecuting,
   isCancelling,
-  isDeleting,
 }: {
   session:      SessionSummaryResponse
   clientName:   string
@@ -88,13 +86,10 @@ function SessionCard({
   onExecute:    () => void
   onResume:     () => void
   onCancel:     () => void
-  onDelete:     () => void
   isExecuting:  boolean
   isCancelling: boolean
-  isDeleting:   boolean
 }): React.JSX.Element {
   const [confirmCancel, setConfirmCancel] = React.useState(false)
-  const [confirmDelete, setConfirmDelete] = React.useState(false)
   const duration = formatDuration(session.startTime, session.endTime)
   const isPlanned    = session.status === 'planned'
   const isInProgress = session.status === 'in_progress'
@@ -253,48 +248,12 @@ function SessionCard({
             )}
 
             {isCompleted && (
-              confirmDelete ? (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDelete(false)}
-                    className="px-2.5 py-1.5 rounded-lg text-xs text-gray-400 border border-surface-border hover:text-gray-200 transition-colors"
-                  >
-                    Keep
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setConfirmDelete(false); onDelete() }}
-                    disabled={isDeleting}
-                    className={cn(
-                      'px-2.5 py-1.5 rounded-lg text-xs font-medium',
-                      'bg-red-500/20 border border-red-500/40 text-red-400',
-                      interactions.button.base,
-                      interactions.button.press,
-                      isDeleting && 'opacity-50',
-                    )}
-                  >
-                    {isDeleting ? <Spinner size="sm" /> : 'Delete'}
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDelete(true)}
-                    aria-label="Delete session"
-                    title="Delete session"
-                    className="p-1.5 rounded-lg text-gray-600 hover:text-red-400 transition-colors"
-                  >
-                    <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-                      <path d="M3 4h10M6.5 4V3h3v1M5 4l.5 8h5L11 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                  <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-600">
-                    <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-              )
+              <div className="flex items-center gap-1">
+                <DeleteSessionButton session={{ id: session.id, clientId: session.clientId }} />
+                <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-600">
+                  <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
             )}
           </div>
         </div>
@@ -314,14 +273,12 @@ export default function SessionsPage(): React.JSX.Element {
   const { data: selfClient }  = useSelfClient()
   const executeSession        = useExecuteSession()
   const updateSession         = useUpdateSession()
-  const discardSession        = useDiscardSession()
 
   const [tab,            setTab]            = useState<StatusTab>('all')
   const [clientFilter,   setClientFilter]   = useState<string>('')
   const [rawSearch,      setRawSearch]      = useState('')
   const [executingId,    setExecutingId]    = useState<string | null>(null)
   const [cancellingId,   setCancellingId]   = useState<string | null>(null)
-  const [deletingId,     setDeletingId]     = useState<string | null>(null)
 
   const search = useDeferredValue(rawSearch.trim().toLowerCase())
 
@@ -367,27 +324,6 @@ export default function SessionsPage(): React.JSX.Element {
       startSession(session.clientId, session.id, getClientName(session.clientId))
     }
     expand(session.clientId)
-  }
-
-  // Permanent, and there is no undo — DELETE /sessions/:id cascades to workouts,
-  // exercises and sets. Guarded by the card's two-step confirm.
-  //
-  // Load/Volume records and every KPI are derived from the surviving sets at read
-  // time, so they self-correct once the session is gone. Challenge progress does
-  // NOT: `sessions_completed` counters were incremented on completion and set
-  // logging advanced exercise-metric challenges by max(), and neither is reversed
-  // here. See the deferred item before relying on challenge numbers post-delete.
-  const handleDelete = async (session: SessionSummaryResponse): Promise<void> => {
-    setDeletingId(session.id)
-    try {
-      await discardSession.mutateAsync({ id: session.id })
-      // The session may still be registered client-side (e.g. it was resumed at
-      // some point); drop it so no phantom pill or dashboard card survives it.
-      endSession(session.clientId)
-      if (focusedClientId === session.clientId) hide()
-    } finally {
-      setDeletingId(null)
-    }
   }
 
   const handleCancel = async (session: SessionSummaryResponse): Promise<void> => {
@@ -559,10 +495,8 @@ export default function SessionsPage(): React.JSX.Element {
                   onExecute={() => handleExecute(session)}
                   onResume={() => handleResume(session)}
                   onCancel={() => handleCancel(session)}
-                  onDelete={() => handleDelete(session)}
                   isExecuting={executingId === session.id}
                   isCancelling={cancellingId === session.id}
-                  isDeleting={deletingId === session.id}
                 />
               ))}
             </div>

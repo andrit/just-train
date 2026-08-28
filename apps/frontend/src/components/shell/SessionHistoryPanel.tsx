@@ -12,6 +12,7 @@ import { setVolume }            from '@trainer-app/shared'
 import { cn }                  from '@/lib/cn'
 import { interactions }        from '@/lib/interactions'
 import { useSession }          from '@/lib/queries/sessions'
+import { DeleteSessionButton } from '@/components/session/DeleteSessionButton'
 import { ApiError }            from '@/lib/api'
 import { useSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { formatDate, formatDuration, formatTotalVolume } from '@/lib/formatters'
@@ -107,13 +108,26 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
           Back
         </button>
 
-        <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">
-          {session.client?.name ?? 'Session'}
-        </p>
-        <h1 className="font-display text-2xl uppercase tracking-wide text-white leading-tight">
-          {session.name ?? 'Training Session'}
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">{formatDate(session.date)}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">
+              {session.client?.name ?? 'Session'}
+            </p>
+            <h1 className="font-display text-2xl uppercase tracking-wide text-white leading-tight">
+              {session.name ?? 'Training Session'}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">{formatDate(session.date)}</p>
+          </div>
+
+          {/* Delete lives here as well as on the Sessions list card, because this
+              panel is where every route ends up — the dashboard's Recent Sessions,
+              the sessions list, and the per-exercise history rows all open it. */}
+          <DeleteSessionButton
+            session={{ id: session.id, clientId: session.clientId }}
+            onDeleted={onClose}
+            className="shrink-0"
+          />
+        </div>
       </div>
 
       {/* Stats row */}

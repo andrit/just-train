@@ -22,6 +22,21 @@ export function formatShortDate(dateStr: string): string {
   return `${mon}-${day}-${yy}`
 }
 
+/**
+ * The name given to a session the user finished without naming — "Session - Aug-28-26".
+ *
+ * Stored, not computed at render, for two reasons: the monthly report builds its
+ * session table on the backend (`report.service.ts`) and prints the name only when
+ * present, so a render-time fallback would show in the app and vanish from the
+ * email; and this file's own rule is that what is stored is exactly what people
+ * see. Identical in form to typing "Session - {date}" by hand, so a default and a
+ * hand-written name are indistinguishable — which is the point. Editable after the
+ * fact like any other name.
+ */
+export function defaultSessionName(date: string): string {
+  return `Session - ${formatShortDate(date)}`
+}
+
 /** Replace known {tokens} in `name`; unknown tokens are left as-is. */
 export function resolveNameTokens(name: string, ctx: NameTokenContext): string {
   const tokens: Record<string, () => string> = {

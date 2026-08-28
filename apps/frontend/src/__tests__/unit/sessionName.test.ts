@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveNameTokens, formatShortDate } from '@/lib/sessionName'
+import { resolveNameTokens, formatShortDate, defaultSessionName } from '@/lib/sessionName'
 
 describe('formatShortDate', () => {
   it('formats YYYY-MM-DD as "MMM-DD-YY", zero-padding the day', () => {
@@ -35,5 +35,18 @@ describe('resolveNameTokens', () => {
 
   it('replaces multiple {date} occurrences', () => {
     expect(resolveNameTokens('{date} / {date}', ctx)).toBe('Jul-28-26 / Jul-28-26')
+  })
+})
+
+describe('defaultSessionName', () => {
+  it('date-stamps the fallback name', () => {
+    expect(defaultSessionName('2026-08-28')).toBe('Session - Aug-28-26')
+  })
+
+  it('matches what typing "Session - {date}" by hand produces', () => {
+    // The default and a hand-written token name must be indistinguishable —
+    // otherwise a defaulted session looks second-class in history.
+    const byHand = resolveNameTokens('Session - {date}', { date: '2026-08-28' })
+    expect(defaultSessionName('2026-08-28')).toBe(byHand)
   })
 })

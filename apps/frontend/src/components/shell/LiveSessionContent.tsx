@@ -30,7 +30,7 @@ import { CircuitBuilderSheet }            from '@/components/session/CircuitBuil
 import { SessionCloseout }                from '@/components/session/SessionCloseout'
 import type { SessionCloseoutData }       from '@/components/session/SessionCloseout'
 import { markFirstSessionCompleted }      from '@/lib/installPrompt'
-import { resolveNameTokens }              from '@/lib/sessionName'
+import { resolveNameTokens, defaultSessionName } from '@/lib/sessionName'
 import { Spinner }                        from '@/components/ui/Spinner'
 
 interface LiveSessionContentProps {
@@ -123,11 +123,14 @@ export default function LiveSessionContent({
       await endSession.mutateAsync({
         id: sessionId,
         ...scores,
-        // Resolve {date} (and any future tokens) to a literal before saving.
-        // Sent in the SAME PATCH as the completion — one request, so there is no
-        // window where the session is closed but still unnamed, and offline it
-        // queues as a single operation instead of two.
-        ...(name && session ? { name: resolveNameTokens(name, { date: session.date }) } : {}),
+        // Resolve {date} (and any future tokens) to a literal before saving, and
+        // fall back to "Session - Aug-28-26" when the field was left blank so the
+        // default is actually useful in history. Sent in the SAME PATCH as the
+        // completion — one request, so the name can never land without the
+        // completion (or vice versa), and offline it queues as one operation.
+        ...(session
+          ? { name: name ? resolveNameTokens(name, { date: session.date }) : defaultSessionName(session.date) }
+          : {}),
       })
     } catch {
       return // errors surface via isError; leave the window open so nothing is lost

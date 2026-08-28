@@ -18,7 +18,7 @@ import { Spinner }                             from '@/components/ui/Spinner'
 import { Modal }                               from '@/components/ui/Modal'
 import { Button }                              from '@/components/ui/Button'
 import { useChallenges }                       from '@/lib/queries/challenges'
-import { resolveNameTokens }                   from '@/lib/sessionName'
+import { resolveNameTokens, defaultSessionName } from '@/lib/sessionName'
 import { HintPopover }                         from '@/components/ui/HintPopover'
 import type { SessionDetailResponse }          from '@trainer-app/shared'
 import { setVolume }                            from '@trainer-app/shared'
@@ -128,21 +128,24 @@ export function SessionCloseout({
             placeholder="e.g. Push Day, Leg Day - {date}…"
             className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
           />
-          {name.trim() !== '' && (
-            <div className="relative mt-2 pr-5">
-              <p className="text-[11px] text-gray-500">
-                Saves as{' '}
-                <span className="text-gray-300 font-medium">
-                  {resolveNameTokens(name, { date: session.date })}
-                </span>
-              </p>
-              <HintPopover
-                className="absolute top-0 right-0"
-                side="bottom"
-                text="Use {date} in the name to insert the workout's date — “Leg Day - {date}” becomes “Leg Day - Jul-28-26”. Swipe this hint away to dismiss."
-              />
-            </div>
-          )}
+          {/* Always show what will be stored — including the date-stamped default
+              for an empty field, so it is a visible choice rather than a surprise
+              discovered later in history. */}
+          <div className="relative mt-2 pr-5">
+            <p className="text-[11px] text-gray-500">
+              Saves as{' '}
+              <span className="text-gray-300 font-medium">
+                {name.trim() !== ''
+                  ? resolveNameTokens(name, { date: session.date })
+                  : defaultSessionName(session.date)}
+              </span>
+            </p>
+            <HintPopover
+              className="absolute top-0 right-0"
+              side="bottom"
+              text="Leave this blank and the session is named for its date. Use {date} anywhere in your own name to insert it — “Leg Day - {date}” becomes “Leg Day - Jul-28-26”. Swipe this hint away to dismiss."
+            />
+          </div>
         </div>
 
         {/* What you did */}

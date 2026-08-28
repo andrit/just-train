@@ -350,6 +350,17 @@ What: Circle the knee caving in, draw the bar path on a form check clip. Overlay
 When: After observing what trainers and athletes actually create
 What: Pre-built challenge templates ("30-day pull-up challenge"). Build the primitive first, template the patterns that emerge from real usage.
 
+### Challenge progress is not reversed when a session is deleted
+When: Before challenges are used for anything that matters (a paid tier, a shared leaderboard), or as soon as a real user reports a challenge counting a workout they deleted.
+
+What: `DELETE /sessions/:id` cascades to workouts, exercises and sets, but leaves challenge progress untouched. Two paths inflate it and neither is reversed:
+- `updateChallengesForSessionComplete()` increments `sessions_completed` challenges when a session is completed.
+- Set logging advances exercise-metric challenges via `max()`, so a deleted PR set leaves the challenge's `currentValue` at a number no surviving set supports.
+
+Why it is not fixed with the delete feature: Load/Volume records and every KPI are **derived from the surviving sets at read time**, so they self-correct the moment a session disappears — that is exactly the payoff of the v2.x move away from stored `isPR` flags. Challenges are the one place progress is *stored* rather than derived, so they are the one place a delete can leave a lie. Fixing it properly means recomputing challenge progress from remaining sets on delete (or deriving `currentValue` at read time like records) — a larger change than the delete UI it would ride in on.
+
+Interim: the numbers only drift for challenges whose contributing session was deleted, which today is mostly test data. Worth a note before challenges become user-facing in a paid context.
+
 ### Challenge Dashboard Widget
 When: v2.12.1 if needed
 What: A `challenges-summary` widget showing total active / completed this month across all clients. Athlete mode shows personal challenges.

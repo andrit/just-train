@@ -62,12 +62,25 @@ node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Optional (for scheduled email reports):
+Optional (email — monthly reports, at-risk alerts, and email verification):
 ```
 RESEND_API_KEY        = re_...
-REPORT_FROM_EMAIL     = reports@yourdomain.com
+REPORT_FROM_EMAIL     = reports@yourdomain.com   ← must be a verified domain in Resend
+APP_URL               = https://your-app.vercel.app   ← FRONTEND origin, no trailing slash
 UPSTASH_REDIS_URL     = rediss://...
 ```
+
+⚠️ **`APP_URL` must be set before enabling email.** It builds the link in the
+verification email (`${APP_URL}/verify-email?token=...`). Unset, it falls back to
+`https://trainerapp.io` — a domain this project does not own — so verification
+emails would send successfully carrying a live token in a URL pointing somewhere
+else. It is the **frontend** origin (Vercel, or the custom domain once live), not
+the Railway backend URL.
+
+Note that email verification is currently **advisory only**: `emailVerified` is
+set at registration and never checked, so nothing is gated on it. Without
+`RESEND_API_KEY` the send fails silently — registration logs the error and
+proceeds — and the only symptom is the dashboard banner never clearing.
 
 ### 1d. Run the database migration
 

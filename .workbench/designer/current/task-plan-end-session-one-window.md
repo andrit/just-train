@@ -96,9 +96,17 @@ The sliders currently default to **7 / 7 / 5 and are saved on every session whet
 so sessions where nothing was reported are recorded as if 7/7/5 had been, and the Avg energy / Avg
 stress KPI cards average those invented values in with real ones.
 
-Designer's call: **a dismiss icon; if it is not interacted with, do not save it.** So an untouched or
-dismissed section writes `null` for energyLevel / mobilityFeel / stressLevel (all three columns are
-already nullable) rather than the defaults.
+Designer's call: **a dismiss icon; if it is not interacted with, do not save it.**
+
+**Mechanism correction (verified 2026-08-27):** "save nothing" must mean **omit the keys**, not send
+`null`. `packages/shared/src/schemas/index.ts:204-207` and `:280-284` declare all three as
+`z.number().int().min(1).max(10).optional()` — **optional but NOT nullable**, so a literal `null`
+fails validation and the PATCH returns 400. Omitting them is already supported end to end: Drizzle
+drops `undefined` keys from the SET clause, so the columns simply stay null.
+
+Consequence for the client types: `EndSessionInput` (`queries/sessions.ts:153-159`) currently types
+the three scores as required `number` and must become optional. No schema or migration change is
+needed on the backend.
 
 Consequence to accept knowingly: historical rows keep their synthetic 7/7/5, so the KPI series
 straddles two meanings. Not backfilled — inventing or deleting past values is worse than a documented

@@ -525,4 +525,23 @@ The honest case against: this product's positioning is private and bare-metal. A
 
 **Trade-off vs autoUpdate:** `autoUpdate` is simpler and means users always get the latest version. `prompt` gives control but requires a UI surface and a deferred-activation strategy. The right call depends on how frequently updates ship and whether live-session interruption has been a real complaint.
 
+**Field evidence (2026-08-27) — silent activation also costs developer time.** A frontend fix to the
+end-session flow was reported as "still broken" after a device test. The observed behaviour matched
+the *old* code exactly, and a full round was spent hunting a phantom unmount — searching every
+`hide()` / `minimise()` call site — before anyone asked whether the new bundle was actually running.
+It wasn't. The fix had been correct all along.
+
+The cause is the same mechanism this item proposes changing: with `autoUpdate` a new bundle
+**activates** on one launch and is **served** on the next, so backgrounding/foregrounding the PWA
+("pause/unpause") does not pick it up.
+
+**Verifying a frontend change on device (until this is revisited):**
+1. Confirm the Vercel commit-status check is green for the commit under test.
+2. Fully close and reopen the PWA **twice**.
+3. Confirm you are on the new bundle by looking for a *visible* piece of the new work — not by
+   re-testing the fix itself, which is what makes a stale bundle so convincing.
+
+Backend fixes (Railway) have no service worker in the path and verify immediately. That asymmetry is
+why a backend fix can confirm cleanly in the same session that a frontend fix appears to fail.
+
 **Files to change:** `vite.config.ts` (`registerType`), new component `UpdatePromptBanner.tsx`, wire into `App.tsx` using `useRegisterSW` from `virtual:pwa-register/react`.

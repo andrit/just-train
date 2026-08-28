@@ -27,6 +27,12 @@
 -- Resolution is by NAME, never hardcoded UUIDs: if a custom row is absent or
 -- already merged, it simply isn't remapped or deleted — this fails safe.
 --
+-- APPLIED TO PROD 2026-08-28. The dry run reported 7 session_exercises and 13 sets
+-- moving (4/7 for the rip-up, 3/6 for the pulldown), 0 template/challenge/media
+-- references, and a post-state identical to the pre-state — nothing stranded.
+-- Safe to re-run: the insert is guarded on name, and with the custom rows already
+-- gone the remap matches nothing, so every later statement affects 0 rows.
+--
 -- Defaults to ROLLBACK (dry run): running as-is prints the inserted rows, the
 -- mapping preview, the reference counts being moved, and the post-state, then
 -- discards. Change the final ROLLBACK -> COMMIT to apply.
@@ -130,5 +136,5 @@ GROUP BY e.name ORDER BY e.name;
 SELECT id, name, trainer_id FROM exercises
 WHERE lower(name) IN ('overhead rotator cable pulldown', 'bottom rotator cable rip up');
 
--- Change ROLLBACK -> COMMIT to apply.
+-- Change ROLLBACK -> COMMIT to apply. (Already applied to prod 2026-08-28.)
 ROLLBACK;

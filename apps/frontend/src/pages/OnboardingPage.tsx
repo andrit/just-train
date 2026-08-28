@@ -21,6 +21,19 @@ import type { TrainerResponse } from '@trainer-app/shared'
 
 type Mode = 'athlete' | 'trainer'
 
+// Trainer mode is fully built and still works for accounts already on it — the
+// product just ships athlete-only for now, so the choice is not offered. Flip
+// this to true to restore the two-card chooser, its heading copy and footnote.
+//
+// Deliberately a flag rather than deleted JSX: the trainer card, TrainerIcon and
+// every trainerMode branch stay referenced and compiling, so re-enabling is one
+// word rather than an archaeology exercise.
+//
+// Note the DB default is still `trainer` (trainers.ts:71). Unreachable today
+// because App.tsx forces onboarding before anything else, and onboarding always
+// posts a mode — but the default contradicts the product and wants a migration.
+const OFFER_TRAINER_MODE = false
+
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 
 function AthleteIcon({ className }: { className?: string }): React.JSX.Element {
@@ -239,13 +252,27 @@ export default function OnboardingPage(): React.JSX.Element {
 
           {/* Heading */}
           <div className="text-center mb-10 animate-slide-up">
-            <h1 className="font-display text-4xl md:text-5xl text-white uppercase tracking-wide mb-3">
-              How will you use
-              <span className="text-command-blue block">TrainerApp?</span>
-            </h1>
-            <p className="text-gray-400 text-sm">
-              Choose your path — you can always change this in settings later.
-            </p>
+            {OFFER_TRAINER_MODE ? (
+              <>
+                <h1 className="font-display text-4xl md:text-5xl text-white uppercase tracking-wide mb-3">
+                  How will you use
+                  <span className="text-command-blue block">TrainerApp?</span>
+                </h1>
+                <p className="text-gray-400 text-sm">
+                  Choose your path — you can always change this in settings later.
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="font-display text-4xl md:text-5xl text-white uppercase tracking-wide mb-3">
+                  Welcome to
+                  <span className="text-command-blue block">TrainerApp</span>
+                </h1>
+                <p className="text-gray-400 text-sm">
+                  Your training, tracked — sessions, progress, and personal records.
+                </p>
+              </>
+            )}
           </div>
 
           {/* Error */}
@@ -259,7 +286,10 @@ export default function OnboardingPage(): React.JSX.Element {
           )}
 
           {/* Choice cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={cn(
+            'grid gap-4',
+            OFFER_TRAINER_MODE ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md mx-auto',
+          )}>
             <ChoiceCard
               mode="athlete"
               title="Athlete"
@@ -276,27 +306,31 @@ export default function OnboardingPage(): React.JSX.Element {
               onSelect={handleSelect}
             />
 
-            <ChoiceCard
-              mode="trainer"
-              title="Trainer"
-              subtitle="Manage clients, track their progress, and deliver monthly reports."
-              bullets={[
-                'Full client roster',
-                'Per-client progress tracking',
-                'Monthly client reports',
-                'Your own training included',
-              ]}
-              icon={<TrainerIcon className="w-full h-full p-2" />}
-              selected={selected === 'trainer'}
-              loading={loading}
-              onSelect={handleSelect}
-            />
+            {OFFER_TRAINER_MODE && (
+              <ChoiceCard
+                mode="trainer"
+                title="Trainer"
+                subtitle="Manage clients, track their progress, and deliver monthly reports."
+                bullets={[
+                  'Full client roster',
+                  'Per-client progress tracking',
+                  'Monthly client reports',
+                  'Your own training included',
+                ]}
+                icon={<TrainerIcon className="w-full h-full p-2" />}
+                selected={selected === 'trainer'}
+                loading={loading}
+                onSelect={handleSelect}
+              />
+            )}
           </div>
 
           {/* Footer note */}
-          <p className="text-center text-xs text-gray-600 mt-8">
-            Selecting <span className="text-gray-500">Trainer</span> gives you a personal training section too — your own progress is always tracked.
-          </p>
+          {OFFER_TRAINER_MODE && (
+            <p className="text-center text-xs text-gray-600 mt-8">
+              Selecting <span className="text-gray-500">Trainer</span> gives you a personal training section too — your own progress is always tracked.
+            </p>
+          )}
 
         </div>
       </main>

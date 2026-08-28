@@ -393,7 +393,13 @@ export default function PreferencesPage(): React.JSX.Element {
           </div>
         </Section>
 
-        {/* ── Training Mode ─────────────────────────────────────────────────── */}
+        {/* ── Training Mode ─────────────────────────────────────────────────────
+            Shown only to accounts already on trainer mode. The product ships
+            athlete-only (see OFFER_TRAINER_MODE in OnboardingPage), so for an
+            athlete this section would announce a mode with no alternative — a
+            setting that cannot be set. Trainers still get the context because for
+            them it explains why they see a client roster at all. */}
+        {trainerMode === 'trainer' && (
         <Section
           title="Training Mode"
           description="Your mode determines which features are shown. Athletes see a personal training interface. Trainers see the full client roster."
@@ -401,27 +407,23 @@ export default function PreferencesPage(): React.JSX.Element {
           <div className="card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-200 capitalize">{trainerMode} Mode</p>
+                {/* Narrowed to trainer by the guard above, so the athlete
+                    variants of this copy and styling are unreachable. */}
+                <p className="text-sm font-medium text-gray-200">Trainer Mode</p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {trainerMode === 'athlete'
-                    ? 'Personal training — no client roster'
-                    : 'Client management + personal training'}
+                  Client management + personal training
                 </p>
               </div>
-              <span className={cn(
-                'text-xs px-2 py-1 rounded border uppercase tracking-wider font-medium',
-                trainerMode === 'athlete'
-                  ? 'border-sky-500/30 text-sky-400 bg-sky-500/10'
-                  : 'border-command-blue/30 text-command-blue/80 bg-command-blue/10',
-              )}>
-                {trainerMode}
+              <span className="text-xs px-2 py-1 rounded border uppercase tracking-wider font-medium border-command-blue/30 text-command-blue/80 bg-command-blue/10">
+                trainer
               </span>
             </div>
             <p className="text-xs text-gray-600 mt-3">
-              To change mode, contact support or re-run onboarding. Mode switching UI coming in a future update.
+              New accounts are athlete-only. Your trainer features are unaffected.
             </p>
           </div>
         </Section>
+        )}
 
         {/* ── Dashboard ────────────────────────────────────────────────────── */}
         <Section

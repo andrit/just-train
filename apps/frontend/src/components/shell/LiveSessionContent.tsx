@@ -27,8 +27,9 @@ import { WorkoutBlock }                   from '@/components/session/WorkoutBloc
 import { CircuitBlock }                   from '@/components/session/CircuitBlock'
 import { AddBlockSheet }                  from '@/components/session/AddBlockSheet'
 import { CircuitBuilderSheet }            from '@/components/session/CircuitBuilderSheet'
-import { EndSessionModal }                from '@/components/session/EndSessionModal'
-import { PostSessionWrapUp }              from '@/components/session/PostSessionWrapUp'
+import { SessionCloseout }                from '@/components/session/SessionCloseout'
+import type { SessionCloseoutData }       from '@/components/session/SessionCloseout'
+import { markFirstSessionCompleted }      from '@/lib/installPrompt'
 import { resolveNameTokens }              from '@/lib/sessionName'
 import { Spinner }                        from '@/components/ui/Spinner'
 
@@ -79,7 +80,6 @@ export default function LiveSessionContent({
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [addBlockOpen,     setAddBlockOpen]     = useState(false)
   const [circuitOpen,      setCircuitOpen]      = useState(false)
-  const [showWrapUp,       setShowWrapUp]       = useState(false)
 
   const weightUnit = trainer?.weightUnitPreference ?? 'lbs'
 
@@ -109,39 +109,35 @@ export default function LiveSessionContent({
     navigate(`/session/${sessionId}/summary`)
   }
 
+  // One window, one confirm. Nothing is written until the user taps Finish, so
+  // abandoning the closeout leaves the session in_progress and resumable rather
+  // than closed with no name and no scores.
+  //
   // `await mutateAsync` rather than `mutate(_, { onSuccess })`: React Query drops
   // per-call callbacks when the calling component unmounts before the mutation
   // settles, and the hook-level onSuccess awaits an invalidateQueries round-trip
   // first. That leaves a window where the session is completed on the server and
   // the client never runs its follow-up. Awaiting keeps the continuation in this
   // closure, where nothing can prune it.
-  const handleEndSession = async (scores: {
-    energyLevel:  number
-    mobilityFeel: number
-    stressLevel:  number
-    sessionNotes?: string
-  }): Promise<void> => {
+  const handleCloseout = async ({ name, ...scores }: SessionCloseoutData): Promise<void> => {
     try {
       await endSession.mutateAsync({ id: sessionId, ...scores })
-    } catch {
-      return // error surfaces through endSession.isError; leave the modal open
-    }
-    fire('session_end', { entityId: sessionId })
-    // Show wrap-up before navigating to summary
-    setShowEndModal(false)
-    setShowWrapUp(true)
-  }
-
-  const handleWrapUpDone = async (name?: string): Promise<void> => {
-    if (name && session?.id) {
-      // Resolve {date} (and any future tokens) to a literal before saving.
-      const resolved = resolveNameTokens(name, { date: session.date })
-      try {
-        await updateSession.mutateAsync({ id: session.id, name: resolved })
-      } catch {
-        return // keep the wrap-up open so the name isn't silently lost
+      if (name && session?.id) {
+        // Resolve {date} (and any future tokens) to a literal before saving.
+        // ponytail: still a second request. Folds into the end PATCH in the
+        // one-request task — /sessions/:id already accepts `name`.
+        await updateSession.mutateAsync({
+          id:   session.id,
+          name: resolveNameTokens(name, { date: session.date }),
+        })
       }
+    } catch {
+      return // errors surface via isError; leave the window open so nothing is lost
     }
+    // Only now is this a completed session — the install prompt keys off that.
+    markFirstSessionCompleted()
+    fire('session_end', { entityId: sessionId })
+    setShowEndModal(false)
     finishSession()
   }
 
@@ -494,20 +490,15 @@ export default function LiveSessionContent({
         onClose={() => setCircuitOpen(false)}
       />
 
-      <EndSessionModal
-        open={showEndModal}
-        onConfirm={handleEndSession}
-        onCancel={() => setShowEndModal(false)}
-        onDiscard={handleDiscard}
-        loading={endSession.isPending || discardSession.isPending}
-        hasWork={sessionExercises.some(se => se.sets.length > 0)}
-      />
-
-      {showWrapUp && session && (
-        <PostSessionWrapUp
+      {session && (
+        <SessionCloseout
+          open={showEndModal}
           session={session}
-          onDone={handleWrapUpDone}
-          isSaving={updateSession.isPending}
+          onConfirm={handleCloseout}
+          onCancel={() => setShowEndModal(false)}
+          onDiscard={handleDiscard}
+          loading={endSession.isPending || discardSession.isPending || updateSession.isPending}
+          hasWork={sessionExercises.some(se => se.sets.length > 0)}
         />
       )}
     </>

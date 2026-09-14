@@ -678,9 +678,11 @@ This tracks progress through the workbench phases, which are separate from the a
 | 13 | Infrastructure | 🔜 Not started — checklist written; needs DevTools manifest/SW clean check + custom domain decision (docs/user-tasks/phase-13-infra-checklist.md) |
 | 14 | Staging & Smoke Test | 🔜 Not started — Athlete + Trainer golden path checklist written (docs/user-tasks/phase-14-smoke-test.md) |
 | 15 | Legal & Compliance | ✅ Complete — /privacy + /terms pages live, register consent links, analytics/cookie consent deferred with recommendation (2026-06-21) |
-| 16 | Monitoring Setup | 🔄 In progress — Sentry SDK wired (DSN-gated), Lighthouse CI added to ci.yml; Sentry DSN + uptime monitor pending human setup (docs/user-tasks/phase-16-monitoring-setup.md) |
-| 17 | Go Live | 🔜 Not started — first real install + post-launch Lighthouse ≥ 90 required to close |
-| 18 | Ongoing | 🔜 |
+| 16 | Monitoring Setup (SDLC v1 numbering) | ✅ Code portion done 2026-06-21 — Sentry SDK wired (DSN-gated), Lighthouse CI added to ci.yml. The SDLC was later renumbered: monitoring is now Phase 18 (below); the human steps carry there |
+| 17 | Brand & Identity Finalization | ⏸ **Closed incomplete 2026-09-14** (advanced with `criteria_verified: false`). Met: product-story post-build, brand-identity.md, WCAG audit. Carried as **launch gates**: the name is undetermined (first choice unavailable; "FORGE" / trainforge.io is a fallback), logo SVG light/dark, domain + SSL, brand sign-off |
+| 18 | Monitoring Setup | 🔄 **Current** — entered 2026-09-14. Already built: Sentry SDK DSN-gated in `main.tsx`, install event captured, Lighthouse CI step. Open: DSN in Vercel + UptimeRobot (human, `docs/user-tasks/phase-16-monitoring-setup.md`); backend Sentry, SW error capture, offline fetch-from-cache tracking (scope to agree) |
+| 19 | Go Live | 🔜 Not started — blocked on the launch gates above; first real install + post-launch Lighthouse ≥ 90 required to close |
+| 20 | Ongoing | 🔜 |
 
 Phase 2 deliverables (from `pwa/project.json`):
 - Client-side persistence approach chosen and implemented (IndexedDB via Dexie.js, or localStorage for lightweight cases)

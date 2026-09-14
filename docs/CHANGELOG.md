@@ -7,6 +7,9 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Process — PWA SDLC Phase 17 closed incomplete → Phase 18 (2026-09-14)
+- Brand & Identity was advanced with `criteria_verified: false` by explicit decision: the three code-side criteria are met, the four remaining (name, logo SVG, domain + SSL, sign-off) are external and now gate **launch** (Phase 19), not monitoring work. **The product name is undetermined** — the first-choice name was unavailable; "FORGE" / trainforge.io is a fallback and may stay so until launch readiness. Nothing in-app or in docs should present it as final.
+
 ### Save as template — now actually saves the plan
 - **"Save as template" copied nothing.** `handleSaveAsTemplateConfirm` created a template with the typed name and zero exercises, then toasted "Template saved!" — silent data loss for anyone who assumed it worked. It now deep-copies the session's plan.
 - **New `POST /templates/from-session`** `{ sessionId, name, description? }` — fork with a different source table. Copies every planning field of the session's exercises (targets, ramp step, per-side mode, notes, circuit grouping — never the sets), remaps circuit ids to fresh per-template ids (members that shared a group still share one), and writes the header and rows in **one transaction**. Refuses a session with no exercises (400) — an empty template is exactly the failure this replaces. Session-scoped to the trainer (404 otherwise). Returns the full template detail.

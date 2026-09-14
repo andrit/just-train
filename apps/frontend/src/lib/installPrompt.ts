@@ -13,6 +13,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 export const FIRST_SESSION_KEY  = 'trainer-app-first-session-completed'
 const        PROMPT_SEEN_KEY    = 'trainer-app-install-prompt-seen'
+const        FIRST_LAUNCH_KEY   = 'trainer-app-first-standalone-launch'
 
 let deferred: BeforeInstallPromptEvent | null = null
 
@@ -39,6 +40,28 @@ export function isStandaloneInstalled(): boolean {
     (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
     window.matchMedia('(display-mode: standalone)').matches
   )
+}
+
+/**
+ * The measured "install" signal: the first time this device opens the app from
+ * the home screen (display-mode: standalone). Dispatches `pwa:first-launch`
+ * once per device. This — not the browser's `appinstalled` event — is what
+ * monitoring and telemetry count, because `appinstalled` fires only in the
+ * tab that triggered the install, only on Chromium, never on iOS, and often
+ * while the user is still logged out. First standalone launch is when there
+ * is an installed app being used, on every platform. Call after the listeners
+ * for `pwa:first-launch` are registered (main.tsx).
+ */
+export function recordFirstStandaloneLaunch(): boolean {
+  if (!isStandaloneInstalled()) return false
+  try {
+    if (localStorage.getItem(FIRST_LAUNCH_KEY) === 'true') return false
+    localStorage.setItem(FIRST_LAUNCH_KEY, 'true')
+  } catch {
+    return false   // storage unavailable — better to miss one count than to double it
+  }
+  window.dispatchEvent(new CustomEvent('pwa:first-launch'))
+  return true
 }
 
 export function isIOSInstallable(): boolean {

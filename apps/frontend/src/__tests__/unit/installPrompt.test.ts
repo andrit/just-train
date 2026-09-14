@@ -8,6 +8,7 @@ import {
   isIOSInstallable,
   isStandaloneInstalled,
   triggerNativePrompt,
+  recordFirstStandaloneLaunch,
 } from '@/lib/installPrompt'
 
 // After each test: reset the deferred capture by simulating 'appinstalled',
@@ -141,6 +142,44 @@ describe('triggerNativePrompt', () => {
 describe('isStandaloneInstalled', () => {
   it('returns false in jsdom (no standalone mode)', () => {
     expect(isStandaloneInstalled()).toBe(false)
+  })
+})
+
+// ── recordFirstStandaloneLaunch ───────────────────────────────────────────────
+// The measured install signal: once per device, only when launched from the
+// home screen. Independent of the browser's tab-scoped appinstalled event.
+
+describe('recordFirstStandaloneLaunch', () => {
+  function setStandalone(matches: boolean): void {
+    vi.stubGlobal('matchMedia', (query: string) => ({ matches, media: query } as unknown as MediaQueryList))
+  }
+
+  it('does nothing in a browser tab (not standalone)', () => {
+    const spy = vi.fn()
+    window.addEventListener('pwa:first-launch', spy)
+    expect(recordFirstStandaloneLaunch()).toBe(false)
+    expect(spy).not.toHaveBeenCalled()
+    window.removeEventListener('pwa:first-launch', spy)
+  })
+
+  it('fires pwa:first-launch on the first standalone launch and never again on that device', () => {
+    setStandalone(true)
+    const spy = vi.fn()
+    window.addEventListener('pwa:first-launch', spy)
+    expect(recordFirstStandaloneLaunch()).toBe(true)
+    expect(recordFirstStandaloneLaunch()).toBe(false)   // second launch: already counted
+    expect(spy).toHaveBeenCalledTimes(1)
+    window.removeEventListener('pwa:first-launch', spy)
+  })
+
+  it('does not depend on appinstalled having fired', () => {
+    // No beforeinstallprompt / appinstalled in this test at all — iOS shape.
+    setStandalone(true)
+    const spy = vi.fn()
+    window.addEventListener('pwa:first-launch', spy)
+    recordFirstStandaloneLaunch()
+    expect(spy).toHaveBeenCalledTimes(1)
+    window.removeEventListener('pwa:first-launch', spy)
   })
 })
 

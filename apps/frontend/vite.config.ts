@@ -11,7 +11,22 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import path from 'path'
+
+// Source-map upload so production errors symbolicate to TSX file:line. Only
+// runs when SENTRY_AUTH_TOKEN is present (Vercel Production env); local and CI
+// builds skip it. Maps are 'hidden' (not referenced from the bundle) and are
+// deleted after upload so they never ship to browsers.
+const sentryUpload = process.env.SENTRY_AUTH_TOKEN
+  ? [sentryVitePlugin({
+      org:       process.env.SENTRY_ORG,
+      project:   process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      release:   { name: process.env.VERCEL_GIT_COMMIT_SHA },
+      sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
+    })]
+  : []
 
 export default defineConfig({
   plugins: [
@@ -30,6 +45,10 @@ export default defineConfig({
       // The user gets the latest version on their next page load without
       // any prompts or interruption.
       registerType: 'autoUpdate',
+
+      // No injected /registerSW.js — main.tsx registers via virtual:pwa-register
+      // so a failed registration is reported to Sentry with a message and tag.
+      injectRegister: null,
 
       // Include these file patterns in the service worker's precache.
       // Everything in the precache is available offline immediately.
@@ -129,9 +148,13 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
       },
     }),
+    ...sentryUpload,
   ],
 
   build: {
+    // Hidden maps: generated for the Sentry upload plugin, never referenced by
+    // the bundle, deleted from dist after upload (see sentryUpload above).
+    sourcemap: 'hidden',
     rollupOptions: {
       output: {
         // Split heavy vendor deps into their own chunks so the main app entry

@@ -10,9 +10,15 @@ const post = vi.hoisted(() => vi.fn())
 vi.mock('@/lib/api', () => ({ apiClient: { post } }))
 
 const authState = vi.hoisted(() => ({ accessToken: 'tok' as string | null }))
-vi.mock('@/store/authStore', () => ({ useAuthStore: { getState: () => authState } }))
+const subscribers = vi.hoisted(() => [] as Array<(s: { accessToken: string | null }, p: { accessToken: string | null }) => void>)
+vi.mock('@/store/authStore', () => ({
+  useAuthStore: {
+    getState:  () => authState,
+    subscribe: (fn: (s: { accessToken: string | null }, p: { accessToken: string | null }) => void) => { subscribers.push(fn); return () => {} },
+  },
+}))
 
-import { track, drain, flush, _resetTelemetry } from '@/services/telemetry'
+import { track, drain, flush, initTelemetry, _resetTelemetry } from '@/services/telemetry'
 
 describe('telemetry', () => {
   beforeEach(() => {
@@ -67,6 +73,20 @@ describe('telemetry', () => {
 
     await flush()
     expect(post).toHaveBeenCalledTimes(1)   // nothing left to send
+  })
+
+  it('flushes events recorded before login as soon as a token appears', async () => {
+    authState.accessToken = null
+    initTelemetry()
+    track('pwa.installed')                       // first standalone launch, still logged out
+    await flush()
+    expect(post).not.toHaveBeenCalled()
+
+    authState.accessToken = 'tok'
+    subscribers.forEach((fn) => fn({ accessToken: 'tok' }, { accessToken: null }))
+    await Promise.resolve()                      // let the subscriber's flush run
+    await Promise.resolve()
+    expect(post).toHaveBeenCalledWith('/telemetry', { events: [expect.objectContaining({ name: 'pwa.installed' })] })
   })
 
   it('drops a failed send rather than retrying or throwing', async () => {

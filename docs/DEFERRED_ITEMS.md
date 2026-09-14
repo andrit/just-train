@@ -570,3 +570,7 @@ Backend fixes (Railway) have no service worker in the path and verify immediatel
 why a backend fix can confirm cleanly in the same session that a frontend fix appears to fail.
 
 **Files to change:** `vite.config.ts` (`registerType`), new component `UpdatePromptBanner.tsx`, wire into `App.tsx` using `useRegisterSW` from `virtual:pwa-register/react`.
+
+**Mechanism behind "reopen twice" (identified 2026-09-14):** `sw.ts` is `injectManifest` and contains no `self.skipWaiting()` / `clientsClaim()`. In that mode `registerType: 'autoUpdate'` does **not** add them (it only does for the generated SW), so a new worker sits in `waiting` until every tab/WebAPK window closes — hence one launch to activate, the next to serve. Adding the two calls would make updates land on the next load; that is the same mid-session-reload risk this item exists to decide, so it is recorded here rather than changed. Registration now goes through `virtual:pwa-register` in `main.tsx` (`injectRegister: null`), which is also where a `needRefresh` prompt would hook in.
+
+**Open defect (2026-09-14):** one Android device (Galaxy S20, Chrome 143) had `navigator.serviceWorker.register('/sw.js')` **reject** with a bare `Error: Rejected` through two anonymous wrapper frames — caught by Sentry, not by us. Cause unknown; the registration is now reported with a tag so a recurrence carries a real message. Check `chrome://serviceworker-internals` on that device: if the worker is ACTIVATED the rejection was transient; if absent, that device has no offline shell and this becomes a real bug.

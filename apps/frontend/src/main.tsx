@@ -18,7 +18,8 @@ import { ErrorBoundary } from './components/shell/ErrorBoundary'
 import './index.css'
 import { syncService, SYNC_COMPLETE_EVENT } from './services/syncService'
 import { ApiError } from './lib/api'
-import { capturePWAInstallPrompt } from './lib/pwaInstall'
+import { recordFirstStandaloneLaunch } from './lib/installPrompt'
+import { registerSW }              from 'virtual:pwa-register'
 import { installSwErrorRelay }     from './lib/swErrorRelay'
 import { initTelemetry, track }    from './services/telemetry'
 import { SpeedInsights }           from '@vercel/speed-insights/react'
@@ -45,8 +46,10 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     },
   })
 
-  // Track PWA install to home screen — Phase 18 advance criterion
-  window.addEventListener('pwa:installed', () => {
+  // Install signal — Phase 18 advance criterion. Fired once per device on the
+  // first launch from the home screen (lib/installPrompt.ts), which covers iOS
+  // and does not depend on the browser's tab-scoped `appinstalled` event.
+  window.addEventListener('pwa:first-launch', () => {
     Sentry.captureMessage('PWA installed to home screen', 'info')
   })
 
@@ -54,13 +57,27 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   installSwErrorRelay()
 }
 
-// Register beforeinstallprompt listener before React mounts — the browser fires
-// this event early and it won't repeat, so the listener must be in place first.
-capturePWAInstallPrompt()
+// Service worker registration — ours, not vite-plugin-pwa's injected one-liner,
+// so a rejected registration (seen on Android, 2026-09-14: bare "Rejected" from
+// registerSW.js with no handler) is reported with a real message and tag
+// instead of surfacing as an anonymous unhandled rejection. injectRegister is
+// null in vite.config.ts; this is the only registration call.
+registerSW({
+  onRegisterError(error) {
+    Sentry.captureException(error instanceof Error ? error : new Error(String(error)), {
+      tags: { source: 'sw-registration' },
+    })
+  },
+})
 
 // First-party usage counters (POST /telemetry) — aggregates, sent on an interval.
 initTelemetry()
-window.addEventListener('pwa:installed', () => track('pwa.installed'))
+window.addEventListener('pwa:first-launch', () => track('pwa.installed'))
+
+// Now that both listeners exist: is this the first launch from the home screen?
+// (lib/installPrompt.ts registered its beforeinstallprompt/appinstalled listeners
+// as a module side effect when imported above.)
+recordFirstStandaloneLaunch()
 
 const queryClient = new QueryClient({
   defaultOptions: {

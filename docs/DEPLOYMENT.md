@@ -69,7 +69,13 @@ TELEMETRY_SINK        = postgres                                ← default; `no
 ```
 `RAILWAY_GIT_COMMIT_SHA` is injected by Railway and becomes the Sentry release.
 The frontend's DSN is a separate Sentry *React* project, set in Vercel as
-`VITE_SENTRY_DSN` (Production only). Full runbook: `docs/user-tasks/phase-18-monitoring-setup.md`.
+`VITE_SENTRY_DSN` (Production only — a DSN is a public write-only address, not a secret).
+Source-map upload needs three more Vercel build-time variables (Production only, **not**
+`VITE_`-prefixed, so they never reach the browser): `SENTRY_AUTH_TOKEN` (a real secret),
+`SENTRY_ORG`, `SENTRY_PROJECT`. On **both** Sentry projects turn on *Settings → Security &
+Privacy → Prevent Storing of IP Addresses* — the SDK's `sendDefaultPii: false` does not stop
+Sentry inferring the IP server-side for browser events. Full runbook:
+`docs/user-tasks/phase-18-monitoring-setup.md`.
 
 Optional (email — monthly reports, at-risk alerts, and email verification):
 ```

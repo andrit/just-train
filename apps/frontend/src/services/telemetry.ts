@@ -79,6 +79,11 @@ export function initTelemetry(): void {
   if (timer) return
   timer = setInterval(() => { void flush() }, FLUSH_INTERVAL_MS)
   window.addEventListener('online', () => { void flush() })
+  // Events recorded before login (e.g. the first standalone launch on a fresh
+  // device) wait in the buffer; send them the moment a token appears.
+  useAuthStore.subscribe((state, prev) => {
+    if (state.accessToken && !prev.accessToken) void flush()
+  })
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') void flush()
   })

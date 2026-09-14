@@ -62,6 +62,15 @@ node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
+Monitoring (Phase 18 — optional, but Go Live requires Sentry to be receiving events):
+```
+SENTRY_DSN            = https://...@o....ingest.sentry.io/...   ← Sentry *Node* project DSN
+TELEMETRY_SINK        = postgres                                ← default; `none` to discard product events
+```
+`RAILWAY_GIT_COMMIT_SHA` is injected by Railway and becomes the Sentry release.
+The frontend's DSN is a separate Sentry *React* project, set in Vercel as
+`VITE_SENTRY_DSN` (Production only). Full runbook: `docs/user-tasks/phase-18-monitoring-setup.md`.
+
 Optional (email — monthly reports, at-risk alerts, and email verification):
 ```
 RESEND_API_KEY        = re_...

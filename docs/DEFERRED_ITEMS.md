@@ -485,6 +485,16 @@ These three items were scoped during the v2.14.0 → v3.0.0 planning window. Sch
 
 ---
 
+## Monitoring L5 — paid / third-party analytics, status page, log shipping (Phase 18 deferral)
+
+**When:** any of — first paying cohort (analytics); Go Live announcement (status page); a production incident that Railway's log viewer could not answer (log shipping); a second person needing Sentry access (Team plan, $26/mo annual at 2026-09-14 pricing).
+
+**What is already in place so this is a flip, not a build:** product events flow through `lib/telemetry/sink.ts` (`TelemetrySink` interface, `TELEMETRY_SINK` env). Adding PostHog = one `posthogSink` file mapping `{ trainerId, name, props, clientTs }` to `capture({ distinctId, event, properties, timestamp })`, plus a case in `createTelemetrySink()`, plus the privacy-policy processor line. PostHog free tier (2026-09-14): 1M events, 5k replays, 100k exceptions; cookieless via `persistence: 'memory'`, EU cloud available — so no consent banner is required even then.
+
+**Explicitly not chosen and why:** session replay (records training screens — privacy posture); Better Stack status page (no public users yet; revisit at Go Live, free tier has 10 monitors + 1 status page); Sentry Logs / Better Stack logs (Railway's viewer suffices; 5 GB / 3 GB free tiers exist when needed); GlitchTip self-host (the escape hatch if Sentry's 1-user or 5k-error cap bites — same SDK, change the DSN).
+
+---
+
 ## Cookie Consent Banner & Analytics — Phase 15 deferral
 
 **When:** Revisit if analytics tooling is added, or before operating under GDPR in the EU.

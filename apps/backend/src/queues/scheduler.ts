@@ -25,6 +25,7 @@ import {
 import { db, clients, trainers } from '../db'
 import { eq, and, isNotNull } from 'drizzle-orm'
 import { expireOverdueChallenges } from '../services/challenge.service'
+import { withCronMonitor, captureError } from '../lib/sentry'
 
 const SCHEDULER_QUEUE = 'scheduler'
 
@@ -82,11 +83,20 @@ export async function startScheduler(): Promise<void> {
     { name: 'challenge-expiry', data: {} },
   )
 
-  new Worker(SCHEDULER_QUEUE, async (job) => {
+  // The hourly alert fanout doubles as the scheduler's heartbeat: it is wrapped
+  // in a Sentry cron monitor (the one included on the free plan), so a dead or
+  // stalled scheduler worker raises an alert instead of looking like "no
+  // clients at risk". The crontab passed here must match the pattern above.
+  const worker = new Worker(SCHEDULER_QUEUE, async (job) => {
     if (job.name === 'report-fanout')     await fanOutScheduledReports()
-    if (job.name === 'alert-fanout')      await fanOutAtRiskAlerts()
+    if (job.name === 'alert-fanout')      await withCronMonitor('scheduler-hourly', '0 * * * *', fanOutAtRiskAlerts)
     if (job.name === 'challenge-expiry')  await runChallengeExpiry()
   }, { connection: getRedisConnection() })
+
+  worker.on('failed', (job, err) => {
+    console.error(`[Scheduler] Job ${job?.name ?? '?'} (${job?.id ?? '?'}) failed:`, err.message)
+    captureError(err, `scheduler:${job?.name ?? 'unknown'}`)
+  })
 
   console.log('[Scheduler] Started — reports (hourly on 1st), alerts (hourly), challenge expiry (daily)')
 }

@@ -26,3 +26,4 @@ export * from './challenges' // v2.12.0: coach challenges
 export * from './auth'                  // Phase 2: refresh tokens
 export * from './email-verification'   // Phase 10.5: email verification
 export * from './idempotency'          // Offline write-replay dedup keys
+export * from './client-events'        // Phase 18: first-party product telemetry

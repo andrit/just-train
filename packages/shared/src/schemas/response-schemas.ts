@@ -741,3 +741,12 @@ export type ChallengeResponse = z.infer<typeof ChallengeResponseSchema>
 export const ChallengeListResponseSchema = z.array(ChallengeResponseSchema)
   .describe('Challenges for a client, ordered by status (active first) then deadline')
 export type ChallengeListResponse = z.infer<typeof ChallengeListResponseSchema>
+
+// ============================================================
+// TELEMETRY (Phase 18)
+// ============================================================
+
+export const TelemetryAcceptedResponseSchema = z.object({
+  accepted: z.number().int().min(0),
+})
+export type TelemetryAcceptedResponse = z.infer<typeof TelemetryAcceptedResponseSchema>

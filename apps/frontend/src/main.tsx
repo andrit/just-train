@@ -19,6 +19,9 @@ import './index.css'
 import { syncService, SYNC_COMPLETE_EVENT } from './services/syncService'
 import { ApiError } from './lib/api'
 import { capturePWAInstallPrompt } from './lib/pwaInstall'
+import { installSwErrorRelay }     from './lib/swErrorRelay'
+import { initTelemetry, track }    from './services/telemetry'
+import { SpeedInsights }           from '@vercel/speed-insights/react'
 
 // Sentry error monitoring — no-ops when DSN is absent (dev + CI).
 // Add VITE_SENTRY_DSN to Vercel env vars to activate in production.
@@ -32,15 +35,22 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     ignoreErrors: ['Unauthorized', 'X-Device-ID header required'],
   })
 
-  // Track PWA install to home screen — satisfies Phase 16 advance criterion
+  // Track PWA install to home screen — Phase 18 advance criterion
   window.addEventListener('pwa:installed', () => {
     Sentry.captureMessage('PWA installed to home screen', 'info')
   })
+
+  // Service-worker errors have no SDK of their own — sw.ts posts them here.
+  installSwErrorRelay()
 }
 
 // Register beforeinstallprompt listener before React mounts — the browser fires
 // this event early and it won't repeat, so the listener must be in place first.
 capturePWAInstallPrompt()
+
+// First-party usage counters (POST /telemetry) — aggregates, sent on an interval.
+initTelemetry()
+window.addEventListener('pwa:installed', () => track('pwa.installed'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,6 +98,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
       {/* DevTools panel — only visible in development, removed from production build */}
       <ReactQueryDevtools initialIsOpen={false} />
+
+      {/* Real-user performance (Vercel Speed Insights, free tier: 10k events / 30 days
+          shared across the team). No cookie, no PII — it reports Web Vitals per path.
+          Sampled so a single active athlete cannot burn the allocation; the script is
+          a no-op outside Vercel deployments. Raise the rate with Speed Insights Plus. */}
+      <SpeedInsights sampleRate={0.2} />
     </QueryClientProvider>
   </React.StrictMode>
 )

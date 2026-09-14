@@ -455,3 +455,23 @@ export const UpdateChallengeSchema = z.object({
     .describe('Manual status override — e.g. cancel a challenge'),
 })
 export type UpdateChallengeInput = z.infer<typeof UpdateChallengeSchema>
+
+// ============================================================
+// TELEMETRY (Phase 18) — first-party product events
+// ============================================================
+
+/** Lower-case dotted names: `offline.cache_hit`, `session.completed`. */
+export const ClientEventNameSchema = z.string().min(1).max(64).regex(/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$/)
+
+export const ClientEventSchema = z.object({
+  name:     ClientEventNameSchema,
+  props:    z.record(z.union([z.string().max(200), z.number(), z.boolean()])).optional()
+              .describe('Flat scalar properties only — counters and small labels, never PII'),
+  clientTs: z.string().datetime().describe('When it happened on the device (ISO 8601)'),
+})
+export type ClientEventInput = z.infer<typeof ClientEventSchema>
+
+export const ClientEventBatchSchema = z.object({
+  events: z.array(ClientEventSchema).min(1).max(50),
+})
+export type ClientEventBatchInput = z.infer<typeof ClientEventBatchSchema>

@@ -19,6 +19,7 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query'
 import { apiClient }        from '@/lib/api'
+import { track }            from '@/services/telemetry'
 import { useAuthStore }     from '@/store/authStore'
 import { offlineAwareApi }  from '@/lib/offlineAwareApi'
 import type {
@@ -179,6 +180,7 @@ export function useEndSession(): UseMutationResult<SessionSummaryResponse, Error
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(data.id) })
       qc.invalidateQueries({ queryKey: sessionKeys.all() })
+      track('session.completed')
     },
   })
 }
@@ -242,8 +244,11 @@ export function useLogSet(): UseMutationResult<SetResponse, Error, LogSetInput> 
         body,
         `Log set — set ${body.setNumber}`,
       ),
-    onSuccess: (_, { sessionId }) => {
+    onSuccess: (set, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+      // The "first aha" moment in the value chain — counted, not identified.
+      if (set.isLoadRecord)   track('record.detected', { kind: 'load' })
+      if (set.isVolumeRecord) track('record.detected', { kind: 'volume' })
     },
   })
 }

@@ -12,11 +12,12 @@
 //
 // USAGE:
 //   import { routeLog } from '../lib/logger'
-//   routeLog(app).error(error)
+//   routeLog(app).error(error)      // also forwarded to Sentry when configured
 //   routeLog(app).warn({ err }, 'seed failed')
 // ------------------------------------------------------------
 
 import type { FastifyInstance } from 'fastify'
+import { captureError } from './sentry'
 
 interface RouteLogger {
   error(msg: unknown, context?: string): void
@@ -28,7 +29,12 @@ export function routeLog(app: FastifyInstance): RouteLogger {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const log = app.log as any
   return {
-    error: (msg, context) => context ? log.error(msg, context) : log.error(msg instanceof Error ? msg.message : msg),
+    // Every route's caught 500 comes through here — forwarding Error instances
+    // to Sentry makes them visible without touching the routes. No-op without a DSN.
+    error: (msg, context) => {
+      captureError(msg, context)
+      return context ? log.error(msg, context) : log.error(msg instanceof Error ? msg.message : msg)
+    },
     warn:  (msg, context) => context ? log.warn(msg, context)  : log.warn(msg  instanceof Error ? msg.message : msg),
     info:  (msg, context) => context ? log.info(msg, context)  : log.info(msg  instanceof Error ? msg.message : msg),
   }

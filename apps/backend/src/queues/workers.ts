@@ -18,6 +18,7 @@
 // ------------------------------------------------------------
 
 import { Worker }            from 'bullmq'
+import { captureError } from '../lib/sentry'
 import { getRedisConnection } from './connection'
 import {
   QUEUE_NAMES,
@@ -74,6 +75,7 @@ export function startReportWorker(): Worker {
 
   worker.on('failed', (job, err) => {
     console.error(`[ReportWorker] Job ${job?.id} failed:`, err.message)
+    captureError(err, `report-worker:${job?.id ?? 'unknown'}`)
   })
 
   return worker
@@ -141,6 +143,7 @@ export function startAlertWorker(): Worker {
 
   worker.on('failed', (job, err) => {
     console.error(`[AlertWorker] Job ${job?.id} failed:`, err.message)
+    captureError(err, `alert-worker:${job?.id ?? 'unknown'}`)
   })
 
   return worker

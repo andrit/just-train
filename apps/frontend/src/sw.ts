@@ -30,6 +30,20 @@ registerRoute(
   })
 )
 
+// Offline-usage signal (Phase 18). NetworkFirst only reaches for the cache when
+// the network failed or timed out, so a cached response being used here means
+// the athlete was genuinely served offline. The page counts these
+// (services/telemetry.ts) and sends one aggregate — not one row per hit.
+const cacheHitSignal = {
+  cachedResponseWillBeUsed: async ({ cacheName, cachedResponse }: { cacheName: string; cachedResponse?: Response | null }) => {
+    if (cachedResponse) {
+      const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+      clients.forEach((client) => client.postMessage({ type: 'CACHE_HIT', cache: cacheName }))
+    }
+    return cachedResponse ?? null
+  },
+}
+
 // NetworkFirst: API reference data (exercises, body parts, templates).
 // Changes rarely, no PII — safe to serve stale for 24h. 50-entry cap.
 registerRoute(
@@ -38,6 +52,7 @@ registerRoute(
     cacheName: 'api-reference-cache',
     plugins: [
       new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 }),
+      cacheHitSignal,
     ],
   })
 )
@@ -53,6 +68,32 @@ registerRoute(
     ],
   })
 )
+
+// Error relay → window clients → Sentry (lib/swErrorRelay.ts).
+// A worker has no DOM and no Sentry SDK; without this, a throwing route handler
+// or a bad precache entry fails silently in the one place we can't see.
+function relayError(kind: 'error' | 'unhandledrejection', message: string, extra: Partial<{ stack: string; filename: string; lineno: number }>): void {
+  void self.clients
+    .matchAll({ includeUncontrolled: true, type: 'window' })
+    .then((clients) => {
+      clients.forEach((client) => client.postMessage({ type: 'SW_ERROR', kind, message, ...extra }))
+    })
+}
+
+self.addEventListener('error', (event) => {
+  relayError('error', event.message, {
+    stack:    event.error instanceof Error ? event.error.stack : undefined,
+    filename: event.filename,
+    lineno:   event.lineno,
+  })
+})
+
+self.addEventListener('unhandledrejection', (event) => {
+  const reason = (event as PromiseRejectionEvent).reason
+  relayError('unhandledrejection', reason instanceof Error ? reason.message : String(reason), {
+    stack: reason instanceof Error ? reason.stack : undefined,
+  })
+})
 
 // Background Sync relay.
 // When the browser gets connectivity (even after the app tab closes), the browser

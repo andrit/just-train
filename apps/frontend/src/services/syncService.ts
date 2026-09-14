@@ -27,6 +27,7 @@
 // ------------------------------------------------------------
 
 import { offlineQueue }  from './offlineQueue'
+import { track } from '@/services/telemetry'
 import { apiClient }     from '@/lib/api'
 
 export const SYNC_COMPLETE_EVENT = 'trainer-app:sync-complete'
@@ -89,6 +90,7 @@ async function flushQueue(): Promise<void> {
   isSyncing = false
   const remaining = offlineQueue.size()
   emitStatus(remaining > 0 ? 'error' : 'idle', remaining)
+  track('offline.queue_flush', { ops: ops.length, failed: remaining })
 
   if (allSucceeded) {
     // Signal React to invalidate affected queries

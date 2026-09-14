@@ -22,6 +22,7 @@
 // ------------------------------------------------------------
 
 import type { FastifyRequest, FastifyReply } from 'fastify'
+import { setSentryUser } from '../lib/sentry'
 import { verifyAccessToken, type AccessTokenPayload } from '../services/auth.service'
 
 // Extend the Fastify request type so TypeScript knows about request.trainer
@@ -61,6 +62,7 @@ export async function authenticate(
 
   try {
     request.trainer = verifyAccessToken(token)
+    setSentryUser(request.trainer.trainerId)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Invalid token'
 

@@ -1,4 +1,7 @@
+// Sentry must initialise before fastify/pg/ioredis are required — keep this first.
+import './instrument'
 import { routeLog } from './lib/logger'
+import { attachSentryErrorHandler } from './lib/sentry'
 // ------------------------------------------------------------
 // index.ts — Fastify server entry point
 //
@@ -48,6 +51,7 @@ import { reportRoutes }          from './routes/reports'
 import { snapshotMediaRoutes }   from './routes/snapshot-media'
 import { sessionExerciseMediaRoutes } from './routes/session-exercise-media'
 import { challengeRoutes }           from './routes/challenges'
+import { telemetryRoutes }           from './routes/telemetry'
 import { configureCloudinary }   from './services/cloudinary.service'
 import { startScheduler }        from './queues/scheduler'
 import { startReportWorker, startAlertWorker } from './queues/workers'
@@ -61,6 +65,10 @@ const app = Fastify({
       : undefined,
   },
 })
+
+// Uncaught 5xx (validation/plugin failures) → Sentry. Caught route errors reach
+// Sentry through routeLog(app).error. No-op without SENTRY_DSN.
+attachSentryErrorHandler(app)
 
 // ------------------------------------------------------------
 // ZodTypeProvider
@@ -301,6 +309,7 @@ app.register(templateRoutes,       { prefix: '/api/v1' })
 app.register(snapshotMediaRoutes,  { prefix: '/api/v1' })
 app.register(sessionExerciseMediaRoutes, { prefix: '/api/v1' })
 app.register(challengeRoutes,          { prefix: '/api/v1' })
+app.register(telemetryRoutes,          { prefix: '/api/v1' })
 
 // ------------------------------------------------------------
 // HEALTH CHECK — public, no auth required

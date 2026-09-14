@@ -75,4 +75,7 @@ export const {
 
   // Offline write-replay dedup keys
   idempotencyKeys,
+
+  // Phase 18: first-party product telemetry
+  clientEvents,
 } = schema

@@ -28,6 +28,7 @@ import { reportRoutes }          from '../../routes/reports'
 import { mediaRoutes }           from '../../routes/media'
 import { snapshotMediaRoutes }   from '../../routes/snapshot-media'
 import { sessionExerciseMediaRoutes } from '../../routes/session-exercise-media'
+import { telemetryRoutes, type TelemetryRouteOptions } from '../../routes/telemetry'
 import multipart                 from '@fastify/multipart'
 
 function createBaseApp() {
@@ -102,6 +103,13 @@ export async function buildChallengeTestApp() {
   const app = createBaseApp()
   await app.register(clientRoutes,    { prefix: '/api/v1' })
   await app.register(challengeRoutes, { prefix: '/api/v1' })
+  await app.ready()
+  return app
+}
+
+export async function buildTelemetryTestApp(opts: TelemetryRouteOptions = {}) {
+  const app = createBaseApp()
+  await app.register(telemetryRoutes, { prefix: '/api/v1', ...opts })
   await app.ready()
   return app
 }

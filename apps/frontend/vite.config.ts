@@ -152,9 +152,10 @@ export default defineConfig({
   ],
 
   build: {
-    // Hidden maps: generated for the Sentry upload plugin, never referenced by
-    // the bundle, deleted from dist after upload (see sentryUpload above).
-    sourcemap: 'hidden',
+    // Hidden maps only when the Sentry upload plugin is active: it uploads them
+    // and deletes them from dist. Without the token, no maps at all — otherwise
+    // unminified source would be deployed as public (unreferenced) files.
+    sourcemap: process.env.SENTRY_AUTH_TOKEN ? 'hidden' : false,
     rollupOptions: {
       output: {
         // Split heavy vendor deps into their own chunks so the main app entry

@@ -7,6 +7,9 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Process — PWA SDLC Phase 18 complete → Phase 19 Go Live (2026-09-14)
+- Advanced with `criteria_verified: true`: a production error event and the install message were both observed in Sentry. Phase 19 is blocked on the launch gates (name, logo, domain + SSL, sign-off); nothing in it is code.
+
 ### Monitoring (PWA SDLC Phase 18) — errors, availability, field performance, first-party usage
 Survey of options (Sentry / GlitchTip / PostHog / Better Stack / UptimeRobot / Vercel / Railway, free tiers checked 2026-09-14) and the level decision are in `.workbench/designer/current/task-plan-phase-18.md`. Chosen: **L2 + L3 + L4 option A** — everything on free tiers, no third-party analytics, extensible to a paid sink later.
 - **Backend Sentry** (`@sentry/node`, DSN-gated, inert without `SENTRY_DSN`). `src/instrument.ts` is the first import so Fastify/pg/ioredis are instrumented. Three paths reach Sentry with **zero route changes**: `routeLog(app).error(err)` now forwards `Error` instances (every route's caught 500), Sentry's Fastify handler takes uncaught 5xx, and BullMQ `failed` events are captured from both workers and the scheduler. `authenticate` tags the request scope with the trainer id. Release = `RAILWAY_GIT_COMMIT_SHA`. `lib/sentry.ts` is the only file that imports the SDK; unit-tested inert/active behaviour.

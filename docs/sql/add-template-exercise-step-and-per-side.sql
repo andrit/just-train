@@ -1,6 +1,9 @@
 -- ------------------------------------------------------------
 -- add-template-exercise-step-and-per-side.sql
 --
+-- ✅ APPLIED TO PROD 2026-09-14 (both columns present, nullable). Safe to re-run: no-op.
+-- Drizzle equivalent: drizzle/0005_wealthy_the_liberteens.sql (prod applies via psql, not the runner).
+--
 -- Additive, idempotent. Adds the two session-only planning fields to
 -- template_exercises so session -> template -> session round-trips every
 -- planning field (Save as template, fork, apply).

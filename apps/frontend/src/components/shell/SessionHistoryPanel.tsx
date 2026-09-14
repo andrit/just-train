@@ -13,6 +13,7 @@ import { cn }                  from '@/lib/cn'
 import { interactions }        from '@/lib/interactions'
 import { useSession }          from '@/lib/queries/sessions'
 import { DeleteSessionButton } from '@/components/session/DeleteSessionButton'
+import { SaveAsTemplateButton } from '@/components/session/SaveAsTemplateButton'
 import { ApiError }            from '@/lib/api'
 import { useSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { formatDate, formatDuration, formatTotalVolume } from '@/lib/formatters'
@@ -119,14 +120,16 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
             <p className="text-sm text-gray-500 mt-1">{formatDate(session.date)}</p>
           </div>
 
-          {/* Delete lives here as well as on the Sessions list card, because this
-              panel is where every route ends up — the dashboard's Recent Sessions,
-              the sessions list, and the per-exercise history rows all open it. */}
-          <DeleteSessionButton
-            session={{ id: session.id, clientId: session.clientId }}
-            onDeleted={onClose}
-            className="shrink-0"
-          />
+          {/* Actions live here because this panel is where every route ends up —
+              the dashboard's Recent Sessions, the sessions list, and the
+              per-exercise history rows all open it. */}
+          <div className="flex items-center gap-2 shrink-0">
+            <SaveAsTemplateButton session={session} />
+            <DeleteSessionButton
+              session={{ id: session.id, clientId: session.clientId }}
+              onDeleted={onClose}
+            />
+          </div>
         </div>
       </div>
 

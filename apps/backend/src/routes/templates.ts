@@ -9,6 +9,7 @@ import { routeLog } from '../lib/logger'
 //   PATCH  /api/v1/templates/:id        → update template metadata
 //   DELETE /api/v1/templates/:id        → delete template
 //   POST   /api/v1/templates/:id/fork   → deep-copy a template
+//   POST   /api/v1/templates/from-session → save a session's plan as a template
 //
 //   POST   /api/v1/templates/:id/exercises          → add exercise to template
 //   DELETE /api/v1/template-exercises/:id           → remove exercise from template
@@ -17,11 +18,13 @@ import { routeLog } from '../lib/logger'
 
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
-import { db, templates, templateExercises, exercises } from '../db'
+import { db, templates, templateExercises, exercises, sessions, sessionExercises } from '../db'
 import { eq, and, ilike, or, exists, sql, inArray } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
+import { createCircuitRemapper, toTemplateExerciseRow } from '../lib/exerciseCopy'
 import {
   CreateTemplateSchema,
+  CreateTemplateFromSessionSchema,
   AddTemplateExerciseSchema,
   CreateTemplateCircuitSchema,
   TemplateListResponseSchema,
@@ -42,6 +45,20 @@ function serializeDates<T extends { createdAt: Date | string; updatedAt: Date | 
     createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
   }
+}
+
+// Full template tree for a detail response. `media: true` is required — the
+// exercise summary schema demands it (see CONTRIBUTING.md).
+function loadTemplateDetail(id: string) {
+  return db.query.templates.findFirst({
+    where: eq(templates.id, id),
+    with: {
+      templateExercises: {
+        orderBy: templateExercises.orderIndex,
+        with: { exercise: { with: { bodyPart: true, media: true } } },
+      },
+    },
+  })
 }
 
 export async function templateRoutes(app: FastifyInstance): Promise<void> {
@@ -273,56 +290,29 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
 
       if (!source) return reply.status(404).send({ error: 'Template not found' })
 
-      // Remap circuit grouping so the fork's circuits are independent of the source.
-      const forkCircuitIdMap = new Map<string, string>()
-      const forkedCircuitId = (srcCircuitId: string | null): string | null => {
-        if (!srcCircuitId) return null
-        const existing = forkCircuitIdMap.get(srcCircuitId)
-        if (existing) return existing
-        const fresh = randomUUID()
-        forkCircuitIdMap.set(srcCircuitId, fresh)
-        return fresh
-      }
+      // Header + rows commit together — a failed row insert must not leave a
+      // half-copied template that looks saved. Circuits are remapped so the
+      // fork's groups are independent of the source's.
+      const forkedId = await db.transaction(async (tx) => {
+        const [forked] = await tx.insert(templates).values({
+          trainerId:   request.trainer.trainerId,
+          name:        body?.name ?? `${source.name} (copy)`,
+          type:        source.type,
+          description: source.description ?? null,
+          notes:       source.notes ?? null,
+        }).returning()
+        if (!forked) throw new Error('Template header insert returned no row')
 
-      const [forked] = await db.insert(templates).values({
-        trainerId:   request.trainer.trainerId,
-        name:        body?.name ?? `${source.name} (copy)`,
-        type:        source.type,
-        description: source.description ?? null,
-        notes:       source.notes ?? null,
-      }).returning()
-
-      if (!forked) return reply.status(500).send({ error: 'Failed to fork template' })
-
-      for (const te of source.templateExercises) {
-        await db.insert(templateExercises).values({
-          templateId:            forked.id,
-          exerciseId:            te.exerciseId,
-          workoutType:           te.workoutType,
-          orderIndex:            te.orderIndex,
-          circuitId:             forkedCircuitId(te.circuitId),
-          targetSets:            te.targetSets       ?? null,
-          targetReps:            te.targetReps       ?? null,
-          targetRepsPerSet:      te.targetRepsPerSet ?? null,
-          targetWeight:          te.targetWeight     ?? null,
-          targetWeightUnit:      te.targetWeightUnit,
-          targetDurationSeconds: te.targetDurationSeconds ?? null,
-          targetDistance:        te.targetDistance        ?? null,
-          targetIntensity:       te.targetIntensity       ?? null,
-          notes:                 te.notes                 ?? null,
-        })
-      }
-
-      const result = await db.query.templates.findFirst({
-        where: eq(templates.id, forked.id),
-        with: {
-          templateExercises: {
-            orderBy: templateExercises.orderIndex,
-            with: { exercise: { with: { bodyPart: true, media: true } } },
-          },
-        },
+        if (source.templateExercises.length) {
+          const remap = createCircuitRemapper()
+          await tx.insert(templateExercises).values(
+            source.templateExercises.map((te) => toTemplateExerciseRow(te, forked.id, remap)),
+          )
+        }
+        return forked.id
       })
 
+      const result = await loadTemplateDetail(forkedId)
       if (!result) return reply.status(500).send({ error: 'Failed to fork template' })
 
       // serializeDates is not optional here: Drizzle returns `timestamp` columns as
@@ -333,6 +323,68 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fork template' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // POST /templates/from-session — Save a session's plan as a template
+  //
+  // Fork with a different source table: copies every planning field of the
+  // session's exercises (targets, ramp step, per-side mode, circuit grouping —
+  // never the sets), remaps circuits, and writes header + rows in one
+  // transaction. An empty session is refused: an empty template is exactly the
+  // silent failure this route replaces.
+  // ----------------------------------------------------------
+  app.post('/templates/from-session', {
+    config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
+    schema: {
+      tags:     ['Templates'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Save a session as a template',
+      description: 'Deep-copies the session\'s exercises and targets into a new template. Sets (actuals) are not copied. Circuits are remapped to fresh ids.',
+      body:     CreateTemplateFromSessionSchema,
+      response: {
+        201: TemplateDetailResponseSchema,
+        400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const body = request.body as z.infer<typeof CreateTemplateFromSessionSchema>
+
+    try {
+      const source = await db.query.sessions.findFirst({
+        where: and(eq(sessions.id, body.sessionId), eq(sessions.trainerId, request.trainer.trainerId)),
+        with:  { sessionExercises: { orderBy: sessionExercises.orderIndex } },
+      })
+      if (!source) return reply.status(404).send({ error: 'Session not found' })
+      if (!source.sessionExercises.length) {
+        return reply.status(400).send({ error: 'Session has no exercises to save' })
+      }
+
+      const templateId = await db.transaction(async (tx) => {
+        const [created] = await tx.insert(templates).values({
+          trainerId:   request.trainer.trainerId,
+          name:        body.name,
+          type:        'session',
+          description: body.description ?? null,
+        }).returning()
+        if (!created) throw new Error('Template header insert returned no row')
+
+        const remap = createCircuitRemapper()
+        await tx.insert(templateExercises).values(
+          source.sessionExercises.map((se) => toTemplateExerciseRow(se, created.id, remap)),
+        )
+        return created.id
+      })
+
+      const result = await loadTemplateDetail(templateId)
+      if (!result) return reply.status(500).send({ error: 'Failed to save template' })
+      return reply.status(201).send(serializeDates(result))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to save template' })
     }
   })
 
@@ -386,11 +438,13 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
         targetReps:            body.targetReps            ?? null,
         targetRepsPerSet:      body.targetRepsPerSet      ?? null,
         targetWeight:          body.targetWeight          ?? null,
+        targetWeightStep:      body.targetWeightStep      ?? null,
         targetWeightUnit:      body.targetWeightUnit ?? 'lbs',
         targetDurationSeconds: body.targetDurationSeconds ?? null,
         targetDistance:        body.targetDistance        ?? null,
         targetIntensity:       body.targetIntensity       ?? null,
         notes:                 body.notes                 ?? null,
+        trackPerSide:          body.trackPerSide          ?? null,
       }).returning()
 
       if (!ex) return reply.status(500).send({ error: 'Failed to add exercise' })
@@ -416,7 +470,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
       tags: ['Templates'],
       security: [{ bearerAuth: [] }],
       summary: 'Create a circuit in a template',
-      description: 'Groups exercises into a circuit performed round-major (interwoven). `rounds` becomes each member\'s target sets; shared reps/weight apply to all. All exercises must share a workout type (v1). Templates do not carry a weight ramp — `targetWeightStep` is not accepted.',
+      description: 'Groups exercises into a circuit performed round-major (interwoven). `rounds` becomes each member\'s target sets; shared reps/weight apply to all. All exercises must share a workout type (v1). `targetWeightStep` applies a shared ramp to every member.',
       params: UuidParamSchema,
       body: CreateTemplateCircuitSchema,
       response: {
@@ -473,6 +527,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
         targetSets:       body.rounds,
         targetReps:       body.targetReps  ?? null,
         targetWeight:     body.targetWeight ?? null,
+        targetWeightStep: body.targetWeightStep ?? null,
         targetWeightUnit: body.targetWeightUnit,
         notes:            body.notes ?? null,
       }))

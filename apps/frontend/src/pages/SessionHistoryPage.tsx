@@ -24,6 +24,7 @@ import { formatDuration, formatDateLong }       from '@/lib/formatters'
 import { Spinner }                              from '@/components/ui/Spinner'
 import { ErrorState }                          from '@/components/ui/ErrorState'
 import { DeleteSessionButton }                 from '@/components/session/DeleteSessionButton'
+import { SaveAsTemplateButton }                from '@/components/session/SaveAsTemplateButton'
 
 
 // ── Score bar ─────────────────────────────────────────────────────────────────
@@ -145,11 +146,13 @@ export default function SessionHistoryPage(): React.JSX.Element {
               per-exercise history rows, so it needs the same affordance as the
               panel — otherwise delete exists on some routes to a session but not
               others. */}
-          <DeleteSessionButton
-            session={{ id: session.id, clientId: session.clientId }}
-            onDeleted={handleBack}
-            className="shrink-0"
-          />
+          <div className="flex items-center gap-2 shrink-0">
+            <SaveAsTemplateButton session={session} />
+            <DeleteSessionButton
+              session={{ id: session.id, clientId: session.clientId }}
+              onDeleted={handleBack}
+            />
+          </div>
         </div>
 
         {/* Stats row */}

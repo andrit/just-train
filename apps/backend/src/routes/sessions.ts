@@ -21,8 +21,9 @@ import { routeLog } from '../lib/logger'
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
 import { idempotencyPreHandler, idempotencyOnSend } from '../lib/idempotency'
-import { db, sessions, sessionExercises, sets, clients, exercises, templateExercises } from '../db'
+import { db, sessions, sessionExercises, sets, clients, exercises, templates, templateExercises } from '../db'
 import { eq, and, desc, inArray } from 'drizzle-orm'
+import { createCircuitRemapper, toSessionExerciseRow } from '../lib/exerciseCopy'
 import { deriveRecordSetIds, type RecordSetIds } from '../lib/prRecords'
 import { updateChallengesForSet, updateChallengesForSessionComplete } from '../services/challenge.service'
 import { logSyncWrite } from '../services/syncLog.service'
@@ -120,6 +121,43 @@ async function computeSessionRecords(clientId: string, exerciseIds: string[]): P
     .innerJoin(sessions, eq(sessionExercises.sessionId, sessions.id))
     .where(and(eq(sessions.clientId, clientId), inArray(sessionExercises.exerciseId, ids)))
   return deriveRecordSetIds(rows)
+}
+
+// ── Template application — read side ───────────────────────────────────────
+// template_exercises → session_exercises is flat, ordered by the template's
+// orderIndex. The template must belong to the trainer (a template id is not a
+// capability) — null means "not found / not yours". Per-side for rows the
+// template leaves unspecified (null) is resolved from each exercise's laterality.
+interface TemplatePlan {
+  rows:          (typeof templateExercises.$inferSelect)[]
+  unilateralIds: ReadonlySet<string>
+}
+const EMPTY_PLAN: TemplatePlan = { rows: [], unilateralIds: new Set() }
+
+async function loadTemplatePlan(templateId: string, trainerId: string): Promise<TemplatePlan | null> {
+  const template = await db.query.templates.findFirst({
+    where:   and(eq(templates.id, templateId), eq(templates.trainerId, trainerId)),
+    columns: { id: true },
+  })
+  if (!template) return null
+
+  const rows = await db.query.templateExercises.findMany({
+    where:   eq(templateExercises.templateId, templateId),
+    orderBy: templateExercises.orderIndex,
+  })
+
+  // One laterality lookup for the whole plan, not one per row.
+  const exIds = [...new Set(rows.map((te) => te.exerciseId))]
+  const lateralityRows = exIds.length
+    ? await db.query.exercises.findMany({
+        where:   inArray(exercises.id, exIds),
+        columns: { id: true, laterality: true },
+      })
+    : []
+  const unilateralIds = new Set(
+    lateralityRows.filter((e) => e.laterality === 'unilateral').map((e) => e.id),
+  )
+  return { rows, unilateralIds }
 }
 
 export async function sessionRoutes(app: FastifyInstance): Promise<void> {
@@ -238,12 +276,13 @@ This is the primary payload for the active workout view — loaded once when the
       description: `Creates a new training session for a client.
 
 **Two creation modes:**
-- **Planned (pre-built):** Provide a \`templateId\` and the session is pre-populated with workouts and exercises from the template. Status starts as \`planned\`.
-- **Live (as-you-go):** Omit \`templateId\` and start with an empty session. Add workouts and exercises as the training happens.`,
+- **Planned (pre-built):** Provide a \`templateId\` (must belong to you) and the session is pre-populated with the template's exercises and targets. Status starts as \`planned\`.
+- **Live (as-you-go):** Omit \`templateId\` and start with an empty session. Add exercises as the training happens.`,
       body: CreateSessionSchema,
       response: {
         201: SessionSummaryResponseSchema,
         400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
@@ -251,76 +290,36 @@ This is the primary payload for the active workout view — loaded once when the
     const body = request.body as z.infer<typeof CreateSessionSchema>
 
     try {
-      const [newSession] = await db
-        .insert(sessions)
-        .values({
-          ...body,
-          templateId: body.templateId ?? null,
-          trainerId:  request.trainer.trainerId,
-          status:     'planned',
-          startTime:  body.startTime ? new Date(body.startTime) : null,
-        })
-        .returning()
+      // ── Resolve the template plan first (reads only) ─────────────────────
+      const plan = body.templateId
+        ? await loadTemplatePlan(body.templateId, request.trainer.trainerId)
+        : EMPTY_PLAN
+      if (!plan) return reply.status(404).send({ error: 'Template not found' })
 
-      if (!newSession) {
-        return reply.status(500).send({ error: 'Failed to create session' })
-      }
-
-      // ── Apply template if provided ───────────────────────────────────────
-      // template_exercises → session_exercises (flat, ordered by template orderIndex)
-      // workoutType is copied from the template exercise record at add time.
-      if (body.templateId) {
-        const templateData = await db.query.templateExercises.findMany({
-          where:   eq(templateExercises.templateId, body.templateId),
-          orderBy: templateExercises.orderIndex,
-        })
-
-        // Per-side default inherited from each exercise's laterality (v1: templates
-        // carry no per-side field of their own). One lookup, not one per row.
-        const exIds = [...new Set(templateData.map((te) => te.exerciseId))]
-        const lateralityRows = exIds.length
-          ? await db.query.exercises.findMany({
-              where:   inArray(exercises.id, exIds),
-              columns: { id: true, laterality: true },
-            })
-          : []
-        const unilateralIds = new Set(
-          lateralityRows.filter((e) => e.laterality === 'unilateral').map((e) => e.id),
-        )
-
-        // Remap circuit grouping: each distinct template circuitId → one fresh
-        // circuitId for THIS session, so applied sessions have independent circuits
-        // (members that shared a group in the template still share one here).
-        const circuitIdMap = new Map<string, string>()
-        const sessionCircuitId = (templateCircuitId: string | null): string | null => {
-          if (!templateCircuitId) return null
-          const existing = circuitIdMap.get(templateCircuitId)
-          if (existing) return existing
-          const fresh = randomUUID()
-          circuitIdMap.set(templateCircuitId, fresh)
-          return fresh
-        }
-
-        for (const te of templateData) {
-          await db.insert(sessionExercises).values({
-            sessionId:             newSession.id,
-            exerciseId:            te.exerciseId,
-            workoutType:           te.workoutType as never,
-            orderIndex:            te.orderIndex,
-            circuitId:             sessionCircuitId(te.circuitId),
-            trackPerSide:          unilateralIds.has(te.exerciseId),
-            targetSets:            te.targetSets            ?? null,
-            targetReps:            te.targetReps            ?? null,
-            targetRepsPerSet:      te.targetRepsPerSet      ?? null,
-            targetWeight:          te.targetWeight          ?? null,
-            targetWeightUnit:      te.targetWeightUnit,
-            targetDurationSeconds: te.targetDurationSeconds ?? null,
-            targetDistance:        te.targetDistance        ?? null,
-            targetIntensity:       te.targetIntensity       ?? null,
-            notes:                 te.notes                 ?? null,
+      // ── Write session + applied plan as one unit ─────────────────────────
+      // A failed row insert must not leave a session that looks planned but is
+      // empty. Circuit ids are remapped so each applied session owns its groups.
+      const newSession = await db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(sessions)
+          .values({
+            ...body,
+            templateId: body.templateId ?? null,
+            trainerId:  request.trainer.trainerId,
+            status:     'planned',
+            startTime:  body.startTime ? new Date(body.startTime) : null,
           })
+          .returning()
+        if (!created) throw new Error('Session insert returned no row')
+
+        if (plan.rows.length) {
+          const remap = createCircuitRemapper()
+          await tx.insert(sessionExercises).values(
+            plan.rows.map((te) => toSessionExerciseRow(te, created.id, remap, plan.unilateralIds)),
+          )
         }
-      }
+        return created
+      })
       // ── End template application ─────────────────────────────────────────
 
       // Fetch the client for the response (schema requires it)

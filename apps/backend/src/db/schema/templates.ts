@@ -9,7 +9,7 @@
 // trainer adjusts targets if needed → records actuals on the day.
 // ------------------------------------------------------------
 
-import { pgTable, uuid, text, integer, real, timestamp, pgEnum, index } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, real, timestamp, pgEnum, index, boolean } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { IntensityEnum, TemplateTypeEnum } from '@trainer-app/shared'
 import { trainers, weightUnitEnum } from './trainers'
@@ -67,11 +67,20 @@ export const templateExercises = pgTable('template_exercises', {
   targetReps:            integer('target_reps'),
   targetRepsPerSet:      text('target_reps_per_set'),
   targetWeight:          real('target_weight'),
+  // Per-set weight increment for a live ramp — mirrors session_exercises. Only the
+  // start (targetWeight) and the step are stored; per-set values are computed live.
+  targetWeightStep:      real('target_weight_step'),
   targetWeightUnit:      weightUnitEnum('target_weight_unit').notNull().default('lbs'),
   targetDurationSeconds: integer('target_duration_seconds'),
   targetDistance:        real('target_distance'),
   targetIntensity:       intensityEnum('target_intensity'),
   notes:                 text('notes'),
+
+  // Per-side input mode, tri-state. NULL = inherit from the exercise's laterality
+  // when applied (what the template builder produces); true/false = explicit,
+  // captured when a session is saved as a template. Nullable so existing rows
+  // keep inheriting — a NOT NULL default would flip every unilateral exercise.
+  trackPerSide:          boolean('track_per_side'),
 }, (t) => ({
   templateIdIdx: index('template_exercises_template_id_idx').on(t.templateId),
   exerciseIdIdx: index('template_exercises_exercise_id_idx').on(t.exerciseId),

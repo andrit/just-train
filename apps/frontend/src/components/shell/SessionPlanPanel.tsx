@@ -33,10 +33,9 @@ import {
 import { AddBlockSheet }                         from '@/components/session/AddBlockSheet'
 import { CircuitBuilderSheet }                   from '@/components/session/CircuitBuilderSheet'
 import { Spinner }                               from '@/components/ui/Spinner'
-import { NamePromptModal }                       from '@/components/ui/NamePromptModal'
 import { SortableWorkoutList }                       from '@/components/session/SortableWorkoutList'
+import { SaveAsTemplateButton }                  from '@/components/session/SaveAsTemplateButton'
 import { TemplatePickerSheet }                   from '@/components/templates/TemplatePickerSheet'
-import { useCreateTemplate }                     from '@/lib/queries/templates'
 import { toast }                                 from '@/store/toastStore'
 
 interface SessionPlanPanelProps {
@@ -65,27 +64,6 @@ export function SessionPlanPanel({
   const executeSession = useExecuteSession()
   const updateName     = useUpdateSessionName()
   const discardSession = useDiscardSession()
-  const createTemplate = useCreateTemplate()
-
-  // ── Save current session plan as a template ───────────────────────────────
-  // Opens name prompt — then saves and shows toast on success
-  const handleSaveAsTemplate = (): void => {
-    if (!session || !(session.sessionExercises ?? []).length) return
-    setNamePromptOpen(true)
-  }
-
-  const handleSaveAsTemplateConfirm = async (name: string): Promise<void> => {
-    setNamePromptOpen(false)
-    setSavingAsTemplate(true)
-    try {
-      await createTemplate.mutateAsync({ name })
-      toast.success('Template saved!')
-    } catch {
-      toast.error('Failed to save template')
-    } finally {
-      setSavingAsTemplate(false)
-    }
-  }
 
   // ── State ─────────────────────────────────────────────────────────────────
 
@@ -98,8 +76,6 @@ export function SessionPlanPanel({
   const [addBlockOpen,  setAddBlockOpen]  = useState(false)
   const [circuitOpen,   setCircuitOpen]   = useState(false)
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false)
-  const [namePromptOpen,     setNamePromptOpen]     = useState(false)
-  const [savingAsTemplate,   setSavingAsTemplate]   = useState(false)
   const [error,              setError]              = useState<string | null>(null)
   const [creating,           setCreating]           = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
@@ -267,30 +243,9 @@ export function SessionPlanPanel({
                   Discard
                 </button>
 
-                {/* Save as template */}
-                {sessionId && sessionExercises.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleSaveAsTemplate}
-                    disabled={savingAsTemplate}
-                    className={cn(
-                      'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium',
-                      'border border-surface-border text-gray-400',
-                      'hover:border-command-blue/40 hover:text-command-blue',
-                      interactions.button.base,
-                      interactions.button.press,
-                    )}
-                  >
-                    {savingAsTemplate ? <Spinner size="sm" /> : (
-                      <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
-                        <path d="M3 3h7l3 3v7a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M5 3v4h6V3" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M4 10h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                    )}
-                    Save as template
-                  </button>
-                )}
+                {/* Save as template — shared with the review panel / history page;
+                    renders nothing until the session has exercises */}
+                {session && <SaveAsTemplateButton session={session} />}
 
                 {/* Save Plan — always available once session is created in DB */}
                 {sessionId && (
@@ -592,17 +547,6 @@ export function SessionPlanPanel({
           }
         }}
         loading={creating}
-      />
-
-      <NamePromptModal
-        open={namePromptOpen}
-        title="Name this template"
-        placeholder="e.g. Push Day A, Full Body Strength…"
-        initialValue={session?.name ?? ''}
-        confirmLabel="Save template"
-        saving={savingAsTemplate}
-        onConfirm={handleSaveAsTemplateConfirm}
-        onCancel={() => setNamePromptOpen(false)}
       />
     </div>
   )

@@ -336,11 +336,10 @@ export const CreateCircuitSchema = z.object({
 })
 export type CreateCircuitInput = z.infer<typeof CreateCircuitSchema>
 
-// Same as CreateCircuitSchema, minus targetWeightStep — template_exercises has no
-// weight-step column yet, so a template circuit can't carry a ramp. Omitting the
-// field (rather than accepting and dropping it) keeps the API honest: a caller that
-// tries to send a step fails typecheck instead of losing data silently.
-export const CreateTemplateCircuitSchema = CreateCircuitSchema.omit({ targetWeightStep: true })
+// Template circuits accept the same input as session circuits. template_exercises
+// now carries target_weight_step, so a template circuit can carry a ramp; kept as a
+// named schema so the two can diverge again without touching call sites.
+export const CreateTemplateCircuitSchema = CreateCircuitSchema
 export type CreateTemplateCircuitInput = z.infer<typeof CreateTemplateCircuitSchema>
 
 // ============================================================
@@ -390,13 +389,23 @@ export const AddTemplateExerciseSchema = z.object({
   targetReps: z.number().int().min(1).optional(),
   targetRepsPerSet: z.string().optional().describe('Comma-delimited per-set rep counts e.g. "10,8,6"'),
   targetWeight: z.number().min(0).optional(),
+  targetWeightStep: z.number().optional().describe('Per-set weight increment for a live ramp. Negatives allowed for deload ramps (matches the session field).'),
   targetWeightUnit: WeightUnitEnum.default('lbs'),
   targetDurationSeconds: z.number().int().min(1).optional(),
   targetDistance: z.number().min(0).optional(),
   targetIntensity: IntensityEnum.optional(),
   notes: z.string().max(1000).optional(),
+  trackPerSide: z.boolean().optional().describe('Explicit per-side input mode. Omit to inherit from the exercise laterality on apply.'),
 })
 export type AddTemplateExerciseInput = z.infer<typeof AddTemplateExerciseSchema>
+
+/** Save a session's exercises as a new template (deep copy of the plan, not the sets). */
+export const CreateTemplateFromSessionSchema = z.object({
+  sessionId:   z.string().uuid(),
+  name:        z.string().min(1).max(150),
+  description: z.string().max(2000).optional(),
+})
+export type CreateTemplateFromSessionInput = z.infer<typeof CreateTemplateFromSessionSchema>
 
 // ============================================================
 // SNAPSHOT MEDIA (v2.12.0) — progress photos on client snapshots

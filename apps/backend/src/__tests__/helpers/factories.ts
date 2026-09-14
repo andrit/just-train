@@ -307,11 +307,13 @@ export function makeTemplateExercise(overrides: Partial<TemplateExercise> = {}):
     targetReps:            8,
     targetRepsPerSet:      null,
     targetWeight:          60,
+    targetWeightStep:      null,
     targetWeightUnit:      'lbs' as const,
     targetDurationSeconds: null,
     targetDistance:        null,
     targetIntensity:       null,
     notes:                 null,
+    trackPerSide:          null,
     ...overrides,
   }
 }

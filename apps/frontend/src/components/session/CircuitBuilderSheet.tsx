@@ -45,8 +45,8 @@ export function CircuitBuilderSheet({
   const createCircuit         = useCreateCircuit()
   const createTemplateCircuit = useCreateTemplateCircuit()
 
-  // Template circuits have no weight-ramp column, so the "+ / set" control is
-  // session-only. `isTemplate` also selects which mutation runs.
+  // `isTemplate` selects which mutation runs; the target controls (incl. the
+  // "+ / set" ramp — template_exercises carries target_weight_step) are shared.
   const isTemplate = templateId != null
   const pending    = isTemplate ? createTemplateCircuit.isPending : createCircuit.isPending
   const submitError = isTemplate ? createTemplateCircuit.isError : createCircuit.isError
@@ -83,33 +83,20 @@ export function CircuitBuilderSheet({
   const handleCreate = (): void => {
     if (!canCreate) return
     const onSuccess = (): void => { reset(); onCreated?.(); onClose() }
-    const targetWeightUnit = weightUnit === 'kg' ? 'kg' : 'lbs'
+    const targetWeightUnit: 'lbs' | 'kg' = weightUnit === 'kg' ? 'kg' : 'lbs'
 
+    const targets = {
+      exerciseIds:      selectedIds,
+      rounds:           rounds ?? 1,
+      targetReps:       reps ?? undefined,
+      targetWeight:     weight ?? undefined,
+      targetWeightStep: weightStep !== 0 ? weightStep : undefined,
+      targetWeightUnit,
+    }
     if (isTemplate && templateId) {
-      createTemplateCircuit.mutate(
-        {
-          templateId,
-          exerciseIds:  selectedIds,
-          rounds:       rounds ?? 1,
-          targetReps:   reps ?? undefined,
-          targetWeight: weight ?? undefined,
-          targetWeightUnit,
-        },
-        { onSuccess },
-      )
+      createTemplateCircuit.mutate({ templateId, ...targets }, { onSuccess })
     } else if (sessionId) {
-      createCircuit.mutate(
-        {
-          sessionId,
-          exerciseIds:      selectedIds,
-          rounds:           rounds ?? 1,
-          targetReps:       reps ?? undefined,
-          targetWeight:     weight ?? undefined,
-          targetWeightStep: weightStep !== 0 ? weightStep : undefined,
-          targetWeightUnit,
-        },
-        { onSuccess },
-      )
+      createCircuit.mutate({ sessionId, ...targets }, { onSuccess })
     }
   }
 
@@ -151,19 +138,17 @@ export function CircuitBuilderSheet({
                 label="Starting weight"
                 suffix={weightUnit}
               />
-              {!isTemplate && (
-                <NumberField
-                  value={weightStep}
-                  onChange={(v) => setWeightStep(v ?? 0)}
-                  min={-500}
-                  max={500}
-                  decimal
-                  label="+ / set"
-                  suffix={weightUnit}
-                />
-              )}
+              <NumberField
+                value={weightStep}
+                onChange={(v) => setWeightStep(v ?? 0)}
+                min={-500}
+                max={500}
+                decimal
+                label="+ / set"
+                suffix={weightUnit}
+              />
             </div>
-            {!isTemplate && weightStep !== 0 && weight != null && (
+            {weightStep !== 0 && weight != null && (
               <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
                 {weightRampSequence(weight, weightStep, rounds ?? 1).join(' · ')} {weightUnit}
               </p>

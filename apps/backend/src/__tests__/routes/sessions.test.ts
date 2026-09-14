@@ -22,26 +22,31 @@ vi.mock('../../db', () => {
     limit:     vi.fn().mockReturnThis(),
     returning: vi.fn().mockResolvedValue([]),
   }
-  return {
-    db: {
-      query: {
-        clients:  { findFirst: vi.fn().mockResolvedValue(undefined) },
-        sessions: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
-        exercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
-        sessionExercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
-        templateExercises: { findMany: vi.fn().mockResolvedValue([]) },
-      },
-      insert:      vi.fn().mockReturnValue(chain),
-      update:      vi.fn().mockReturnValue(chain),
-      delete:      vi.fn().mockReturnValue(chain),
-      select:      vi.fn().mockReturnValue(chain),
-      transaction: vi.fn().mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(chain)),
+  const db: Record<string, unknown> = {
+    query: {
+      clients:  { findFirst: vi.fn().mockResolvedValue(undefined) },
+      sessions: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
+      exercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
+      sessionExercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
+      templates: { findFirst: vi.fn().mockResolvedValue(undefined) },
+      templateExercises: { findMany: vi.fn().mockResolvedValue([]) },
     },
+    insert:      vi.fn().mockReturnValue(chain),
+    update:      vi.fn().mockReturnValue(chain),
+    delete:      vi.fn().mockReturnValue(chain),
+    select:      vi.fn().mockReturnValue(chain),
+  }
+  // A transaction hands the callback the same client surface (insert/update/…),
+  // so per-call assertions on db.insert().values see writes made via tx.
+  db.transaction = vi.fn().mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(db))
+  return {
+    db,
     clients:         {},
     sessions:        {},
     sessionExercises: {},
     sets:            {},
     exercises:       {},
+    templates:       {},
     templateExercises: {},
   }
 })
@@ -164,6 +169,7 @@ describe('POST /sessions', () => {
     const EX_B = 'ffffffff-3333-3333-3333-ffffffffffff'
     const EX_C = 'ffffffff-4444-4444-4444-ffffffffffff'
 
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TPL_ID } as never)
     vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([makeSession()])
     vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([
       makeTemplateExercise({ exerciseId: EX_A, circuitId: TPL_CID, orderIndex: 0 }),
@@ -182,11 +188,9 @@ describe('POST /sessions', () => {
       payload: { ...validSessionBody, templateId: TPL_ID },
     })
     expect(res.statusCode).toBe(201)
+    expect(db.transaction).toHaveBeenCalledTimes(1)
 
-    // Collect the per-exercise session_exercise inserts (single-object .values with sessionId + exerciseId).
-    const seValues = vi.mocked(db.insert({} as never).values).mock.calls
-      .map((c) => c[0] as any)
-      .filter((v) => v && !Array.isArray(v) && v.sessionId && v.exerciseId)
+    const seValues = appliedRows(db)
     expect(seValues).toHaveLength(3)
 
     const byEx = Object.fromEntries(seValues.map((v) => [v.exerciseId, v]))
@@ -195,7 +199,56 @@ describe('POST /sessions', () => {
     expect(byEx[EX_A].circuitId).not.toBe(TPL_CID)            // fresh, not the template's id
     expect(byEx[EX_C].circuitId).toBeNull()                   // standalone stays null
   })
+
+  it('returns 404 when the template is not found or belongs to another trainer', async () => {
+    const { db } = await import('../../db')
+    const res = await app.inject({
+      method: 'POST', url: '/api/v1/sessions', headers: authHeader(),
+      payload: { ...validSessionBody, templateId: 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa' },
+    })
+    expect(res.statusCode).toBe(404)
+    expect(db.insert).not.toHaveBeenCalled()   // no orphan session for a template we cannot see
+  })
+
+  it('carries the ramp step and resolves per-side: explicit wins, null inherits laterality', async () => {
+    const { db } = await import('../../db')
+    const TPL_ID = 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa'
+    const UNI = 'ffffffff-0000-0000-0000-ffffffffffff'
+    const BI  = 'ffffffff-3333-3333-3333-ffffffffffff'
+
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TPL_ID } as never)
+    vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([makeSession()])
+    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([
+      makeTemplateExercise({ exerciseId: UNI, orderIndex: 0, trackPerSide: null,  targetWeightStep: 5 }),  // inherit → true
+      makeTemplateExercise({ exerciseId: UNI, orderIndex: 1, trackPerSide: false }),                       // explicit "together"
+      makeTemplateExercise({ exerciseId: BI,  orderIndex: 2, trackPerSide: null }),                        // inherit → false
+    ] as never)
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      { id: UNI, laterality: 'unilateral' },
+      { id: BI,  laterality: 'bilateral' },
+    ] as never)
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+
+    const res = await app.inject({
+      method: 'POST', url: '/api/v1/sessions', headers: authHeader(),
+      payload: { ...validSessionBody, templateId: TPL_ID },
+    })
+    expect(res.statusCode).toBe(201)
+
+    const rows = appliedRows(db)
+    expect(rows.map((r) => r.trackPerSide)).toEqual([true, false, false])
+    expect(rows[0].targetWeightStep).toBe(5)
+  })
 })
+
+// The applied plan goes in as one multi-row insert — the only array-valued .values call.
+function appliedRows(db: typeof import('../../db')['db']): any[] {
+  const arrays = vi.mocked(db.insert({} as never).values).mock.calls
+    .map((c) => c[0] as unknown)
+    .filter((v): v is any[] => Array.isArray(v))
+  expect(arrays).toHaveLength(1)
+  return arrays[0] ?? []
+}
 
 // ── PATCH /sessions/:id ───────────────────────────────────────────────────────
 // Route uses db.update().where().returning() — no ownership findFirst.

@@ -346,6 +346,10 @@ Removed nested `overflow-y-auto` wrapper in `ExercisesPage` BottomSheet usage. S
 When: Premium trainer feature, separate version
 What: Circle the knee caving in, draw the bar path on a form check clip. Overlay drawing tools on the `MediaPlaybackModal`. Trainer-only tier feature.
 
+### Template builder — bracket circuit members + reorder contiguity
+When: Next template-builder UX pass.
+What: Circuit members render flat in `TemplateBuilderSheet`'s `SortableExerciseList`, and its drag-reorder can drop a standalone exercise between members, splitting contiguity so a read view shows two brackets. Sessions have the same accepted hazard. Apply/fork/save-as-template are unaffected (they copy `circuitId` + `orderIndex` as-is). Note: the template builder's per-exercise add form does not yet expose the `+ / set` ramp or the per-side mode (both columns exist as of "Save as template"; the circuit builder exposes the ramp) — authoring is the follow-up, carry-through is done.
+
 ### Challenge Templates
 When: After observing what trainers and athletes actually create
 What: Pre-built challenge templates ("30-day pull-up challenge"). Build the primitive first, template the patterns that emerge from real usage.

@@ -452,10 +452,12 @@ export const TemplateExerciseResponseSchema = z.object({
   targetReps:            z.number().int().nullable(),
   targetRepsPerSet:      z.string().nullable().describe('Comma-delimited per-set rep counts e.g. "10,8,6"'),
   targetWeight:          z.number().nullable(),
+  targetWeightStep:      z.number().nullable().default(null).describe('Per-set weight increment for a live ramp. Mirrors the session field; carried through save-as-template, fork and apply.'),
   targetWeightUnit:      WeightUnitEnum,
   targetDurationSeconds: z.number().int().nullable(),
   targetDistance:        z.number().nullable(),
   notes:                 z.string().nullable(),
+  trackPerSide:          z.boolean().nullable().default(null).describe('Per-side input mode, tri-state. null = inherit from the exercise laterality on apply; true/false = explicit (captured from a session).'),
 })
 
 export const TemplateSummaryResponseSchema = z.object({

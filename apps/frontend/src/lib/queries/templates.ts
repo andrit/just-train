@@ -13,6 +13,7 @@ import type {
   TemplateDetailResponse,
   TemplateSummaryResponse,
   CreateTemplateCircuitInput,
+  CreateTemplateFromSessionInput,
 } from '@trainer-app/shared'
 
 export const templateKeys = {
@@ -54,6 +55,21 @@ export function useCreateTemplate() {
   return useMutation({
     mutationFn: (body: CreateTemplateInput) =>
       apiClient.post<TemplateSummaryResponse>('/templates', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: templateKeys.all() }),
+  })
+}
+
+// ── Save a session as a template ──────────────────────────────────────────────
+// Deep-copies the session's exercises + targets server-side in one request
+// (POST /templates/from-session). Never composed client-side from
+// createTemplate + addExercise: that is N+1 round trips and a half-saved
+// template on any mid-way failure.
+
+export function useCreateTemplateFromSession() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateTemplateFromSessionInput) =>
+      apiClient.post<TemplateDetailResponse>('/templates/from-session', body),
     onSuccess: () => qc.invalidateQueries({ queryKey: templateKeys.all() }),
   })
 }

@@ -36,6 +36,13 @@
       "when": 1786029738333,
       "tag": "0004_flowery_red_wolf",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789399358974,
+      "tag": "0005_wealthy_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

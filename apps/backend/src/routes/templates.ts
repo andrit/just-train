@@ -559,7 +559,29 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
   }, async (request, reply) => {
     const { id } = request.params as z.infer<typeof UuidParamSchema>
     try {
-      await db.delete(templateExercises).where(eq(templateExercises.id, id))
+      // Ownership through the template (a template exercise has no trainer_id).
+      // Found in the Phase 19 ownership audit: this deleted by bare id.
+      const row = await db.query.templateExercises.findFirst({
+        where: eq(templateExercises.id, id),
+        with:  { template: { columns: { trainerId: true } } },
+      })
+      if (!row || row.template.trainerId !== request.trainer.trainerId) {
+        return reply.status(404).send({ error: 'Template exercise not found' })
+      }
+
+      // Delete + demote a now-lonely circuit survivor together (same rule as
+      // sessions: a circuit is ≥2 members).
+      await db.transaction(async (tx) => {
+        await tx.delete(templateExercises).where(eq(templateExercises.id, id))
+        if (!row.circuitId) return
+        const members = await tx.query.templateExercises.findMany({
+          where:   and(eq(templateExercises.templateId, row.templateId), eq(templateExercises.circuitId, row.circuitId)),
+          columns: { id: true },
+        })
+        if (members.length < 2) {
+          await tx.update(templateExercises).set({ circuitId: null }).where(eq(templateExercises.circuitId, row.circuitId))
+        }
+      })
       return reply.status(204).send()
     } catch (error) {
       ;routeLog(app).error(error)

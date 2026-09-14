@@ -5,9 +5,10 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
 import { buildSessionTestApp } from '../helpers/buildApp'
 import {
-  makeClient, makeSession, makeSessionExercise, makeTemplateExercise,
+  makeClient, makeSession, makeSessionExercise, makeTemplateExercise, makeSet,
   validSessionBody,
   TEST_TRAINER_ID, TEST_SESSION_ID, TEST_UNKNOWN_ID, TEST_EXERCISE_ID,
+  TEST_CLIENT_ID, TEST_SESSION_EXERCISE_ID,
 } from '../helpers/factories'
 import { generateAccessToken } from '../../services/auth.service'
 
@@ -28,6 +29,7 @@ vi.mock('../../db', () => {
       sessions: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
       exercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
       sessionExercises: { findFirst: vi.fn().mockResolvedValue(undefined), findMany: vi.fn().mockResolvedValue([]) },
+      sets:     { findFirst: vi.fn().mockResolvedValue(undefined) },
       templates: { findFirst: vi.fn().mockResolvedValue(undefined) },
       templateExercises: { findMany: vi.fn().mockResolvedValue([]) },
     },
@@ -337,6 +339,7 @@ describe('POST /sessions/:id/exercises — trackPerSide', () => {
 
   async function addExercise(laterality: 'bilateral' | 'unilateral', body: Record<string, unknown> = {}) {
     const { db } = await import('../../db')
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce(makeSession())   // owned session
     vi.mocked(db.query.exercises.findFirst).mockResolvedValueOnce({ workoutType: 'resistance', laterality } as never)
     // returning() echoes a row; the assertion is on what was passed to values()
     vi.mocked(db.insert({} as never).values({} as never).returning)
@@ -518,5 +521,142 @@ describe('POST /sessions/:id/circuits', () => {
       payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
     })
     expect(res.statusCode).toBe(404)
+  })
+})
+
+// ── Ownership — the session tree (Phase 19 security gate) ─────────────────────
+// Session-exercises and sets have no trainer_id; they belong to whoever owns the
+// session. Before this audit, seven routes mutated by bare id. Each case below
+// seeds a row owned by ANOTHER trainer and proves the caller gets 404 with no
+// write. The mocked db cannot evaluate WHERE clauses, so these tests prove the
+// route *resolves ownership before writing*; the SQL-level proof is the
+// real-database matrix (Phase 19 item 5b).
+
+const OTHER_TRAINER = '99999999-9999-9999-9999-999999999999'
+
+function seOwnedBy(trainerId: string, overrides: Partial<ReturnType<typeof makeSessionExercise>> = {}) {
+  return { ...makeSessionExercise(overrides), session: { id: TEST_SESSION_ID, trainerId, clientId: TEST_CLIENT_ID } }
+}
+function setOwnedBy(trainerId: string) {
+  return { ...makeSet(), sessionExercise: { ...makeSessionExercise(), session: { trainerId } } }
+}
+
+describe('Ownership — session tree', () => {
+  let app: Awaited<ReturnType<typeof buildSessionTestApp>>
+  beforeAll(async () => { app = await buildSessionTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('POST /sessions/:id/exercises → 404 for another trainer\'s session, nothing inserted', async () => {
+    const { db } = await import('../../db')
+    // ownedSession() scopes by trainer in its WHERE; the mock models "no row for this trainer".
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce(undefined)
+    const res = await app.inject({ method: 'POST', url: `/api/v1/sessions/${TEST_SESSION_ID}/exercises`,
+      headers: authHeader(), payload: { exerciseId: TEST_EXERCISE_ID, orderIndex: 0 } })
+    expect(res.statusCode).toBe(404)
+    expect(db.insert).not.toHaveBeenCalled()
+  })
+
+  it('PATCH /session-exercises/:id → 404 when its session belongs to another trainer, no update', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessionExercises.findFirst).mockResolvedValueOnce(seOwnedBy(OTHER_TRAINER) as never)
+    const res = await app.inject({ method: 'PATCH', url: `/api/v1/session-exercises/${TEST_SESSION_EXERCISE_ID}`,
+      headers: authHeader(), payload: { trackPerSide: true } })
+    expect(res.statusCode).toBe(404)
+    expect(db.update).not.toHaveBeenCalled()
+  })
+
+  it('DELETE /session-exercises/:id → 404 when its session belongs to another trainer, no delete', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessionExercises.findFirst).mockResolvedValueOnce(seOwnedBy(OTHER_TRAINER) as never)
+    const res = await app.inject({ method: 'DELETE', url: `/api/v1/session-exercises/${TEST_SESSION_EXERCISE_ID}`, headers: authHeader() })
+    expect(res.statusCode).toBe(404)
+    expect(db.delete).not.toHaveBeenCalled()
+    expect(db.transaction).not.toHaveBeenCalled()
+  })
+
+  it('POST /session-exercises/:id/sets → 404 when its session belongs to another trainer, no insert', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessionExercises.findFirst).mockResolvedValueOnce(seOwnedBy(OTHER_TRAINER) as never)
+    const res = await app.inject({ method: 'POST', url: `/api/v1/session-exercises/${TEST_SESSION_EXERCISE_ID}/sets`,
+      headers: authHeader(), payload: { setNumber: 1, reps: 10, weight: 100 } })
+    expect(res.statusCode).toBe(404)
+    expect(db.insert).not.toHaveBeenCalled()
+  })
+
+  it('POST /session-exercises/:id/sets → 404 when the session-exercise does not exist (previously inserted anyway)', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessionExercises.findFirst).mockResolvedValueOnce(undefined)
+    const res = await app.inject({ method: 'POST', url: `/api/v1/session-exercises/${TEST_SESSION_EXERCISE_ID}/sets`,
+      headers: authHeader(), payload: { setNumber: 1, reps: 10, weight: 100 } })
+    expect(res.statusCode).toBe(404)
+    expect(db.insert).not.toHaveBeenCalled()
+  })
+
+  it('PATCH /sets/:id → 404 when the set\'s session belongs to another trainer, no update', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sets.findFirst).mockResolvedValueOnce(setOwnedBy(OTHER_TRAINER) as never)
+    const res = await app.inject({ method: 'PATCH', url: `/api/v1/sets/${makeSet().id}`, headers: authHeader(), payload: { reps: 12 } })
+    expect(res.statusCode).toBe(404)
+    expect(db.update).not.toHaveBeenCalled()
+  })
+
+  it('DELETE /sets/:id → 404 when the set\'s session belongs to another trainer, no delete', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sets.findFirst).mockResolvedValueOnce(setOwnedBy(OTHER_TRAINER) as never)
+    const res = await app.inject({ method: 'DELETE', url: `/api/v1/sets/${makeSet().id}`, headers: authHeader() })
+    expect(res.statusCode).toBe(404)
+    expect(db.delete).not.toHaveBeenCalled()
+  })
+
+  it('PATCH /sets/:id → proceeds for the owner', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sets.findFirst).mockResolvedValueOnce(setOwnedBy(TEST_TRAINER_ID) as never)
+    vi.mocked(db.update({} as never).set({} as never).where({} as never).returning).mockResolvedValueOnce([makeSet({ reps: 12 })])
+    vi.mocked(db.update).mockClear()   // the setup line above counts as a call
+    const res = await app.inject({ method: 'PATCH', url: `/api/v1/sets/${makeSet().id}`, headers: authHeader(), payload: { reps: 12 } })
+    expect(res.statusCode).toBe(200)
+    expect(db.update).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ── Circuit auto-ungroup on member delete ─────────────────────────────────────
+
+describe('DELETE /session-exercises/:id — circuit auto-ungroup', () => {
+  let app: Awaited<ReturnType<typeof buildSessionTestApp>>
+  beforeAll(async () => { app = await buildSessionTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const CID = 'cccccccc-0000-0000-0000-cccccccccccc'
+
+  it('demotes the lone survivor when a 2-member circuit loses a member', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessionExercises.findFirst).mockResolvedValueOnce(seOwnedBy(TEST_TRAINER_ID, { circuitId: CID }) as never)
+    vi.mocked(db.query.sessionExercises.findMany).mockResolvedValueOnce([{ id: 'survivor' }] as never)   // after delete: one left
+    const res = await app.inject({ method: 'DELETE', url: `/api/v1/session-exercises/${TEST_SESSION_EXERCISE_ID}`, headers: authHeader() })
+    expect(res.statusCode).toBe(204)
+    expect(db.transaction).toHaveBeenCalledTimes(1)
+    expect(db.delete).toHaveBeenCalledTimes(1)
+    expect(db.update).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(db.update({} as never).set).mock.calls[0]?.[0]).toEqual({ circuitId: null })
+  })
+
+  it('leaves a 3-member circuit intact when one member is removed', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessionExercises.findFirst).mockResolvedValueOnce(seOwnedBy(TEST_TRAINER_ID, { circuitId: CID }) as never)
+    vi.mocked(db.query.sessionExercises.findMany).mockResolvedValueOnce([{ id: 'a' }, { id: 'b' }] as never)
+    const res = await app.inject({ method: 'DELETE', url: `/api/v1/session-exercises/${TEST_SESSION_EXERCISE_ID}`, headers: authHeader() })
+    expect(res.statusCode).toBe(204)
+    expect(db.update).not.toHaveBeenCalled()
+  })
+
+  it('does not touch circuits when a standalone exercise is removed', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessionExercises.findFirst).mockResolvedValueOnce(seOwnedBy(TEST_TRAINER_ID, { circuitId: null }) as never)
+    const res = await app.inject({ method: 'DELETE', url: `/api/v1/session-exercises/${TEST_SESSION_EXERCISE_ID}`, headers: authHeader() })
+    expect(res.statusCode).toBe(204)
+    expect(db.query.sessionExercises.findMany).not.toHaveBeenCalled()
+    expect(db.update).not.toHaveBeenCalled()
   })
 })

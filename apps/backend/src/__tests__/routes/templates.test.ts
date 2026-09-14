@@ -32,7 +32,8 @@ vi.mock('../../db', () => {
         findMany:  vi.fn().mockResolvedValue([]),
       },
       templateExercises: {
-        findMany: vi.fn().mockResolvedValue([]),
+        findFirst: vi.fn().mockResolvedValue(undefined),
+        findMany:  vi.fn().mockResolvedValue([]),
       },
       exercises: {
         findFirst: vi.fn().mockResolvedValue(undefined),
@@ -572,12 +573,52 @@ describe('DELETE /template-exercises/:id', () => {
     expect(res.statusCode).toBe(401)
   })
 
-  it('removes an exercise and returns 204', async () => {
+  it('removes an owned exercise and returns 204', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.templateExercises.findFirst).mockResolvedValueOnce(
+      { ...makeTemplateExercise(), template: { trainerId: TEST_TRAINER_ID } } as never)
     const res = await app.inject({
       method: 'DELETE', url: `/api/v1/template-exercises/${TEST_TEMPLATE_EXERCISE_ID}`,
       headers: authHeader(),
     })
     expect(res.statusCode).toBe(204)
+    expect(db.delete).toHaveBeenCalledTimes(1)
+  })
+
+  // Phase 19 security gate: this route deleted by bare id before.
+  it('returns 404 when the template belongs to another trainer, and deletes nothing', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.templateExercises.findFirst).mockResolvedValueOnce(
+      { ...makeTemplateExercise(), template: { trainerId: '99999999-9999-9999-9999-999999999999' } } as never)
+    const res = await app.inject({
+      method: 'DELETE', url: `/api/v1/template-exercises/${TEST_TEMPLATE_EXERCISE_ID}`,
+      headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(404)
+    expect(db.delete).not.toHaveBeenCalled()
+  })
+
+  it('returns 404 when the exercise does not exist', async () => {
+    const res = await app.inject({
+      method: 'DELETE', url: `/api/v1/template-exercises/${TEST_TEMPLATE_EXERCISE_ID}`,
+      headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('demotes the lone survivor when a 2-member template circuit loses a member', async () => {
+    const { db } = await import('../../db')
+    const CID = 'cccccccc-0000-0000-0000-cccccccccccc'
+    vi.mocked(db.query.templateExercises.findFirst).mockResolvedValueOnce(
+      { ...makeTemplateExercise({ circuitId: CID }), template: { trainerId: TEST_TRAINER_ID } } as never)
+    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([{ id: 'survivor' }] as never)
+    const res = await app.inject({
+      method: 'DELETE', url: `/api/v1/template-exercises/${TEST_TEMPLATE_EXERCISE_ID}`,
+      headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(204)
+    expect(db.transaction).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(db.update({} as never).set).mock.calls[0]?.[0]).toEqual({ circuitId: null })
   })
 })
 

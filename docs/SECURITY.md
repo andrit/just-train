@@ -1,6 +1,6 @@
 # Security Assessment
 
-Reviewed: April 2026. Revisit before v3.0.0 SaaS launch.
+Reviewed: April 2026. Pre-Go-Live gate opened 2026-09-14 (below). Full OWASP pass before v3.0.0.
 
 ---
 
@@ -100,6 +100,19 @@ VitePWA registers the service worker scoped to `/` on the app's origin. It only 
 
 ---
 
+## Pre-Go-Live Security Gate (Phase 19 · opened 2026-09-14)
+
+A lightweight gate before public registration; the full OWASP pass stays a v3.0 gate.
+An item is done when it has a date. Items without one are open.
+
+| # | Check | Status | Evidence |
+|---|---|---|---|
+| 4a | **Ownership matrix** — every parameterised route resolves the caller's ownership before acting | ✅ 2026-09-14 (static guard) · ⬜ real-DB matrix | Audit found **7 IDORs** (all in the session/template exercise tree — see What Was Fixed). Source-level guard `__tests__/security/ownership-guard.test.ts` fails on any route that never uses `request.trainer.trainerId` in a scoping shape; it failed on all seven before the fix. The SQL-level proof (seed trainer A, call as B, expect 404, against real Postgres) is still to build. |
+| 4b | `pnpm audit` — no high/critical | ⬜ | run from repo root; record date + count here |
+| 4c | Production surface — Swagger UI + `/documentation/json` absent, CSP + `Cache-Control: no-store` on `/api/*`, no debug routes | ⬜ | `curl -sI https://just-train-production.up.railway.app/documentation` → expect 404; `curl -sI …/api/v1/health` shows the headers |
+| 4d | Secrets hygiene — rotate Railway Postgres password; `.env` never committed | ⬜ | `git log --all --diff-filter=A -- '*.env'` must be empty |
+| 4e | Validation-before-auth (unauthenticated callers get field-level 400s) — decide: leave (documented) or `authenticate` as `onRequest` | ⬜ designer decision | |
+
 ## Roadmap
 
 | Version | Security Work |
@@ -114,6 +127,10 @@ VitePWA registers the service worker scoped to `/` on the app's origin. It only 
 ---
 
 ## What Was Fixed
+
+### 2026-09-14 — seven IDORs in the session/template exercise tree (Phase 19 gate)
+Session-exercises and sets carry no `trainer_id`; they belong to whoever owns the session. Seven routes mutated them by bare `id` with no ownership resolution, so any authenticated trainer could: add an exercise to anyone's session (`POST /sessions/:id/exercises`), edit or delete anyone's session-exercise (`PATCH`/`DELETE /session-exercises/:id`), **log sets onto anyone's session-exercise** (`POST /session-exercises/:id/sets` — it also inserted when the parent row did not exist), edit or delete anyone's set (`PATCH`/`DELETE /sets/:id`), and delete anyone's template exercise (`DELETE /template-exercises/:id`). Fixed with three resolvers in `routes/sessions.ts` — `ownedSession`, `ownedSessionExercise`, `ownedSet` — that load through the aggregate root and return 404 (never 403: no existence leak), plus a relational load on the template route. Circuit auto-ungroup (a circuit is ≥ 2 members) now runs in the same transaction as both deletes. Found by the source-level ownership guard, which is now a permanent test. Two earlier IDORs of the same class were found by reading code: `POST /templates/:id/fork` (2026-08) and template apply in `POST /sessions` (2026-09-14).
+
 
 | Date | Fix |
 |---|---|

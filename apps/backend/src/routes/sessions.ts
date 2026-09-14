@@ -160,6 +160,52 @@ async function loadTemplatePlan(templateId: string, trainerId: string): Promise<
   return { rows, unilateralIds }
 }
 
+// ── Ownership through the aggregate root ────────────────────────────────────
+// A session-exercise or a set has no trainer_id of its own; it belongs to
+// whoever owns its session. Every route that takes one of their ids resolves
+// ownership here first and returns 404 (not 403 — no existence leak) if the
+// caller is not that trainer. Found in the Phase 19 ownership audit: seven
+// routes mutated by bare id.
+async function ownedSession(sessionId: string, trainerId: string) {
+  return db.query.sessions.findFirst({
+    where:   and(eq(sessions.id, sessionId), eq(sessions.trainerId, trainerId)),
+    columns: { id: true, clientId: true },
+  })
+}
+
+async function ownedSessionExercise(id: string, trainerId: string) {
+  const row = await db.query.sessionExercises.findFirst({
+    where: eq(sessionExercises.id, id),
+    with:  { session: { columns: { id: true, trainerId: true, clientId: true } } },
+  })
+  return row && row.session.trainerId === trainerId ? row : null
+}
+
+async function ownedSet(id: string, trainerId: string) {
+  const row = await db.query.sets.findFirst({
+    where: eq(sets.id, id),
+    with:  { sessionExercise: { with: { session: { columns: { trainerId: true } } } } },
+  })
+  return row && row.sessionExercise.session.trainerId === trainerId ? row : null
+}
+
+// A circuit is a group of ≥2 members. When a member is removed and only one
+// remains, the survivor is demoted to a standalone exercise (read views already
+// tolerate a lone member; this keeps the data honest instead of relying on that).
+async function ungroupIfBelowTwo(
+  tx: Pick<typeof db, 'query' | 'update'>,
+  circuitId: string | null,
+  sessionId: string,
+): Promise<void> {
+  if (!circuitId) return
+  const members = await tx.query.sessionExercises.findMany({
+    where:   and(eq(sessionExercises.sessionId, sessionId), eq(sessionExercises.circuitId, circuitId)),
+    columns: { id: true },
+  })
+  if (members.length >= 2) return
+  await tx.update(sessionExercises).set({ circuitId: null }).where(eq(sessionExercises.circuitId, circuitId))
+}
+
 export async function sessionRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', authenticate)
 
@@ -480,6 +526,10 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
     const body = request.body as z.infer<typeof AddSessionExerciseSchema>
 
     try {
+      if (!(await ownedSession(sessionId, request.trainer.trainerId))) {
+        return reply.status(404).send({ error: 'Session not found' })
+      }
+
       // Look up workoutType + laterality from exercise library
       const exercise = await db.query.exercises.findFirst({
         where: eq(exercises.id, body.exerciseId),
@@ -634,6 +684,10 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
     const body = request.body as z.infer<typeof UpdateSessionExerciseSchema>
 
     try {
+      if (!(await ownedSessionExercise(id, request.trainer.trainerId))) {
+        return reply.status(404).send({ error: 'Session exercise not found' })
+      }
+
       const [updated] = await db
         .update(sessionExercises)
         .set(body)
@@ -686,14 +740,17 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
     const { id } = request.params as z.infer<typeof UuidParamSchema>
 
     try {
-      const [deleted] = await db
-        .delete(sessionExercises)
-        .where(eq(sessionExercises.id, id))
-        .returning()
-
-      if (!deleted) {
+      const owned = await ownedSessionExercise(id, request.trainer.trainerId)
+      if (!owned) {
         return reply.status(404).send({ error: 'Session exercise not found' })
       }
+
+      // Delete + demote a now-lonely circuit survivor together, so a failure
+      // between the two cannot leave a circuit of one.
+      await db.transaction(async (tx) => {
+        await tx.delete(sessionExercises).where(eq(sessionExercises.id, id))
+        await ungroupIfBelowTwo(tx, owned.circuitId, owned.sessionId)
+      })
 
       return reply.status(204).send()
     } catch (error) {
@@ -733,6 +790,7 @@ Which fields you populate depends on the workout type:
       response: {
         201: SetResponseSchema,
         400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
@@ -743,14 +801,13 @@ Which fields you populate depends on the workout type:
     try {
       // ── Fetch session exercise context ────────────────────────────────
       // Needed for both PR detection and challenge auto-progress
-      const seRow = await db.query.sessionExercises.findFirst({
-        where: eq(sessionExercises.id, sessionExerciseId),
-        with: {
-          session: {
-            columns: { clientId: true },
-          },
-        },
-      })
+      // Also the ownership check: a set can only be logged onto the caller's
+      // own session-exercise. (Previously this row was fetched for PR detection
+      // only, and a missing row did not stop the insert.)
+      const seRow = await ownedSessionExercise(sessionExerciseId, request.trainer.trainerId)
+      if (!seRow) {
+        return reply.status(404).send({ error: 'Session exercise not found' })
+      }
 
       // ── Record detection (at log time — drives the live "New PR" flash) ──
       // A set becomes the current record when it strictly beats the client's
@@ -882,6 +939,10 @@ Which fields you populate depends on the workout type:
     const body = request.body as Partial<Omit<z.infer<typeof CreateSetSchema>, 'sessionExerciseId'>>
 
     try {
+      if (!(await ownedSet(id, request.trainer.trainerId))) {
+        return reply.status(404).send({ error: 'Set not found' })
+      }
+
       const [updated] = await db
         .update(sets)
         .set(body as never)
@@ -922,6 +983,10 @@ Which fields you populate depends on the workout type:
     const { id } = request.params as z.infer<typeof UuidParamSchema>
 
     try {
+      if (!(await ownedSet(id, request.trainer.trainerId))) {
+        return reply.status(404).send({ error: 'Set not found' })
+      }
+
       const [deleted] = await db
         .delete(sets)
         .where(eq(sets.id, id))

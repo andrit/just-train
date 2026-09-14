@@ -264,7 +264,13 @@ Gate location documented in `routes/clients.ts`.
 When: Billing phase
 What: Nightly job recalculates `trainer_usage_monthly` rows. Table schema and unique constraint on `(trainerId, periodYear, periodMonth)` ready for upsert.
 
-### Billing Gate Matrix (reference)
+### Billing Gate Matrix (reference) — ⚠️ athlete rows SUPERSEDED 2026-09-14
+The `athlete | free` rows below date from the trainer-first model, where "athlete" was the
+trainer's own training bundled into a paid trainer account. Under athlete-first the
+**athlete is the paying user and the trainer layer is an add-on**; athlete pricing (tiers,
+trial, what is gated) is a v3.0.0 decision and is not yet made. Trainer rows remain the
+working assumption for the add-on. Schema is unaffected (`trainerMode` ⟂ `subscriptionTier`).
+
 
 | trainerMode | subscriptionTier | Client limit | Reports | KPI history |
 |---|---|---|---|---|

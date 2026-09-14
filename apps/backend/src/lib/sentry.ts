@@ -31,6 +31,20 @@ export function initSentry(): void {
     // Railway injects the deployed commit; ties an event to the code that produced it.
     release:          process.env.RAILWAY_GIT_COMMIT_SHA,
     tracesSampleRate: 0.05,
+    // Matches the privacy policy: no IP addresses, no request bodies, no cookies.
+    // sendDefaultPii=false is the SDK default; pinned so an upgrade can't flip it.
+    // beforeSend drops the request body/cookies/query outright — a body is training
+    // data or credentials, never something an error report needs.
+    sendDefaultPii: false,
+    beforeSend(event) {
+      if (event.request) {
+        delete event.request.data
+        delete event.request.cookies
+        delete event.request.query_string
+        if (event.request.url) event.request.url = event.request.url.split('?')[0]
+      }
+      return event
+    },
   })
   enabled = true
 }

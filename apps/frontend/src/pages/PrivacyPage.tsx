@@ -1,6 +1,6 @@
 // pages/PrivacyPage.tsx — Privacy Policy (Phase 15)
 // Public route, no auth required.
-// Third-party processor details reflect actual infrastructure as of v2.14.0.
+// Third-party processor details reflect actual infrastructure as of Phase 18 (2026-09-14).
 // Sections marked [PLACEHOLDER] require legal review before launch.
 
 import { useNavigate } from 'react-router-dom'
@@ -102,7 +102,23 @@ export default function PrivacyPage(): React.JSX.Element {
                 <p className="text-gray-400">The app's frontend (the interface you interact with) is hosted on Vercel.
                 Vercel serves static files only — no personal data is stored by Vercel.
                 Standard server logs (IP address, request path, timestamp) may be retained
-                by Vercel per their own privacy policy.</p>
+                by Vercel per their own privacy policy. We also use Vercel Speed Insights,
+                which reports page-load performance measurements (timings per page path) for a
+                sample of visits. It sets no cookie and receives no account or training data.</p>
+              </div>
+
+              <div className="border border-surface-border rounded-lg p-4">
+                <p className="text-white font-medium mb-1">Sentry</p>
+                <p className="text-xs text-gray-500 mb-2">Error monitoring</p>
+                <p className="text-gray-400">When something in the app breaks, a report of the failure is sent to
+                Sentry so we can fix it. A report contains the technical error and where in the
+                code it happened, your browser and operating system, the page path, and your
+                account's internal identifier so we can see whether one account or many are
+                affected. It does not contain your training data, your name or email, the
+                contents of forms, or your IP address (we do not enable Sentry's personal-data
+                collection). Session replay — recording what is on your screen — is switched
+                off. Reports are retained for 30 days. Sentry is SOC 2 Type II certified and
+                GDPR compliant.</p>
               </div>
             </div>
           </section>

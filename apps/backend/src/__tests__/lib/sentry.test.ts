@@ -71,6 +71,17 @@ describe('lib/sentry', () => {
       expect(mod.isSentryEnabled()).toBe(true)
     })
 
+    it('pins sendDefaultPii off and scrubs body, cookies and query from request context', async () => {
+      const { Sentry, mod } = await load('https://k@o.ingest.sentry.io/1')
+      mod.initSentry()
+      const opts = vi.mocked(Sentry.init).mock.calls[0]?.[0] as { sendDefaultPii: boolean; beforeSend: (e: any) => any }
+      expect(opts.sendDefaultPii).toBe(false)
+      const scrubbed = opts.beforeSend({
+        request: { url: 'https://api/x/sessions?search=secret', data: { weight: 100 }, cookies: { rt: 'x' }, query_string: 'search=secret', headers: { 'user-agent': 'ua' } },
+      })
+      expect(scrubbed.request).toEqual({ url: 'https://api/x/sessions', headers: { 'user-agent': 'ua' } })
+    })
+
     it('forwards Error instances only, with the route context as an extra', async () => {
       const { Sentry, mod } = await load('https://k@o.ingest.sentry.io/1')
       mod.initSentry()

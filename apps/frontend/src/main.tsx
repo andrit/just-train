@@ -33,6 +33,16 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     allowUrls: [window.location.origin],
     // Auth errors are expected — not actionable noise in Sentry
     ignoreErrors: ['Unauthorized', 'X-Device-ID header required'],
+    // What the privacy policy promises (PrivacyPage → Sentry): no IP, no PII,
+    // no replay. sendDefaultPii is the SDK default but is pinned here so a
+    // future upgrade cannot flip it silently. Query strings are stripped from
+    // every event URL — paths carry UUIDs only, but a query could carry a search
+    // term typed by the user.
+    sendDefaultPii: false,
+    beforeSend(event) {
+      if (event.request?.url) event.request.url = event.request.url.split('?')[0]
+      return event
+    },
   })
 
   // Track PWA install to home screen — Phase 18 advance criterion

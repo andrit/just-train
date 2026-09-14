@@ -43,6 +43,13 @@
       "when": 1789399358974,
       "tag": "0005_wealthy_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1789406615067,
+      "tag": "0006_condemned_alex_power",
+      "breakpoints": true
     }
   ]
 }

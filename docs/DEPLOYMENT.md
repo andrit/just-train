@@ -142,6 +142,16 @@ It will look like: `https://trainerapp-production.up.railway.app`
 
 ## Step 2 — Vercel (Frontend)
 
+> **Where the project lives (2026-09-14):** `https://vercel.com/remarkable-embrace/just-train` —
+> a *team* scope named `remarkable-embrace` (Vercel auto-migrated Hobby accounts into
+> teams with generated names). The owning login is the **email** account (the address that
+> is also the GitHub primary), not a GitHub-linked login. If the dashboard looks empty,
+> switch scope with the dropdown top-left; if "Continue with GitHub" bounces you to
+> "login with your email then link GitHub", do exactly that once (Settings →
+> Authentication → Link GitHub). Logging in by email with an address that has no
+> account silently creates a new, empty one — an empty dashboard does not mean the
+> project is gone.
+
 ### 2a. Import the project
 
 1. Go to [vercel.com](https://vercel.com) → **Add New Project** → **Import Git Repository**

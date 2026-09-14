@@ -1,6 +1,9 @@
 -- ------------------------------------------------------------
 -- add-client-events-table.sql  (Phase 18 — first-party product telemetry)
 --
+-- ✅ APPLIED TO PROD 2026-09-14 (6 columns verified). Safe to re-run: no-op.
+-- Drizzle equivalent: drizzle/0006_condemned_alex_power.sql (prod applies via psql).
+--
 -- Additive, idempotent. Creates the client_events table the app writes to via
 -- POST /telemetry: a few usage counters (offline cache hits, queue flushes,
 -- sessions completed, records detected, installs). Stored in the product DB —

@@ -135,7 +135,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | # | Check | Notes |
 |---|---|---|
 | S1 | Full OWASP Top-10 pass — ZAP against staging, Burp on auth/refresh/upload; the ten areas in `DEFERRED_ITEMS.md` → Pre-3.0 | High findings block 3.0 |
-| S2 | Refresh-token reuse detection (account plan A3) | replay of a rotated token ends the family |
+| S2 | Refresh-token reuse detection (account plan A3) | ✅ 2026-09-15 — replay of a rotated token beyond a 10 s grace window revokes the family (`401 TOKEN_REUSE`); daily cleanup job |
 | S3 | Stripe webhook signature verification + idempotent event handling; no card data ever touches the API | when Stripe lands |
 | S4 | Admin surface hardened — `role = 'admin'` set only via SQL (no self-promotion path; guarded by G5), admin routes under `requireRole('admin')`, admin UI on its own origin (`metzger.just-train.fit`) with IP allow-list / Vercel protection | see admin note in `task-plan-account.md` |
 | S5 | CAPTCHA (Turnstile) on register; adaptive on login | with G15 |

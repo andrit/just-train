@@ -26,6 +26,7 @@ import { db, clients, trainers } from '../db'
 import { eq, and, isNotNull } from 'drizzle-orm'
 import { expireOverdueChallenges } from '../services/challenge.service'
 import { withCronMonitor, captureError } from '../lib/sentry'
+import { cleanupRefreshTokens } from '../services/auth.service'
 
 const SCHEDULER_QUEUE = 'scheduler'
 
@@ -83,6 +84,14 @@ export async function startScheduler(): Promise<void> {
     { name: 'challenge-expiry', data: {} },
   )
 
+  // Refresh-token cleanup: daily at 00:30 UTC. Rotation keeps revoked rows for
+  // reuse detection; this drops expired rows and revoked rows past the TTL.
+  await schedulerQueue.upsertJobScheduler(
+    'refresh-token-cleanup-daily',
+    { pattern: '30 0 * * *' },
+    { name: 'refresh-token-cleanup', data: {} },
+  )
+
   // The hourly alert fanout doubles as the scheduler's heartbeat: it is wrapped
   // in a Sentry cron monitor (the one included on the free plan), so a dead or
   // stalled scheduler worker raises an alert instead of looking like "no
@@ -91,6 +100,10 @@ export async function startScheduler(): Promise<void> {
     if (job.name === 'report-fanout')     await fanOutScheduledReports()
     if (job.name === 'alert-fanout')      await withCronMonitor('scheduler-hourly', '0 * * * *', fanOutAtRiskAlerts)
     if (job.name === 'challenge-expiry')  await runChallengeExpiry()
+    if (job.name === 'refresh-token-cleanup') {
+      const n = await cleanupRefreshTokens()
+      console.log(`[Scheduler] refresh-token cleanup removed ${n} rows`)
+    }
   }, { connection: getRedisConnection() })
 
   worker.on('failed', (job, err) => {
@@ -98,7 +111,7 @@ export async function startScheduler(): Promise<void> {
     captureError(err, `scheduler:${job?.name ?? 'unknown'}`)
   })
 
-  console.log('[Scheduler] Started — reports (hourly on 1st), alerts (hourly), challenge expiry (daily)')
+  console.log('[Scheduler] Started — reports (hourly on 1st), alerts (hourly), challenge expiry (daily), refresh-token cleanup (daily)')
 }
 
 // ── Fan-out: scheduled reports ─────────────────────────────────────────────────

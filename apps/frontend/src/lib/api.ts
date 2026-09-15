@@ -14,6 +14,7 @@
 // ------------------------------------------------------------
 
 import { useAuthStore, DEVICE_ID } from '@/store/authStore'
+import { toast }                    from '@/store/toastStore'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api/v1'
 
@@ -55,7 +56,17 @@ export async function attemptTokenRefresh(): Promise<string | null> {
     },
   })
     .then(async (response) => {
-      if (!response.ok) return null
+      if (!response.ok) {
+        // TOKEN_REUSE: the server ended every session because a rotated token
+        // was replayed. Say so — a silent bounce to /login reads as a bug.
+        if (response.status === 401) {
+          const body = await response.json().catch(() => null) as { code?: string } | null
+          if (body?.code === 'TOKEN_REUSE') {
+            toast.error('You were signed out everywhere for security. Please sign in again.')
+          }
+        }
+        return null
+      }
       const data = await response.json()
       useAuthStore.getState().setAuth(data.accessToken, data.trainer)
       return data.accessToken as string

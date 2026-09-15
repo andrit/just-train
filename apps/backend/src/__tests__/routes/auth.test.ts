@@ -648,3 +648,50 @@ describe('DELETE /api/v1/auth/devices/:deviceId', () => {
     expect(String(res.headers['set-cookie'])).toContain('trainer_refresh_token=;')
   })
 })
+
+// ── POST /api/v1/auth/refresh — reuse detection (account plan A3) ─────────────
+
+describe('POST /api/v1/auth/refresh — reuse detection', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const headers = { 'x-trainer-id': TEST_TRAINER_ID, 'x-device-id': TEST_DEVICE_ID }
+  const cookies = { trainer_refresh_token: 'raw-refresh-token' }
+
+  it('a token rotated long ago and presented again ends every session: 401 TOKEN_REUSE', async () => {
+    const { findAndVerifyRefreshToken, revokeAllRefreshTokens, rotateRefreshToken } = await import('../../services/auth.service')
+    vi.mocked(findAndVerifyRefreshToken).mockResolvedValueOnce(makeRefreshToken({
+      revokedAt: new Date(Date.now() - 60_000), lastUsedAt: new Date(Date.now() - 60_000),
+    }))
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/refresh', headers, cookies })
+    expect(res.statusCode).toBe(401)
+    expect(res.json().code).toBe('TOKEN_REUSE')
+    expect(revokeAllRefreshTokens).toHaveBeenCalledWith(TEST_TRAINER_ID)
+    expect(rotateRefreshToken).not.toHaveBeenCalled()
+    expect(String(res.headers['set-cookie'])).toContain('trainer_refresh_token=;')
+  })
+
+  it('a token rotated seconds ago (two tabs racing) still refreshes normally', async () => {
+    const { db } = await import('../../db')
+    const { findAndVerifyRefreshToken, revokeAllRefreshTokens, rotateRefreshToken } = await import('../../services/auth.service')
+    vi.mocked(findAndVerifyRefreshToken).mockResolvedValueOnce(makeRefreshToken({
+      revokedAt: new Date(Date.now() - 2_000), lastUsedAt: new Date(Date.now() - 2_000),
+    }))
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/refresh', headers, cookies })
+    expect(res.statusCode).toBe(200)
+    expect(rotateRefreshToken).toHaveBeenCalled()
+    expect(revokeAllRefreshTokens).not.toHaveBeenCalled()
+  })
+
+  it('a token revoked by logout is just invalid — no family revocation', async () => {
+    const { findAndVerifyRefreshToken, revokeAllRefreshTokens } = await import('../../services/auth.service')
+    vi.mocked(findAndVerifyRefreshToken).mockResolvedValueOnce(makeRefreshToken({ revokedAt: new Date(Date.now() - 60_000), lastUsedAt: null }))
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/refresh', headers, cookies })
+    expect(res.statusCode).toBe(401)
+    expect(res.json().code).toBeUndefined()
+    expect(revokeAllRefreshTokens).not.toHaveBeenCalled()
+  })
+})

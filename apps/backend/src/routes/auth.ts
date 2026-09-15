@@ -1,4 +1,5 @@
 import { routeLog } from '../lib/logger'
+import { captureSecurityEvent } from '../lib/sentry'
 // ------------------------------------------------------------
 // routes/auth.ts — Authentication endpoints
 //
@@ -41,6 +42,7 @@ import {
   revokeRefreshTokensExceptDevice,
   listActiveDevices,
   revokeDevice,
+  classifyPresentedToken,
   revokeRefreshToken,
   refreshTokenCookieOptions,
   REFRESH_TOKEN_COOKIE,
@@ -364,6 +366,23 @@ Returns 401 if the refresh token is expired, revoked, or missing.`,
         reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
         return reply.status(401).send({ error: 'Invalid or expired refresh token' })
       }
+
+      // Reuse detection (account plan A3). A token that was rotated more than
+      // the grace window ago and is presented again was copied: end every
+      // session for this trainer, not just this one.
+      const status = classifyPresentedToken(tokenRecord)
+      if (status === 'reuse') {
+        await revokeAllRefreshTokens(tokenRecord.trainerId)
+        reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
+        routeLog(app).warn({ trainerId: tokenRecord.trainerId, deviceId }, 'Refresh token reuse detected — all sessions revoked')
+        captureSecurityEvent('Refresh token reuse detected', { trainerId: tokenRecord.trainerId })
+        return reply.status(401).send({ error: 'Session ended for security reasons. Please sign in again.', code: 'TOKEN_REUSE' })
+      }
+      if (status === 'stale') {
+        reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
+        return reply.status(401).send({ error: 'Invalid or expired refresh token' })
+      }
+      // 'valid' and 'grace' both proceed to rotate.
 
       // trainerId comes from the token record — don't rely on the header
       const trainer = await db.query.trainers.findFirst({

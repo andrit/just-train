@@ -65,6 +65,15 @@ export function captureError(error: unknown, context?: string): void {
   Sentry.captureException(error, context ? { extra: { context } } : undefined)
 }
 
+/**
+ * A security-relevant event that is not an exception — token reuse, lockout.
+ * Warning level so it groups as its own issue and can carry an alert rule.
+ */
+export function captureSecurityEvent(message: string, tags: Record<string, string>): void {
+  if (!enabled) return
+  Sentry.captureMessage(message, { level: 'warning', tags: { kind: 'security', ...tags } })
+}
+
 /** Tag the request's isolation scope with the authenticated trainer. */
 export function setSentryUser(trainerId: string): void {
   if (!enabled) return

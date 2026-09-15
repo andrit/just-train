@@ -22,7 +22,7 @@ import * as crypto from 'crypto'
 import * as jwt from 'jsonwebtoken'
 import { Resend } from 'resend'
 import { db, refreshTokens, emailVerificationTokens } from '../db'
-import { eq, and, gt, desc, ne, isNull } from 'drizzle-orm'
+import { eq, and, gt, desc, ne, isNull, or, lt, isNotNull } from 'drizzle-orm'
 import { trainers } from '../db/schema/trainers'
 import type { TrainerRole } from '@trainer-app/shared'
 
@@ -189,10 +189,10 @@ export async function findAndVerifyRefreshToken(params: {
     .from(refreshTokens)
     .where(and(...conditions))
 
-  // Verify raw token against each candidate hash
+  // Verify raw token against each candidate hash. Revoked rows are NOT skipped:
+  // since rotation marks rather than deletes (A3), a match on a revoked row is
+  // the signal that reuse detection needs — classifyPresentedToken() decides.
   for (const candidate of candidates) {
-    if (candidate.revokedAt) continue
-
     const valid = await argon2.verify(candidate.tokenHash, params.rawToken)
     if (valid) return candidate
   }
@@ -200,8 +200,50 @@ export async function findAndVerifyRefreshToken(params: {
   return null
 }
 
+// ── Reuse detection (account plan A3) ───────────────────────────────────────
+//
+// Rotation keeps the old row and stamps it revokedAt + lastUsedAt ("rotated
+// at"). A token presented after it was rotated is one of three things:
+//   grace  — the two-tabs race: the refresh cookie is shared across tabs, so a
+//            second refresh already in flight carries the just-rotated token.
+//            Allowed within ROTATION_GRACE_MS; the client ends up with whichever
+//            cookie was set last, and the orphaned token simply expires.
+//   reuse  — beyond the grace window someone still holds a token the legitimate
+//            client no longer has: the token was copied. Revoke the family.
+//   stale  — revoked by logout (lastUsedAt null): a device that signed out and
+//            kept its cookie. Not proof of theft; plain 401.
+export const ROTATION_GRACE_MS = 10_000
+
+export type PresentedTokenStatus = 'valid' | 'grace' | 'reuse' | 'stale'
+
+export function classifyPresentedToken(
+  token: Pick<typeof refreshTokens.$inferSelect, 'revokedAt' | 'lastUsedAt'>,
+  now: Date = new Date(),
+): PresentedTokenStatus {
+  if (!token.revokedAt) return 'valid'
+  if (!token.lastUsedAt) return 'stale'
+  return now.getTime() - token.lastUsedAt.getTime() <= ROTATION_GRACE_MS ? 'grace' : 'reuse'
+}
+
 /**
- * Rotate a refresh token — delete the old one, create a new one.
+ * Delete rows that can no longer matter: expired tokens, and revoked tokens
+ * older than the refresh TTL (a stolen copy of one of those has expired too,
+ * so reuse detection no longer needs it). Run daily by the scheduler.
+ */
+export async function cleanupRefreshTokens(now: Date = new Date()): Promise<number> {
+  const revokedCutoff = new Date(now.getTime() - REFRESH_TOKEN_TTL_MS)
+  const deleted = await db
+    .delete(refreshTokens)
+    .where(or(
+      lt(refreshTokens.expiresAt, now),
+      and(isNotNull(refreshTokens.revokedAt), lt(refreshTokens.revokedAt, revokedCutoff)),
+    ))
+    .returning({ id: refreshTokens.id })
+  return deleted.length
+}
+
+/**
+ * Rotate a refresh token — mark the old one rotated, create a new one.
  * Called on every successful token refresh.
  * This is the core of the token rotation security model.
  */
@@ -214,9 +256,12 @@ export async function rotateRefreshToken(params: {
   const { raw, hash } = await generateRefreshToken()
   const expiresAt     = new Date(Date.now() + REFRESH_TOKEN_TTL_MS)
 
-  // Delete old token and insert new one in a single transaction
+  // Mark the old token rotated (revokedAt + lastUsedAt) and insert the new one
+  // in a single transaction. Marking rather than deleting is what makes a
+  // later presentation of the old token detectable (classifyPresentedToken).
+  const now = new Date()
   await db.transaction(async (tx) => {
-    await tx.delete(refreshTokens).where(eq(refreshTokens.id, params.oldTokenId))
+    await tx.update(refreshTokens).set({ revokedAt: now, lastUsedAt: now }).where(eq(refreshTokens.id, params.oldTokenId))
     await tx.insert(refreshTokens).values({
       trainerId:  params.trainerId,
       tokenHash:  hash,

@@ -76,14 +76,11 @@ What: Verify email on register. `email_verified` column already exists on traine
 When: Multi-trainer launch
 What: Restrict `POST /auth/register` to require an invite token. Add `invite_tokens` table.
 
-### Token Reuse Detection
-When: Multi-trainer + higher security stakes
-What: If a rotated refresh token is replayed, terminate all sessions for that trainer. `last_used_at` column already exists for this purpose.
+### Token Reuse Detection ✅ DONE (2026-09-15)
+Rotation marks the old row (`revoked_at` + `last_used_at`); a replay beyond a 10-second grace window revokes every session for the trainer (`401 TOKEN_REUSE`). Account plan A3.
 
-### Refresh Token Cleanup Job
-When: Production infrastructure setup
-What: Cron job deletes expired/revoked refresh token rows.
-Query: `DELETE FROM refresh_tokens WHERE expires_at < NOW() OR revoked_at IS NOT NULL`
+### Refresh Token Cleanup Job ✅ DONE (2026-09-15)
+Daily BullMQ job `refresh-token-cleanup` (00:30 UTC) deletes expired rows and revoked rows older than the refresh TTL — kept that long so a replayed copy is still detectable while it could still be valid.
 
 ### Device Management UI ✅ DONE (2026-09-15)
 `GET /auth/devices` + `DELETE /auth/devices/:deviceId` + Preferences → Account → Devices. Note: `last_used_at` was never maintained (rotation replaces the row); the newest row's `created_at` is used as last activity. Column left in place for the reuse-detection work (account plan A3).

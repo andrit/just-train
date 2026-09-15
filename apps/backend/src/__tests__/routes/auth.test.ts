@@ -58,6 +58,16 @@ vi.mock('../../services/emailVerification.service', () => ({
   redeemVerificationToken: vi.fn().mockResolvedValue({ outcome: 'ok' }),
 }))
 
+vi.mock('../../services/lockout.service', () => ({
+  loginLockout: {
+    check:         vi.fn().mockReturnValue({ locked: false }),
+    recordFailure: vi.fn().mockReturnValue({ justLockedEmail: false, emailFailures: 1, ipFailures: 1 }),
+    recordSuccess: vi.fn(),
+    reset:         vi.fn(),
+  },
+  sendLockoutNotice: vi.fn().mockResolvedValue(undefined),
+}))
+
 vi.mock('../../services/passwordReset.service', () => ({
   requestPasswordReset:   vi.fn().mockResolvedValue('sent'),
   resetPasswordWithToken: vi.fn().mockResolvedValue({ outcome: 'ok', trainerId: '11111111-1111-1111-1111-111111111111' }),
@@ -970,5 +980,82 @@ describe('GET /api/v1/auth/verify-email', () => {
       const res = await app.inject({ method: 'GET', url })
       expect(res.statusCode, outcome).toBe(status)
     }
+  })
+})
+
+// ── POST /auth/login — lockout (account plan C9) ──────────────────────────────
+
+describe('POST /api/v1/auth/login — lockout', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const url     = '/api/v1/auth/login'
+  const payload = { email: 'trainer@example.com', password: 'wrong-password-1' }
+
+  it('answers 423 + retryAfterSeconds + Retry-After before looking the account up', async () => {
+    const { db } = await import('../../db')
+    const { loginLockout } = await import('../../services/lockout.service')
+    vi.mocked(loginLockout.check).mockReturnValueOnce({ locked: true, scope: 'email', retryAfterSeconds: 540 })
+    const res = await app.inject({ method: 'POST', url, payload })
+    expect(res.statusCode).toBe(423)
+    expect(res.json()).toMatchObject({ code: 'ACCOUNT_LOCKED', retryAfterSeconds: 540 })
+    expect(res.headers['retry-after']).toBe('540')
+    expect(db.query.trainers.findFirst).not.toHaveBeenCalled()
+  })
+
+  it('answers 429 for an IP cap', async () => {
+    const { loginLockout } = await import('../../services/lockout.service')
+    vi.mocked(loginLockout.check).mockReturnValueOnce({ locked: true, scope: 'ip', retryAfterSeconds: 30 })
+    const res = await app.inject({ method: 'POST', url, payload })
+    expect(res.statusCode).toBe(429)
+    expect(res.json().code).toBe('TOO_MANY_FAILURES')
+  })
+
+  it('records a failure for an unknown email AND for a wrong password, keyed on the client IP', async () => {
+    const { db } = await import('../../db')
+    const { verifyPassword } = await import('../../services/auth.service')
+    const { loginLockout } = await import('../../services/lockout.service')
+
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(undefined)
+    let res = await app.inject({ method: 'POST', url, payload, headers: { 'x-forwarded-for': '203.0.113.7, 10.0.0.1' } })
+    expect(res.statusCode).toBe(401)
+    expect(loginLockout.recordFailure).toHaveBeenLastCalledWith('trainer@example.com', '203.0.113.7')
+
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    vi.mocked(verifyPassword).mockResolvedValueOnce(false)
+    res = await app.inject({ method: 'POST', url, payload })
+    expect(res.statusCode).toBe(401)
+    expect(loginLockout.recordFailure).toHaveBeenCalledTimes(2)
+    expect(loginLockout.recordSuccess).not.toHaveBeenCalled()
+  })
+
+  it('sends the notice on the locking failure only when the account exists', async () => {
+    const { db } = await import('../../db')
+    const { verifyPassword } = await import('../../services/auth.service')
+    const { loginLockout, sendLockoutNotice } = await import('../../services/lockout.service')
+    vi.mocked(loginLockout.recordFailure).mockReturnValue({ justLockedEmail: true, emailFailures: 5, ipFailures: 5 })
+
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(undefined)
+    await app.inject({ method: 'POST', url, payload })
+    expect(sendLockoutNotice).not.toHaveBeenCalled()
+
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    vi.mocked(verifyPassword).mockResolvedValueOnce(false)
+    await app.inject({ method: 'POST', url, payload })
+    expect(sendLockoutNotice).toHaveBeenCalledWith('trainer@example.com', 'Test Trainer')
+
+    vi.mocked(loginLockout.recordFailure).mockReturnValue({ justLockedEmail: false, emailFailures: 1, ipFailures: 1 })
+  })
+
+  it('a correct sign-in clears the email counter', async () => {
+    const { db } = await import('../../db')
+    const { loginLockout } = await import('../../services/lockout.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    const res = await app.inject({ method: 'POST', url, payload: { email: 'trainer@example.com', password: 'correct-password-1' } })
+    expect(res.statusCode).toBe(200)
+    expect(loginLockout.recordSuccess).toHaveBeenCalledWith('trainer@example.com')
+    expect(loginLockout.recordFailure).not.toHaveBeenCalled()
   })
 })

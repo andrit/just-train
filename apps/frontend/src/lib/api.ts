@@ -24,6 +24,8 @@ export class ApiError extends Error {
     public readonly message:  string,
     public readonly code?:    string,
     public readonly details?: unknown,
+    /** The parsed error body as sent — for fields beyond error/code/details (e.g. retryAfterSeconds). */
+    public readonly body?:    Record<string, unknown>,
   ) {
     super(message)
     this.name = 'ApiError'
@@ -167,6 +169,7 @@ async function request<T>(
       errorData.error || response.statusText || `Request failed (${response.status})`,
       errorData.code,
       errorData.details,
+      errorData,
     )
   }
 

@@ -97,19 +97,10 @@ When: Revisit if Cloudinary is removed or media handling becomes a higher-risk s
 What: File upload routes read MIME type from the client's `Content-Type` header rather than inspecting file magic bytes server-side.
 Why accepted: Cloudinary performs its own server-side validation on every upload and rejects files that don't match the declared type. A lying client would have their upload rejected by Cloudinary regardless. Adding a magic-number check (e.g. `file-type` npm package) before the Cloudinary call would provide defence-in-depth but is low priority given the secondary validation already in place.
 
-### Account Lockout / CAPTCHA (requires product decisions before implementing)
-When: Schedule a dedicated session before or alongside the v3.0.0 SaaS work — this matters more once registration is open to paying strangers
-What: Two related but independent mechanisms:
-  1. **Account lockout** — temporarily block login after N consecutive failures for a given email. Requires a `failed_login_attempts` counter + `locked_until` timestamp on the `trainers` table, or a Redis key for transient state.
-  2. **CAPTCHA / bot detection** — challenge on `POST /auth/register` and `POST /auth/login` to block automated credential stuffing and bulk account creation. Cloudflare Turnstile is the preferred option (free tier, privacy-respecting, no image puzzles).
+### Account Lockout ✅ BUILT (2026-09-15, account plan C9) / CAPTCHA ⬜
+Decisions (2026-09-15): threshold **5** failures per email → **15-minute** fixed lock, counted for unknown emails too (no enumeration), `423` + `retryAfterSeconds`; per-IP failure cap **20 / 15 min** → `429`; **notice email** to the owner on lock (live once mail is configured); Turnstile **register always, login adaptively after the 3rd failure**. Built: `lib/loginLockout.ts` (pure, `FailureStore` interface, in-process store — see the `ponytail` there for why not Redis yet), `services/lockout.service.ts`, login route, sign-in page countdown.
 
-Product decisions needed before building:
-  - **Lockout threshold** — how many failures before lockout? (5 is standard; stricter hurts trainers who mistype). 
-  - **Lockout duration** — fixed (15 min) or exponential backoff?
-  - **Lockout scope** — per email, per IP, or both? Per-email protects against targeted attacks on a known account; per-IP protects against distributed credential stuffing across many accounts.
-  - **Notification** — does the trainer get an email when their account is locked? (Good for awareness; adds Resend dependency to the auth flow.)
-  - **CAPTCHA gate** — register only, or also login? Login CAPTCHA adds friction for every user on every session; register-only is a lighter touch.
-  - **CAPTCHA in PWA context** — Turnstile requires a browser widget; needs design consideration for the installed PWA experience (non-issue for web, but test on iOS standalone mode).
+**Remaining — CAPTCHA (Cloudflare Turnstile):** free tier, privacy-respecting, works in the installed PWA (a normal widget; test iOS standalone). Needs a site key in the frontend + `TURNSTILE_SECRET` server-side, a verify call in `POST /auth/register` (always) and `POST /auth/login` (only when the lockout reports ≥ 3 failures for that email or IP — `recordFailure` already returns the counts), and a package → lockfile on the Mac. Escalation path if victim-lockout becomes a real nuisance: CAPTCHA-instead-of-lock, not a longer lock.
 
 ---
 

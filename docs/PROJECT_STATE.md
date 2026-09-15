@@ -681,7 +681,7 @@ This tracks progress through the workbench phases, which are separate from the a
 | 16 | Monitoring Setup (SDLC v1 numbering) | ✅ Code portion done 2026-06-21 — Sentry SDK wired (DSN-gated), Lighthouse CI added to ci.yml. The SDLC was later renumbered: monitoring is now Phase 18 (below); the human steps carry there |
 | 17 | Brand & Identity Finalization | ⏸ **Closed incomplete 2026-09-14** (advanced with `criteria_verified: false`). Met: product-story post-build, brand-identity.md, WCAG audit. Carried as **launch gates**: ~~name~~ → **Just Train, `just-train.fit` (acquired 2026-09-15)**; still open: logo SVG light/dark, USPTO clearance, DNS/SSL cut-over, brand sign-off |
 | 18 | Monitoring Setup | ✅ **Complete 2026-09-14** (criteria verified in production: test error + install event in Sentry). Backend Sentry via the `routeLog` chokepoint + Fastify handler + worker failures; cron heartbeat `scheduler-hourly`; uptime on `/health`; SW errors relayed; SW registration owned (`virtual:pwa-register`); Speed Insights 20 %; first-party `client_events` via `POST /telemetry` behind a pluggable `TelemetrySink`; install signal = first standalone launch (iOS-safe); source maps upload when `SENTRY_AUTH_TOKEN` is set (not yet set). IP storage disabled in Sentry after the first event showed server-inferred IP. Open: symbolication vars in Vercel; one transient Android SW-registration rejection (cause unknown, worker ACTIVATED) |
-| 19 | Go Live | 🔄 **Current** — entered 2026-09-14. Name + domain settled 2026-09-15 (Just Train, `just-train.fit`); still gated on logo, DNS/SSL cut-over, sign-off. Pre-Go-Live security gate in progress (`docs/SECURITY.md`); account track planned. Criteria: first real install confirmed; Lighthouse ≥ 90 on the production URL. Seeded push-notification task will be recorded as skipped (push deferred post-SaaS) |
+| 19 | Go Live | 🔄 **Current** — entered 2026-09-14. Name + domain settled 2026-09-15 (Just Train, `just-train.fit`); still gated on logo, DNS/SSL cut-over, sign-off. Pre-Go-Live security gate in progress (`docs/SECURITY.md`); account track A1–A5 + B6–B8 shipped 2026-09-15 (change/reset password, devices, reuse detection, export, deactivate + 30-day purge, change email — email flows inert until Resend is configured); C9 lockout next. Criteria: first real install confirmed; Lighthouse ≥ 90 on the production URL. Seeded push-notification task will be recorded as skipped (push deferred post-SaaS) |
 | 20 | Ongoing | 🔜 |
 
 Phase 2 deliverables (from `pwa/project.json`):
@@ -818,7 +818,7 @@ Full details in `DEFERRED_ITEMS.md`.
 |---|---|
 | Subscription billing gates | v3.0.0 SaaS |
 | Email verification | Multi-trainer launch |
-| Password reset flow | Settings UI phase |
+| Password reset flow | ✅ built 2026-09-15 — live once email is configured |
 | Visualization / demonstration content | Phase 9 (post-SPA) |
 | Draft exercise enrichment queue | v1.9.x |
 | Post-session wrap-up | After session planning (v2.2.0+) |

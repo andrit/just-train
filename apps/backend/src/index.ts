@@ -31,6 +31,7 @@ import helmet                        from '@fastify/helmet'
 import cookie                        from '@fastify/cookie'
 import multipart     from '@fastify/multipart'
 import rateLimit     from '@fastify/rate-limit'
+import { clientIp }  from './lib/clientIp'
 import swagger       from '@fastify/swagger'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import { z }          from 'zod'
@@ -210,10 +211,7 @@ app.register(rateLimit, {
   global:       true,
   max:          100,
   timeWindow:   '1 minute',
-  keyGenerator: (req: { headers: Record<string, string | string[] | undefined>; ip: string }) =>
-    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-    ?? req.ip
-    ?? 'unknown',
+  keyGenerator: clientIp,
   errorResponseBuilder: () => ({
     error: 'Too many requests — please slow down',
     code:  'RATE_LIMIT_EXCEEDED',

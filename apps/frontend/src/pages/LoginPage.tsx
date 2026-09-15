@@ -9,10 +9,10 @@
 //   - Error messages are intentionally vague (no email enumeration)
 // ------------------------------------------------------------
 
-import { useState }          from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useQueryClient }    from '@tanstack/react-query'
-import { apiClient }         from '@/lib/api'
+import { apiClient, ApiError } from '@/lib/api'
 import { useAuthStore }      from '@/store/authStore'
 import { Input }             from '@/components/ui/Input'
 import { Button }            from '@/components/ui/Button'
@@ -21,6 +21,12 @@ import type { AuthResponse } from '@trainer-app/shared'
 import { toast } from '@/store/toastStore'
 
 type Mode = 'login' | 'register'
+
+function formatCountdown(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return m > 0 ? `${m}:${String(s).padStart(2, '0')}` : `${s}s`
+}
 
 export default function LoginPage(): React.JSX.Element {
   const [mode, setMode]       = useState<Mode>('login')
@@ -32,6 +38,17 @@ export default function LoginPage(): React.JSX.Element {
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [serverError, setServerError]     = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  // Lockout (423 / 429 with retryAfterSeconds): hold the button and count down
+  // rather than let the user keep hitting a wall.
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null)
+  const [nowTs, setNowTs] = useState(() => Date.now())
+  useEffect(() => {
+    if (lockedUntil === null) return
+    const id = window.setInterval(() => setNowTs(Date.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [lockedUntil])
+  const lockSecondsLeft = lockedUntil === null ? 0 : Math.max(0, Math.ceil((lockedUntil - nowTs) / 1000))
+  const isLocked = lockSecondsLeft > 0
 
   const { setAuth } = useAuthStore()
   const navigate    = useNavigate()
@@ -46,6 +63,7 @@ export default function LoginPage(): React.JSX.Element {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
+    if (isLocked) return
     clearFieldErrors()
 
     // Auth always requires network (offline-contract.md)
@@ -85,6 +103,13 @@ export default function LoginPage(): React.JSX.Element {
       // ApiError carries the HTTP status — surface it if the message is generic
       if ('status' in (err as Record<string, unknown>) && msg === 'Unauthorized') {
         msg = 'Invalid email or password'
+      }
+      if (err instanceof ApiError && (err.status === 423 || err.status === 429)) {
+        const retry = typeof err.body?.retryAfterSeconds === 'number' ? err.body.retryAfterSeconds : 60
+        setLockedUntil(Date.now() + retry * 1000)
+        msg = err.status === 423
+          ? 'Too many failed attempts — sign-in for this email is paused.'
+          : 'Too many attempts from this network — sign-in is paused.'
       }
       setServerError(msg)
     } finally {
@@ -176,12 +201,18 @@ export default function LoginPage(): React.JSX.Element {
               className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"
             >
               {serverError}
+              {isLocked && (
+                <span className="block mt-1 text-xs text-red-300/80">
+                  Try again in {formatCountdown(lockSecondsLeft)}. Already-signed-in devices are not affected.
+                </span>
+              )}
             </div>
           )}
 
           <Button
             type="submit"
             loading={loading}
+            disabled={isLocked}
             className="w-full mt-2"
             size="lg"
           >

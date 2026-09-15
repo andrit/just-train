@@ -3,6 +3,8 @@ import { captureSecurityEvent } from '../lib/sentry'
 import { deactivateTrainer, restoreTrainer, isRestorable, buildExport, PURGE_AFTER_DAYS } from '../services/account.service'
 import { requestPasswordReset, resetPasswordWithToken } from '../services/passwordReset.service'
 import { requestEmailChange, cancelEmailChange, redeemVerificationToken } from '../services/emailVerification.service'
+import { loginLockout, sendLockoutNotice } from '../services/lockout.service'
+import { clientIp } from '../lib/clientIp'
 import { createHash } from 'node:crypto'
 // ------------------------------------------------------------
 // routes/auth.ts — Authentication endpoints
@@ -29,7 +31,7 @@ import { createHash } from 'node:crypto'
 //   HTTP → Rate limit check → Zod validation → auth.service → DB → response
 // ------------------------------------------------------------
 
-import type { FastifyInstance, FastifyRequest } from 'fastify'
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import { db, trainers, clients } from '../db'
 import type { Trainer } from '../db/schema/trainers'
@@ -94,6 +96,22 @@ const MessageResponseSchema = z.object({
 // null (just created) while login returns the updated value.
 
 /** First 12 hex chars of SHA-256(email) — enough to correlate log lines, never the address itself. */
+const LockedResponseSchema = ErrorResponseSchema.extend({
+  retryAfterSeconds: z.number().int().positive(),
+})
+
+function sendLocked(reply: FastifyReply, scope: 'email' | 'ip', retryAfterSeconds: number) {
+  const status = scope === 'email' ? 423 : 429
+  reply.header('Retry-After', String(retryAfterSeconds))
+  return reply.status(status).send({
+    error: scope === 'email'
+      ? 'Too many failed sign-in attempts. Try again later.'
+      : 'Too many failed sign-in attempts from this network. Try again later.',
+    code:  scope === 'email' ? 'ACCOUNT_LOCKED' : 'TOO_MANY_FAILURES',
+    retryAfterSeconds,
+  })
+}
+
 function sha256Short(email: string): string {
   return createHash('sha256').update(email.toLowerCase()).digest('hex').slice(0, 12)
 }
@@ -282,34 +300,47 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
 **Refresh token:** set as an \`httpOnly\` cookie. JavaScript cannot read it. Automatically sent to \`/api/v1/auth/refresh\` by the browser. Expires in 7 days.
 
-**Rate limited:** 10 attempts per 15 minutes per IP. Returns 429 on excess.`,
+**Rate limited:** 10 attempts per 15 minutes per IP. Returns 429 on excess.
+
+**Lockout:** 5 consecutive failures for an email → \`423\` with \`retryAfterSeconds\` for the rest of a 15-minute window (unknown emails lock identically); 20 failures from one IP → \`429\` likewise. A correct sign-in clears the email counter.`,
       body: LoginSchema,
       response: {
         200: AuthResponseSchema,
         401: ErrorResponseSchema.describe('Invalid credentials'),
-        429: ErrorResponseSchema.describe('Too many login attempts'),
+        423: LockedResponseSchema.describe('Too many failed attempts for this email'),
+        429: LockedResponseSchema.describe('Too many failed attempts from this address, or the per-route rate limit'),
         500: ErrorResponseSchema,
       },
     },
   }, async (request, reply) => {
     const { email, password } = request.body as z.infer<typeof LoginSchema>
     const { deviceId, deviceName } = extractDeviceInfo(request as FastifyRequest)
+    const ip = clientIp(request)
+
+    // Lockout runs BEFORE the lookup so a locked unknown address answers the
+    // same as a locked real one. Every 401 below counts as a failure.
+    const lock = loginLockout.check(email, ip)
+    if (lock.locked) return sendLocked(reply, lock.scope, lock.retryAfterSeconds)
+
+    const fail = (trainer?: { email: string; name: string }): ReturnType<typeof reply.send> => {
+      const { justLockedEmail, emailFailures, ipFailures } = loginLockout.recordFailure(email, ip)
+      routeLog(app).warn({ email: sha256Short(email), ip, emailFailures, ipFailures, known: !!trainer }, 'Sign-in failed')
+      if (justLockedEmail) {
+        routeLog(app).warn({ email: sha256Short(email), ip }, 'Sign-in locked for this email')
+        if (trainer) sendLockoutNotice(trainer.email, trainer.name).catch((err: unknown) => routeLog(app).warn({ err }, 'Lockout notice not sent'))
+      }
+      // Same message whether the email or the password is wrong — no enumeration.
+      return reply.status(401).send({ error: 'Invalid email or password' })
+    }
 
     try {
       const trainer = await db.query.trainers.findFirst({
         where: eq(trainers.email, email.toLowerCase()),
       })
-
-      // Use the same error message whether email or password is wrong —
-      // prevents email enumeration attacks
-      if (!trainer) {
-        return reply.status(401).send({ error: 'Invalid email or password' })
-      }
+      if (!trainer) return fail()
 
       const valid = await verifyPassword(password, trainer.passwordHash)
-      if (!valid) {
-        return reply.status(401).send({ error: 'Invalid email or password' })
-      }
+      if (!valid) return fail(trainer)
 
       // Soft-deleted account (account plan A5). Within the purge window a
       // correct sign-in restores it; past the window it is treated exactly
@@ -317,13 +348,13 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       // and a distinct message would confirm the email once existed).
       let restored = false
       if (trainer.deactivatedAt) {
-        if (!isRestorable(trainer.deactivatedAt)) {
-          return reply.status(401).send({ error: 'Invalid email or password' })
-        }
+        if (!isRestorable(trainer.deactivatedAt)) return fail()
         await restoreTrainer(trainer.id)
         routeLog(app).warn({ trainerId: trainer.id }, 'Account restored by sign-in')
         restored = true
       }
+
+      loginLockout.recordSuccess(email)
 
       // Update last login timestamp for audit trail
       await db

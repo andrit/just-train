@@ -122,7 +122,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | G12 | **Account surface** — vetted; features tracked in `task-plan-account.md` | Claude | ✅ vet 2026-09-15 · ⬜ features | see "Account surface" below |
 | G13 | **Delete-account semantics** ⚖ | you | ✅ decided + built 2026-09-15 | **Soft delete** (`DELETE /auth/me`), restore-on-login within 30 days, daily purge job with an explicit ordered delete (`purgeTrainer()`, also the admin hard-purge utility); `/privacy` retention text now matches |
 | G14 | **Email verification gating** ⚖ | you | ✅ decided 2026-09-15 | **Nothing gated before Go Live** (verification stays advisory; reset-password proves the mailbox) — revisit at 3.0 |
-| G15 | **Account lockout** ⚖ | you | ✅ decided 2026-09-15 · ⬜ build | 5 failures/email → 15-min lock (counted for unknown emails too, `423` + retry-after); per-IP failure cap 20/15 min; notice email once mail is live; Turnstile register-always, login-adaptive after 3 failures. Build = account plan C9 |
+| G15 | **Account lockout** ⚖ | you | ✅ decided · ✅ built 2026-09-15 | 5 failures/email → 15-min lock (unknown emails too, `423` + `retryAfterSeconds`); per-IP 20/15 min (`429`); notice email once mail is live. **In-process store** (no Redis client in the repo — `ioredis` removed on purpose; same durability as the global rate limiter; `FailureStore` interface is the seam). ⬜ Turnstile register-always / login-adaptive — own step. ⚠ per-IP keying uses `X-Forwarded-For[0]` — confirm under G9 that Vercel→Railway overwrites a client-sent header (if it appends, the per-IP cap is bypassable; the per-email lock does not depend on IP) |
 | G16 | **Progress-photo delivery** — Cloudinary URLs are public if guessed; move `snapshot_media` (and form-check clips) to signed/authenticated delivery | Claude, design | ⬜ | the most sensitive data the app holds |
 | G17 | **Upload content check** — magic-byte validation (`file-type`) before Cloudinary, not only the client `Content-Type` | Claude | ⬜ | closes the documented trade-off |
 | G18 | **Backups** — Railway Postgres: automated backup enabled + retention; one restore *tested* (`pg_restore` into a scratch DB) | you | ⬜ | `Database-Management.md` documents manual `pg_dump` only; a backup never restored is a hope |
@@ -168,7 +168,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | Forgot / reset password (email link) | ✅ B6 (code) · ⬜ live | `POST /auth/forgot-password` (always 202, 5/15 min) → `POST /auth/reset-password` (single-use SHA-256 token, 1 h, all devices signed out). **Live only once Resend + `APP_URL` are set** — until then the request succeeds and the mail silently fails (logged + Sentry) |
 | Change email (re-verify) | ✅ B7 (code) · ⬜ live | `PATCH /auth/email` → link to the **new** address; swap only on redeem (token carries the target); old address notified. Same email-config gate as B6 |
 | Email verification **enforced** | advisory only | decided: nothing gated before Go Live (G14) |
-| Account lockout after N failures | ⬜ C9 | decided (G15); build pending |
+| Account lockout after N failures | ✅ C9 | 5/15 min per email (`423`), 20/15 min per IP (`429`), in-process store; Turnstile pending |
 
 Plan: `.workbench/designer/current/task-plan-account.md` (Phase 19 track).
 

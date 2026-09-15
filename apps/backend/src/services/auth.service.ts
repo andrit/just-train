@@ -23,7 +23,6 @@ import * as jwt from 'jsonwebtoken'
 import { emailConfig, sendTransactionalEmail, escapeHtml } from './email.service'
 import { db, refreshTokens, emailVerificationTokens } from '../db'
 import { eq, and, gt, desc, ne, isNull, or, lt, isNotNull } from 'drizzle-orm'
-import { trainers } from '../db/schema/trainers'
 import type { TrainerRole } from '@trainer-app/shared'
 
 // ============================================================
@@ -356,10 +355,11 @@ export async function revokeRefreshToken(tokenId: string): Promise<void> {
 // deterministic SHA-256 hash lets us query by hash directly.
 // ============================================================
 
-const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000  // 24 hours
-const RESEND_COOLDOWN_MS        = 60 * 1000             // 60 seconds
+export const EMAIL_VERIFICATION_TTL_MS       = 24 * 60 * 60 * 1000  // 24 hours
+export const VERIFICATION_RESEND_COOLDOWN_MS = 60 * 1000             // 60 seconds
+const RESEND_COOLDOWN_MS = VERIFICATION_RESEND_COOLDOWN_MS
 
-function sha256(value: string): string {
+export function sha256(value: string): string {
   return crypto.createHash('sha256').update(value).digest('hex')
 }
 
@@ -396,34 +396,8 @@ export async function sendVerificationEmail(
   })
 }
 
-export type VerifyTokenResult = 'ok' | 'expired' | 'used' | 'not_found'
-
-export async function verifyEmailToken(rawToken: string): Promise<VerifyTokenResult> {
-  const tokenHash = sha256(rawToken)
-  const now       = new Date()
-
-  const record = await db.query.emailVerificationTokens.findFirst({
-    where: eq(emailVerificationTokens.tokenHash, tokenHash),
-  })
-
-  if (!record)        return 'not_found'
-  if (record.usedAt)  return 'used'
-  if (record.expiresAt <= now) return 'expired'
-
-  await db.transaction(async (tx) => {
-    await tx
-      .update(emailVerificationTokens)
-      .set({ usedAt: now })
-      .where(eq(emailVerificationTokens.id, record.id))
-
-    await tx
-      .update(trainers)
-      .set({ emailVerified: true, updatedAt: now })
-      .where(eq(trainers.id, record.trainerId))
-  })
-
-  return 'ok'
-}
+// verifyEmailToken moved to emailVerification.service.ts (redeemVerificationToken)
+// when the change-email flow gave a token two possible meanings.
 
 /**
  * Check whether a resend is allowed for a trainer.

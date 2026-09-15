@@ -54,6 +54,9 @@ export const trainers = pgTable('trainers', {
 
   // Auth / audit
   emailVerified: boolean('email_verified').notNull().default(false),
+  // Address awaiting proof (account plan B7). The swap itself is driven by the
+  // verification token that carries new_email — this column is for display/cancel.
+  pendingEmail:  text('pending_email'),
   lastLoginAt:   timestamp('last_login_at'),
 
   // Phase 3C: SaaS subscription — not yet enforced (billing deferred to SaaS phase)

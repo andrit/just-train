@@ -20,6 +20,11 @@ export const emailVerificationTokens = pgTable('email_verification_tokens', {
   // The raw token is never stored — only the hash.
   tokenHash: text('token_hash').notNull(),
 
+  // Set when the token proves a NEW address (change-email flow, account plan
+  // B7): redeeming it swaps trainers.email to this value. Null = plain
+  // verification of the current address.
+  newEmail: text('new_email'),
+
   expiresAt: timestamp('expires_at').notNull(),
 
   // Set when the token is redeemed — prevents reuse.

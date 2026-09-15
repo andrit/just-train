@@ -18,6 +18,7 @@ const mockTrainer: Pick<TrainerResponse, 'id' | 'name' | 'email'> & Record<strin
   role:                 'trainer',
   weightUnitPreference: 'kg',
   emailVerified:        false,
+  pendingEmail:         null,
   lastLoginAt:          null,
   subscriptionTier:     'free',
   subscriptionStatus:   'active',

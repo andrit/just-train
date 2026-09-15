@@ -7,7 +7,7 @@
 import { useQuery, useMutation, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
 import { apiClient }    from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import type { ChangePasswordInput, DeactivateAccountInput, DeviceListResponse, ForgotPasswordInput, ResetPasswordInput } from '@trainer-app/shared'
+import type { ChangePasswordInput, ChangeEmailInput, DeactivateAccountInput, DeviceListResponse, ForgotPasswordInput, ResetPasswordInput, TrainerResponse } from '@trainer-app/shared'
 
 interface MessageResponse { message: string }
 
@@ -90,5 +90,25 @@ export function useForgotPassword() {
 export function useResetPassword() {
   return useMutation({
     mutationFn: (body: ResetPasswordInput) => apiClient.post<MessageResponse>('/auth/reset-password', body),
+  })
+}
+
+// ── Email (account plan B7) ───────────────────────────────────────────────────
+// Both return the trainer: `pendingEmail` set while the new address awaits its
+// link, `email` unchanged until the link is redeemed.
+
+export function useChangeEmail() {
+  const setTrainer = useAuthStore((s) => s.setTrainer)
+  return useMutation({
+    mutationFn: (body: ChangeEmailInput) => apiClient.patch<TrainerResponse>('/auth/email', body),
+    onSuccess:  (trainer) => setTrainer(trainer),
+  })
+}
+
+export function useCancelEmailChange() {
+  const setTrainer = useAuthStore((s) => s.setTrainer)
+  return useMutation({
+    mutationFn: () => apiClient.delete<TrainerResponse>('/auth/email/pending'),
+    onSuccess:  (trainer) => setTrainer(trainer),
   })
 }

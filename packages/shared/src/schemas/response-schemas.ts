@@ -72,6 +72,8 @@ export const TrainerResponseSchema = z.object({
     .describe('Always false in Phase 2 — email verification flow is deferred. See DEFERRED_ITEMS.md.'),
   lastLoginAt: z.string().datetime().nullable()
     .describe('ISO datetime of last successful login. null if never logged in via this system.'),
+  pendingEmail: z.string().email().nullable().default(null)
+    .describe('A new sign-in address awaiting verification (account plan B7). null when no change is pending.'),
 
   // Phase 3C: SaaS subscription fields
   subscriptionTier:   SubscriptionTierEnum

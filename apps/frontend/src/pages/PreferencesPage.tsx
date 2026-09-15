@@ -30,6 +30,7 @@ import {
 import { Input }   from '@/components/ui/Input'
 import { Spinner } from '@/components/ui/Spinner'
 import { ChangePasswordCard } from '@/components/account/ChangePasswordCard'
+import { ChangeEmailCard }    from '@/components/account/ChangeEmailCard'
 import { DevicesCard }        from '@/components/account/DevicesCard'
 import { ExportDataCard }     from '@/components/account/ExportDataCard'
 import { DeactivateAccountCard } from '@/components/account/DeactivateAccountCard'
@@ -852,8 +853,9 @@ export default function PreferencesPage(): React.JSX.Element {
         {/* ── Account ──────────────────────────────────────────────────── */}
         <Section
           title="Account"
-          description="Sign-in security and your data — password, devices, export"
+          description="Sign-in security and your data — email, password, devices, export"
         >
+          <ChangeEmailCard />
           <ChangePasswordCard />
           <DevicesCard />
           <ExportDataCard />

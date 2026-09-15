@@ -166,7 +166,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | Export my data (portability) | ✅ A4 | `GET /auth/export`, 3/hour |
 | **Delete account** (with data + Cloudinary media) | ✅ A5 | soft: `DELETE /auth/me { password }` → `deactivated_at`; login within 30 days restores; daily purge job deletes media then rows |
 | Forgot / reset password (email link) | ✅ B6 (code) · ⬜ live | `POST /auth/forgot-password` (always 202, 5/15 min) → `POST /auth/reset-password` (single-use SHA-256 token, 1 h, all devices signed out). **Live only once Resend + `APP_URL` are set** — until then the request succeeds and the mail silently fails (logged + Sentry) |
-| Change email (re-verify) | ✗ B7 | typos at register are permanent today |
+| Change email (re-verify) | ✅ B7 (code) · ⬜ live | `PATCH /auth/email` → link to the **new** address; swap only on redeem (token carries the target); old address notified. Same email-config gate as B6 |
 | Email verification **enforced** | advisory only | decided: nothing gated before Go Live (G14) |
 | Account lockout after N failures | ⬜ C9 | decided (G15); build pending |
 

@@ -102,6 +102,14 @@ export type DeactivateAccountInput = z.infer<typeof DeactivateAccountSchema>
 export const ForgotPasswordSchema = z.object({
   email: z.string().email(),
 })
+// Account security — change email (re-proves the password; the new address is
+// verified by link before it becomes the sign-in email)
+export const ChangeEmailSchema = z.object({
+  newEmail: z.string().email().max(254),
+  password: z.string().min(1),
+})
+export type ChangeEmailInput = z.infer<typeof ChangeEmailSchema>
+
 export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>
 
 export const ResetPasswordSchema = z.object({

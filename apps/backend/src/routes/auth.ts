@@ -2,6 +2,7 @@ import { routeLog } from '../lib/logger'
 import { captureSecurityEvent } from '../lib/sentry'
 import { deactivateTrainer, restoreTrainer, isRestorable, buildExport, PURGE_AFTER_DAYS } from '../services/account.service'
 import { requestPasswordReset, resetPasswordWithToken } from '../services/passwordReset.service'
+import { requestEmailChange, cancelEmailChange, redeemVerificationToken } from '../services/emailVerification.service'
 import { createHash } from 'node:crypto'
 // ------------------------------------------------------------
 // routes/auth.ts — Authentication endpoints
@@ -52,7 +53,6 @@ import {
   generateVerificationToken,
   storeVerificationToken,
   sendVerificationEmail,
-  verifyEmailToken,
   canResendVerification,
 } from '../services/auth.service'
 import { authenticate } from '../middleware/authenticate'
@@ -63,6 +63,7 @@ import {
   OnboardTrainerSchema,
   UpdateTrainerSchema,
   ChangePasswordSchema,
+  ChangeEmailSchema,
   DeactivateAccountSchema,
   ForgotPasswordSchema,
   ResetPasswordSchema,
@@ -111,6 +112,7 @@ export function serializeTrainer(
     role:                 trainer.role,
     weightUnitPreference: trainer.weightUnitPreference,
     emailVerified:        trainer.emailVerified,
+    pendingEmail:         trainer.pendingEmail ?? null,
     lastLoginAt:          overrides.lastLoginAt !== undefined
                             ? overrides.lastLoginAt
                             : trainer.lastLoginAt?.toISOString() ?? null,
@@ -893,6 +895,89 @@ Called once from the onboarding screen after registration. Can be called again t
 
 
   // ──────────────────────────────────────────────────────────────────────────
+  // PATCH /auth/email — Start a sign-in email change (account plan B7)
+  //
+  // Re-proves the password, records the pending address, and mails a
+  // confirmation link to the NEW address. Nothing changes until that link is
+  // redeemed (GET /auth/verify-email) — the old address keeps working, so a
+  // typo cannot lock anyone out. Returns the trainer with `pendingEmail` set.
+  // ──────────────────────────────────────────────────────────────────────────
+  app.patch('/auth/email', {
+    preHandler: [authenticate],
+    config: { rateLimit: { max: 5, timeWindow: '15 minutes' } },
+    schema: {
+      tags: ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Change sign-in email (verified by link before it takes effect)',
+      body: ChangeEmailSchema,
+      response: {
+        200: TrainerResponseSchema,
+        400: ErrorResponseSchema.describe('Wrong password, same address, or resend cooldown'),
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+        409: ErrorResponseSchema.describe('Address already used by another account'),
+        500: ErrorResponseSchema,
+        503: ErrorResponseSchema.describe('Pending change recorded but the confirmation email could not be sent'),
+      },
+    },
+  }, async (request, reply) => {
+    const body = request.body as z.infer<typeof ChangeEmailSchema>
+    const trainerId = request.trainer.trainerId
+
+    try {
+      const { outcome } = await requestEmailChange(trainerId, body.newEmail, body.password)
+      switch (outcome) {
+        case 'not_found':      return reply.status(404).send({ error: 'Trainer not found' })
+        case 'wrong_password': return reply.status(400).send({ error: 'Password is incorrect' })
+        case 'same_email':     return reply.status(400).send({ error: 'That is already your sign-in email' })
+        case 'taken':          return reply.status(409).send({ error: 'That email address is already in use' })
+        case 'cooldown':       return reply.status(400).send({ error: 'Please wait 60 seconds before requesting another confirmation email' })
+        case 'send_failed':
+          routeLog(app).error({ trainerId }, 'Change-email confirmation could not be sent')
+          return reply.status(503).send({ error: 'Could not send the confirmation email. Try again in a minute.' })
+        case 'sent': break
+      }
+
+      const trainer = await db.query.trainers.findFirst({ where: eq(trainers.id, trainerId) })
+      if (!trainer) return reply.status(404).send({ error: 'Trainer not found' })
+      routeLog(app).warn({ trainerId }, 'Email change requested; confirmation sent to the new address')
+      return reply.send(serializeTrainer(trainer))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to change email' })
+    }
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // DELETE /auth/email/pending — Cancel a pending email change
+  // ──────────────────────────────────────────────────────────────────────────
+  app.delete('/auth/email/pending', {
+    preHandler: [authenticate],
+    schema: {
+      tags: ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Cancel a pending sign-in email change',
+      response: {
+        200: TrainerResponseSchema,
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const trainerId = request.trainer.trainerId
+    try {
+      await cancelEmailChange(trainerId)
+      const trainer = await db.query.trainers.findFirst({ where: eq(trainers.id, trainerId) })
+      if (!trainer) return reply.status(404).send({ error: 'Trainer not found' })
+      return reply.send(serializeTrainer(trainer))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to cancel the email change' })
+    }
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
   // POST /auth/send-verification — Generate and send a verification email
   //
   // Protected. Generates a fresh token, stores its SHA-256 hash, and emails
@@ -955,6 +1040,7 @@ Called once from the onboarding screen after registration. Can be called again t
       response: {
         200: MessageResponseSchema,
         400: ErrorResponseSchema.describe('Token expired, already used, or not found'),
+        409: ErrorResponseSchema.describe('Change-email token, but the address was registered by someone else meanwhile'),
         500: ErrorResponseSchema,
       },
     },
@@ -962,10 +1048,14 @@ Called once from the onboarding screen after registration. Can be called again t
     const { token } = request.query as { token: string }
 
     try {
-      const result = await verifyEmailToken(token)
+      const { outcome, changedTo } = await redeemVerificationToken(token)
 
-      if (result === 'ok') {
-        return reply.send({ message: 'Email verified successfully' })
+      if (outcome === 'ok') {
+        if (changedTo) routeLog(app).warn({ email: sha256Short(changedTo) }, 'Sign-in email changed via verification link')
+        return reply.send({ message: changedTo ? `Your sign-in email is now ${changedTo}` : 'Email verified successfully' })
+      }
+      if (outcome === 'taken') {
+        return reply.status(409).send({ error: 'That email address is now used by another account. Cancel the change and pick a different one.' })
       }
 
       const messages: Record<string, string> = {
@@ -973,7 +1063,7 @@ Called once from the onboarding screen after registration. Can be called again t
         used:      'This verification link has already been used.',
         not_found: 'Invalid verification link.',
       }
-      return reply.status(400).send({ error: messages[result] ?? 'Verification failed' })
+      return reply.status(400).send({ error: messages[outcome] ?? 'Verification failed' })
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Verification failed' })

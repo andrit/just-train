@@ -49,6 +49,7 @@ export function makeTrainer(overrides: Partial<Trainer> = {}): Trainer {
     role:                 'trainer',
     weightUnitPreference: 'lbs',
     emailVerified:        false,
+    pendingEmail:         null,
     lastLoginAt:          null,
     // Phase 3C
     subscriptionTier:     'free',

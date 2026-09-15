@@ -86,7 +86,7 @@ UPSTASH_REDIS_URL     = rediss://...
 ```
 
 ⚠️ **All three of `RESEND_API_KEY`, `REPORT_FROM_EMAIL` and `APP_URL` must be set for any
-transactional email to go out** — verification links and password-reset links both.
+transactional email to go out** — verification, password-reset and change-email links alike.
 `services/email.service.ts` refuses to send with any of them missing (there is no fallback
 domain: an earlier default of `https://trainerapp.io` would have mailed live tokens to a
 domain this project does not own). `APP_URL` is the **frontend** origin (the custom domain

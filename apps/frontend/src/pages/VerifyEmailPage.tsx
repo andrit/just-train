@@ -31,6 +31,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
       .then(async (res) => {
         const data = await res.json()
         if (res.ok) {
+          setMessage(data.message ?? '')
           setState('success')
         } else {
           setMessage(data.error ?? 'Verification failed.')
@@ -69,7 +70,8 @@ export default function VerifyEmailPage(): React.JSX.Element {
               Email verified
             </h1>
             <p className="text-gray-400 text-sm mb-8">
-              Your email address has been confirmed.
+              {/* A change-email link reports the new sign-in address; a plain one just confirms. */}
+              {message || 'Your email address has been confirmed.'}
             </p>
             <button
               type="button"

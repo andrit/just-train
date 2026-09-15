@@ -117,7 +117,7 @@ Product decisions needed before building:
 
 ### Trainer Profile Edit
 When: Settings page (post-v2.x) — **in progress as the Phase 19 account track** (`.workbench/designer/current/task-plan-account.md`)
-What: `PATCH /auth/me` — name, weightUnitPreference ✅. ~~Password change~~ ✅ `PATCH /auth/password` (2026-09-15). Email change (re-verify the new address before switching) → account plan B7. Devices, export, deactivate/purge, reset password, lockout → A2–A5, B6, C9.
+What: `PATCH /auth/me` — name, weightUnitPreference ✅. ~~Password change~~ ✅ `PATCH /auth/password` (2026-09-15). ~~Email change~~ ✅ `PATCH /auth/email` + verify-to-swap (2026-09-15, B7; live once email is configured). Devices, export, deactivate/purge, reset password ✅ (A2–A5, B6). Lockout → C9.
 
 ### Trainer Mode Switch After Onboarding
 When: Settings page

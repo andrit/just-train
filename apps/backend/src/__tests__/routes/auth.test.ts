@@ -52,6 +52,12 @@ vi.mock('../../services/account.service', async (importOriginal) => {
   return { ...real, deactivateTrainer: vi.fn().mockResolvedValue(undefined), restoreTrainer: vi.fn().mockResolvedValue(undefined), buildExport: vi.fn().mockResolvedValue(null) }
 })
 
+vi.mock('../../services/emailVerification.service', () => ({
+  requestEmailChange:      vi.fn().mockResolvedValue({ outcome: 'sent', pendingEmail: 'new@example.com' }),
+  cancelEmailChange:       vi.fn().mockResolvedValue(undefined),
+  redeemVerificationToken: vi.fn().mockResolvedValue({ outcome: 'ok' }),
+}))
+
 vi.mock('../../services/passwordReset.service', () => ({
   requestPasswordReset:   vi.fn().mockResolvedValue('sent'),
   resetPasswordWithToken: vi.fn().mockResolvedValue({ outcome: 'ok', trainerId: '11111111-1111-1111-1111-111111111111' }),
@@ -865,5 +871,104 @@ describe('POST /api/v1/auth/reset-password', () => {
     const res = await app.inject({ method: 'POST', url: '/api/v1/auth/reset-password', payload: { token, newPassword: 'short' } })
     expect(res.statusCode).toBe(400)
     expect(resetPasswordWithToken).not.toHaveBeenCalled()
+  })
+})
+
+// ── PATCH /auth/email + DELETE /auth/email/pending + verify swap (account plan B7) ──
+
+describe('PATCH /api/v1/auth/email', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const url  = '/api/v1/auth/email'
+  const body = { newEmail: 'new@example.com', password: 'current-password' }
+
+  it('returns 401 without a token', async () => {
+    const res = await app.inject({ method: 'PATCH', url, payload: body })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 400 for a malformed address before calling the service', async () => {
+    const { requestEmailChange } = await import('../../services/emailVerification.service')
+    const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader() }, payload: { newEmail: 'nope', password: 'x' } })
+    expect(res.statusCode).toBe(400)
+    expect(requestEmailChange).not.toHaveBeenCalled()
+  })
+
+  it('returns the trainer with pendingEmail set on success', async () => {
+    const { db } = await import('../../db')
+    const { requestEmailChange } = await import('../../services/emailVerification.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce({ ...makeTrainer(), pendingEmail: 'new@example.com' })
+    const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader() }, payload: body })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().pendingEmail).toBe('new@example.com')
+    expect(res.json().email).toBe('trainer@example.com')                          // unchanged until verified
+    expect(requestEmailChange).toHaveBeenCalledWith(TEST_TRAINER_ID, 'new@example.com', 'current-password')
+  })
+
+  it('maps outcomes: wrong_password/same_email/cooldown → 400, taken → 409, send_failed → 503', async () => {
+    const { requestEmailChange } = await import('../../services/emailVerification.service')
+    const cases = [['wrong_password', 400], ['same_email', 400], ['cooldown', 400], ['taken', 409], ['send_failed', 503]] as const
+    for (const [outcome, status] of cases) {
+      vi.mocked(requestEmailChange).mockResolvedValueOnce({ outcome })
+      const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader() }, payload: body })
+      expect(res.statusCode, outcome).toBe(status)
+    }
+  })
+})
+
+describe('DELETE /api/v1/auth/email/pending', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('returns 401 without a token', async () => {
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/email/pending' })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('cancels and returns the trainer with pendingEmail cleared', async () => {
+    const { db } = await import('../../db')
+    const { cancelEmailChange } = await import('../../services/emailVerification.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/email/pending', headers: { authorization: authHeader() } })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().pendingEmail).toBeNull()
+    expect(cancelEmailChange).toHaveBeenCalledWith(TEST_TRAINER_ID)
+  })
+})
+
+describe('GET /api/v1/auth/verify-email', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const url = '/api/v1/auth/verify-email?token=' + 'a'.repeat(96)
+
+  it('plain verification → 200', async () => {
+    const res = await app.inject({ method: 'GET', url })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().message).toContain('verified')
+  })
+
+  it('change token → 200 naming the new address', async () => {
+    const { redeemVerificationToken } = await import('../../services/emailVerification.service')
+    vi.mocked(redeemVerificationToken).mockResolvedValueOnce({ outcome: 'ok', changedTo: 'new@example.com' })
+    const res = await app.inject({ method: 'GET', url })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().message).toContain('new@example.com')
+  })
+
+  it('expired/used/not_found → 400, taken → 409', async () => {
+    const { redeemVerificationToken } = await import('../../services/emailVerification.service')
+    for (const [outcome, status] of [['expired', 400], ['used', 400], ['not_found', 400], ['taken', 409]] as const) {
+      vi.mocked(redeemVerificationToken).mockResolvedValueOnce({ outcome })
+      const res = await app.inject({ method: 'GET', url })
+      expect(res.statusCode, outcome).toBe(status)
+    }
   })
 })

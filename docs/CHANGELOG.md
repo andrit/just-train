@@ -37,7 +37,7 @@ Survey of options (Sentry / GlitchTip / PostHog / Better Stack / UptimeRobot / V
 - **Deliberately not done:** session replay (would record training screens), PostHog, a status page, log shipping — all recorded with triggers under `DEFERRED_ITEMS.md` → "Monitoring L5".
 
 ### Process — PWA SDLC Phase 17 closed incomplete → Phase 18 (2026-09-14)
-- Brand & Identity was advanced with `criteria_verified: false` by explicit decision: the three code-side criteria are met, the four remaining (name, logo SVG, domain + SSL, sign-off) are external and now gate **launch** (Phase 19), not monitoring work. **The product name is undetermined** — the first-choice name was unavailable; "FORGE" / trainforge.io is a fallback and may stay so until launch readiness. Nothing in-app or in docs should present it as final.
+- Brand & Identity was advanced with `criteria_verified: false` by explicit decision: the three code-side criteria are met, the four remaining (name, logo SVG, domain + SSL, sign-off) are external and now gate **launch** (Phase 19), not monitoring work. ~~The product name is undetermined~~ — **resolved 2026-09-15: Just Train, domain `just-train.fit` acquired.** Chosen because it says what the app is ("we are here to train, and that's it"), and it was already the repo/Vercel/Railway name. Logo, USPTO clearance and sign-off remain launch gates; DNS/SSL cut-over and the Resend sender domain are now unblocked.
 
 ### Save as template — now actually saves the plan
 - **"Save as template" copied nothing.** `handleSaveAsTemplateConfirm` created a template with the typed name and zero exercises, then toasted "Template saved!" — silent data loss for anyone who assumed it worked. It now deep-copies the session's plan.

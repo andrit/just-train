@@ -149,6 +149,7 @@ Some commands must be run from a specific directory. Always include the director
 | `npx drizzle-kit generate` | `apps/backend/` | Generate migration file after schema change — run before every deploy |
 | `DATABASE_URL="..." npx drizzle-kit migrate` | `apps/backend/` | Apply pending migrations to production — get password from Railway Variables, never save it to a file |
 | `pnpm db:seed` | `apps/backend/` | Seeds exercises and default templates |
+| `pnpm verify` | `/workspace` (root) | **The pre-commit gate**: shared build → typecheck → all tests → lint, stopping at the first failure. Run this, not the four separately |
 | `pnpm --filter @trainer-app/shared build` | `/workspace` (root) | Compiles shared package to CJS |
 | `pnpm typecheck` | `/workspace` (root) | Typechecks all packages |
 | `pnpm lint` | `/workspace` (root) | Lints all packages |
@@ -161,10 +162,9 @@ Some commands must be run from a specific directory. Always include the director
 
 ```
 # from /workspace (root)
-pnpm typecheck
-pnpm lint
-pnpm test
+pnpm verify
 ```
+(= shared build → typecheck → all tests → lint, `&&`-chained. The shared build comes first because typecheck and tests read `packages/shared/dist`.)
 
 ## Production architecture — Vercel proxy (important)
 

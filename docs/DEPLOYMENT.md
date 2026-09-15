@@ -85,17 +85,18 @@ APP_URL               = https://your-app.vercel.app   ← FRONTEND origin, no tr
 UPSTASH_REDIS_URL     = rediss://...
 ```
 
-⚠️ **`APP_URL` must be set before enabling email.** It builds the link in the
-verification email (`${APP_URL}/verify-email?token=...`). Unset, it falls back to
-`https://trainerapp.io` — a domain this project does not own — so verification
-emails would send successfully carrying a live token in a URL pointing somewhere
-else. It is the **frontend** origin (Vercel, or the custom domain once live), not
-the Railway backend URL.
+⚠️ **All three of `RESEND_API_KEY`, `REPORT_FROM_EMAIL` and `APP_URL` must be set for any
+transactional email to go out** — verification links and password-reset links both.
+`services/email.service.ts` refuses to send with any of them missing (there is no fallback
+domain: an earlier default of `https://trainerapp.io` would have mailed live tokens to a
+domain this project does not own). `APP_URL` is the **frontend** origin (the custom domain
+once live; the Vercel URL until then), not the Railway backend URL — it builds
+`${APP_URL}/verify-email?token=…` and `${APP_URL}/reset-password?token=…`.
 
-Note that email verification is currently **advisory only**: `emailVerified` is
-set at registration and never checked, so nothing is gated on it. Without
-`RESEND_API_KEY` the send fails silently — registration logs the error and
-proceeds — and the only symptom is the dashboard banner never clearing.
+What fails without them: registration still succeeds (the verification send is logged and
+skipped; the dashboard banner never clears — verification is advisory anyway), and
+**forgot-password accepts the request but no mail arrives** (`send_failed` in the logs and a
+Sentry event). Password recovery is therefore unavailable until email is configured.
 
 ### 1d. Run the database migration
 

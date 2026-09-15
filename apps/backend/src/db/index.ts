@@ -73,6 +73,9 @@ export const {
   // Phase 10.5: email verification
   emailVerificationTokens,
 
+  // Account plan B6: password reset
+  passwordResetTokens,
+
   // Offline write-replay dedup keys
   idempotencyKeys,
 

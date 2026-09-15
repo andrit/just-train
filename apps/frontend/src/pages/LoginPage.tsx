@@ -188,6 +188,12 @@ export default function LoginPage(): React.JSX.Element {
             {mode === 'login' ? 'Sign in' : 'Create account'}
           </Button>
 
+          {mode === 'login' && (
+            <p className="text-xs text-center mt-3">
+              <Link to="/forgot-password" className="text-gray-400 hover:text-gray-200 underline underline-offset-2">Forgot your password?</Link>
+            </p>
+          )}
+
           {mode === 'register' && (
             <p className="text-xs text-gray-600 text-center mt-3">
               By creating an account you agree to our{' '}

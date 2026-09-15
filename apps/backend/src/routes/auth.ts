@@ -1,6 +1,8 @@
 import { routeLog } from '../lib/logger'
 import { captureSecurityEvent } from '../lib/sentry'
 import { deactivateTrainer, restoreTrainer, isRestorable, buildExport, PURGE_AFTER_DAYS } from '../services/account.service'
+import { requestPasswordReset, resetPasswordWithToken } from '../services/passwordReset.service'
+import { createHash } from 'node:crypto'
 // ------------------------------------------------------------
 // routes/auth.ts — Authentication endpoints
 //
@@ -62,6 +64,8 @@ import {
   UpdateTrainerSchema,
   ChangePasswordSchema,
   DeactivateAccountSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
   DeviceListResponseSchema,
   TrainerResponseSchema,
   ErrorResponseSchema,
@@ -87,6 +91,11 @@ const MessageResponseSchema = z.object({
 //
 // Note: lastLoginAt is passed separately because the register route returns
 // null (just created) while login returns the updated value.
+
+/** First 12 hex chars of SHA-256(email) — enough to correlate log lines, never the address itself. */
+function sha256Short(email: string): string {
+  return createHash('sha256').update(email.toLowerCase()).digest('hex').slice(0, 12)
+}
 
 export function serializeTrainer(
   trainer: Trainer,
@@ -821,6 +830,64 @@ Called once from the onboarding screen after registration. Can be called again t
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to build export' })
+    }
+  })
+
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // POST /auth/forgot-password — Request a reset link (account plan B6)
+  // POST /auth/reset-password  — Redeem it
+  //
+  // Both PUBLIC. forgot-password answers 202 no matter what (no account,
+  // cooldown, send failure) — the email is the only signal, so the endpoint
+  // cannot be used to enumerate accounts. The outcome is logged.
+  // ──────────────────────────────────────────────────────────────────────────
+  app.post('/auth/forgot-password', {
+    config: { rateLimit: { max: 5, timeWindow: '15 minutes' } },
+    schema: {
+      tags: ['Auth'],
+      summary: 'Request a password reset link',
+      description: 'Always answers 202. If an account exists for the email, a one-hour single-use link is sent.',
+      body: ForgotPasswordSchema,
+      response: { 202: MessageResponseSchema, 400: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { email } = request.body as z.infer<typeof ForgotPasswordSchema>
+    try {
+      const outcome = await requestPasswordReset(email)
+      routeLog(app).warn({ outcome, emailHash: sha256Short(email) }, 'Password reset requested')
+      if (outcome === 'send_failed') captureSecurityEvent('Password reset email failed to send', { outcome })
+      return reply.status(202).send({ message: 'If an account exists for that email, a reset link is on its way.' })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Could not process the request' })
+    }
+  })
+
+  app.post('/auth/reset-password', {
+    config: { rateLimit: { max: 10, timeWindow: '15 minutes' } },
+    schema: {
+      tags: ['Auth'],
+      summary: 'Set a new password with a reset token',
+      description: 'Consumes the token, sets the password, and signs out every device.',
+      body: ResetPasswordSchema,
+      response: { 200: MessageResponseSchema, 400: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { token, newPassword } = request.body as z.infer<typeof ResetPasswordSchema>
+    try {
+      const { outcome, trainerId } = await resetPasswordWithToken(token, newPassword)
+      if (outcome !== 'ok') {
+        const reason = outcome === 'expired' ? 'This reset link has expired. Request a new one.'
+                     : outcome === 'used'    ? 'This reset link was already used. Request a new one.'
+                     :                         'This reset link is not valid.'
+        return reply.status(400).send({ error: reason, code: `RESET_${outcome.toUpperCase()}` })
+      }
+      routeLog(app).warn({ trainerId }, 'Password reset via emailed link; all devices signed out')
+      return reply.send({ message: 'Password updated. Sign in with your new password.' })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Could not reset the password' })
     }
   })
 

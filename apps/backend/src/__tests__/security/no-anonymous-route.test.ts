@@ -42,6 +42,8 @@ const PUBLIC = new Set([
   'POST /auth/login',
   'POST /auth/refresh',       // authenticates via the httpOnly cookie + headers, not a Bearer token
   'GET /auth/verify-email',   // the emailed link; token in the query
+  'POST /auth/forgot-password', // by definition the caller cannot sign in
+  'POST /auth/reset-password',  // authenticates with the emailed token
 ])
 
 describe('no anonymous route — source layer', () => {

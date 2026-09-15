@@ -7,7 +7,7 @@
 import { useQuery, useMutation, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
 import { apiClient }    from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import type { ChangePasswordInput, DeactivateAccountInput, DeviceListResponse } from '@trainer-app/shared'
+import type { ChangePasswordInput, DeactivateAccountInput, DeviceListResponse, ForgotPasswordInput, ResetPasswordInput } from '@trainer-app/shared'
 
 interface MessageResponse { message: string }
 
@@ -76,5 +76,19 @@ export function useExportData() {
       a.remove()
       URL.revokeObjectURL(url)
     },
+  })
+}
+
+// ── Forgot / reset (public) ───────────────────────────────────────────────────
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (body: ForgotPasswordInput) => apiClient.post<MessageResponse>('/auth/forgot-password', body),
+  })
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (body: ResetPasswordInput) => apiClient.post<MessageResponse>('/auth/reset-password', body),
   })
 }

@@ -52,6 +52,11 @@ vi.mock('../../services/account.service', async (importOriginal) => {
   return { ...real, deactivateTrainer: vi.fn().mockResolvedValue(undefined), restoreTrainer: vi.fn().mockResolvedValue(undefined), buildExport: vi.fn().mockResolvedValue(null) }
 })
 
+vi.mock('../../services/passwordReset.service', () => ({
+  requestPasswordReset:   vi.fn().mockResolvedValue('sent'),
+  resetPasswordWithToken: vi.fn().mockResolvedValue({ outcome: 'ok', trainerId: '11111111-1111-1111-1111-111111111111' }),
+}))
+
 vi.mock('../../services/auth.service', async (importOriginal) => {
   // Keep real generateAccessToken and verifyAccessToken —
   // routes issue real tokens, middleware verifies them
@@ -801,5 +806,64 @@ describe('GET /api/v1/auth/export', () => {
     expect(res.headers['content-disposition']).toBe('attachment; filename="just-train-export-2026-09-15.json"')
     expect(res.json()).toMatchObject({ format: 'just-train-export', account: { id: TEST_TRAINER_ID } })
     expect(buildExport).toHaveBeenCalledWith(TEST_TRAINER_ID)
+  })
+})
+
+// ── POST /auth/forgot-password + /auth/reset-password (account plan B6) ───────
+
+describe('POST /api/v1/auth/forgot-password', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('answers 202 with the same message for a known account, an unknown one, a cooldown, and a send failure', async () => {
+    const { requestPasswordReset } = await import('../../services/passwordReset.service')
+    const bodies: string[] = []
+    for (const outcome of ['sent', 'no_account', 'cooldown', 'send_failed'] as const) {
+      vi.mocked(requestPasswordReset).mockResolvedValueOnce(outcome)
+      const res = await app.inject({ method: 'POST', url: '/api/v1/auth/forgot-password', payload: { email: 'someone@example.com' } })
+      expect(res.statusCode).toBe(202)
+      bodies.push(res.body)
+    }
+    expect(new Set(bodies).size).toBe(1)
+  })
+
+  it('returns 400 for a malformed email', async () => {
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/forgot-password', payload: { email: 'nope' } })
+    expect(res.statusCode).toBe(400)
+  })
+})
+
+describe('POST /api/v1/auth/reset-password', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const token = 'a'.repeat(96)
+
+  it('sets the password and reports success', async () => {
+    const { resetPasswordWithToken } = await import('../../services/passwordReset.service')
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/reset-password', payload: { token, newPassword: 'brand-new-pass-1' } })
+    expect(res.statusCode).toBe(200)
+    expect(resetPasswordWithToken).toHaveBeenCalledWith(token, 'brand-new-pass-1')
+  })
+
+  it('maps expired / used / not_found to 400 with a code', async () => {
+    const { resetPasswordWithToken } = await import('../../services/passwordReset.service')
+    for (const outcome of ['expired', 'used', 'not_found'] as const) {
+      vi.mocked(resetPasswordWithToken).mockResolvedValueOnce({ outcome })
+      const res = await app.inject({ method: 'POST', url: '/api/v1/auth/reset-password', payload: { token, newPassword: 'brand-new-pass-1' } })
+      expect(res.statusCode).toBe(400)
+      expect(res.json().code).toBe(`RESET_${outcome.toUpperCase()}`)
+    }
+  })
+
+  it('rejects a short password before touching the token', async () => {
+    const { resetPasswordWithToken } = await import('../../services/passwordReset.service')
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/reset-password', payload: { token, newPassword: 'short' } })
+    expect(res.statusCode).toBe(400)
+    expect(resetPasswordWithToken).not.toHaveBeenCalled()
   })
 })

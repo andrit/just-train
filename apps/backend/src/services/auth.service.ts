@@ -20,7 +20,7 @@
 import * as argon2 from 'argon2'
 import * as crypto from 'crypto'
 import * as jwt from 'jsonwebtoken'
-import { Resend } from 'resend'
+import { emailConfig, sendTransactionalEmail, escapeHtml } from './email.service'
 import { db, refreshTokens, emailVerificationTokens } from '../db'
 import { eq, and, gt, desc, ne, isNull, or, lt, isNotNull } from 'drizzle-orm'
 import { trainers } from '../db/schema/trainers'
@@ -379,27 +379,21 @@ export async function sendVerificationEmail(
   name:  string,
   rawToken: string,
 ): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) throw new Error('RESEND_API_KEY is not set')
-
-  const fromEmail = process.env.REPORT_FROM_EMAIL ?? 'reports@trainerapp.io'
-  const appUrl    = process.env.APP_URL            ?? 'https://trainerapp.io'
-  const link      = `${appUrl}/verify-email?token=${rawToken}`
-  const resend    = new Resend(apiKey)
-
-  const { error } = await resend.emails.send({
-    from:    fromEmail,
+  // emailConfig() throws if APP_URL / REPORT_FROM_EMAIL / RESEND_API_KEY are
+  // missing — there is deliberately no default origin (see email.service.ts).
+  const cfg  = emailConfig()
+  const link = `${cfg.appUrl}/verify-email?token=${rawToken}`
+  await sendTransactionalEmail({
     to:      email,
-    subject: 'Verify your TrainerApp email',
+    subject: 'Verify your Just Train email',
+    config:  cfg,
     html: [
-      `<p>Hi ${name},</p>`,
+      `<p>Hi ${escapeHtml(name)},</p>`,
       `<p>Click the link below to verify your email address. The link expires in 24 hours.</p>`,
       `<p><a href="${link}">${link}</a></p>`,
-      `<p>If you didn't create a TrainerApp account, you can safely ignore this email.</p>`,
+      `<p>If you didn't create a Just Train account, you can safely ignore this email.</p>`,
     ].join(''),
   })
-
-  if (error) throw new Error(error.message ?? 'Failed to send verification email')
 }
 
 export type VerifyTokenResult = 'ok' | 'expired' | 'used' | 'not_found'

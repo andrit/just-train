@@ -98,6 +98,18 @@ export const DeactivateAccountSchema = z.object({
 })
 export type DeactivateAccountInput = z.infer<typeof DeactivateAccountSchema>
 
+// Forgot / reset password (public routes)
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email(),
+})
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>
+
+export const ResetPasswordSchema = z.object({
+  token:       z.string().min(32).max(200),
+  newPassword: z.string().min(8).max(100),
+})
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>
+
 // ============================================================
 // CLIENT
 // ============================================================

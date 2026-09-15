@@ -157,18 +157,18 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 
 **Safe as built:** `PATCH /auth/me` spreads the body, but `UpdateTrainerSchema` holds only name / unit / preferences — no `role`, `subscriptionTier`, `subscriptionStatus`, `emailVerified`, `trainerMode` — and Zod strips unknown keys (now pinned by the mass-assignment guard). Register accepts name / email / password only. `POST /auth/onboard` may be re-called to switch mode ("before the trainer has meaningful data" — advisory; nothing enforces "no meaningful data"). `POST /auth/logout-all` revokes every device's refresh token. Refresh tokens rotate; device id is tracked.
 
-**Missing — expected of any account, and required before strangers register** (each is a `DEFERRED_ITEMS` entry today):
-| Capability | Status | Why it matters |
+**Account capabilities — status as of 2026-09-15** (each was a `DEFERRED_ITEMS` entry; the plan is the account track of Phase 19):
+| Capability | Status | Notes |
 |---|---|---|
-| Change password (current + new) | ✗ | basic hygiene; also the recovery path after a suspected compromise |
-| Forgot / reset password (email link) | ✗ | without it a forgotten password is a lost account; needs Resend + `APP_URL` (parked on the domain — can run on the vercel.app origin now) |
-| Change email (re-verify) | ✗ | typos at register are permanent today |
-| Email verification **enforced** | advisory only | built; gate is one line when email is live |
-| Active devices / sessions list + revoke one | ✗ | `refresh_tokens` has `device_name`, `last_used_at`; UI only |
-| Refresh-token reuse detection | ✗ | replay of a rotated token should end all sessions (`last_used_at` exists for this) |
-| **Delete account** (with data + Cloudinary media) | ✗ | `/privacy` §Data retention and §Your rights promise deletion and erasure — **the page promises what the app cannot do** |
-| Export my data (portability) | ✗ | `/privacy` §Your rights lists portability |
-| Account lockout after N failures | ✗ | decisions listed in `DEFERRED_ITEMS`; needed once registration is public |
+| Change password (current + new) | ✅ A1 | `PATCH /auth/password`; other devices signed out, caller kept |
+| Active devices / sessions list + revoke one | ✅ A2 | `GET /auth/devices`, `DELETE /auth/devices/:deviceId`; "sign out everywhere" via `/auth/logout-all` |
+| Refresh-token reuse detection | ✅ A3 | replay beyond a 10 s grace → family revoked, `401 TOKEN_REUSE`; daily cleanup job |
+| Export my data (portability) | ✅ A4 | `GET /auth/export`, 3/hour |
+| **Delete account** (with data + Cloudinary media) | ✅ A5 | soft: `DELETE /auth/me { password }` → `deactivated_at`; login within 30 days restores; daily purge job deletes media then rows |
+| Forgot / reset password (email link) | ✅ B6 (code) · ⬜ live | `POST /auth/forgot-password` (always 202, 5/15 min) → `POST /auth/reset-password` (single-use SHA-256 token, 1 h, all devices signed out). **Live only once Resend + `APP_URL` are set** — until then the request succeeds and the mail silently fails (logged + Sentry) |
+| Change email (re-verify) | ✗ B7 | typos at register are permanent today |
+| Email verification **enforced** | advisory only | decided: nothing gated before Go Live (G14) |
+| Account lockout after N failures | ⬜ C9 | decided (G15); build pending |
 
 Plan: `.workbench/designer/current/task-plan-account.md` (Phase 19 track).
 

@@ -63,10 +63,8 @@ Fix: Add `public/robots.txt` with appropriate crawl directives before launch.
 
 ## Auth & Security
 
-### Password Reset Flow
-When: Settings UI phase (post-v2.x)
-What: Forgot password → signed short-lived token → email → verify → set new password
-Notes: Add `password_reset_tokens` table. Wire to Resend (already integrated).
+### Password Reset Flow ✅ BUILT (2026-09-15, account plan B6)
+`password_reset_tokens` (SHA-256 of a 48-byte token, 1 h TTL, single use), `POST /auth/forgot-password` (always 202), `POST /auth/reset-password` (sets the hash, signs out every device), `/forgot-password` + `/reset-password` pages. **Not yet live:** the email goes out through `services/email.service.ts`, which needs `RESEND_API_KEY`, `REPORT_FROM_EMAIL` (a Resend-verified `just-train.fit` sender) and `APP_URL` on Railway — until those are set the request is accepted and the send fails (logged, Sentry event). Remaining: set the three variables after the domain is verified in Resend.
 
 ### Email Verification
 When: When registration opens to multiple trainers

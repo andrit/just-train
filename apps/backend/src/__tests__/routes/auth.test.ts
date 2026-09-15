@@ -49,7 +49,7 @@ vi.mock('../../db', () => ({
 
 vi.mock('../../services/account.service', async (importOriginal) => {
   const real = await importOriginal<typeof import('../../services/account.service')>()
-  return { ...real, deactivateTrainer: vi.fn().mockResolvedValue(undefined), restoreTrainer: vi.fn().mockResolvedValue(undefined) }
+  return { ...real, deactivateTrainer: vi.fn().mockResolvedValue(undefined), restoreTrainer: vi.fn().mockResolvedValue(undefined), buildExport: vi.fn().mockResolvedValue(null) }
 })
 
 vi.mock('../../services/auth.service', async (importOriginal) => {
@@ -776,5 +776,30 @@ describe('POST /api/v1/auth/login — deactivated accounts', () => {
     expect(res.statusCode).toBe(401)
     expect(res.json().error).toBe('Invalid email or password')
     expect(restoreTrainer).not.toHaveBeenCalled()
+  })
+})
+
+// ── GET /api/v1/auth/export (account plan A4) ─────────────────────────────────
+
+describe('GET /api/v1/auth/export', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('returns 401 without a token', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/v1/auth/export' })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('downloads the export as a dated JSON attachment', async () => {
+    const { buildExport } = await import('../../services/account.service')
+    vi.mocked(buildExport).mockResolvedValueOnce({ format: 'just-train-export', version: 1, exportedAt: '2026-09-15T12:00:00.000Z', account: { id: TEST_TRAINER_ID } } as never)
+    const res = await app.inject({ method: 'GET', url: '/api/v1/auth/export', headers: { authorization: authHeader() } })
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toContain('application/json')
+    expect(res.headers['content-disposition']).toBe('attachment; filename="just-train-export-2026-09-15.json"')
+    expect(res.json()).toMatchObject({ format: 'just-train-export', account: { id: TEST_TRAINER_ID } })
+    expect(buildExport).toHaveBeenCalledWith(TEST_TRAINER_ID)
   })
 })

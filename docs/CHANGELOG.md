@@ -7,6 +7,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Account — export my data (account plan A4, 2026-09-15)
+- **`GET /auth/export`** — one JSON attachment (`just-train-export-YYYY-MM-DD.json`) of every row the account owns, grouped by table: account (minus the password hash), clients, goals, snapshots + progress photos, sessions → session-exercises → sets, form-check clips, templates → exercises, challenges, private exercises, telemetry. Raw rows on purpose (portability = the data as stored, not the UI's view); media as their existing URLs. Rate-limited 3/hour; download logged. `ponytail:` assembled in memory — fine to ~100k rows.
+- **Preferences → Account → Download my data.** Closes the portability promise in `/privacy` §Your rights (checklist G21 now fully mapped).
+- Tests: service strips the hash, assembles the envelope, and skips per-client/media queries when nothing exists; route 401 / 200 with the attachment header.
+
 ### Account — deactivate, restore, purge (account plan A5, 2026-09-15)
 - **`DELETE /auth/me { password }` — soft delete.** Re-proves the password, stamps `trainers.deactivated_at` (new column, migration `docs/sql/add-trainers-deactivated-at.sql` / drizzle `0007`), revokes every device, clears the cookie. Not exposed on `TrainerResponse` — a deactivated account can't be signed in to see it.
 - **Restore by signing in.** Login on a deactivated account within **30 days** (`PURGE_AFTER_DAYS`) clears the stamp and returns `restored: true` (shared `AuthResponseSchema`); the app toasts "Welcome back". Past the window the login answers the generic "Invalid email or password" — a distinct message would confirm the email once existed. The check runs *after* the password check for the same reason.

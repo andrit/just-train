@@ -18,6 +18,7 @@ import { and, eq, isNull, lt, inArray } from 'drizzle-orm'
 import {
   db, trainers, clients, sessions, templates, challenges, exercises,
   sessionExercises, templateExercises, refreshTokens, emailVerificationTokens, clientEvents, idempotencyKeys,
+  clientGoals, clientSnapshots, snapshotMedia, sessionExerciseMedia,
 } from '../db'
 import { revokeAllRefreshTokens } from './auth.service'
 import { deleteByPrefix } from './cloudinary.service'
@@ -129,4 +130,65 @@ export async function findPurgeable(now: Date = new Date()): Promise<string[]> {
   const cutoff = new Date(now.getTime() - PURGE_AFTER_DAYS * DAY_MS)
   const rows = await db.query.trainers.findMany({ where: lt(trainers.deactivatedAt, cutoff), columns: { id: true } })
   return rows.map((r) => r.id)
+}
+
+// ── Export (account plan A4 — portability) ──────────────────────────────────
+//
+// One JSON document of everything the trainer owns, raw rows grouped by
+// table, plus a small envelope. Raw rows on purpose: portability means the
+// user gets the data as it is stored, not our UI's view of it. Media are
+// exported as the Cloudinary URLs already on the rows. The password hash and
+// tokens are never included.
+//
+// ponytail: assembled in memory. A year of daily sessions is a few tens of
+// thousands of set rows — fine. ceiling: ~100k rows per account. upgrade:
+// stream per table when a real account gets there.
+
+export const EXPORT_FORMAT_VERSION = 1
+
+export async function buildExport(trainerId: string, now: Date = new Date()) {
+  const trainer = await db.query.trainers.findFirst({ where: eq(trainers.id, trainerId) })
+  if (!trainer) return null
+  const { passwordHash: _hash, ...account } = trainer
+
+  const ownedClients = await db.query.clients.findMany({ where: eq(clients.trainerId, trainerId) })
+  const clientIds    = ownedClients.map((c) => c.id)
+  const byClient     = clientIds.length
+
+  const [goals, snapshots, ownedSessions, ownedTemplates, ownedChallenges, privateExercises, events] = await Promise.all([
+    byClient ? db.query.clientGoals.findMany({ where: inArray(clientGoals.clientId, clientIds) }) : [],
+    byClient ? db.query.clientSnapshots.findMany({ where: inArray(clientSnapshots.clientId, clientIds) }) : [],
+    db.query.sessions.findMany({
+      where: eq(sessions.trainerId, trainerId),
+      with:  { sessionExercises: { with: { sets: true } } },
+    }),
+    db.query.templates.findMany({ where: eq(templates.trainerId, trainerId), with: { templateExercises: true } }),
+    db.query.challenges.findMany({ where: eq(challenges.trainerId, trainerId) }),
+    db.query.exercises.findMany({ where: eq(exercises.trainerId, trainerId) }),
+    db.query.clientEvents.findMany({ where: eq(clientEvents.trainerId, trainerId) }),
+  ])
+
+  const snapshotIds = snapshots.map((s) => s.id)
+  const sessionExerciseIds = ownedSessions.flatMap((s) => s.sessionExercises.map((se) => se.id))
+  const [progressPhotos, formCheckClips] = await Promise.all([
+    snapshotIds.length ? db.query.snapshotMedia.findMany({ where: inArray(snapshotMedia.snapshotId, snapshotIds) }) : [],
+    sessionExerciseIds.length ? db.query.sessionExerciseMedia.findMany({ where: inArray(sessionExerciseMedia.sessionExerciseId, sessionExerciseIds) }) : [],
+  ])
+
+  return {
+    format:     'just-train-export',
+    version:    EXPORT_FORMAT_VERSION,
+    exportedAt: now.toISOString(),
+    account,
+    clients:    ownedClients,
+    goals,
+    snapshots,
+    progressPhotos,
+    sessions:   ownedSessions,
+    formCheckClips,
+    templates:  ownedTemplates,
+    challenges: ownedChallenges,
+    exercises:  privateExercises,
+    telemetry:  events,
+  }
 }

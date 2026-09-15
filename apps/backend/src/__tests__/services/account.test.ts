@@ -19,7 +19,14 @@ vi.mock('../../db', () => {
       sessionExercises:  { findMany: vi.fn().mockResolvedValue([]) },
       templateExercises: { findMany: vi.fn().mockResolvedValue([]) },
       challenges:        { findMany: vi.fn().mockResolvedValue([]) },
-      trainers:          { findMany: vi.fn().mockResolvedValue([]) },
+      trainers:          { findMany: vi.fn().mockResolvedValue([]), findFirst: vi.fn().mockResolvedValue(undefined) },
+      clientGoals:       { findMany: vi.fn().mockResolvedValue([]) },
+      clientSnapshots:   { findMany: vi.fn().mockResolvedValue([]) },
+      sessions:          { findMany: vi.fn().mockResolvedValue([]) },
+      templates:         { findMany: vi.fn().mockResolvedValue([]) },
+      snapshotMedia:     { findMany: vi.fn().mockResolvedValue([]) },
+      sessionExerciseMedia: { findMany: vi.fn().mockResolvedValue([]) },
+      clientEvents:      { findMany: vi.fn().mockResolvedValue([]) },
     },
     update: vi.fn().mockReturnValue(chain), delete: vi.fn().mockReturnValue(chain), insert: vi.fn().mockReturnValue(chain),
   }
@@ -29,6 +36,7 @@ vi.mock('../../db', () => {
     trainers: t('trainers'), clients: t('clients'), sessions: t('sessions'), templates: t('templates'), challenges: t('challenges'),
     exercises: t('exercises'), sessionExercises: t('sessionExercises'), templateExercises: t('templateExercises'),
     refreshTokens: t('refreshTokens'), emailVerificationTokens: t('emailVerificationTokens'), clientEvents: t('clientEvents'), idempotencyKeys: t('idempotencyKeys'),
+    clientGoals: t('clientGoals'), clientSnapshots: t('clientSnapshots'), snapshotMedia: t('snapshotMedia'), sessionExerciseMedia: t('sessionExerciseMedia'),
   }
 })
 vi.mock('../../services/auth.service', () => ({ revokeAllRefreshTokens: vi.fn().mockResolvedValue(undefined) }))
@@ -37,7 +45,7 @@ vi.mock('../../services/cloudinary.service', () => ({ deleteByPrefix: vi.fn().mo
 import { db } from '../../db'
 import { revokeAllRefreshTokens } from '../../services/auth.service'
 import { deleteByPrefix } from '../../services/cloudinary.service'
-import { deactivateTrainer, isRestorable, purgeTrainer, findPurgeable, PURGE_AFTER_DAYS } from '../../services/account.service'
+import { deactivateTrainer, isRestorable, purgeTrainer, findPurgeable, buildExport, PURGE_AFTER_DAYS } from '../../services/account.service'
 
 const NOW = new Date('2026-09-15T12:00:00Z')
 const daysAgo = (d: number) => new Date(NOW.getTime() - d * 86_400_000)
@@ -104,5 +112,42 @@ describe('findPurgeable', () => {
   it('returns the ids the query yields', async () => {
     vi.mocked(db.query.trainers.findMany).mockResolvedValueOnce([{ id: 'a' }, { id: 'b' }] as never)
     expect(await findPurgeable(NOW)).toEqual(['a', 'b'])
+  })
+})
+
+describe('buildExport', () => {
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('returns null for an unknown trainer', async () => {
+    expect(await buildExport('nope', NOW)).toBeNull()
+  })
+
+  it('assembles every owned table, strips the password hash, and only fetches media for rows that exist', async () => {
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce({ id: 't-1', email: 'a@b.co', passwordHash: '$argon2id$secret', name: 'A' } as never)
+    vi.mocked(db.query.clients.findMany).mockResolvedValueOnce([{ id: 'c1' }] as never)
+    vi.mocked(db.query.clientSnapshots.findMany).mockResolvedValueOnce([{ id: 'snap1' }] as never)
+    vi.mocked(db.query.sessions.findMany).mockResolvedValueOnce([{ id: 's1', sessionExercises: [{ id: 'se1', sets: [{ id: 'set1' }] }] }] as never)
+    vi.mocked(db.query.snapshotMedia.findMany).mockResolvedValueOnce([{ id: 'photo1', snapshotId: 'snap1' }] as never)
+
+    const out = await buildExport('t-1', NOW)
+    expect(out).not.toBeNull()
+    expect(JSON.stringify(out)).not.toContain('argon2')
+    expect(out).toMatchObject({
+      format: 'just-train-export', version: 1, exportedAt: NOW.toISOString(),
+      account: { id: 't-1', email: 'a@b.co', name: 'A' },
+      clients: [{ id: 'c1' }], snapshots: [{ id: 'snap1' }], progressPhotos: [{ id: 'photo1' }],
+      sessions: [{ id: 's1', sessionExercises: [{ id: 'se1', sets: [{ id: 'set1' }] }] }],
+      templates: [], challenges: [], exercises: [], telemetry: [], goals: [], formCheckClips: [],
+    })
+    expect(db.query.snapshotMedia.findMany).toHaveBeenCalledTimes(1)          // there was a snapshot
+    expect(db.query.sessionExerciseMedia.findMany).toHaveBeenCalledTimes(1)   // there was a session-exercise
+  })
+
+  it('skips per-client and media queries entirely when the account owns nothing', async () => {
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce({ id: 't-1', passwordHash: 'x' } as never)
+    await buildExport('t-1', NOW)
+    expect(db.query.clientGoals.findMany).not.toHaveBeenCalled()
+    expect(db.query.snapshotMedia.findMany).not.toHaveBeenCalled()
+    expect(db.query.sessionExerciseMedia.findMany).not.toHaveBeenCalled()
   })
 })

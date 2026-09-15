@@ -31,6 +31,7 @@ import { Input }   from '@/components/ui/Input'
 import { Spinner } from '@/components/ui/Spinner'
 import { ChangePasswordCard } from '@/components/account/ChangePasswordCard'
 import { DevicesCard }        from '@/components/account/DevicesCard'
+import { ExportDataCard }     from '@/components/account/ExportDataCard'
 import { DeactivateAccountCard } from '@/components/account/DeactivateAccountCard'
 import type { TrainerResponse } from '@trainer-app/shared'
 
@@ -851,10 +852,11 @@ export default function PreferencesPage(): React.JSX.Element {
         {/* ── Account ──────────────────────────────────────────────────── */}
         <Section
           title="Account"
-          description="Sign-in security — password, devices"
+          description="Sign-in security and your data — password, devices, export"
         >
           <ChangePasswordCard />
           <DevicesCard />
+          <ExportDataCard />
         </Section>
 
         {/* ── Danger zone ──────────────────────────────────────────────── */}

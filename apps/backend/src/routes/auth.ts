@@ -1,6 +1,6 @@
 import { routeLog } from '../lib/logger'
 import { captureSecurityEvent } from '../lib/sentry'
-import { deactivateTrainer, restoreTrainer, isRestorable, PURGE_AFTER_DAYS } from '../services/account.service'
+import { deactivateTrainer, restoreTrainer, isRestorable, buildExport, PURGE_AFTER_DAYS } from '../services/account.service'
 // ------------------------------------------------------------
 // routes/auth.ts — Authentication endpoints
 //
@@ -791,6 +791,36 @@ Called once from the onboarding screen after registration. Can be called again t
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to deactivate account' })
+    }
+  })
+
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // GET /auth/export — Download my data (account plan A4, portability)
+  // ──────────────────────────────────────────────────────────────────────────
+  app.get('/auth/export', {
+    preHandler: [authenticate],
+    config: { rateLimit: { max: 3, timeWindow: '1 hour' } },
+    schema: {
+      tags: ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Export all of my data as JSON',
+      description: 'Every row the account owns, grouped by table, as a downloadable JSON file. Media are included as their URLs. Never includes the password hash or tokens.',
+      response: { 401: ErrorResponseSchema, 404: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    try {
+      const data = await buildExport(request.trainer.trainerId)
+      if (!data) return reply.status(404).send({ error: 'Trainer not found' })
+      const stamp = data.exportedAt.slice(0, 10)
+      routeLog(app).warn({ trainerId: request.trainer.trainerId }, 'Data export downloaded')
+      return reply
+        .header('Content-Type', 'application/json; charset=utf-8')
+        .header('Content-Disposition', `attachment; filename="just-train-export-${stamp}.json"`)
+        .send(JSON.stringify(data, null, 2))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to build export' })
     }
   })
 

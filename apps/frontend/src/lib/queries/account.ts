@@ -53,3 +53,28 @@ export function useDeactivateAccount() {
     mutationFn: (body: DeactivateAccountInput) => apiClient.delete<MessageResponse>('/auth/me', body),
   })
 }
+
+// ── Export ────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /auth/export — the server answers with a JSON attachment. apiClient
+ * parses JSON, so we receive the document as an object and hand the browser a
+ * Blob to save; the filename mirrors the server's Content-Disposition.
+ */
+export function useExportData() {
+  return useMutation({
+    mutationFn: async () => {
+      const data = await apiClient.get<{ exportedAt: string }>('/auth/export')
+      const stamp = data.exportedAt.slice(0, 10)
+      const blob  = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url   = URL.createObjectURL(blob)
+      const a     = document.createElement('a')
+      a.href = url
+      a.download = `just-train-export-${stamp}.json`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    },
+  })
+}

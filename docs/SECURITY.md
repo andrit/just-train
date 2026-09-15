@@ -128,7 +128,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | G18 | **Backups** — Railway Postgres: automated backup enabled + retention; one restore *tested* (`pg_restore` into a scratch DB) | you | ⬜ | `Database-Management.md` documents manual `pg_dump` only; a backup never restored is a hope |
 | G19 | **Cookie** — `sameSite: 'strict'` once `just-train.fit` fronts the app via the proxy (both origins same-site) | Claude, after DNS cut-over | ⬜ | the deferred item's own trigger |
 | G20 | **Auth failure logging** — failed logins / lockouts logged at `warn` with email hash + IP, surfaced in Railway logs; Sentry alert on a spike | Claude | ⬜ | today only seed/email failures are logged |
-| G21 | **Privacy page truth** — every promise on `/privacy` maps to a capability: deletion ✅, erasure ✅ (purge job), portability ⬜ (export, A4), processors list ✅, retention numbers ✅ (real text 2026-09-15) | you + Claude | 🟡 export remaining | §Your rights still carries the `[PLACEHOLDER]` legal-review marker |
+| G21 | **Privacy page truth** — every promise on `/privacy` maps to a capability: deletion ✅, erasure ✅ (purge job), portability ✅ (`GET /auth/export`, 2026-09-15), processors list ✅, retention numbers ✅ | you + Claude | ✅ capabilities 2026-09-15 | §Your rights still carries the `[PLACEHOLDER]` legal-review marker — wording, not capability |
 
 ### Tier 2 — before 3.0 (money, paid strangers)
 

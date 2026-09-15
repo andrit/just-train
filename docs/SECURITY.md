@@ -100,21 +100,58 @@ VitePWA registers the service worker scoped to `/` on the app's origin. It only 
 
 ---
 
-## Pre-Go-Live Security Gate (Phase 19 · opened 2026-09-14)
+## Security Checklist (opened 2026-09-14 · this is the whole list)
 
-A lightweight gate before public registration; the full OWASP pass stays a v3.0 gate.
-An item is done when it has a date. Items without one are open.
+Three tiers. **Gate** = must be done (dated) before public registration. **3.0** = before money and paid strangers. **Ongoing** = cadence, not a one-off. An item is done when it has a date and evidence; an undated item is open, whoever owns it. Decisions recorded 2026-09-15 are marked ⚖.
 
-| # | Check | Status | Evidence |
-|---|---|---|---|
-| 4a | **Ownership matrix — URL ids** — every parameterised route resolves the caller's ownership before acting | ✅ 2026-09-14 (static guard) · ⬜ real-DB matrix | Audit found **7 IDORs** (all in the session/template exercise tree — see What Was Fixed). Source-level guard `__tests__/security/ownership-guard.test.ts` fails on any route that never uses `request.trainer.trainerId` in a scoping shape; it failed on all seven before the fix. The SQL-level proof (seed trainer A, call as B, expect 404, against real Postgres) is still to build. |
-| 4a′ | **Ownership matrix — body ids** — every foreign key accepted in a request body is checked against "may the caller reference this row" | ✅ 2026-09-15 | Sweep of every input schema carrying `clientId` / `exerciseId(s)` / `templateId` / `sessionId`. Found: `POST /sessions` wrote `body.clientId` unchecked (sessions against another trainer's client, polluting their KPIs/at-risk/report); `exerciseId` on session-exercise, circuits (session + template), template-exercise and challenge create accepted another trainer's **private** exercise (name leak, and a 500-on-FK for unknown ids). All now go through `lib/ownership.ts` (`ownedClient`, `visibleExercise(s)` = public library OR own). Reorder routes were already constrained to the parent. |
-| 4a″ | Permanent guards (`__tests__/security/`) | ✅ 2026-09-15 | `no-anonymous-route` (source: every route authenticated unless on the 4-entry PUBLIC list; runtime: every GET/DELETE 401s without a token) · `mass-assignment` (role / subscriptionTier / subscriptionStatus / emailVerified / trainerId / isSelf / id / passwordHash never survive Register, Update, Onboard, Client, Session schemas) · `response-leak` (serializer + response schema both drop `passwordHash`) · `rate-limit-presence` (every POST has a per-route limit or a listed reason for the global one). Each can fail; each is a scan, not a proof. |
-| 4b | `pnpm audit` — no high/critical | ⬜ | run from repo root; record date + count here |
-| 4c | Production surface — Swagger UI + `/documentation/json` absent, CSP + `Cache-Control: no-store` on `/api/*`, no debug routes | ⬜ | `curl -sI https://just-train-production.up.railway.app/documentation` → expect 404; `curl -sI …/api/v1/health` shows the headers |
-| 4d | Secrets hygiene — rotate Railway Postgres password; `.env` never committed | ⬜ | `git log --all --diff-filter=A -- '*.env'` must be empty |
-| 4e | Validation-before-auth (unauthenticated callers get field-level 400s) — decide: leave (documented) or `authenticate` as `onRequest` | ⬜ designer decision | Also why the runtime anonymous-route guard covers only GET/DELETE. |
-| 4f | **Account / profile vet** | ✅ vetted 2026-09-15 · ⬜ features | See "Account surface" below. |
+### Tier 1 — Pre-Go-Live gate
+
+| # | Check | Owner | Status | Evidence / notes |
+|---|---|---|---|---|
+| G1 | **Ownership — URL ids.** Every parameterised route resolves the caller before acting | Claude | ✅ 2026-09-14 | 7 IDORs fixed; guard `__tests__/security/ownership-guard.test.ts` (fails on any unscoped route; failed on all 7 pre-fix) |
+| G2 | **Ownership — body ids.** Every body/query foreign key checked (`clientId`, `exerciseId(s)`, `templateId`, `sessionId`) | Claude | ✅ 2026-09-15 | `POST /sessions` clientId + 5 exercise-visibility gaps fixed via `lib/ownership.ts` |
+| G3 | **Ownership — real-database matrix.** Seed trainer A, call every route as B, expect 404 — against Postgres, not mocks | Claude (needs a test-DB URL on the Mac) | ⬜ | The guards are scans; this is the proof |
+| G4 | **No anonymous route** (source + runtime GET/DELETE) | Claude | ✅ 2026-09-15 | `no-anonymous-route.test.ts`; 4-entry PUBLIC list |
+| G5 | **Mass-assignment** — privileged fields never survive input schemas | Claude | ✅ 2026-09-15 | `mass-assignment.test.ts` |
+| G6 | **Response leak** — `passwordHash` cannot reach a response | Claude | ✅ 2026-09-15 | `response-leak.test.ts` |
+| G7 | **Rate limits** — every POST has a per-route limit or a listed reason | Claude | ✅ 2026-09-15 | `rate-limit-presence.test.ts` |
+| G8 | **Dependency audit** — `pnpm audit` from the repo root, zero high/critical | you | ⬜ | record date + counts here |
+| G9 | **Production surface, verified live** — `curl -sI …railway.app/documentation` → 404; `curl -sI …/health` shows CSP + `Cache-Control: no-store`; no debug routes | you | ⬜ | config says so; the header is proof |
+| G10 | **Secrets hygiene** — rotate Railway Postgres password (pasted in chat, Aug); `git log --all --diff-filter=A -- '*.env'` empty; one-off `npx gitleaks git .` over history | you | ⬜ | |
+| G11 | **Validation-before-auth** — bare POST → 400 not 401; decide leave-documented vs `authenticate` as `onRequest` | you ⚖ | ⬜ decision | also why G4's runtime layer is GET/DELETE only |
+| G12 | **Account surface** — vetted; features tracked in `task-plan-account.md` | Claude | ✅ vet 2026-09-15 · ⬜ features | see "Account surface" below |
+| G13 | **Delete-account semantics** ⚖ | you | ✅ decided 2026-09-15 | **Soft delete: deactivate (login blocked, data hidden), purge after 30 days by a scheduled job** — matches `/privacy` retention wording; restore-on-login within the window; hard purge as the first **admin** utility |
+| G14 | **Email verification gating** ⚖ | you | ✅ decided 2026-09-15 | **Nothing gated before Go Live** (verification stays advisory; reset-password proves the mailbox) — revisit at 3.0 |
+| G15 | **Account lockout** ⚖ | you | ⬜ decision | proposal in `task-plan-account.md` §Lockout; defaults: 5 failures/email → 15-min lock, counted for unknown emails too; per-IP failure cap; notice email once mail is live; Turnstile on register, adaptive on login |
+| G16 | **Progress-photo delivery** — Cloudinary URLs are public if guessed; move `snapshot_media` (and form-check clips) to signed/authenticated delivery | Claude, design | ⬜ | the most sensitive data the app holds |
+| G17 | **Upload content check** — magic-byte validation (`file-type`) before Cloudinary, not only the client `Content-Type` | Claude | ⬜ | closes the documented trade-off |
+| G18 | **Backups** — Railway Postgres: automated backup enabled + retention; one restore *tested* (`pg_restore` into a scratch DB) | you | ⬜ | `Database-Management.md` documents manual `pg_dump` only; a backup never restored is a hope |
+| G19 | **Cookie** — `sameSite: 'strict'` once `just-train.fit` fronts the app via the proxy (both origins same-site) | Claude, after DNS cut-over | ⬜ | the deferred item's own trigger |
+| G20 | **Auth failure logging** — failed logins / lockouts logged at `warn` with email hash + IP, surfaced in Railway logs; Sentry alert on a spike | Claude | ⬜ | today only seed/email failures are logged |
+| G21 | **Privacy page truth** — every promise on `/privacy` maps to a capability: deletion (G13), erasure (purge job), portability (export), processors list (Sentry ✅, Speed Insights ✅), retention numbers (`[PLACEHOLDER]` → real) | you + Claude | ⬜ | |
+
+### Tier 2 — before 3.0 (money, paid strangers)
+
+| # | Check | Notes |
+|---|---|---|
+| S1 | Full OWASP Top-10 pass — ZAP against staging, Burp on auth/refresh/upload; the ten areas in `DEFERRED_ITEMS.md` → Pre-3.0 | High findings block 3.0 |
+| S2 | Refresh-token reuse detection (account plan A3) | replay of a rotated token ends the family |
+| S3 | Stripe webhook signature verification + idempotent event handling; no card data ever touches the API | when Stripe lands |
+| S4 | Admin surface hardened — `role = 'admin'` set only via SQL (no self-promotion path; guarded by G5), admin routes under `requireRole('admin')`, admin UI on its own origin with IP allow-list / Vercel protection | see admin note in `task-plan-account.md` |
+| S5 | CAPTCHA (Turnstile) on register; adaptive on login | with G15 |
+| S6 | Visual/E2E regression covering auth flows (login, refresh, lockout, reset) | Playwright |
+| S7 | Data-protection impact note: what each processor receives, per feature (already done for Sentry/Speed Insights; extend to Stripe, Resend) | privacy page processors section |
+
+### Tier 3 — ongoing
+
+| # | Cadence | Check |
+|---|---|---|
+| O1 | monthly | `pnpm audit`; bump patch/minor deps; record date |
+| O2 | monthly | review Sentry issues for auth-related patterns; review lockout counts |
+| O3 | quarterly | rotate `JWT_SECRET` / `COOKIE_SECRET` / Cloudinary + Resend keys; rotate DB password |
+| O4 | quarterly | restore-test a backup |
+| O5 | on each browser major | service worker + install behaviour (already in Phase 20 "Ongoing") |
+| O6 | on each new route | the four guards run in CI — a new parameterised route without ownership resolution fails the build |
 
 ### Account surface — what a signed-in user can and cannot do to their own account (vetted 2026-09-15)
 

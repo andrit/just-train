@@ -18,6 +18,7 @@ import { Input }             from '@/components/ui/Input'
 import { Button }            from '@/components/ui/Button'
 import { cn }                from '@/lib/cn'
 import type { AuthResponse } from '@trainer-app/shared'
+import { toast } from '@/store/toastStore'
 
 type Mode = 'login' | 'register'
 
@@ -74,6 +75,7 @@ export default function LoginPage(): React.JSX.Element {
       // Clear stale cache from any previous session before setting new auth
       qc.clear()
       setAuth(data.accessToken, data.trainer)
+      if (data.restored) toast.success('Welcome back — your account has been restored')
       navigate('/', { replace: true })
     } catch (err: unknown) {
       let msg = 'Something went wrong — please try again'

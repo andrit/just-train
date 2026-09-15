@@ -7,7 +7,7 @@
 import { useQuery, useMutation, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
 import { apiClient }    from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import type { ChangePasswordInput, DeviceListResponse } from '@trainer-app/shared'
+import type { ChangePasswordInput, DeactivateAccountInput, DeviceListResponse } from '@trainer-app/shared'
 
 interface MessageResponse { message: string }
 
@@ -42,5 +42,14 @@ export function useRevokeDevice() {
   return useMutation({
     mutationFn: (deviceId: string) => apiClient.delete<void>(`/auth/devices/${encodeURIComponent(deviceId)}`),
     onSuccess:  () => qc.invalidateQueries({ queryKey: accountKeys.devices() }),
+  })
+}
+
+// ── Deactivate (soft delete) ──────────────────────────────────────────────────
+
+/** DELETE /auth/me — deactivates the account; restorable by signing in within 30 days. */
+export function useDeactivateAccount() {
+  return useMutation({
+    mutationFn: (body: DeactivateAccountInput) => apiClient.delete<MessageResponse>('/auth/me', body),
   })
 }

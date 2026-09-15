@@ -47,6 +47,11 @@ vi.mock('../../db', () => ({
   clients:      {},
 }))
 
+vi.mock('../../services/account.service', async (importOriginal) => {
+  const real = await importOriginal<typeof import('../../services/account.service')>()
+  return { ...real, deactivateTrainer: vi.fn().mockResolvedValue(undefined), restoreTrainer: vi.fn().mockResolvedValue(undefined) }
+})
+
 vi.mock('../../services/auth.service', async (importOriginal) => {
   // Keep real generateAccessToken and verifyAccessToken —
   // routes issue real tokens, middleware verifies them
@@ -693,5 +698,83 @@ describe('POST /api/v1/auth/refresh — reuse detection', () => {
     expect(res.statusCode).toBe(401)
     expect(res.json().code).toBeUndefined()
     expect(revokeAllRefreshTokens).not.toHaveBeenCalled()
+  })
+})
+
+// ── DELETE /api/v1/auth/me + login restore (account plan A5) ─────────────────
+
+describe('DELETE /api/v1/auth/me — deactivate', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('returns 401 without a token', async () => {
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/me', payload: { password: 'x' } })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 400 and deactivates nothing on a wrong password', async () => {
+    const { db } = await import('../../db')
+    const { verifyPassword } = await import('../../services/auth.service')
+    const { deactivateTrainer } = await import('../../services/account.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    vi.mocked(verifyPassword).mockResolvedValueOnce(false)
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/me', headers: { authorization: authHeader() }, payload: { password: 'wrong' } })
+    expect(res.statusCode).toBe(400)
+    expect(deactivateTrainer).not.toHaveBeenCalled()
+  })
+
+  it('deactivates, clears the cookie, and says how to restore', async () => {
+    const { db } = await import('../../db')
+    const { deactivateTrainer } = await import('../../services/account.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/me', headers: { authorization: authHeader() }, payload: { password: 'correct' } })
+    expect(res.statusCode).toBe(200)
+    expect(deactivateTrainer).toHaveBeenCalledWith(TEST_TRAINER_ID)
+    expect(String(res.headers['set-cookie'])).toContain('trainer_refresh_token=;')
+    expect(res.json().message).toMatch(/30 days/)
+  })
+})
+
+describe('POST /api/v1/auth/login — deactivated accounts', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const payload = { email: 'test@example.com', password: 'correct-password' }
+
+  it('restores an account deactivated within the window and flags it', async () => {
+    const { db } = await import('../../db')
+    const { restoreTrainer } = await import('../../services/account.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer({ deactivatedAt: new Date(Date.now() - 2 * 86_400_000) }))
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', headers: { 'x-device-id': TEST_DEVICE_ID }, payload })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().restored).toBe(true)
+    expect(res.json().trainer.id).toBe(TEST_TRAINER_ID)
+    expect(restoreTrainer).toHaveBeenCalledWith(TEST_TRAINER_ID)
+  })
+
+  it('treats an account past the window like an unknown one — generic 401, no restore', async () => {
+    const { db } = await import('../../db')
+    const { restoreTrainer } = await import('../../services/account.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer({ deactivatedAt: new Date(Date.now() - 45 * 86_400_000) }))
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', headers: { 'x-device-id': TEST_DEVICE_ID }, payload })
+    expect(res.statusCode).toBe(401)
+    expect(res.json().error).toBe('Invalid email or password')
+    expect(restoreTrainer).not.toHaveBeenCalled()
+  })
+
+  it('a wrong password on a deactivated account never reveals its state', async () => {
+    const { db } = await import('../../db')
+    const { verifyPassword } = await import('../../services/auth.service')
+    const { restoreTrainer } = await import('../../services/account.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer({ deactivatedAt: new Date(Date.now() - 2 * 86_400_000) }))
+    vi.mocked(verifyPassword).mockResolvedValueOnce(false)
+    const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', headers: { 'x-device-id': TEST_DEVICE_ID }, payload })
+    expect(res.statusCode).toBe(401)
+    expect(res.json().error).toBe('Invalid email or password')
+    expect(restoreTrainer).not.toHaveBeenCalled()
   })
 })

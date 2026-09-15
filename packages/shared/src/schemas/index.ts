@@ -92,6 +92,12 @@ export const ChangePasswordSchema = z.object({
 })
 export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>
 
+// Account security — deactivate (soft delete; re-proves the password)
+export const DeactivateAccountSchema = z.object({
+  password: z.string().min(1),
+})
+export type DeactivateAccountInput = z.infer<typeof DeactivateAccountSchema>
+
 // ============================================================
 // CLIENT
 // ============================================================

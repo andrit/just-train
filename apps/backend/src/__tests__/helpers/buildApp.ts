@@ -107,7 +107,7 @@ export async function buildChallengeTestApp() {
   return app
 }
 
-export interface RegisteredRoute { method: string; url: string }
+export interface RegisteredRoute { method: string; url: string; hasBody: boolean }
 
 /** Every route file, as production registers them, plus the list of routes seen — for cross-cutting security guards. */
 export async function buildAuditedFullTestApp() {
@@ -117,7 +117,8 @@ export async function buildAuditedFullTestApp() {
   const routes: RegisteredRoute[] = []
   app.addHook('onRoute', (r) => {
     const methods = Array.isArray(r.method) ? r.method : [r.method]
-    for (const m of methods) if (m !== 'HEAD') routes.push({ method: m, url: r.url })
+    const hasBody = Boolean((r.schema as { body?: unknown } | undefined)?.body)
+    for (const m of methods) if (m !== 'HEAD') routes.push({ method: m, url: r.url, hasBody })
   })
   for (const plugin of [authRoutes, clientRoutes, clientGoalRoutes, clientSnapshotRoutes, exerciseRoutes, mediaRoutes,
     sessionRoutes, templateRoutes, kpiRoutes, reportRoutes, snapshotMediaRoutes, sessionExerciseMediaRoutes, challengeRoutes, telemetryRoutes]) {

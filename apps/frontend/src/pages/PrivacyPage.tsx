@@ -137,10 +137,14 @@ export default function PrivacyPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">5. Data retention</h2>
-            <p className="text-gray-400 italic">
-              [PLACEHOLDER — define retention periods before launch. E.g.: account data retained
-              for the lifetime of the account plus 30 days after deletion; training data deleted
-              on account deletion; media deleted from Cloudinary within X days of account deletion.]
+            <p className="text-gray-400">
+              Your data is kept for as long as your account is active. When you deactivate your
+              account (Preferences → Danger zone), it is hidden and every device is signed out
+              immediately; for <span className="text-gray-200">30 days</span> you can restore it by
+              signing in again. After 30 days your account, training data, goals, snapshots,
+              templates and challenges are permanently deleted from our database, and your progress
+              photos and form-check clips are deleted from Cloudinary in the same purge. Error
+              reports held by Sentry expire on their own after 30 days.
             </p>
           </section>
 

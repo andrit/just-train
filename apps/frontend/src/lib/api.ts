@@ -183,7 +183,7 @@ type ApiFn = {
   get:    <T>(path: string)                     => Promise<T>
   post:   <T>(path: string, body: unknown)      => Promise<T>
   patch:  <T>(path: string, body: unknown)      => Promise<T>
-  delete: <T>(path: string)                     => Promise<T>
+  delete: <T>(path: string, body?: unknown)     => Promise<T>
 }
 
 const fn = <T>(path: string, init: RequestInit = {}) =>
@@ -193,6 +193,7 @@ const apiClient = fn as ApiFn
 apiClient.get    = <T>(path: string)            => request<T>(path, { method: 'GET' })
 apiClient.post   = <T>(path: string, body: unknown) => request<T>(path, { method: 'POST',  body: JSON.stringify(body) })
 apiClient.patch  = <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
-apiClient.delete = <T>(path: string)            => request<T>(path, { method: 'DELETE' })
+apiClient.delete = <T>(path: string, body?: unknown) =>
+  request<T>(path, { method: 'DELETE', ...(body !== undefined ? { body: JSON.stringify(body) } : {}) })
 
 export { apiClient }

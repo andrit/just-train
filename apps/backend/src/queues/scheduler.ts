@@ -27,6 +27,7 @@ import { eq, and, isNotNull } from 'drizzle-orm'
 import { expireOverdueChallenges } from '../services/challenge.service'
 import { withCronMonitor, captureError } from '../lib/sentry'
 import { cleanupRefreshTokens } from '../services/auth.service'
+import { findPurgeable, purgeTrainer } from '../services/account.service'
 
 const SCHEDULER_QUEUE = 'scheduler'
 
@@ -84,6 +85,14 @@ export async function startScheduler(): Promise<void> {
     { name: 'challenge-expiry', data: {} },
   )
 
+  // Account purge: daily at 01:00 UTC — hard-deletes accounts deactivated
+  // ≥ PURGE_AFTER_DAYS ago (media first, then an ordered DB delete).
+  await schedulerQueue.upsertJobScheduler(
+    'account-purge-daily',
+    { pattern: '0 1 * * *' },
+    { name: 'account-purge', data: {} },
+  )
+
   // Refresh-token cleanup: daily at 00:30 UTC. Rotation keeps revoked rows for
   // reuse detection; this drops expired rows and revoked rows past the TTL.
   await schedulerQueue.upsertJobScheduler(
@@ -100,6 +109,7 @@ export async function startScheduler(): Promise<void> {
     if (job.name === 'report-fanout')     await fanOutScheduledReports()
     if (job.name === 'alert-fanout')      await withCronMonitor('scheduler-hourly', '0 * * * *', fanOutAtRiskAlerts)
     if (job.name === 'challenge-expiry')  await runChallengeExpiry()
+    if (job.name === 'account-purge')     await runAccountPurge()
     if (job.name === 'refresh-token-cleanup') {
       const n = await cleanupRefreshTokens()
       console.log(`[Scheduler] refresh-token cleanup removed ${n} rows`)
@@ -111,7 +121,7 @@ export async function startScheduler(): Promise<void> {
     captureError(err, `scheduler:${job?.name ?? 'unknown'}`)
   })
 
-  console.log('[Scheduler] Started — reports (hourly on 1st), alerts (hourly), challenge expiry (daily), refresh-token cleanup (daily)')
+  console.log('[Scheduler] Started — reports (hourly on 1st), alerts (hourly), challenge expiry (daily), account purge (daily), refresh-token cleanup (daily)')
 }
 
 // ── Fan-out: scheduled reports ─────────────────────────────────────────────────
@@ -195,6 +205,20 @@ async function fanOutAtRiskAlerts(): Promise<void> {
 }
 
 // ── Challenge expiry ────────────────────────────────────────────────────────
+
+async function runAccountPurge(): Promise<void> {
+  const ids = await findPurgeable()
+  for (const trainerId of ids) {
+    try {
+      const report = await purgeTrainer(trainerId)
+      console.log(`[Scheduler] Purged account ${trainerId}: ${report.clients} clients, ${report.exercisesDeleted} exercises deleted, ${report.exercisesRehomed} re-homed, media failures: ${report.mediaFailures.length}`)
+      if (report.mediaFailures.length) captureError(new Error(`Account purge: ${report.mediaFailures.length} media prefixes failed for ${trainerId}`), 'account-purge:media')
+    } catch (err) {
+      console.error(`[Scheduler] Account purge failed for ${trainerId}:`, err)
+      captureError(err, `account-purge:${trainerId}`)
+    }
+  }
+}
 
 async function runChallengeExpiry(): Promise<void> {
   const expired = await expireOverdueChallenges()

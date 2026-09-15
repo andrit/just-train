@@ -128,6 +128,27 @@ export async function deleteByPublicId(
   await cloudinary.uploader.destroy(publicId, { resource_type: resourceType })
 }
 
+/**
+ * Delete everything under a folder prefix — images, then videos, then the
+ * folder itself. Used by the account purge job. Cloudinary limits each call
+ * to ~1000 resources; loop until nothing is left. Best-effort by design: the
+ * caller logs failures and proceeds with the DB delete.
+ */
+export async function deleteByPrefix(prefix: string): Promise<void> {
+  for (const resourceType of ['image', 'video'] as const) {
+    let remaining = true
+    while (remaining) {
+      const result = await cloudinary.api.delete_resources_by_prefix(prefix, { resource_type: resourceType }) as { deleted?: Record<string, string> }
+      remaining = Object.keys(result.deleted ?? {}).length >= 1000
+    }
+  }
+  try {
+    await cloudinary.api.delete_folder(prefix)
+  } catch {
+    // Folder may not exist (no uploads ever) or may already be gone — either is fine.
+  }
+}
+
 // ── URL Transforms ────────────────────────────────────────────────────────────
 
 /**

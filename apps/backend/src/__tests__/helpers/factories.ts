@@ -54,6 +54,7 @@ export function makeTrainer(overrides: Partial<Trainer> = {}): Trainer {
     subscriptionTier:     'free',
     subscriptionStatus:   'trialing',
     onboardedAt:          null,
+    deactivatedAt:        null,
     // Phase 3D
     trainerMode:          'trainer',
     reportsSentCount:     0,

@@ -1,0 +1,1 @@
+ALTER TABLE "trainers" ADD COLUMN "deactivated_at" timestamp;

@@ -1,5 +1,6 @@
 import { routeLog } from '../lib/logger'
 import { captureSecurityEvent } from '../lib/sentry'
+import { deactivateTrainer, restoreTrainer, isRestorable, PURGE_AFTER_DAYS } from '../services/account.service'
 // ------------------------------------------------------------
 // routes/auth.ts — Authentication endpoints
 //
@@ -60,6 +61,7 @@ import {
   OnboardTrainerSchema,
   UpdateTrainerSchema,
   ChangePasswordSchema,
+  DeactivateAccountSchema,
   DeviceListResponseSchema,
   TrainerResponseSchema,
   ErrorResponseSchema,
@@ -71,6 +73,8 @@ const AuthResponseSchema = z.object({
   accessToken: z.string()
     .describe('Short-lived JWT (15 min). Store in memory (Zustand). Attach as "Bearer <token>" on all API requests.'),
   trainer: TrainerResponseSchema,
+  restored: z.boolean().optional()
+    .describe('True when this sign-in restored a deactivated account (account plan A5)'),
 })
 
 const MessageResponseSchema = z.object({
@@ -296,6 +300,20 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(401).send({ error: 'Invalid email or password' })
       }
 
+      // Soft-deleted account (account plan A5). Within the purge window a
+      // correct sign-in restores it; past the window it is treated exactly
+      // like an unknown account (the purge job removes the row soon anyway,
+      // and a distinct message would confirm the email once existed).
+      let restored = false
+      if (trainer.deactivatedAt) {
+        if (!isRestorable(trainer.deactivatedAt)) {
+          return reply.status(401).send({ error: 'Invalid email or password' })
+        }
+        await restoreTrainer(trainer.id)
+        routeLog(app).warn({ trainerId: trainer.id }, 'Account restored by sign-in')
+        restored = true
+      }
+
       // Update last login timestamp for audit trail
       await db
         .update(trainers)
@@ -311,7 +329,8 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.send({
         accessToken,
-        trainer: serializeTrainer(trainer),
+        trainer: serializeTrainer({ ...trainer, deactivatedAt: null }),
+        ...(restored ? { restored: true } : {}),
       })
     } catch (error) {
       ;routeLog(app).error(error)
@@ -726,6 +745,52 @@ Called once from the onboarding screen after registration. Can be called again t
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to sign out device' })
+    }
+  })
+
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // DELETE /auth/me — Deactivate account (account plan A5, soft delete)
+  //
+  // Re-proves the password, stamps deactivated_at, revokes every device,
+  // clears the cookie. Data stays for PURGE_AFTER_DAYS so a sign-in can
+  // restore it; the daily purge job hard-deletes after that.
+  // ──────────────────────────────────────────────────────────────────────────
+  app.delete('/auth/me', {
+    preHandler: [authenticate],
+    config: { rateLimit: { max: 5, timeWindow: '15 minutes' } },
+    schema: {
+      tags: ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Deactivate account',
+      description: `Soft delete. The account is hidden and every device signed out; signing in within ${PURGE_AFTER_DAYS} days restores it, after which all data and media are permanently deleted.`,
+      body: DeactivateAccountSchema,
+      response: {
+        200: MessageResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { password } = request.body as z.infer<typeof DeactivateAccountSchema>
+    const trainerId = request.trainer.trainerId
+
+    try {
+      const trainer = await db.query.trainers.findFirst({ where: eq(trainers.id, trainerId), columns: { id: true, passwordHash: true } })
+      if (!trainer) return reply.status(404).send({ error: 'Trainer not found' })
+
+      const ok = await verifyPassword(password, trainer.passwordHash)
+      if (!ok) return reply.status(400).send({ error: 'Password is incorrect' })
+
+      await deactivateTrainer(trainerId)
+      reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
+      routeLog(app).warn({ trainerId }, 'Account deactivated')
+      return reply.send({ message: `Account deactivated. Sign in within ${PURGE_AFTER_DAYS} days to restore it.` })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to deactivate account' })
     }
   })
 

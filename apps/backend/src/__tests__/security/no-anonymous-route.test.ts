@@ -6,10 +6,11 @@
 // `app.addHook('preHandler', authenticate)` or every route in it carries
 // `preHandler: [authenticate]` — except the routes listed as PUBLIC.
 // Layer 2 (runtime): every GET and DELETE in the full app answers 401 with no
-// token. (POST/PATCH are excluded from the runtime layer only because Fastify
-// validates the body before preHandler runs — an empty body 400s first. That
+// token — or 400 when the route declares a body schema, because Fastify
+// validates the body before preHandler runs and an empty body fails first.
+// (POST/PATCH are excluded from the runtime layer for the same reason.) That
 // ordering is the open decision 4e in docs/SECURITY.md; the source layer still
-// covers them.)
+// proves the hook is present on every route.
 // ------------------------------------------------------------
 
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
@@ -83,7 +84,12 @@ describe('no anonymous route — runtime layer (GET + DELETE, no token)', () => 
       if (PUBLIC.has(key) || r.url === '/health' || r.url.startsWith('/documentation')) continue
       const url = r.url.replace(/:[A-Za-z]+/g, '11111111-1111-1111-1111-111111111111')
       const res = await app.inject({ method: r.method as 'GET' | 'DELETE', url })
-      if (res.statusCode !== 401) failures.push(`${key} → ${res.statusCode}`)
+      // A route WITH a body schema answers 400 to a bare request because Fastify
+      // validates before preHandler runs — that is decision 4e in SECURITY.md,
+      // not a missing guard (the source layer above still proves the hook is
+      // there). Delete this allowance if authenticate ever moves to onRequest.
+      const acceptable = r.hasBody ? [400, 401] : [401]
+      if (!acceptable.includes(res.statusCode)) failures.push(`${key} → ${res.statusCode}`)
     }
     expect(failures).toEqual([])
   })

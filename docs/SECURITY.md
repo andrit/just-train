@@ -120,7 +120,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | G10 | **Secrets hygiene** — rotate Railway Postgres password (pasted in chat, Aug); `git log --all --diff-filter=A -- '*.env'` empty; one-off `npx gitleaks git .` over history | you | ⬜ | |
 | G11 | **Validation-before-auth** — bare POST → 400 not 401; decide leave-documented vs `authenticate` as `onRequest` | you ⚖ | ⬜ decision | also why G4's runtime layer is GET/DELETE only |
 | G12 | **Account surface** — vetted; features tracked in `task-plan-account.md` | Claude | ✅ vet 2026-09-15 · ⬜ features | see "Account surface" below |
-| G13 | **Delete-account semantics** ⚖ | you | ✅ decided 2026-09-15 | **Soft delete: deactivate (login blocked, data hidden), purge after 30 days by a scheduled job** — matches `/privacy` retention wording; restore-on-login within the window; hard purge as the first **admin** utility |
+| G13 | **Delete-account semantics** ⚖ | you | ✅ decided + built 2026-09-15 | **Soft delete** (`DELETE /auth/me`), restore-on-login within 30 days, daily purge job with an explicit ordered delete (`purgeTrainer()`, also the admin hard-purge utility); `/privacy` retention text now matches |
 | G14 | **Email verification gating** ⚖ | you | ✅ decided 2026-09-15 | **Nothing gated before Go Live** (verification stays advisory; reset-password proves the mailbox) — revisit at 3.0 |
 | G15 | **Account lockout** ⚖ | you | ✅ decided 2026-09-15 · ⬜ build | 5 failures/email → 15-min lock (counted for unknown emails too, `423` + retry-after); per-IP failure cap 20/15 min; notice email once mail is live; Turnstile register-always, login-adaptive after 3 failures. Build = account plan C9 |
 | G16 | **Progress-photo delivery** — Cloudinary URLs are public if guessed; move `snapshot_media` (and form-check clips) to signed/authenticated delivery | Claude, design | ⬜ | the most sensitive data the app holds |
@@ -128,7 +128,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | G18 | **Backups** — Railway Postgres: automated backup enabled + retention; one restore *tested* (`pg_restore` into a scratch DB) | you | ⬜ | `Database-Management.md` documents manual `pg_dump` only; a backup never restored is a hope |
 | G19 | **Cookie** — `sameSite: 'strict'` once `just-train.fit` fronts the app via the proxy (both origins same-site) | Claude, after DNS cut-over | ⬜ | the deferred item's own trigger |
 | G20 | **Auth failure logging** — failed logins / lockouts logged at `warn` with email hash + IP, surfaced in Railway logs; Sentry alert on a spike | Claude | ⬜ | today only seed/email failures are logged |
-| G21 | **Privacy page truth** — every promise on `/privacy` maps to a capability: deletion (G13), erasure (purge job), portability (export), processors list (Sentry ✅, Speed Insights ✅), retention numbers (`[PLACEHOLDER]` → real) | you + Claude | ⬜ | |
+| G21 | **Privacy page truth** — every promise on `/privacy` maps to a capability: deletion ✅, erasure ✅ (purge job), portability ⬜ (export, A4), processors list ✅, retention numbers ✅ (real text 2026-09-15) | you + Claude | 🟡 export remaining | §Your rights still carries the `[PLACEHOLDER]` legal-review marker |
 
 ### Tier 2 — before 3.0 (money, paid strangers)
 

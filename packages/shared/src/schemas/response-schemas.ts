@@ -130,6 +130,8 @@ export const AuthResponseSchema = z.object({
   accessToken: z.string()
     .describe('Short-lived JWT (15 min). Store in memory only — never localStorage. Attach as "Authorization: Bearer <token>".'),
   trainer: TrainerResponseSchema,
+  restored: z.boolean().optional()
+    .describe('True when this sign-in restored a deactivated account (within the 30-day purge window)'),
 })
 export type AuthResponse = z.infer<typeof AuthResponseSchema>
 

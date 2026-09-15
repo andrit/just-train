@@ -74,6 +74,11 @@ export const trainers = pgTable('trainers', {
   reportsSentCount: integer('reports_sent_count').notNull().default(0),
   lastActiveAt:     timestamp('last_active_at'),
 
+  // Account plan A5 — soft delete. Set by DELETE /auth/me; login and refresh
+  // are blocked while set; signing in within PURGE_AFTER_DAYS clears it
+  // (restore); the daily purge job hard-deletes accounts past the window.
+  deactivatedAt:    timestamp('deactivated_at'),
+
   // Phase 4 Preferences — trainer/athlete personalization settings.
   //
   // ctaLabel: the call-to-action wording on the "start training" button.

@@ -22,7 +22,7 @@ import * as crypto from 'crypto'
 import * as jwt from 'jsonwebtoken'
 import { Resend } from 'resend'
 import { db, refreshTokens, emailVerificationTokens } from '../db'
-import { eq, and, gt, desc } from 'drizzle-orm'
+import { eq, and, gt, desc, ne } from 'drizzle-orm'
 import { trainers } from '../db/schema/trainers'
 import type { TrainerRole } from '@trainer-app/shared'
 
@@ -242,6 +242,19 @@ export async function revokeAllRefreshTokens(trainerId: string): Promise<void> {
         eq(refreshTokens.trainerId, trainerId),
       )
     )
+}
+
+/**
+ * Revoke every refresh token for a trainer EXCEPT the given device's — used
+ * after a password change so other sessions end but the one that changed the
+ * password stays signed in. Pass undefined to keep nothing (same as
+ * revokeAllRefreshTokens).
+ */
+export async function revokeRefreshTokensExceptDevice(trainerId: string, keepDeviceId: string | undefined): Promise<void> {
+  const where = keepDeviceId
+    ? and(eq(refreshTokens.trainerId, trainerId), ne(refreshTokens.deviceId, keepDeviceId))
+    : eq(refreshTokens.trainerId, trainerId)
+  await db.update(refreshTokens).set({ revokedAt: new Date() }).where(where)
 }
 
 /**

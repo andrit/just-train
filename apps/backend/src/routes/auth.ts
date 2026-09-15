@@ -38,6 +38,7 @@ import {
   findAndVerifyRefreshToken,
   rotateRefreshToken,
   revokeAllRefreshTokens,
+  revokeRefreshTokensExceptDevice,
   revokeRefreshToken,
   refreshTokenCookieOptions,
   REFRESH_TOKEN_COOKIE,
@@ -54,6 +55,7 @@ import {
   LoginSchema,
   OnboardTrainerSchema,
   UpdateTrainerSchema,
+  ChangePasswordSchema,
   TrainerResponseSchema,
   ErrorResponseSchema,
 } from '@trainer-app/shared'
@@ -589,6 +591,65 @@ Called once from the onboarding screen after registration. Can be called again t
       return reply.status(500).send({ error: 'Failed to update profile' })
     }
   })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PATCH /auth/password — Change password (account plan A1)
+  //
+  // Re-proves the current password, stores the new hash, and signs out every
+  // OTHER device: a password change is the recovery move after a suspected
+  // compromise, so sessions the owner cannot see must end. The device that
+  // made the change keeps its refresh token.
+  // ──────────────────────────────────────────────────────────────────────────
+  app.patch('/auth/password', {
+    preHandler: [authenticate],
+    config: { rateLimit: { max: 5, timeWindow: '15 minutes' } },
+    schema: {
+      tags: ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Change password',
+      description: 'Requires the current password. On success every other device is signed out; this device stays signed in.',
+      body: ChangePasswordSchema,
+      response: {
+        200: MessageResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const body = request.body as z.infer<typeof ChangePasswordSchema>
+    const trainerId = request.trainer.trainerId
+
+    try {
+      const trainer = await db.query.trainers.findFirst({
+        where:   eq(trainers.id, trainerId),
+        columns: { id: true, passwordHash: true },
+      })
+      if (!trainer) return reply.status(404).send({ error: 'Trainer not found' })
+
+      const ok = await verifyPassword(body.currentPassword, trainer.passwordHash)
+      if (!ok) return reply.status(400).send({ error: 'Current password is incorrect' })
+
+      if (body.newPassword === body.currentPassword) {
+        return reply.status(400).send({ error: 'New password must be different from the current password' })
+      }
+
+      const passwordHash = await hashPassword(body.newPassword)
+      await db.update(trainers).set({ passwordHash, updatedAt: new Date() }).where(eq(trainers.id, trainerId))
+
+      // Sign out everywhere else. X-Device-ID identifies this device's refresh token.
+      const deviceId = request.headers['x-device-id'] as string | undefined
+      await revokeRefreshTokensExceptDevice(trainerId, deviceId)
+
+      routeLog(app).warn({ trainerId }, 'Password changed; other devices signed out')
+      return reply.send({ message: 'Password changed. Other devices have been signed out.' })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to change password' })
+    }
+  })
+
 
   // ──────────────────────────────────────────────────────────────────────────
   // POST /auth/send-verification — Generate and send a verification email

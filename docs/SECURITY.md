@@ -122,7 +122,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | G12 | **Account surface** — vetted; features tracked in `task-plan-account.md` | Claude | ✅ vet 2026-09-15 · ⬜ features | see "Account surface" below |
 | G13 | **Delete-account semantics** ⚖ | you | ✅ decided 2026-09-15 | **Soft delete: deactivate (login blocked, data hidden), purge after 30 days by a scheduled job** — matches `/privacy` retention wording; restore-on-login within the window; hard purge as the first **admin** utility |
 | G14 | **Email verification gating** ⚖ | you | ✅ decided 2026-09-15 | **Nothing gated before Go Live** (verification stays advisory; reset-password proves the mailbox) — revisit at 3.0 |
-| G15 | **Account lockout** ⚖ | you | ⬜ decision | proposal in `task-plan-account.md` §Lockout; defaults: 5 failures/email → 15-min lock, counted for unknown emails too; per-IP failure cap; notice email once mail is live; Turnstile on register, adaptive on login |
+| G15 | **Account lockout** ⚖ | you | ✅ decided 2026-09-15 · ⬜ build | 5 failures/email → 15-min lock (counted for unknown emails too, `423` + retry-after); per-IP failure cap 20/15 min; notice email once mail is live; Turnstile register-always, login-adaptive after 3 failures. Build = account plan C9 |
 | G16 | **Progress-photo delivery** — Cloudinary URLs are public if guessed; move `snapshot_media` (and form-check clips) to signed/authenticated delivery | Claude, design | ⬜ | the most sensitive data the app holds |
 | G17 | **Upload content check** — magic-byte validation (`file-type`) before Cloudinary, not only the client `Content-Type` | Claude | ⬜ | closes the documented trade-off |
 | G18 | **Backups** — Railway Postgres: automated backup enabled + retention; one restore *tested* (`pg_restore` into a scratch DB) | you | ⬜ | `Database-Management.md` documents manual `pg_dump` only; a backup never restored is a hope |
@@ -137,7 +137,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | S1 | Full OWASP Top-10 pass — ZAP against staging, Burp on auth/refresh/upload; the ten areas in `DEFERRED_ITEMS.md` → Pre-3.0 | High findings block 3.0 |
 | S2 | Refresh-token reuse detection (account plan A3) | replay of a rotated token ends the family |
 | S3 | Stripe webhook signature verification + idempotent event handling; no card data ever touches the API | when Stripe lands |
-| S4 | Admin surface hardened — `role = 'admin'` set only via SQL (no self-promotion path; guarded by G5), admin routes under `requireRole('admin')`, admin UI on its own origin with IP allow-list / Vercel protection | see admin note in `task-plan-account.md` |
+| S4 | Admin surface hardened — `role = 'admin'` set only via SQL (no self-promotion path; guarded by G5), admin routes under `requireRole('admin')`, admin UI on its own origin (`metzger.just-train.fit`) with IP allow-list / Vercel protection | see admin note in `task-plan-account.md` |
 | S5 | CAPTCHA (Turnstile) on register; adaptive on login | with G15 |
 | S6 | Visual/E2E regression covering auth flows (login, refresh, lockout, reset) | Playwright |
 | S7 | Data-protection impact note: what each processor receives, per feature (already done for Sentry/Speed Insights; extend to Stripe, Resend) | privacy page processors section |

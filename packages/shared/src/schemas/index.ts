@@ -85,6 +85,13 @@ export const UpdateTrainerSchema = z.object({
 })
 export type UpdateTrainerInput = z.infer<typeof UpdateTrainerSchema>
 
+// Account security — change password (authenticated; re-proves the current one)
+export const ChangePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword:     z.string().min(8).max(100),
+})
+export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>
+
 // ============================================================
 // CLIENT
 // ============================================================

@@ -7,6 +7,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Account — change password (account plan A1, 2026-09-15)
+- **`PATCH /auth/password { currentPassword, newPassword }`** — re-proves the current password (argon2), stores the new hash, and **signs out every other device** (new `revokeRefreshTokensExceptDevice(trainerId, keepDeviceId)`; the caller's `X-Device-ID` refresh token survives). Reusing the current password is refused. Rate-limited 5/15 min. Logged at `warn` (the start of auth-event logging, checklist G20). Shared `ChangePasswordSchema` (8–100 chars, same rule as register).
+- **Preferences → Account → Change password** (`components/account/ChangePasswordCard.tsx`, `lib/queries/account.ts`). Copy states up front that other devices will be signed out.
+- Tests: 401 / short password / wrong current (nothing written, nothing revoked) / reused password / success (hash stored, other devices revoked, this one kept) / trainer gone.
+
 ### Security — seven IDORs closed in the session/template exercise tree (Phase 19 gate, 2026-09-14)
 - **Any authenticated trainer could mutate any other trainer's session-exercises and sets, and delete any template exercise.** `POST /sessions/:id/exercises`, `PATCH`/`DELETE /session-exercises/:id`, `POST /session-exercises/:id/sets`, `PATCH`/`DELETE /sets/:id`, `DELETE /template-exercises/:id` all acted by bare id. Set logging additionally inserted when the parent session-exercise didn't exist. Each now resolves ownership through the aggregate root (`ownedSession` / `ownedSessionExercise` / `ownedSet` in `routes/sessions.ts`; relational load in `templates.ts`) and returns 404 — never 403, so nothing leaks existence. `POST …/sets` now documents its 404.
 - **Circuit auto-ungroup.** Deleting a member of a 2-member circuit (session or template) demotes the survivor to a standalone exercise, in the same transaction as the delete. Closes the deferred "auto-ungroup on member delete" item.

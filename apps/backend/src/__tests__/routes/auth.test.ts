@@ -72,6 +72,7 @@ vi.mock('../../services/auth.service', async (importOriginal) => {
     rotateRefreshToken:       vi.fn().mockResolvedValue({ raw: 'new-raw-refresh-token' }),
     revokeRefreshToken:       vi.fn().mockResolvedValue(undefined),
     revokeAllRefreshTokens:   vi.fn().mockResolvedValue(undefined),
+    revokeRefreshTokensExceptDevice: vi.fn().mockResolvedValue(undefined),
     refreshTokenCookieOptions:real.refreshTokenCookieOptions,
     REFRESH_TOKEN_COOKIE:     real.REFRESH_TOKEN_COOKIE,
   }
@@ -517,6 +518,68 @@ describe('GET /api/v1/auth/me', () => {
       headers: { authorization: authHeader() },
     })
 
+    expect(res.statusCode).toBe(404)
+  })
+})
+
+// ── PATCH /api/v1/auth/password ───────────────────────────────────────────────
+// Account plan A1. The current password is re-proved; other devices are signed
+// out; the caller's device (X-Device-ID) is kept.
+
+describe('PATCH /api/v1/auth/password', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const url = '/api/v1/auth/password'
+  const body = { currentPassword: 'old-password-1', newPassword: 'new-password-22' }
+
+  it('returns 401 without a token', async () => {
+    const res = await app.inject({ method: 'PATCH', url, payload: body })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 400 when the new password is too short', async () => {
+    const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader() }, payload: { currentPassword: 'x', newPassword: 'short' } })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 400 and changes nothing when the current password is wrong', async () => {
+    const { db } = await import('../../db')
+    const { verifyPassword, hashPassword, revokeRefreshTokensExceptDevice } = await import('../../services/auth.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    vi.mocked(verifyPassword).mockResolvedValueOnce(false)
+    const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader() }, payload: body })
+    expect(res.statusCode).toBe(400)
+    expect(hashPassword).not.toHaveBeenCalled()
+    expect(db.update).not.toHaveBeenCalled()
+    expect(revokeRefreshTokensExceptDevice).not.toHaveBeenCalled()
+  })
+
+  it('rejects reusing the current password', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader() }, payload: { currentPassword: 'same-password-1', newPassword: 'same-password-1' } })
+    expect(res.statusCode).toBe(400)
+    expect(db.update).not.toHaveBeenCalled()
+  })
+
+  it('stores the new hash and signs out every other device, keeping this one', async () => {
+    const { db } = await import('../../db')
+    const { hashPassword, revokeRefreshTokensExceptDevice } = await import('../../services/auth.service')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(makeTrainer())
+    const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader(), 'x-device-id': 'dev-1' }, payload: body })
+    expect(res.statusCode).toBe(200)
+    expect(hashPassword).toHaveBeenCalledWith('new-password-22')
+    expect(vi.mocked(db.update({} as never).set).mock.calls[0]?.[0]).toMatchObject({ passwordHash: '$argon2id$mocked-hash' })
+    expect(revokeRefreshTokensExceptDevice).toHaveBeenCalledWith(TEST_TRAINER_ID, 'dev-1')
+  })
+
+  it('returns 404 when the trainer row no longer exists', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(undefined)
+    const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader() }, payload: body })
     expect(res.statusCode).toBe(404)
   })
 })

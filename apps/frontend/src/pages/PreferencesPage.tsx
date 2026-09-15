@@ -29,6 +29,7 @@ import {
 } from '@/lib/widgets'
 import { Input }   from '@/components/ui/Input'
 import { Spinner } from '@/components/ui/Spinner'
+import { ChangePasswordCard } from '@/components/account/ChangePasswordCard'
 import type { TrainerResponse } from '@trainer-app/shared'
 
 // ── Section wrapper ───────────────────────────────────────────────────────────
@@ -843,6 +844,14 @@ export default function PreferencesPage(): React.JSX.Element {
               </p>
             )}
           </div>
+        </Section>
+
+        {/* ── Account ──────────────────────────────────────────────────── */}
+        <Section
+          title="Account"
+          description="Sign-in security — password, devices"
+        >
+          <ChangePasswordCard />
         </Section>
 
       </div>

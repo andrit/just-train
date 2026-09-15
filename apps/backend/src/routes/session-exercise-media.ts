@@ -121,8 +121,6 @@ Video duration is enforced server-side. The upload runs in the background during
 
     // Parse multipart upload
     let fileBuffer: Buffer
-    let mimeType:   string
-    let fileSize:   number
 
     try {
       const data = await request.file()
@@ -130,17 +128,14 @@ Video duration is enforced server-side. The upload runs in the background during
         return reply.status(400).send({ error: 'No file provided. Send a multipart/form-data request with a "file" field.' })
       }
       fileBuffer = await data.toBuffer()
-      mimeType   = data.mimetype
-      fileSize   = fileBuffer.length
     } catch {
       return reply.status(400).send({ error: 'Failed to parse upload. Ensure the request is multipart/form-data.' })
     }
 
-    // Validate file type and size
-    const validationError = validateMediaFile(mimeType, fileSize)
-    if (validationError) {
-      return reply.status(400).send({ error: validationError })
-    }
+    // Type from the bytes, not the header (G17); size for that class.
+    const checked = validateMediaFile(fileBuffer)
+    if (!checked.ok) return reply.status(400).send({ error: checked.error })
+    const mimeType = checked.mimeType
 
     try {
       const session   = se.session

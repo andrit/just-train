@@ -93,8 +93,6 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
 
     // Parse multipart upload
     let fileBuffer: Buffer
-    let mimeType:   string
-    let fileSize:   number
 
     try {
       const data = await request.file()
@@ -103,17 +101,14 @@ The file is uploaded to Cloudinary and the URL is stored. The original file is n
       }
 
       fileBuffer = await data.toBuffer()
-      mimeType   = data.mimetype
-      fileSize   = fileBuffer.length
     } catch {
       return reply.status(400).send({ error: 'Failed to parse upload. Ensure the request is multipart/form-data.' })
     }
 
-    // Validate file before uploading to Cloudinary
-    const validationError = validateMediaFile(mimeType, fileSize)
-    if (validationError) {
-      return reply.status(400).send({ error: validationError })
-    }
+    // Type from the bytes, not the header (G17); size for that class.
+    const checked = validateMediaFile(fileBuffer)
+    if (!checked.ok) return reply.status(400).send({ error: checked.error })
+    const mimeType = checked.mimeType
 
     try {
       // Upload to Cloudinary

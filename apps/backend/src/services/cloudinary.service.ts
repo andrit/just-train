@@ -23,6 +23,7 @@
 //   getThumbnailUrl() generates an optimised 400×300 JPEG URL on the fly.
 // ------------------------------------------------------------
 
+import { sniffMediaType, type SniffedMediaType } from '../lib/magicBytes'
 import { v2 as cloudinary } from 'cloudinary'
 
 // ── Configuration ─────────────────────────────────────────────────────────────
@@ -168,26 +169,29 @@ export function getThumbnailUrl(cloudinaryUrl: string): string {
 
 // ── Validation ────────────────────────────────────────────────────────────────
 
-const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-const ALLOWED_VIDEO_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime'])
-const MAX_IMAGE_BYTES      = 10 * 1024 * 1024  // 10 MB
-const MAX_VIDEO_BYTES      = 100 * 1024 * 1024 // 100 MB
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024  // 10 MB
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024 // 100 MB
 
-export function validateMediaFile(mimeType: string, sizeBytes: number): string | null {
-  const isImage = ALLOWED_IMAGE_TYPES.has(mimeType)
-  const isVideo = ALLOWED_VIDEO_TYPES.has(mimeType)
+export type MediaValidation =
+  | { ok: true;  mimeType: SniffedMediaType }
+  | { ok: false; error: string }
 
-  if (!isImage && !isVideo) {
-    return `Unsupported file type: ${mimeType}. Allowed: JPEG, PNG, WebP, GIF, MP4, WebM, MOV`
+/**
+ * Decide what an upload is from its bytes (security gate G17) and check the
+ * size for that class. The client's declared Content-Type is not consulted —
+ * a mislabelled file is rejected or corrected here, before Cloudinary sees it.
+ */
+export function validateMediaFile(file: Buffer): MediaValidation {
+  const mimeType = sniffMediaType(file)
+  if (!mimeType) {
+    return { ok: false, error: 'Unsupported file type. Allowed: JPEG, PNG, WebP, GIF, MP4, WebM, MOV' }
   }
-
-  if (isImage && sizeBytes > MAX_IMAGE_BYTES) {
-    return `Image too large (${(sizeBytes / 1024 / 1024).toFixed(1)} MB). Maximum: 10 MB`
+  const sizeBytes = file.length
+  if (mimeType.startsWith('image/') && sizeBytes > MAX_IMAGE_BYTES) {
+    return { ok: false, error: `Image too large (${(sizeBytes / 1024 / 1024).toFixed(1)} MB). Maximum: 10 MB` }
   }
-
-  if (isVideo && sizeBytes > MAX_VIDEO_BYTES) {
-    return `Video too large (${(sizeBytes / 1024 / 1024).toFixed(1)} MB). Maximum: 100 MB`
+  if (mimeType.startsWith('video/') && sizeBytes > MAX_VIDEO_BYTES) {
+    return { ok: false, error: `Video too large (${(sizeBytes / 1024 / 1024).toFixed(1)} MB). Maximum: 100 MB` }
   }
-
-  return null // valid
+  return { ok: true, mimeType }
 }

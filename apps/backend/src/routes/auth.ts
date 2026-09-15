@@ -5,6 +5,7 @@ import { requestPasswordReset, resetPasswordWithToken } from '../services/passwo
 import { requestEmailChange, cancelEmailChange, redeemVerificationToken } from '../services/emailVerification.service'
 import { loginLockout, sendLockoutNotice } from '../services/lockout.service'
 import { clientIp } from '../lib/clientIp'
+import { IP_FAILURE_CAP } from '../lib/loginLockout'
 import { createHash } from 'node:crypto'
 // ------------------------------------------------------------
 // routes/auth.ts — Authentication endpoints
@@ -325,9 +326,16 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     const fail = (trainer?: { email: string; name: string }): ReturnType<typeof reply.send> => {
       const { justLockedEmail, emailFailures, ipFailures } = loginLockout.recordFailure(email, ip)
       routeLog(app).warn({ email: sha256Short(email), ip, emailFailures, ipFailures, known: !!trainer }, 'Sign-in failed')
+      // G20: lock events also go to Sentry (tags only, no PII) so an alert
+      // rule can watch for a spike — Railway logs are not something anyone reads.
       if (justLockedEmail) {
         routeLog(app).warn({ email: sha256Short(email), ip }, 'Sign-in locked for this email')
+        captureSecurityEvent('Sign-in locked', { scope: 'email', known: String(!!trainer) })
         if (trainer) sendLockoutNotice(trainer.email, trainer.name).catch((err: unknown) => routeLog(app).warn({ err }, 'Lockout notice not sent'))
+      }
+      if (ipFailures === IP_FAILURE_CAP) {
+        routeLog(app).warn({ ip, ipFailures }, 'Sign-in refused for this address')
+        captureSecurityEvent('Sign-in locked', { scope: 'ip' })
       }
       // Same message whether the email or the password is wrong — no enumeration.
       return reply.status(401).send({ error: 'Invalid email or password' })

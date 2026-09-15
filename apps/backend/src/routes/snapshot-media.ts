@@ -141,8 +141,6 @@ export async function snapshotMediaRoutes(app: FastifyInstance): Promise<void> {
 
     // Parse multipart upload
     let fileBuffer: Buffer
-    let mimeType:   string
-    let fileSize:   number
 
     try {
       const data = await request.file()
@@ -150,21 +148,18 @@ export async function snapshotMediaRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(400).send({ error: 'No file provided. Send a multipart/form-data request with a "file" field.' })
       }
       fileBuffer = await data.toBuffer()
-      mimeType   = data.mimetype
-      fileSize   = fileBuffer.length
     } catch {
       return reply.status(400).send({ error: 'Failed to parse upload. Ensure the request is multipart/form-data.' })
     }
 
+    // Type from the bytes, not the header (G17); size for that class.
+    const checked = validateMediaFile(fileBuffer)
+    if (!checked.ok) return reply.status(400).send({ error: checked.error })
+    const mimeType = checked.mimeType
+
     // Progress photos are images only
     if (mimeType.startsWith('video/')) {
       return reply.status(400).send({ error: 'Progress photos must be images. Video is for form check clips (session exercise media).' })
-    }
-
-    // Validate file
-    const validationError = validateMediaFile(mimeType, fileSize)
-    if (validationError) {
-      return reply.status(400).send({ error: validationError })
     }
 
     try {

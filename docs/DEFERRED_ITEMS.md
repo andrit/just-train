@@ -92,10 +92,8 @@ When: Revisit only if cross-site CSRF becomes a demonstrated risk
 What: The refresh token cookie uses `sameSite: 'lax'` rather than `'strict'`.
 Why accepted: The app deploys across two origins (Vercel frontend → Railway backend). Vercel preview deploys need the cookie to be sent on the top-level navigation that lands on the preview URL. `'strict'` would break token refresh for any preview deploy that isn't on a custom domain. The risk from `'lax'` is mild — it allows cross-site requests on top-level navigations, but the refresh endpoint already validates the token and rotates it; a CSRF attack would need to also intercept the rotated token to do any damage. This is documented, understood, and acceptable until a custom domain is set for both origins, at which point `'strict'` is a one-line change in `auth.service.ts`.
 
-### MIME Type Validation: Client-Supplied Header (intentional trade-off)
-When: Revisit if Cloudinary is removed or media handling becomes a higher-risk surface
-What: File upload routes read MIME type from the client's `Content-Type` header rather than inspecting file magic bytes server-side.
-Why accepted: Cloudinary performs its own server-side validation on every upload and rejects files that don't match the declared type. A lying client would have their upload rejected by Cloudinary regardless. Adding a magic-number check (e.g. `file-type` npm package) before the Cloudinary call would provide defence-in-depth but is low priority given the secondary validation already in place.
+### MIME Type Validation ✅ CLOSED (2026-09-15, security gate G17)
+Upload routes now decide the type from the file's first bytes (`lib/magicBytes.ts`) and ignore the client's `Content-Type`. No dependency — `file-type` is ESM-only from v17 and the backend is CJS; the seven accepted formats are sniffed directly. Cloudinary's own validation remains the second layer.
 
 ### Account Lockout ✅ BUILT (2026-09-15, account plan C9) / CAPTCHA ⬜
 Decisions (2026-09-15): threshold **5** failures per email → **15-minute** fixed lock, counted for unknown emails too (no enumeration), `423` + `retryAfterSeconds`; per-IP failure cap **20 / 15 min** → `429`; **notice email** to the owner on lock (live once mail is configured); Turnstile **register always, login adaptively after the 3rd failure**. Built: `lib/loginLockout.ts` (pure, `FailureStore` interface, in-process store — see the `ponytail` there for why not Redis yet), `services/lockout.service.ts`, login route, sign-in page countdown.

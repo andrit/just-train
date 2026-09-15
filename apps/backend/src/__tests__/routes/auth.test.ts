@@ -58,6 +58,11 @@ vi.mock('../../services/emailVerification.service', () => ({
   redeemVerificationToken: vi.fn().mockResolvedValue({ outcome: 'ok' }),
 }))
 
+vi.mock('../../lib/sentry', async (importOriginal) => {
+  const real = await importOriginal<typeof import('../../lib/sentry')>()
+  return { ...real, captureSecurityEvent: vi.fn() }
+})
+
 vi.mock('../../services/lockout.service', () => ({
   loginLockout: {
     check:         vi.fn().mockReturnValue({ locked: false }),
@@ -1045,6 +1050,8 @@ describe('POST /api/v1/auth/login — lockout', () => {
     vi.mocked(verifyPassword).mockResolvedValueOnce(false)
     await app.inject({ method: 'POST', url, payload })
     expect(sendLockoutNotice).toHaveBeenCalledWith('trainer@example.com', 'Test Trainer')
+    const { captureSecurityEvent } = await import('../../lib/sentry')
+    expect(captureSecurityEvent).toHaveBeenCalledWith('Sign-in locked', { scope: 'email', known: 'true' })   // G20
 
     vi.mocked(loginLockout.recordFailure).mockReturnValue({ justLockedEmail: false, emailFailures: 1, ipFailures: 1 })
   })

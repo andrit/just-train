@@ -118,6 +118,13 @@ proceeds — and the only symptom is the dashboard banner never clearing.
    cd apps/backend && DATABASE_URL="<prod-url>" npx drizzle-kit migrate
    ```
 
+**Order on a column *add*: SQL to prod first, then push the code.** Drizzle's `findFirst`
+selects every column of the table, so code that knows about a new column fails on a
+database that doesn't have it yet — a new `trainers` column breaks *login* until the
+`ALTER TABLE` lands. Additive columns are safe to apply ahead of the deploy (old code
+ignores them), so the sequence is: `psql … -f docs/sql/<migration>.sql` → verify → `git push`.
+Column *drops* are the reverse (code first, then SQL) and need a two-deploy dance — avoid.
+
 `db:push` is for the **local** dev DB only (fast iteration, no migration files). It must
 never touch production. If prod and code ever diverge, diff prod's live columns against
 the schema (`docs/utilities/dump-db-schema-csv.sh` in the workbench) before writing a

@@ -1,6 +1,9 @@
 -- ------------------------------------------------------------
 -- add-trainers-deactivated-at.sql  (account plan A5 — soft delete)
 --
+-- ⚠️ APPLY BEFORE deploying the code that adds the column: login selects every
+-- trainers column and 500s until this exists.
+--
 -- Additive, idempotent. `deactivated_at` set by DELETE /auth/me; login and
 -- refresh are blocked while set; signing in within 30 days clears it; the
 -- daily purge job hard-deletes accounts past the window (ordered explicit

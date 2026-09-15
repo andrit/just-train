@@ -22,7 +22,7 @@ import * as crypto from 'crypto'
 import * as jwt from 'jsonwebtoken'
 import { Resend } from 'resend'
 import { db, refreshTokens, emailVerificationTokens } from '../db'
-import { eq, and, gt, desc, ne } from 'drizzle-orm'
+import { eq, and, gt, desc, ne, isNull } from 'drizzle-orm'
 import { trainers } from '../db/schema/trainers'
 import type { TrainerRole } from '@trainer-app/shared'
 
@@ -242,6 +242,43 @@ export async function revokeAllRefreshTokens(trainerId: string): Promise<void> {
         eq(refreshTokens.trainerId, trainerId),
       )
     )
+}
+
+/**
+ * Active devices = refresh tokens that are unexpired and not revoked, grouped
+ * by device. Rotation replaces the row, so the newest row's createdAt is the
+ * device's last activity. A device that logged in twice has two rows until the
+ * older expires — grouping hides that.
+ */
+export interface ActiveDevice {
+  deviceId:     string
+  deviceName:   string | null
+  lastActiveAt: Date
+}
+
+export async function listActiveDevices(trainerId: string): Promise<ActiveDevice[]> {
+  const rows = await db.query.refreshTokens.findMany({
+    where:   and(eq(refreshTokens.trainerId, trainerId), isNull(refreshTokens.revokedAt), gt(refreshTokens.expiresAt, new Date())),
+    columns: { deviceId: true, deviceName: true, createdAt: true },
+  })
+  const byDevice = new Map<string, ActiveDevice>()
+  for (const r of rows) {
+    const seen = byDevice.get(r.deviceId)
+    if (!seen || r.createdAt > seen.lastActiveAt) {
+      byDevice.set(r.deviceId, { deviceId: r.deviceId, deviceName: r.deviceName ?? seen?.deviceName ?? null, lastActiveAt: r.createdAt })
+    }
+  }
+  return [...byDevice.values()].sort((a, b) => b.lastActiveAt.getTime() - a.lastActiveAt.getTime())
+}
+
+/** Revoke one device's tokens. Returns false when the trainer has no active token for that device. */
+export async function revokeDevice(trainerId: string, deviceId: string): Promise<boolean> {
+  const revoked = await db
+    .update(refreshTokens)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(refreshTokens.trainerId, trainerId), eq(refreshTokens.deviceId, deviceId), isNull(refreshTokens.revokedAt)))
+    .returning({ id: refreshTokens.id })
+  return revoked.length > 0
 }
 
 /**

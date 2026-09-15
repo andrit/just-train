@@ -85,9 +85,8 @@ When: Production infrastructure setup
 What: Cron job deletes expired/revoked refresh token rows.
 Query: `DELETE FROM refresh_tokens WHERE expires_at < NOW() OR revoked_at IS NOT NULL`
 
-### Device Management UI
-When: Settings UI phase
-What: List active sessions by device, with individual revoke buttons. Infrastructure complete — `refresh_tokens` has `device_id`, `device_name`, `last_used_at`. UI only.
+### Device Management UI ✅ DONE (2026-09-15)
+`GET /auth/devices` + `DELETE /auth/devices/:deviceId` + Preferences → Account → Devices. Note: `last_used_at` was never maintained (rotation replaces the row); the newest row's `created_at` is used as last activity. Column left in place for the reuse-detection work (account plan A3).
 
 ### HTTPS in Local Dev
 When: If cookie behaviour needs precise local testing

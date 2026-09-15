@@ -30,6 +30,7 @@ import {
 import { Input }   from '@/components/ui/Input'
 import { Spinner } from '@/components/ui/Spinner'
 import { ChangePasswordCard } from '@/components/account/ChangePasswordCard'
+import { DevicesCard }        from '@/components/account/DevicesCard'
 import type { TrainerResponse } from '@trainer-app/shared'
 
 // ── Section wrapper ───────────────────────────────────────────────────────────
@@ -852,6 +853,7 @@ export default function PreferencesPage(): React.JSX.Element {
           description="Sign-in security — password, devices"
         >
           <ChangePasswordCard />
+          <DevicesCard />
         </Section>
 
       </div>

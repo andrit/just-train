@@ -3,18 +3,16 @@
 // ------------------------------------------------------------
 
 import { useState }              from 'react'
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { useQueryClient }        from '@tanstack/react-query'
+import { NavLink, useLocation } from 'react-router-dom'
 import { cn }              from '@/lib/cn'
 import { useOverlayStore } from '@/store/overlayStore'
-import { useSessionStore } from '@/store/sessionStore'
 import { useAuthStore }    from '@/store/authStore'
+import { useSignOut }      from '@/hooks/useSignOut'
 import { useSyncStatus }   from '@/hooks/useSyncStatus'
 import { usePreferences }  from '@/hooks/usePreferences'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { OfflineBanner }   from '@/components/shell/OfflineBanner'
 import { ToastContainer }  from '@/components/ui/ToastContainer'
-import { apiClient }       from '@/lib/api'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -210,7 +208,6 @@ function UserMenuButton({
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
   const { pending: pendingSyncCount } = useSyncStatus()
   const trainer          = useAuthStore((s) => s.trainer)
-  const clearAuth        = useAuthStore((s) => s.clearAuth)
   const { trainerMode }  = usePreferences()
   const { showPassiveIcon, promptInstall } = useInstallPrompt()
   const {
@@ -220,8 +217,6 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
     closeSidebar,
     minimise,
   } = useOverlayStore()
-  const navigate = useNavigate()
-  const qc       = useQueryClient()
 
   // Sidebar collapses to icon-only strip while a session is in full-screen mode
   const sessionExpanded = overlayState === 'expanded'
@@ -237,19 +232,8 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
     ? trainer.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase()
     : '?'
 
-  const handleLogout = async (): Promise<void> => {
-    try {
-      await apiClient.post('/auth/logout', {})
-    } catch {
-      // Even if the server call fails, clear local auth
-    } finally {
-      qc.clear()
-      clearAuth()
-      useSessionStore.getState().clearAll()
-      useOverlayStore.getState().hide()
-      navigate('/login', { replace: true })
-    }
-  }
+  const signOut = useSignOut()
+  const handleLogout = (): Promise<void> => signOut()
 
   // When navigating away while a session is expanded, drop it to a pill
   const handleNavClick = (): void => {

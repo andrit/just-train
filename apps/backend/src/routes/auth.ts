@@ -39,6 +39,8 @@ import {
   rotateRefreshToken,
   revokeAllRefreshTokens,
   revokeRefreshTokensExceptDevice,
+  listActiveDevices,
+  revokeDevice,
   revokeRefreshToken,
   refreshTokenCookieOptions,
   REFRESH_TOKEN_COOKIE,
@@ -56,6 +58,7 @@ import {
   OnboardTrainerSchema,
   UpdateTrainerSchema,
   ChangePasswordSchema,
+  DeviceListResponseSchema,
   TrainerResponseSchema,
   ErrorResponseSchema,
 } from '@trainer-app/shared'
@@ -647,6 +650,63 @@ Called once from the onboarding screen after registration. Can be called again t
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to change password' })
+    }
+  })
+
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // GET /auth/devices — Signed-in devices (account plan A2)
+  // DELETE /auth/devices/:deviceId — Sign out one device
+  //
+  // A device is a refresh-token family keyed by the client's X-Device-ID.
+  // Revoking your own device is allowed and behaves like logout.
+  // ──────────────────────────────────────────────────────────────────────────
+  app.get('/auth/devices', {
+    preHandler: [authenticate],
+    schema: {
+      tags: ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary: 'List signed-in devices',
+      response: { 200: DeviceListResponseSchema, 401: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    try {
+      const current = request.headers['x-device-id'] as string | undefined
+      const devices = await listActiveDevices(request.trainer.trainerId)
+      return reply.send(devices.map((d) => ({
+        deviceId:     d.deviceId,
+        deviceName:   d.deviceName,
+        lastActiveAt: d.lastActiveAt.toISOString(),
+        current:      d.deviceId === current,
+      })))
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to list devices' })
+    }
+  })
+
+  app.delete('/auth/devices/:deviceId', {
+    preHandler: [authenticate],
+    schema: {
+      tags: ['Auth'],
+      security: [{ bearerAuth: [] }],
+      summary: 'Sign out one device',
+      params: z.object({ deviceId: z.string().min(1).max(200) }),
+      response: { 204: z.null(), 401: ErrorResponseSchema, 404: ErrorResponseSchema, 500: ErrorResponseSchema },
+    },
+  }, async (request, reply) => {
+    const { deviceId } = request.params as { deviceId: string }
+    try {
+      const revoked = await revokeDevice(request.trainer.trainerId, deviceId)
+      if (!revoked) return reply.status(404).send({ error: 'Device not found' })
+      if (deviceId === request.headers['x-device-id']) {
+        reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' })
+      }
+      routeLog(app).warn({ trainerId: request.trainer.trainerId, deviceId }, 'Device signed out')
+      return reply.status(204).send()
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to sign out device' })
     }
   })
 

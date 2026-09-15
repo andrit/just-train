@@ -750,3 +750,18 @@ export const TelemetryAcceptedResponseSchema = z.object({
   accepted: z.number().int().min(0),
 })
 export type TelemetryAcceptedResponse = z.infer<typeof TelemetryAcceptedResponseSchema>
+
+// ============================================================
+// ACCOUNT — devices (account plan A2)
+// ============================================================
+
+export const DeviceResponseSchema = z.object({
+  deviceId:     z.string(),
+  deviceName:   z.string().nullable().describe('Raw User-Agent captured at login; the client renders a friendly label'),
+  lastActiveAt: z.string().datetime(),
+  current:      z.boolean().describe('True for the device making this request (X-Device-ID)'),
+})
+export type DeviceResponse = z.infer<typeof DeviceResponseSchema>
+
+export const DeviceListResponseSchema = z.array(DeviceResponseSchema)
+export type DeviceListResponse = z.infer<typeof DeviceListResponseSchema>

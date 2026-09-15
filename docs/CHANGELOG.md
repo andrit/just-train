@@ -7,6 +7,12 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Account — devices (account plan A2, 2026-09-15)
+- **`GET /auth/devices`** — every device with a live session (unexpired, unrevoked refresh token), grouped by the client's `X-Device-ID`, newest activity first, the caller's flagged `current`. Rotation replaces the token row, so the newest row's `createdAt` *is* last activity (the never-maintained `lastUsedAt` column is not used). **`DELETE /auth/devices/:deviceId`** — revokes that device's tokens, scoped to the caller (404 for an unknown or another trainer's device id); revoking your own device clears the cookie, i.e. logout.
+- **Preferences → Account → Devices** (`components/account/DevicesCard.tsx`): "Chrome on Android · Active 3 h ago", per-device *Sign out*, and a two-step *Sign out everywhere* (existing `/auth/logout-all`). `lib/userAgent.ts` `describeUserAgent()` reduces the stored UA to browser + platform (unit-tested: Edge/Opera before Chrome, Chrome before Safari).
+- **`hooks/useSignOut.ts`** — the one sign-out sequence (server revoke → query cache → auth store → session state → overlay → `/login`), extracted from `Layout`'s logout button so *Sign out everywhere* and account deactivation cannot drift from it. `Layout` now calls it.
+- Tests: service grouping/sorting/name fallback + revoke true/false (`services/devices.test.ts`); routes 401 / list with current flag / 204 scoped / 404 / own-device clears cookie.
+
 ### Account — change password (account plan A1, 2026-09-15)
 - **`PATCH /auth/password { currentPassword, newPassword }`** — re-proves the current password (argon2), stores the new hash, and **signs out every other device** (new `revokeRefreshTokensExceptDevice(trainerId, keepDeviceId)`; the caller's `X-Device-ID` refresh token survives). Reusing the current password is refused. Rate-limited 5/15 min. Logged at `warn` (the start of auth-event logging, checklist G20). Shared `ChangePasswordSchema` (8–100 chars, same rule as register).
 - **Preferences → Account → Change password** (`components/account/ChangePasswordCard.tsx`, `lib/queries/account.ts`). Copy states up front that other devices will be signed out.

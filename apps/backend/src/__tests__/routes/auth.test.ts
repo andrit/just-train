@@ -73,6 +73,8 @@ vi.mock('../../services/auth.service', async (importOriginal) => {
     revokeRefreshToken:       vi.fn().mockResolvedValue(undefined),
     revokeAllRefreshTokens:   vi.fn().mockResolvedValue(undefined),
     revokeRefreshTokensExceptDevice: vi.fn().mockResolvedValue(undefined),
+    listActiveDevices:        vi.fn().mockResolvedValue([]),
+    revokeDevice:             vi.fn().mockResolvedValue(true),
     refreshTokenCookieOptions:real.refreshTokenCookieOptions,
     REFRESH_TOKEN_COOKIE:     real.REFRESH_TOKEN_COOKIE,
   }
@@ -581,5 +583,68 @@ describe('PATCH /api/v1/auth/password', () => {
     vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(undefined)
     const res = await app.inject({ method: 'PATCH', url, headers: { authorization: authHeader() }, payload: body })
     expect(res.statusCode).toBe(404)
+  })
+})
+
+// ── GET / DELETE /api/v1/auth/devices ─────────────────────────────────────────
+// Account plan A2.
+
+describe('GET /api/v1/auth/devices', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('returns 401 without a token', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/v1/auth/devices' })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('lists devices for the caller and flags the current one from X-Device-ID', async () => {
+    const { listActiveDevices } = await import('../../services/auth.service')
+    vi.mocked(listActiveDevices).mockResolvedValueOnce([
+      { deviceId: 'dev-1', deviceName: 'Mozilla/5.0 (Linux; Android 13)', lastActiveAt: new Date('2026-09-15T10:00:00Z') },
+      { deviceId: 'dev-2', deviceName: null, lastActiveAt: new Date('2026-09-14T10:00:00Z') },
+    ])
+    const res = await app.inject({ method: 'GET', url: '/api/v1/auth/devices', headers: { authorization: authHeader(), 'x-device-id': 'dev-2' } })
+    expect(res.statusCode).toBe(200)
+    expect(listActiveDevices).toHaveBeenCalledWith(TEST_TRAINER_ID)
+    expect(res.json()).toEqual([
+      { deviceId: 'dev-1', deviceName: 'Mozilla/5.0 (Linux; Android 13)', lastActiveAt: '2026-09-15T10:00:00.000Z', current: false },
+      { deviceId: 'dev-2', deviceName: null, lastActiveAt: '2026-09-14T10:00:00.000Z', current: true },
+    ])
+  })
+})
+
+describe('DELETE /api/v1/auth/devices/:deviceId', () => {
+  let app: Awaited<ReturnType<typeof buildAuthTestApp>>
+  beforeAll(async () => { app = await buildAuthTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('returns 401 without a token', async () => {
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/devices/dev-1' })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('revokes the device scoped to the caller and returns 204', async () => {
+    const { revokeDevice } = await import('../../services/auth.service')
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/devices/dev-1', headers: { authorization: authHeader(), 'x-device-id': 'dev-9' } })
+    expect(res.statusCode).toBe(204)
+    expect(revokeDevice).toHaveBeenCalledWith(TEST_TRAINER_ID, 'dev-1')
+    expect(res.headers['set-cookie']).toBeUndefined()   // another device: this session's cookie untouched
+  })
+
+  it('returns 404 when the caller has no active token for that device (another trainer\'s device id included)', async () => {
+    const { revokeDevice } = await import('../../services/auth.service')
+    vi.mocked(revokeDevice).mockResolvedValueOnce(false)
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/devices/not-mine', headers: { authorization: authHeader() } })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('clears the refresh cookie when the caller signs out its own device', async () => {
+    const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/devices/dev-1', headers: { authorization: authHeader(), 'x-device-id': 'dev-1' } })
+    expect(res.statusCode).toBe(204)
+    expect(String(res.headers['set-cookie'])).toContain('trainer_refresh_token=;')
   })
 })

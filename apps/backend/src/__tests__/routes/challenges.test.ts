@@ -24,6 +24,7 @@ vi.mock('../../db', () => {
     db: {
       query: {
         clients:    { findFirst: vi.fn().mockResolvedValue(undefined) },
+        exercises:  { findFirst: vi.fn().mockResolvedValue(undefined) },
         challenges: {
           findFirst: vi.fn().mockResolvedValue(undefined),
           findMany:  vi.fn().mockResolvedValue([]),
@@ -35,6 +36,10 @@ vi.mock('../../db', () => {
       select: vi.fn().mockReturnValue(chain),
     },
     clients:    {},
+    exercises:  {},
+    sessions:   {},
+    sessionExercises: {},
+    sets:       {},
     challenges: {},
   }
 })
@@ -131,6 +136,20 @@ describe('POST /clients/:clientId/challenges', () => {
     })
     expect(res.statusCode).toBe(201)
     expect(res.json()).toHaveProperty('id', TEST_CHALLENGE_ID)
+  })
+
+  // Phase 19 body-id sweep: a referenced exercise must be public or the caller's own.
+  it('returns 404 when exerciseId is not visible to the trainer (foreign private exercise)', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    vi.mocked(db.query.exercises.findFirst).mockResolvedValueOnce(undefined)
+    const res = await app.inject({
+      method: 'POST', url: `/api/v1/clients/${TEST_CLIENT_ID}/challenges`,
+      headers: authHeader(),
+      payload: { ...validChallengeBody, metricType: 'weight_lifted', exerciseId: '11111111-1111-1111-1111-111111111111' },
+    })
+    expect(res.statusCode).toBe(404)
+    expect(db.insert).not.toHaveBeenCalled()
   })
 })
 

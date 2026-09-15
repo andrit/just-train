@@ -40,7 +40,7 @@ function parameterisedRoutes(): ParamRoute[] {
     while ((m = re.exec(src))) {
       const rest = src.slice(m.index + m[0].length)
       const next = rest.search(/\n {2}app\.(get|post|patch|delete)\('/)
-      out.push({ file, method: m[1].toUpperCase(), path: m[2], body: rest.slice(0, next === -1 ? undefined : next) })
+      out.push({ file, method: (m[1] ?? '').toUpperCase(), path: m[2] ?? '', body: rest.slice(0, next === -1 ? undefined : next) })
     }
   }
   return out

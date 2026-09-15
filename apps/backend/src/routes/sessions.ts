@@ -24,6 +24,7 @@ import { idempotencyPreHandler, idempotencyOnSend } from '../lib/idempotency'
 import { db, sessions, sessionExercises, sets, clients, exercises, templates, templateExercises } from '../db'
 import { eq, and, desc, inArray } from 'drizzle-orm'
 import { createCircuitRemapper, toSessionExerciseRow } from '../lib/exerciseCopy'
+import { ownedClient, ownedSession, ownedSessionExercise, ownedSet, visibleExercise, visibleExercises } from '../lib/ownership'
 import { deriveRecordSetIds, type RecordSetIds } from '../lib/prRecords'
 import { updateChallengesForSet, updateChallengesForSessionComplete } from '../services/challenge.service'
 import { logSyncWrite } from '../services/syncLog.service'
@@ -160,38 +161,11 @@ async function loadTemplatePlan(templateId: string, trainerId: string): Promise<
   return { rows, unilateralIds }
 }
 
-// ── Ownership through the aggregate root ────────────────────────────────────
-// A session-exercise or a set has no trainer_id of its own; it belongs to
-// whoever owns its session. Every route that takes one of their ids resolves
-// ownership here first and returns 404 (not 403 — no existence leak) if the
-// caller is not that trainer. Found in the Phase 19 ownership audit: seven
-// routes mutated by bare id.
-async function ownedSession(sessionId: string, trainerId: string) {
-  return db.query.sessions.findFirst({
-    where:   and(eq(sessions.id, sessionId), eq(sessions.trainerId, trainerId)),
-    columns: { id: true, clientId: true },
-  })
-}
-
-async function ownedSessionExercise(id: string, trainerId: string) {
-  const row = await db.query.sessionExercises.findFirst({
-    where: eq(sessionExercises.id, id),
-    with:  { session: { columns: { id: true, trainerId: true, clientId: true } } },
-  })
-  return row && row.session.trainerId === trainerId ? row : null
-}
-
-async function ownedSet(id: string, trainerId: string) {
-  const row = await db.query.sets.findFirst({
-    where: eq(sets.id, id),
-    with:  { sessionExercise: { with: { session: { columns: { trainerId: true } } } } },
-  })
-  return row && row.sessionExercise.session.trainerId === trainerId ? row : null
-}
-
-// A circuit is a group of ≥2 members. When a member is removed and only one
-// remains, the survivor is demoted to a standalone exercise (read views already
-// tolerate a lone member; this keeps the data honest instead of relying on that).
+// Ownership resolvers live in lib/ownership.ts (owned* through the aggregate
+// root; visible* for the exercise library). A circuit is a group of ≥2 members —
+// when a member is removed and only one remains, the survivor is demoted to a
+// standalone exercise (read views already tolerate a lone member; this keeps
+// the data honest instead of relying on that).
 async function ungroupIfBelowTwo(
   tx: Pick<typeof db, 'query' | 'update'>,
   circuitId: string | null,
@@ -336,6 +310,13 @@ This is the primary payload for the active workout view — loaded once when the
     const body = request.body as z.infer<typeof CreateSessionSchema>
 
     try {
+      // The client must be the caller's — a session is written against a
+      // client, and every per-client computation (KPIs, at-risk, reports)
+      // would otherwise count a stranger's rows. (Phase 19 body-id sweep.)
+      if (!(await ownedClient(body.clientId, request.trainer.trainerId))) {
+        return reply.status(404).send({ error: 'Client not found' })
+      }
+
       // ── Resolve the template plan first (reads only) ─────────────────────
       const plan = body.templateId
         ? await loadTemplatePlan(body.templateId, request.trainer.trainerId)
@@ -530,11 +511,8 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
         return reply.status(404).send({ error: 'Session not found' })
       }
 
-      // Look up workoutType + laterality from exercise library
-      const exercise = await db.query.exercises.findFirst({
-        where: eq(exercises.id, body.exerciseId),
-        columns: { workoutType: true, laterality: true },
-      })
+      // Look up workoutType + laterality — public library or the caller's own
+      const exercise = await visibleExercise(body.exerciseId, request.trainer.trainerId)
       if (!exercise) {
         return reply.status(404).send({ error: 'Exercise not found' })
       }
@@ -610,15 +588,12 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
       })
       if (!session) return reply.status(404).send({ error: 'Session not found' })
 
-      // Look up the exercises — validate existence, single workout type, laterality.
-      const exRows = await db.query.exercises.findMany({
-        where: inArray(exercises.id, body.exerciseIds),
-        columns: { id: true, workoutType: true, laterality: true },
-      })
-      const found = new Map(exRows.map((e) => [e.id, e]))
-      if (found.size !== new Set(body.exerciseIds).size) {
+      // Look up the exercises — all must be visible (public or own), single workout type, laterality.
+      const exRows = await visibleExercises(body.exerciseIds, request.trainer.trainerId)
+      if (!exRows) {
         return reply.status(400).send({ error: 'One or more exercises not found' })
       }
+      const found = new Map(exRows.map((e) => [e.id, e]))
       const types = new Set(exRows.map((e) => e.workoutType))
       if (types.size > 1) {
         return reply.status(400).send({ error: 'Circuit exercises must share a workout type' })

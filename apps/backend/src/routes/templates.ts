@@ -19,9 +19,10 @@ import { routeLog } from '../lib/logger'
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
 import { db, templates, templateExercises, exercises, sessions, sessionExercises } from '../db'
-import { eq, and, ilike, or, exists, sql, inArray } from 'drizzle-orm'
+import { eq, and, ilike, or, exists, sql } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { createCircuitRemapper, toTemplateExerciseRow } from '../lib/exerciseCopy'
+import { visibleExercise, visibleExercises } from '../lib/ownership'
 import {
   CreateTemplateSchema,
   CreateTemplateFromSessionSchema,
@@ -415,10 +416,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
           where: and(eq(templates.id, templateId), eq(templates.trainerId, request.trainer.trainerId)),
           columns: { id: true },
         }),
-        db.query.exercises.findFirst({
-          where: eq(exercises.id, body.exerciseId),
-          columns: { workoutType: true },
-        }),
+        visibleExercise(body.exerciseId, request.trainer.trainerId),   // public library or the caller's own
       ])
 
       if (!template) return reply.status(404).send({ error: 'Template not found' })
@@ -492,13 +490,9 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
       })
       if (!template) return reply.status(404).send({ error: 'Template not found' })
 
-      // Look up the exercises — validate existence and a single workout type.
-      const exRows = await db.query.exercises.findMany({
-        where:   inArray(exercises.id, body.exerciseIds),
-        columns: { id: true, workoutType: true },
-      })
-      const found = new Map(exRows.map((e) => [e.id, e]))
-      if (found.size !== new Set(body.exerciseIds).size) {
+      // Look up the exercises — all must be visible (public or own), single workout type.
+      const exRows = await visibleExercises(body.exerciseIds, request.trainer.trainerId)
+      if (!exRows) {
         return reply.status(400).send({ error: 'One or more exercises not found' })
       }
       const types = new Set(exRows.map((e) => e.workoutType))

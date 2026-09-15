@@ -107,6 +107,26 @@ export async function buildChallengeTestApp() {
   return app
 }
 
+export interface RegisteredRoute { method: string; url: string }
+
+/** Every route file, as production registers them, plus the list of routes seen — for cross-cutting security guards. */
+export async function buildAuditedFullTestApp() {
+  const app = createBaseApp()
+  await app.register(cookie    as unknown as FastifyPluginCallback<Record<string, unknown>>, { secret: 'test-cookie-secret-for-testing-only' })
+  await app.register(multipart as unknown as FastifyPluginCallback<Record<string, unknown>>)
+  const routes: RegisteredRoute[] = []
+  app.addHook('onRoute', (r) => {
+    const methods = Array.isArray(r.method) ? r.method : [r.method]
+    for (const m of methods) if (m !== 'HEAD') routes.push({ method: m, url: r.url })
+  })
+  for (const plugin of [authRoutes, clientRoutes, clientGoalRoutes, clientSnapshotRoutes, exerciseRoutes, mediaRoutes,
+    sessionRoutes, templateRoutes, kpiRoutes, reportRoutes, snapshotMediaRoutes, sessionExerciseMediaRoutes, challengeRoutes, telemetryRoutes]) {
+    await app.register(plugin as FastifyPluginCallback, { prefix: '/api/v1' })
+  }
+  await app.ready()
+  return { app, routes }
+}
+
 export async function buildTelemetryTestApp(opts: TelemetryRouteOptions = {}) {
   const app = createBaseApp()
   await app.register(telemetryRoutes, { prefix: '/api/v1', ...opts })

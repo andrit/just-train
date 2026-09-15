@@ -77,7 +77,7 @@ const MessageResponseSchema = z.object({
 // Note: lastLoginAt is passed separately because the register route returns
 // null (just created) while login returns the updated value.
 
-function serializeTrainer(
+export function serializeTrainer(
   trainer: Trainer,
   overrides: { lastLoginAt?: string | null } = {},
 ): z.infer<typeof TrainerResponseSchema> {

@@ -155,7 +155,7 @@ describe('POST /sessions', () => {
     const session = makeSession()
     vi.mocked(db.insert({} as never).values({} as never).returning).mockResolvedValueOnce([session])
     // Second returning call — client fetch for response (uses findFirst not insert)
-    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient()).mockResolvedValueOnce(makeClient())   // ownership + response
 
     const res = await app.inject({
       method: 'POST', url: '/api/v1/sessions', headers: authHeader(), payload: validSessionBody,
@@ -183,7 +183,7 @@ describe('POST /sessions', () => {
       { id: EX_B, laterality: 'bilateral' },
       { id: EX_C, laterality: 'bilateral' },
     ] as never)
-    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient()).mockResolvedValueOnce(makeClient())   // ownership + response
 
     const res = await app.inject({
       method: 'POST', url: '/api/v1/sessions', headers: authHeader(),
@@ -204,6 +204,7 @@ describe('POST /sessions', () => {
 
   it('returns 404 when the template is not found or belongs to another trainer', async () => {
     const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())   // client is ours; template is not
     const res = await app.inject({
       method: 'POST', url: '/api/v1/sessions', headers: authHeader(),
       payload: { ...validSessionBody, templateId: 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa' },
@@ -229,7 +230,7 @@ describe('POST /sessions', () => {
       { id: UNI, laterality: 'unilateral' },
       { id: BI,  laterality: 'bilateral' },
     ] as never)
-    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient()).mockResolvedValueOnce(makeClient())   // ownership + response
 
     const res = await app.inject({
       method: 'POST', url: '/api/v1/sessions', headers: authHeader(),
@@ -617,6 +618,34 @@ describe('Ownership — session tree', () => {
     const res = await app.inject({ method: 'PATCH', url: `/api/v1/sets/${makeSet().id}`, headers: authHeader(), payload: { reps: 12 } })
     expect(res.statusCode).toBe(200)
     expect(db.update).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ── Body-supplied foreign keys (Phase 19 body-id sweep) ───────────────────────
+
+describe('Ownership — ids in the request body', () => {
+  let app: Awaited<ReturnType<typeof buildSessionTestApp>>
+  beforeAll(async () => { app = await buildSessionTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('POST /sessions → 404 when body.clientId is not the caller\'s client, no session written', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(undefined)   // ownedClient: no row for this trainer
+    const res = await app.inject({ method: 'POST', url: '/api/v1/sessions', headers: authHeader(), payload: validSessionBody })
+    expect(res.statusCode).toBe(404)
+    expect(db.insert).not.toHaveBeenCalled()
+    expect(db.transaction).not.toHaveBeenCalled()
+  })
+
+  it('POST /sessions/:id/exercises → 404 when the exercise is another trainer\'s private one, no insert', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce(makeSession())
+    vi.mocked(db.query.exercises.findFirst).mockResolvedValueOnce(undefined)   // visibleExercise: filtered out by the WHERE
+    const res = await app.inject({ method: 'POST', url: `/api/v1/sessions/${TEST_SESSION_ID}/exercises`,
+      headers: authHeader(), payload: { exerciseId: TEST_EXERCISE_ID, orderIndex: 0 } })
+    expect(res.statusCode).toBe(404)
+    expect(db.insert).not.toHaveBeenCalled()
   })
 })
 

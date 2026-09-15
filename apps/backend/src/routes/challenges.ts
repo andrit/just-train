@@ -18,6 +18,7 @@ import { z }                    from 'zod'
 import { db, challenges, clients } from '../db'
 import { eq, and, desc }        from 'drizzle-orm'
 import { authenticate }         from '../middleware/authenticate'
+import { visibleExercise }      from '../lib/ownership'
 import {
   CreateChallengeSchema,
   UpdateChallengeSchema,
@@ -197,6 +198,13 @@ export async function challengeRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(400).send({
         error: `exerciseId is required for ${body.metricType} challenges`,
       })
+    }
+
+    // A referenced exercise must be visible to the caller (public library or
+    // their own) — previously an unknown id surfaced as a 500 on the FK and a
+    // foreign private exercise was accepted. (Phase 19 body-id sweep.)
+    if (body.exerciseId && !(await visibleExercise(body.exerciseId, trainerId))) {
+      return reply.status(404).send({ error: 'Exercise not found' })
     }
 
     try {

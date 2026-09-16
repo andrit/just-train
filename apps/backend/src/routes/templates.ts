@@ -36,27 +36,12 @@ import {
   UuidParamSchema,
 } from '@trainer-app/shared'
 import { z } from 'zod'
+import { serializeDates } from '../lib/serializeDates'
 
 
 const UpdateTemplateSchema = CreateTemplateSchema.partial()
 
-/**
- * Every `Date` anywhere in the tree → ISO string. The detail tree nests
- * templateExercises → exercise → media, and media rows carry their own
- * createdAt; a top-level-only conversion 500'd `GET /templates/:id` the
- * moment a template exercise had media (found by the real-database lane —
- * the mocked tests only ever saw factory rows that already held strings).
- */
-function serializeDates<T>(value: T): T {
-  if (value instanceof Date) return value.toISOString() as unknown as T
-  if (Array.isArray(value)) return value.map(serializeDates) as unknown as T
-  if (value && typeof value === 'object') {
-    const out: Record<string, unknown> = {}
-    for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = serializeDates(v)
-    return out as T
-  }
-  return value
-}
+// serializeDates lives in lib/ — deep, because the detail tree nests media rows with their own timestamps.
 
 // Full template tree for a detail response. `media: true` is required — the
 // exercise summary schema demands it (see CONTRIBUTING.md).

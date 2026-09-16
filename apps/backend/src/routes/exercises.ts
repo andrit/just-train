@@ -1,3 +1,4 @@
+import { serializeDates } from '../lib/serializeDates'
 import { routeLog } from '../lib/logger'
 // ------------------------------------------------------------
 // routes/exercises.ts — Exercise Library endpoints
@@ -173,11 +174,8 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(404).send({ error: 'Exercise not found' })
       }
 
-      return reply.send({
-        ...result,
-        createdAt: result.createdAt instanceof Date ? result.createdAt.toISOString() : result.createdAt,
-        updatedAt: result.updatedAt instanceof Date ? result.updatedAt.toISOString() : result.updatedAt,
-      })
+      // Deep: media rows carry their own createdAt (real-DB lane finding).
+      return reply.send(serializeDates(result))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercise' })

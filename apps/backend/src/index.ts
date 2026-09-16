@@ -33,7 +33,8 @@ import multipart     from '@fastify/multipart'
 import rateLimit     from '@fastify/rate-limit'
 import { clientIp }  from './lib/clientIp'
 import swagger       from '@fastify/swagger'
-import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
+import { serializerCompiler, validatorCompiler, jsonSchemaTransform } from 'fastify-type-provider-zod'
+import { attachErrorHandler } from './lib/errorHandler'
 import { z }          from 'zod'
 import * as dotenv   from 'dotenv'
 
@@ -80,6 +81,8 @@ attachSentryErrorHandler(app)
 // ------------------------------------------------------------
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
+// Zod validation / serialisation failures → ErrorResponseSchema shapes (lib/errorHandler.ts).
+attachErrorHandler(app)
 
 // ------------------------------------------------------------
 // CORS
@@ -226,6 +229,8 @@ app.register(rateLimit, {
 // This makes the Swagger UI show an "Authorize" button.
 // ------------------------------------------------------------
 app.register(swagger, {
+  // Zod → JSON Schema for the docs; without it every schema renders empty.
+  transform: jsonSchemaTransform,
   openapi: {
     openapi: '3.0.0',
     info: {

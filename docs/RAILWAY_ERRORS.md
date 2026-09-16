@@ -412,3 +412,14 @@ response: {
 **Lesson:** When using `fastify-type-provider-zod`, ALL response schemas across the entire app must be Zod schemas. Plain JSON Schema objects will cause `safeParse is not a function` at runtime.
 
 **Status: ✅ RESOLVED — plain JSON Schema on /health was the root cause**
+
+---
+
+### Fastify 5 (2026-09-16) — the rule from Error 11 still holds
+
+Upgraded Fastify 4 → 5 and `fastify-type-provider-zod` 1 → **4** — not 5: 5.x expects `zod/v4` schemas (its `zod >=3.25.56` peer is about the subpath, not the API) and throws in the serializer for every Zod-3 schema, so every route answers 500. **Every response schema must
+still be a Zod schema** — the serializer compiler is global and calls `.safeParse()`; a plain
+JSON-Schema object will still produce `schema.safeParse is not a function`. New in 5: Zod
+validation and serialisation failures now go through `lib/errorHandler.ts` (400 `VALIDATION`,
+500 `RESPONSE_SCHEMA`) instead of Fastify's default bodies, and `@fastify/swagger` needs
+`transform: jsonSchemaTransform` or the docs render empty schemas.

@@ -15,6 +15,7 @@ import Fastify                                   from 'fastify'
 import type { FastifyPluginCallback }            from 'fastify'
 import cookie                                    from '@fastify/cookie'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
+import { attachErrorHandler } from '../../lib/errorHandler'
 import { authRoutes }            from '../../routes/auth'
 import { clientRoutes }          from '../../routes/clients'
 import { clientGoalRoutes }      from '../../routes/client-goals'
@@ -35,6 +36,7 @@ function createBaseApp() {
   const app = Fastify({ logger: false })
   app.setValidatorCompiler(validatorCompiler)
   app.setSerializerCompiler(serializerCompiler)
+  attachErrorHandler(app)   // same 400/500 shapes as production
   return app
 }
 

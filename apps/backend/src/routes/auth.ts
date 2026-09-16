@@ -608,6 +608,7 @@ Called once from the onboarding screen after registration. Can be called again t
       response: {
         200: TrainerResponseSchema,
         401: ErrorResponseSchema,
+        404: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
@@ -656,6 +657,7 @@ Called once from the onboarding screen after registration. Can be called again t
       response: {
         200: TrainerResponseSchema,
         401: ErrorResponseSchema,
+        404: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
@@ -1034,6 +1036,7 @@ Called once from the onboarding screen after registration. Can be called again t
       response: {
         200: MessageResponseSchema,
         400: ErrorResponseSchema.describe('Too soon — resend cooldown (60s) not elapsed'),
+        404: ErrorResponseSchema,
         409: ErrorResponseSchema.describe('Email already verified'),
         500: ErrorResponseSchema,
       },

@@ -123,7 +123,7 @@ trainer-app/
 | State | TanStack Query (server), Zustand (client) | |
 | PWA | vite-plugin-pwa, Workbox | Phase 8 |
 | Offline | IndexedDB + sync log table | Phase 8 |
-| Backend | Fastify 4, TypeScript | |
+| Backend | Fastify 5, TypeScript | 4 → 5 on 2026-09-16 (EOL + validation-bypass CVE) |
 | ORM | Drizzle ORM + drizzle-kit | |
 | Validation | Zod — shared frontend + backend | |
 | Auth | JWT + argon2id + httpOnly cookies | |

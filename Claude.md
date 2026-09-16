@@ -32,7 +32,7 @@ TrainerApp is a mobile-first PWA for fitness trainers and athletes. Progress nar
 
 - Frontend: React 18, Vite, TypeScript, Tailwind CSS
 - State: TanStack Query (server), Zustand (client)
-- Backend: Fastify 4, TypeScript, Drizzle ORM, PostgreSQL
+- Backend: Fastify 5, TypeScript, Drizzle ORM, PostgreSQL
 - Shared: Zod schemas in `packages/shared/` — compiled to CJS via `tsc -p tsconfig.build.json`
 - Auth: JWT access tokens (15min, in-memory) + argon2id + httpOnly refresh cookies (7 day)
 - Media: Cloudinary

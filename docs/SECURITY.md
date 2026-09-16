@@ -201,6 +201,7 @@ Plan: `.workbench/designer/current/task-plan-account.md` (Phase 19 track).
 `vitest` (the other **critical**: only when `vitest --ui`'s server is listening — never in CI or prod), `vite`, `postcss`, `nanoid`, `ws` (jsdom), `esbuild`, `@babel/*`, `browserslist`, `brace-expansion` (glob/minimatch under eslint, rimraf, node-pre-gyp), `js-yaml` (eslint), `serialize-javascript` (workbox-build at build time), `@humanfs/node`. Addressed by a tooling upgrade (vitest 1 → 3 brings vite 6) — a deliberate session, not a security fix. **Not** a launch blocker.
 
 ### Decision
+**Fastify 5 applied 2026-09-16** (tier 2, first item) — re-audit counts below once merged.
 Tier 1 applied 2026-09-16 → 97 to **65** (4 low / 23 moderate / 36 high / 2 critical); the remaining runtime-reachable set is exactly fastify, drizzle-orm, @opentelemetry/core. **Tier 2 — Fastify 5 first** (closes fastify + find-my-way + fast-uri-at-source + @fastify/static in one move), then drizzle 0.45 + drizzle-kit, Sentry 10, argon2 0.45 — each its own commit with `pnpm verify` + the real-DB lane green, before Go Live. Tier 3 (tooling) when convenient. Re-run the audit after each and update this section.
 
 ## Roadmap

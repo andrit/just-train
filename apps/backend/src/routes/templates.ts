@@ -594,7 +594,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
       summary: 'Reorder exercises in a template',
       params: z.object({ id: z.string().uuid() }),
       body:   z.object({ orderedIds: z.array(z.string().uuid()) }),
-      response: { 204: z.object({}), 403: ErrorResponseSchema, 500: ErrorResponseSchema },
+      response: { 204: z.object({}), 404: ErrorResponseSchema, 500: ErrorResponseSchema },
     },
   }, async (request, reply) => {
     const { id: templateId } = request.params as { id: string }
@@ -604,7 +604,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
         where: and(eq(templates.id, templateId), eq(templates.trainerId, request.trainer.trainerId)),
         columns: { id: true },
       })
-      if (!template) return reply.status(403).send({ error: 'Not authorised' })
+      if (!template) return reply.status(404).send({ error: 'Template not found' })   // 404, never 403 — do not confirm existence
 
       await Promise.all(
         orderedIds.map((exerciseId, index) =>

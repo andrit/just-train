@@ -988,7 +988,7 @@ Which fields you populate depends on the workout type:
       summary: 'Reorder exercises in a session',
       params: z.object({ id: z.string().uuid() }),
       body:   z.object({ orderedIds: z.array(z.string().uuid()) }),
-      response: { 204: z.object({}), 403: ErrorResponseSchema, 500: ErrorResponseSchema },
+      response: { 204: z.object({}), 404: ErrorResponseSchema, 500: ErrorResponseSchema },
     },
   }, async (request, reply) => {
     const { id: sessionId } = request.params as { id: string }
@@ -999,7 +999,7 @@ Which fields you populate depends on the workout type:
         where: and(eq(sessions.id, sessionId), eq(sessions.trainerId, request.trainer.trainerId)),
         columns: { id: true },
       })
-      if (!session) return reply.status(403).send({ error: 'Not authorised' })
+      if (!session) return reply.status(404).send({ error: 'Session not found' })   // 404, never 403 — do not confirm existence
 
       await Promise.all(
         orderedIds.map((exId, index) =>

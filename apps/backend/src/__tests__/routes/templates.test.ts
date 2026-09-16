@@ -535,7 +535,7 @@ describe('PATCH /templates/:id/exercises/reorder', () => {
     expect(res.statusCode).toBe(401)
   })
 
-  it('returns 403 when template not owned by trainer', async () => {
+  it('returns 404 when template not owned by trainer (never 403 — that would confirm it exists)', async () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce(undefined)
 
@@ -543,7 +543,7 @@ describe('PATCH /templates/:id/exercises/reorder', () => {
       method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises/reorder`,
       headers: authHeader(), payload: { orderedIds: [TEST_TEMPLATE_EXERCISE_ID] },
     })
-    expect(res.statusCode).toBe(403)
+    expect(res.statusCode).toBe(404)
   })
 
   it('reorders exercises for an owned template and returns 204', async () => {

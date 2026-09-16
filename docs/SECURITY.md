@@ -110,7 +110,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 |---|---|---|---|---|
 | G1 | **Ownership — URL ids.** Every parameterised route resolves the caller before acting | Claude | ✅ 2026-09-14 | 7 IDORs fixed; guard `__tests__/security/ownership-guard.test.ts` (fails on any unscoped route; failed on all 7 pre-fix) |
 | G2 | **Ownership — body ids.** Every body/query foreign key checked (`clientId`, `exerciseId(s)`, `templateId`, `sessionId`) | Claude | ✅ 2026-09-15 | `POST /sessions` clientId + 5 exercise-visibility gaps fixed via `lib/ownership.ts` |
-| G3 | **Ownership — real-database matrix.** Seed trainer A, call every route as B, expect 404 — against Postgres, not mocks | Claude (needs a test-DB URL on the Mac) | ⬜ | The guards are scans; this is the proof |
+| G3 | **Ownership — real-database matrix.** Seed trainer A, call every route as B, expect 404 — against Postgres, not mocks | Claude | ✅ 2026-09-16 — **in CI on every push** | `__tests__/db/ownership-matrix.test.ts`: 56 URL-id routes + 9 body-id cases, all 404; owner sanity 200; a coverage test fails CI if a parameterised route has no matrix entry. Found + fixed two `403`s (reorder routes). Purge proven against real FKs alongside (found two purge defects). CI job step *Ownership matrix (real database)* |
 | G4 | **No anonymous route** (source + runtime GET/DELETE) | Claude | ✅ 2026-09-15 | `no-anonymous-route.test.ts`; 4-entry PUBLIC list |
 | G5 | **Mass-assignment** — privileged fields never survive input schemas | Claude | ✅ 2026-09-15 | `mass-assignment.test.ts` |
 | G6 | **Response leak** — `passwordHash` cannot reach a response | Claude | ✅ 2026-09-15 | `response-leak.test.ts` |

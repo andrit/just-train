@@ -34,6 +34,24 @@ jobs:
     name: Typecheck, Lint, Test & Build
     runs-on: ubuntu-latest
 
+    # Real Postgres for the ownership matrix (security gate G3). The unit lane
+    # never connects; the db lane below builds the schema with drizzle-kit push
+    # and truncates freely — this database exists only for the job.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER:     ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB:       ci_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci_db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -80,6 +98,20 @@ jobs:
           JWT_SECRET:      ci-test-jwt-secret-not-used-in-production-64-bytes-padding-here
           COOKIE_SECRET:   ci-test-cookie-secret-32-bytes!!
           NODE_ENV:        test
+
+      # Real-database lane (security gate G3): every parameterised route called
+      # as trainer B against trainer A's ids must 404, plus the purge-order proof.
+      # Schema comes from drizzle-kit push (the migration chain has no true
+      # baseline); the CI drizzle config reads TEST_DATABASE_URL and is non-interactive.
+      - name: Prepare test database
+        run: pnpm --filter backend test:db:prepare
+        env:
+          TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_db
+
+      - name: Ownership matrix (real database)
+        run: pnpm --filter backend test:db
+        env:
+          TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_db
 
       # Build — final gate before merge
       # Ensures Vite build and tsc compile succeed end-to-end

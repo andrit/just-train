@@ -11,6 +11,8 @@
     "lint":         "NODE_NO_WARNINGS=1 eslint . --max-warnings 0",
     "test":         "vitest run",
     "test:watch":   "vitest",
+    "test:db:prepare": "drizzle-kit push --config drizzle.ci.config.ts",
+    "test:db":      "vitest run --config vitest.db.config.ts",
     "test:coverage":"vitest run --coverage",
     "db:generate":  "drizzle-kit generate",
     "db:migrate":   "drizzle-kit migrate",

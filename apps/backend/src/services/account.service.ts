@@ -61,12 +61,18 @@ export async function purgeTrainer(trainerId: string): Promise<PurgeReport> {
   const ownedExercises = await db.query.exercises.findMany({ where: eq(exercises.trainerId, trainerId), columns: { id: true } })
   const exerciseIds  = ownedExercises.map((e) => e.id)
 
+  // Decide re-homing BEFORE touching media: a private exercise still referenced
+  // by another trainer's rows survives as public, and its media must survive
+  // with it (found by the real-DB purge test — the media used to go first).
+  const stillUsed = await exercisesReferencedElsewhere(exerciseIds, trainerId)
+  const deletableExerciseIds = exerciseIds.filter((id) => !stillUsed.has(id))
+
   // ── Media (Cloudinary) — best-effort, never blocks the DB delete ──────────
   // Client media is `authenticated`, library media `public` — the delete is
   // scoped by type, so getting this wrong deletes nothing and reports success.
   const mediaPrefixes: Array<[string, MediaAccess]> = [
     ...clientIds.map((id): [string, MediaAccess] => [`trainer-app/clients/${id}`, 'authenticated']),
-    ...exerciseIds.map((id): [string, MediaAccess] => [`trainer-app/exercises/${id}`, 'public']),
+    ...deletableExerciseIds.map((id): [string, MediaAccess] => [`trainer-app/exercises/${id}`, 'public']),
   ]
   const mediaFailures: string[] = []
   for (const [prefix, access] of mediaPrefixes) {
@@ -92,23 +98,14 @@ export async function purgeTrainer(trainerId: string): Promise<PurgeReport> {
     let exercisesDeleted = 0
     let exercisesRehomed = 0
     if (exerciseIds.length) {
-      const stillUsed = new Set<string>()
-      const refs = await Promise.all([
-        tx.query.sessionExercises.findMany({ where: inArray(sessionExercises.exerciseId, exerciseIds), columns: { exerciseId: true } }),
-        tx.query.templateExercises.findMany({ where: inArray(templateExercises.exerciseId, exerciseIds), columns: { exerciseId: true } }),
-        tx.query.challenges.findMany({ where: inArray(challenges.exerciseId, exerciseIds), columns: { exerciseId: true } }),
-      ])
-      for (const rows of refs) for (const r of rows) if (r.exerciseId) stillUsed.add(r.exerciseId)
-
       const rehome = [...stillUsed]
       if (rehome.length) {
         await tx.update(exercises).set({ trainerId: null, isPublic: true }).where(inArray(exercises.id, rehome))
         exercisesRehomed = rehome.length
       }
-      const deletable = exerciseIds.filter((id) => !stillUsed.has(id))
-      if (deletable.length) {
-        await tx.delete(exercises).where(inArray(exercises.id, deletable))
-        exercisesDeleted = deletable.length
+      if (deletableExerciseIds.length) {
+        await tx.delete(exercises).where(inArray(exercises.id, deletableExerciseIds))
+        exercisesDeleted = deletableExerciseIds.length
       }
     }
 
@@ -125,6 +122,38 @@ export async function purgeTrainer(trainerId: string): Promise<PurgeReport> {
   })
 
   return { trainerId, clients: clientIds.length, mediaPrefixes: mediaPrefixes.map(([prefix]) => prefix), mediaFailures, ...report }
+}
+
+/**
+ * Private exercises of `trainerId` that rows OUTSIDE this trainer's own data
+ * still point at (sessions/templates/challenges of other trainers — possible
+ * for data created before the visibility fix). The trainer's own references
+ * vanish with their sessions/templates/challenges in the purge, so they do
+ * not count.
+ */
+async function exercisesReferencedElsewhere(exerciseIds: string[], trainerId: string): Promise<Set<string>> {
+  const used = new Set<string>()
+  if (!exerciseIds.length) return used
+  const [se, te, ch] = await Promise.all([
+    db.query.sessionExercises.findMany({
+      where: inArray(sessionExercises.exerciseId, exerciseIds),
+      columns: { exerciseId: true },
+      with: { session: { columns: { trainerId: true } } },
+    }),
+    db.query.templateExercises.findMany({
+      where: inArray(templateExercises.exerciseId, exerciseIds),
+      columns: { exerciseId: true },
+      with: { template: { columns: { trainerId: true } } },
+    }),
+    db.query.challenges.findMany({
+      where: inArray(challenges.exerciseId, exerciseIds),
+      columns: { exerciseId: true, trainerId: true },
+    }),
+  ])
+  for (const r of se) if (r.session?.trainerId !== trainerId) used.add(r.exerciseId)
+  for (const r of te) if (r.template?.trainerId !== trainerId) used.add(r.exerciseId)
+  for (const r of ch) if (r.trainerId !== trainerId && r.exerciseId) used.add(r.exerciseId)
+  return used
 }
 
 /** Accounts deactivated at least PURGE_AFTER_DAYS ago. */

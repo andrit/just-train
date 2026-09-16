@@ -185,3 +185,26 @@ with only the middleware under test as a preHandler.
 | Cloudinary upload flow | Requires network; mock-only tests give false confidence | Phase 3 integration tests |
 | Full DB integration | Requires a real PostgreSQL instance | Phase 6 (Docker test DB) |
 | Rate limiting | Infrastructure concern, not business logic; resets are fiddly to test | Phase 6 if needed |
+
+---
+
+## Real-database lane (security gate G3)
+
+The unit lane mocks `../../db` everywhere and never connects. A second lane runs a few
+files against a live Postgres: the **ownership matrix** (every parameterised route called
+as trainer B with trainer A's ids → 404) and the **purge-order proof** (account purge
+against real foreign keys). CI runs it on every push (`Ownership matrix (real database)`).
+
+Locally it needs its own scratch database — the harness truncates every table, and the
+setup file refuses a URL whose database name does not contain `test` or `ci`:
+
+```bash
+createdb trainer_test
+# schema from db/schema/* via drizzle-kit push (the migration chain has no real baseline)
+TEST_DATABASE_URL=postgresql://localhost/trainer_test pnpm --filter backend test:db:prepare
+TEST_DATABASE_URL=postgresql://localhost/trainer_test pnpm --filter backend test:db
+```
+
+Files: `apps/backend/vitest.db.config.ts`, `drizzle.ci.config.ts`, `src/__tests__/db/{setup,harness}.ts`,
+`src/__tests__/db/*.test.ts`. **Adding a route that takes an `:id`** means adding one line to
+`MATRIX` in `ownership-matrix.test.ts` — the coverage test fails otherwise. That is the point.

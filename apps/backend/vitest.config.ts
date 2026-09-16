@@ -25,6 +25,8 @@ export default defineConfig({
 
     // Test file patterns
     include: ['src/__tests__/**/*.test.ts'],
+    // The real-database lane has its own config (vitest.db.config.ts, `pnpm test:db`).
+    exclude: ['src/__tests__/db/**', 'node_modules/**'],
 
     // Show individual test names in output
     reporter: 'verbose',

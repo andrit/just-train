@@ -96,12 +96,21 @@ describe('purgeTrainer', () => {
     expect(report).toMatchObject({ trainerId: 't-1', clients: 2, exercisesDeleted: 1, exercisesRehomed: 0, mediaFailures: [] })
   })
 
-  it('re-homes a private exercise still referenced by someone else instead of deleting it', async () => {
+  it('re-homes a private exercise still referenced by someone else instead of deleting it — and keeps its media', async () => {
     vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([{ id: 'e-used' }, { id: 'e-free' }] as never)
-    vi.mocked(db.query.sessionExercises.findMany).mockResolvedValueOnce([{ exerciseId: 'e-used' }] as never)
+    vi.mocked(db.query.sessionExercises.findMany).mockResolvedValueOnce([{ exerciseId: 'e-used', session: { trainerId: 't-OTHER' } }] as never)
     const report = await purgeTrainer('t-1')
     expect(vi.mocked(db.update({} as never).set).mock.calls[0]?.[0]).toEqual({ trainerId: null, isPublic: true })
     expect(report).toMatchObject({ exercisesDeleted: 1, exercisesRehomed: 1 })
+    // Media is decided AFTER re-homing: the survivor's folder is not deleted.
+    expect(vi.mocked(deleteByPrefix).mock.calls.map((c) => c[0])).toEqual(['trainer-app/exercises/e-free'])
+  })
+
+  it('a reference from the trainer\'s OWN session does not count — that session is deleted in the same purge', async () => {
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([{ id: 'e-mine' }] as never)
+    vi.mocked(db.query.sessionExercises.findMany).mockResolvedValueOnce([{ exerciseId: 'e-mine', session: { trainerId: 't-1' } }] as never)
+    const report = await purgeTrainer('t-1')
+    expect(report).toMatchObject({ exercisesDeleted: 1, exercisesRehomed: 0 })
   })
 
   it('a media failure is reported, and the DB delete still runs', async () => {

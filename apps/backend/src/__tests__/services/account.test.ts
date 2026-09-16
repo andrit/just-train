@@ -40,7 +40,10 @@ vi.mock('../../db', () => {
   }
 })
 vi.mock('../../services/auth.service', () => ({ revokeAllRefreshTokens: vi.fn().mockResolvedValue(undefined) }))
-vi.mock('../../services/cloudinary.service', () => ({ deleteByPrefix: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('../../services/cloudinary.service', () => ({
+  deleteByPrefix:   vi.fn().mockResolvedValue(undefined),
+  mediaDeliveryUrl: vi.fn((publicId: string) => `https://res.cloudinary.com/x/authenticated/s--sig--/${publicId}`),
+}))
 
 import { db } from '../../db'
 import { revokeAllRefreshTokens } from '../../services/auth.service'
@@ -78,8 +81,10 @@ describe('purgeTrainer', () => {
     vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([{ id: 'e1' }] as never)
     const report = await purgeTrainer('t-1')
 
-    expect(vi.mocked(deleteByPrefix).mock.calls.map((c) => c[0])).toEqual([
-      'trainer-app/clients/c1', 'trainer-app/clients/c2', 'trainer-app/exercises/e1',
+    // Client folders are `authenticated`, library folders `public` — the admin API
+    // scopes deletion by type, so a purge that forgot this would delete nothing (G16).
+    expect(vi.mocked(deleteByPrefix).mock.calls.map((c) => [c[0], c[1]])).toEqual([
+      ['trainer-app/clients/c1', 'authenticated'], ['trainer-app/clients/c2', 'authenticated'], ['trainer-app/exercises/e1', 'public'],
     ])
     expect(db.transaction).toHaveBeenCalledTimes(1)
     expect(deletedTables()).toEqual([
@@ -127,7 +132,7 @@ describe('buildExport', () => {
     vi.mocked(db.query.clients.findMany).mockResolvedValueOnce([{ id: 'c1' }] as never)
     vi.mocked(db.query.clientSnapshots.findMany).mockResolvedValueOnce([{ id: 'snap1' }] as never)
     vi.mocked(db.query.sessions.findMany).mockResolvedValueOnce([{ id: 's1', sessionExercises: [{ id: 'se1', sets: [{ id: 'set1' }] }] }] as never)
-    vi.mocked(db.query.snapshotMedia.findMany).mockResolvedValueOnce([{ id: 'photo1', snapshotId: 'snap1' }] as never)
+    vi.mocked(db.query.snapshotMedia.findMany).mockResolvedValueOnce([{ id: 'photo1', snapshotId: 'snap1', cloudinaryPublicId: 'pid1', cloudinaryUrl: 'https://res.cloudinary.com/x/image/upload/pid1.webp' }] as never)
 
     const out = await buildExport('t-1', NOW)
     expect(out).not.toBeNull()
@@ -135,7 +140,9 @@ describe('buildExport', () => {
     expect(out).toMatchObject({
       format: 'just-train-export', version: 1, exportedAt: NOW.toISOString(),
       account: { id: 't-1', email: 'a@b.co', name: 'A' },
-      clients: [{ id: 'c1' }], snapshots: [{ id: 'snap1' }], progressPhotos: [{ id: 'photo1' }],
+      clients: [{ id: 'c1' }], snapshots: [{ id: 'snap1' }],
+      // G16: export carries a delivery URL signed at read time, not the stored column
+      progressPhotos: [{ id: 'photo1', cloudinaryUrl: 'https://res.cloudinary.com/x/authenticated/s--sig--/pid1' }],
       sessions: [{ id: 's1', sessionExercises: [{ id: 'se1', sets: [{ id: 'set1' }] }] }],
       templates: [], challenges: [], exercises: [], telemetry: [], goals: [], formCheckClips: [],
     })

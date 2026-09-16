@@ -43,6 +43,7 @@ vi.mock('../../db', () => {
 vi.mock('../../services/cloudinary.service', () => ({
   uploadBuffer:          vi.fn().mockResolvedValue({ url: 'https://cloudinary.com/test.jpg', publicId: 'test-id', width: 800, height: 600 }),
   deleteByPublicId:      vi.fn().mockResolvedValue(undefined),
+  mediaDeliveryUrl:      vi.fn((publicId: string, rt: string) => `https://res.cloudinary.com/x/${rt}/authenticated/s--sig--/${publicId}`),
   validateMediaFile: vi.fn().mockReturnValue({ ok: true, mimeType: 'image/jpeg' }),
   exerciseFolder:        vi.fn().mockReturnValue('trainer-app/exercises/test'),
   snapshotFolder:        vi.fn().mockReturnValue('trainer-app/snapshots/test'),
@@ -169,6 +170,10 @@ describe('DELETE /snapshot-media/:id', () => {
       method: 'DELETE', url: `/api/v1/snapshot-media/${TEST_MEDIA_ID}`, headers: authHeader(),
     })
     expect(res.statusCode).toBe(204)
+    // G16: client media lives under Cloudinary's `authenticated` type; a delete
+    // without the type would silently miss the asset.
+    const { deleteByPublicId } = await import('../../services/cloudinary.service')
+    expect(deleteByPublicId).toHaveBeenCalledWith('test-public-id', 'image', 'authenticated')
   })
 })
 

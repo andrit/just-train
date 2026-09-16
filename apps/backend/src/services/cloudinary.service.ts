@@ -16,7 +16,19 @@
 //   media record — orphaned files accumulate and cost money otherwise.
 //
 // FOLDER STRUCTURE in Cloudinary:
-//   trainer-app/exercises/<exerciseId>/  — exercise demo images/videos
+//   trainer-app/exercises/<exerciseId>/  — exercise demo images/videos (public)
+//   trainer-app/clients/<clientId>/…     — progress photos, form-check clips
+//
+// ACCESS (security gate G16):
+//   Library media is `public` (Cloudinary type `upload`, plain URLs). Client
+//   media is `authenticated` — Cloudinary refuses to deliver it without a
+//   signature only this backend can produce. Every client-media URL is
+//   generated at read time by mediaDeliveryUrl(); the stored cloudinary_url
+//   column is not trusted for delivery. A signed URL is deterministic for
+//   (public_id, transformation) — the service worker's CacheFirst on
+//   res.cloudinary.com keeps working — and it does NOT expire: a URL that has
+//   legitimately loaded and then leaked stays valid until the asset is deleted
+//   or CLOUDINARY_API_SECRET is rotated (which invalidates every signature).
 //
 // IMAGE TRANSFORMATIONS:
 //   Cloudinary transforms are applied via URL parameters, not stored.
@@ -76,10 +88,19 @@ export interface UploadResult {
  * @param folder   Cloudinary folder path — use exerciseFolder() or snapshotFolder()
  * @param mimeType e.g. 'image/jpeg', 'video/mp4' — determines resource_type
  */
+/** Who may fetch an asset: library media is public; client media needs a signed URL. */
+export type MediaAccess = 'public' | 'authenticated'
+
+const CLOUDINARY_TYPE: Record<MediaAccess, 'upload' | 'authenticated'> = {
+  public:        'upload',
+  authenticated: 'authenticated',
+}
+
 export async function uploadBuffer(
   buffer:   Buffer,
   folder:   string,
   mimeType: string,
+  access:   MediaAccess = 'public',
 ): Promise<UploadResult> {
   const resourceType = mimeType.startsWith('video/') ? 'video' : 'image'
 
@@ -88,6 +109,7 @@ export async function uploadBuffer(
       const stream = cloudinary.uploader.upload_stream(
         {
           resource_type: resourceType,
+          type:          CLOUDINARY_TYPE[access],
           folder:        folder,
           // Auto-detect format and quality — Cloudinary picks the best compression
           format:        resourceType === 'image' ? 'webp' : undefined,
@@ -125,8 +147,9 @@ export async function uploadBuffer(
 export async function deleteByPublicId(
   publicId:     string,
   resourceType: 'image' | 'video' = 'image',
+  access:       MediaAccess = 'public',
 ): Promise<void> {
-  await cloudinary.uploader.destroy(publicId, { resource_type: resourceType })
+  await cloudinary.uploader.destroy(publicId, { resource_type: resourceType, type: CLOUDINARY_TYPE[access] })
 }
 
 /**
@@ -135,11 +158,14 @@ export async function deleteByPublicId(
  * to ~1000 resources; loop until nothing is left. Best-effort by design: the
  * caller logs failures and proceeds with the DB delete.
  */
-export async function deleteByPrefix(prefix: string): Promise<void> {
+export async function deleteByPrefix(prefix: string, access: MediaAccess = 'public'): Promise<void> {
+  // `type` matters: the admin API scopes deletion to one delivery type, so a
+  // purge that forgets it deletes nothing under an authenticated folder.
+  const type = CLOUDINARY_TYPE[access]
   for (const resourceType of ['image', 'video'] as const) {
     let remaining = true
     while (remaining) {
-      const result = await cloudinary.api.delete_resources_by_prefix(prefix, { resource_type: resourceType }) as { deleted?: Record<string, string> }
+      const result = await cloudinary.api.delete_resources_by_prefix(prefix, { resource_type: resourceType, type }) as { deleted?: Record<string, string> }
       remaining = Object.keys(result.deleted ?? {}).length >= 1000
     }
   }
@@ -148,6 +174,34 @@ export async function deleteByPrefix(prefix: string): Promise<void> {
   } catch {
     // Folder may not exist (no uploads ever) or may already be gone — either is fine.
   }
+}
+
+// ── Delivery URLs ─────────────────────────────────────────────────────────────
+
+/**
+ * The URL a client renders for an asset. Public media: a plain URL. Client
+ * media: signed for Cloudinary's `authenticated` type — the SDK computes the
+ * `s--…--` signature from the API secret, so only this backend can mint one.
+ *
+ * Deterministic for (publicId, transformation): the same asset always yields
+ * the same URL, which is what keeps the service worker's CacheFirst valid.
+ * No expiry — see the file header. Images are stored as webp (uploadBuffer
+ * forces the format); videos keep their original container.
+ */
+export function mediaDeliveryUrl(
+  publicId:       string,
+  resourceType:   'image' | 'video',
+  access:         MediaAccess,
+  transformation?: Record<string, string | number>,
+): string {
+  return cloudinary.url(publicId, {
+    secure:        true,
+    resource_type: resourceType,
+    type:          CLOUDINARY_TYPE[access],
+    sign_url:      access === 'authenticated',
+    ...(resourceType === 'image' ? { format: 'webp' } : {}),
+    ...(transformation ? { transformation: [transformation] } : {}),
+  })
 }
 
 // ── URL Transforms ────────────────────────────────────────────────────────────

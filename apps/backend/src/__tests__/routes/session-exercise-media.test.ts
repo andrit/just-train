@@ -44,6 +44,7 @@ vi.mock('../../db', () => {
 vi.mock('../../services/cloudinary.service', () => ({
   uploadBuffer:          vi.fn().mockResolvedValue({ url: 'https://cloudinary.com/test.mp4', publicId: 'test-id', width: 0, height: 0, mediaType: 'video' }),
   deleteByPublicId:      vi.fn().mockResolvedValue(undefined),
+  mediaDeliveryUrl:      vi.fn((publicId: string, rt: string) => `https://res.cloudinary.com/x/${rt}/authenticated/s--sig--/${publicId}`),
   validateMediaFile: vi.fn().mockReturnValue({ ok: true, mimeType: 'image/jpeg' }),
   exerciseFolder:        vi.fn().mockReturnValue('trainer-app/exercises/test'),
   snapshotFolder:        vi.fn().mockReturnValue('trainer-app/snapshots/test'),

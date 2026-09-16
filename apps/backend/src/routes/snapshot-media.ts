@@ -40,6 +40,7 @@ import {
   deleteByPublicId,
   validateMediaFile,
   snapshotFolder,
+  mediaDeliveryUrl,
 } from '../services/cloudinary.service'
 
 // ── Serializer ──────────────────────────────────────────────────────────────
@@ -49,7 +50,8 @@ function serializeSnapshotMedia(m: typeof snapshotMedia.$inferSelect) {
     id:                 m.id,
     snapshotId:         m.snapshotId,
     pose:               m.pose,
-    cloudinaryUrl:      m.cloudinaryUrl,
+    // Signed at read time (G16) — the stored URL is not used for delivery.
+    cloudinaryUrl:      mediaDeliveryUrl(m.cloudinaryPublicId, 'image', 'authenticated'),
     cloudinaryPublicId: m.cloudinaryPublicId,
     width:              m.width  ?? null,
     height:             m.height ?? null,
@@ -168,6 +170,7 @@ export async function snapshotMediaRoutes(app: FastifyInstance): Promise<void> {
         fileBuffer,
         snapshotFolder(clientId, snapshotId),
         mimeType,
+        'authenticated',
       )
 
       // Count existing media for orderIndex
@@ -270,7 +273,7 @@ export async function snapshotMediaRoutes(app: FastifyInstance): Promise<void> {
 
     try {
       // Delete from Cloudinary first
-      await deleteByPublicId(media.cloudinaryPublicId, 'image')
+      await deleteByPublicId(media.cloudinaryPublicId, 'image', 'authenticated')
 
       // Delete from DB
       await db

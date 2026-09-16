@@ -102,6 +102,13 @@ Decisions (2026-09-15): threshold **5** failures per email → **15-minute** fix
 
 ---
 
+### Media delivery — expiring URLs (post-G16 escalation)
+When: a real incident of a leaked photo URL; the first paying cohort; a client-portal / magic-link feature (needs per-viewer access anyway); or a Cloudinary plan upgrade taken for other reasons.
+What: G16 (2026-09-16) made client media `authenticated` + SDK-signed. Signed URLs are permanent capabilities — a URL that legitimately loaded and then leaked (copied image address, synced history, an ex-trainer's browser cache) works until the asset is deleted or `CLOUDINARY_API_SECRET` is rotated. Two ways to close that: **(a) Cloudinary token-based auth** (expiring tokens; paid plans) — breaks the service worker's CacheFirst unless URLs are stable for the cache window; **(b) backend proxy** `GET /media/:id` — ownership check per request, instant revocation on deactivation, offline via caching our own origin; costs Railway egress + latency on the heaviest requests and needs range-request handling for video. Design + trade-offs: `.workbench/designer/current/task-plan-g16-media-delivery.md`.
+Also small, separate: **clear `cloudinary-media` from Cache Storage on sign-out** (`useSignOut` → `caches.delete`) — today a signed-out device keeps viewed photos for up to 30 days. And plan task 5: a source guard that `getThumbnailUrl()` (a string rewrite) is never applied to client media, which would break the signature.
+
+---
+
 ## Trainer Profile & Settings
 
 ### Trainer Profile Edit

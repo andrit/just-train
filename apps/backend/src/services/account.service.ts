@@ -21,7 +21,7 @@ import {
   clientGoals, clientSnapshots, snapshotMedia, sessionExerciseMedia,
 } from '../db'
 import { revokeAllRefreshTokens } from './auth.service'
-import { deleteByPrefix } from './cloudinary.service'
+import { deleteByPrefix, mediaDeliveryUrl, type MediaAccess } from './cloudinary.service'
 
 export const PURGE_AFTER_DAYS = 30
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -62,13 +62,15 @@ export async function purgeTrainer(trainerId: string): Promise<PurgeReport> {
   const exerciseIds  = ownedExercises.map((e) => e.id)
 
   // ── Media (Cloudinary) — best-effort, never blocks the DB delete ──────────
-  const mediaPrefixes = [
-    ...clientIds.map((id) => `trainer-app/clients/${id}`),
-    ...exerciseIds.map((id) => `trainer-app/exercises/${id}`),
+  // Client media is `authenticated`, library media `public` — the delete is
+  // scoped by type, so getting this wrong deletes nothing and reports success.
+  const mediaPrefixes: Array<[string, MediaAccess]> = [
+    ...clientIds.map((id): [string, MediaAccess] => [`trainer-app/clients/${id}`, 'authenticated']),
+    ...exerciseIds.map((id): [string, MediaAccess] => [`trainer-app/exercises/${id}`, 'public']),
   ]
   const mediaFailures: string[] = []
-  for (const prefix of mediaPrefixes) {
-    try { await deleteByPrefix(prefix) } catch { mediaFailures.push(prefix) }
+  for (const [prefix, access] of mediaPrefixes) {
+    try { await deleteByPrefix(prefix, access) } catch { mediaFailures.push(prefix) }
   }
 
   // ── Database — explicit order, one transaction ───────────────────────────
@@ -122,7 +124,7 @@ export async function purgeTrainer(trainerId: string): Promise<PurgeReport> {
     return { exercisesDeleted, exercisesRehomed }
   })
 
-  return { trainerId, clients: clientIds.length, mediaPrefixes, mediaFailures, ...report }
+  return { trainerId, clients: clientIds.length, mediaPrefixes: mediaPrefixes.map(([prefix]) => prefix), mediaFailures, ...report }
 }
 
 /** Accounts deactivated at least PURGE_AFTER_DAYS ago. */
@@ -183,9 +185,10 @@ export async function buildExport(trainerId: string, now: Date = new Date()) {
     clients:    ownedClients,
     goals,
     snapshots,
-    progressPhotos,
+    // Delivery URLs are signed at read time (G16); the stored column is not usable directly.
+    progressPhotos: progressPhotos.map((m) => ({ ...m, cloudinaryUrl: mediaDeliveryUrl(m.cloudinaryPublicId, 'image', 'authenticated') })),
     sessions:   ownedSessions,
-    formCheckClips,
+    formCheckClips: formCheckClips.map((m) => ({ ...m, cloudinaryUrl: mediaDeliveryUrl(m.cloudinaryPublicId, m.mediaType, 'authenticated') })),
     templates:  ownedTemplates,
     challenges: ownedChallenges,
     exercises:  privateExercises,

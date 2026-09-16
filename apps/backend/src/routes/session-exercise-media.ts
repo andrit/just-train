@@ -29,6 +29,7 @@ import {
 import {
   uploadBuffer,
   deleteByPublicId,
+  mediaDeliveryUrl,
   validateMediaFile,
   sessionExerciseFolder,
 } from '../services/cloudinary.service'
@@ -44,7 +45,8 @@ function serializeMedia(m: typeof sessionExerciseMedia.$inferSelect) {
     id:                 m.id,
     sessionExerciseId:  m.sessionExerciseId,
     mediaType:          m.mediaType,
-    cloudinaryUrl:      m.cloudinaryUrl,
+    // Signed at read time (G16) — the stored URL is not used for delivery.
+    cloudinaryUrl:      mediaDeliveryUrl(m.cloudinaryPublicId, m.mediaType, 'authenticated'),
     cloudinaryPublicId: m.cloudinaryPublicId,
     durationSeconds:    m.durationSeconds ?? null,
     caption:            m.caption ?? null,
@@ -146,6 +148,7 @@ Video duration is enforced server-side. The upload runs in the background during
         fileBuffer,
         sessionExerciseFolder(clientId, sessionId, sessionExerciseId),
         mimeType,
+        'authenticated',
       )
 
       // For video, Cloudinary returns duration in the upload response.
@@ -157,7 +160,7 @@ Video duration is enforced server-side. The upload runs in the background during
       // Enforce 30-second cap (server-side safety net)
       if (durationSeconds !== null && durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
         // Clean up the uploaded file from Cloudinary
-        await deleteByPublicId(uploaded.publicId, 'video')
+        await deleteByPublicId(uploaded.publicId, 'video', 'authenticated')
         return reply.status(400).send({
           error: `Video exceeds ${MAX_VIDEO_DURATION_SECONDS}-second limit (${durationSeconds}s). Trim the clip and try again.`,
         })
@@ -210,7 +213,7 @@ Video duration is enforced server-side. The upload runs in the background during
     }
 
     try {
-      await deleteByPublicId(media.cloudinaryPublicId, media.mediaType)
+      await deleteByPublicId(media.cloudinaryPublicId, media.mediaType, 'authenticated')
 
       await db
         .delete(sessionExerciseMedia)

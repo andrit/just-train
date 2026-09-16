@@ -7,6 +7,10 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Security — refresh cookie is SameSite=Strict (gate G19, 2026-09-16)
+- With the app served from `just-train.fit` and `/api/*` proxied to Railway, the refresh cookie is first-party on the app's own origin, so the last reason for `'lax'` (a vercel.app origin) is gone. `'strict'` now: the cookie is never sent on a cross-site request. It is path-scoped to `/api/v1/auth` and only the app's own fetches call those routes — email links land on public pages, so nothing that used to work stops working. Unit test pins the options.
+- **Domain cut-over, same day (yours):** `CORS_ORIGIN` on Railway now lists `https://just-train.fit,https://www.just-train.fit` — the Vercel proxy forwards the browser's `Origin`, so the backend's allow-list is effectively an origin guard on the API; with the old value every call 500'd (seen in Sentry: `Origin https://www.just-train.fit not allowed by CORS`). `APP_URL` set to the domain.
+
 ### Platform — Fastify 4 → 5 (audit tier 2, 2026-09-16)
 - **Why:** Fastify 4 is end-of-life with a reachable body-validation bypass (CVE-2026-25223: a `Content-Type` carrying a tab character skipped validation) and no 4.x patch. Zod body validation is this app's input guard on every route. Plan + vet: `.workbench/designer/current/task-plan-fastify-5.md`.
 - **Versions:** `fastify` ^5.12, `@fastify/cookie` 11, `cors` 11, `helmet` 13, `multipart` 10, `rate-limit` 11, `swagger` 9, `swagger-ui` 6, **`fastify-type-provider-zod` 4.0** (the line for Fastify 5 with the Zod 3 API — 5.x already expects `zod/v4` schemas; 6.x/7.x need Zod 4 — a separate migration), Zod **^3.25** everywhere (root override, shared peer, backend, frontend). Node 20 was already the floor. No schema, no prod SQL.

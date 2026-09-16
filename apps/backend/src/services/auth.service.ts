@@ -432,8 +432,13 @@ export function refreshTokenCookieOptions() {
     httpOnly: true,
     secure:   isProd,
     // Vercel proxies /api/* to Railway, so the cookie is first-party on the
-    // Vercel domain. SameSite=Lax works in both prod and dev.
-    sameSite: 'lax' as const,
+    // app's own origin (just-train.fit since 2026-09-16). Strict: never sent on
+    // a cross-site request, including top-level navigations from elsewhere —
+    // safe because the path scopes it to /api/v1/auth, which only the app's
+    // own fetches call. Email links (/verify-email, /reset-password) land on
+    // public pages and do not need it. (G19; was 'lax' while the app lived on
+    // a vercel.app origin.)
+    sameSite: 'strict' as const,
     path:     '/api/v1/auth',
     maxAge:   REFRESH_TOKEN_TTL_MS / 1000,
   }

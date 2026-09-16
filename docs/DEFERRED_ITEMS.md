@@ -87,10 +87,8 @@ Daily BullMQ job `refresh-token-cleanup` (00:30 UTC) deletes expired rows and re
 When: If cookie behaviour needs precise local testing
 What: `mkcert` for locally-trusted TLS. The dev workaround (`secure: NODE_ENV === 'production'`) is safe and well-understood.
 
-### SameSite Cookie: 'lax' not 'strict' (intentional trade-off)
-When: Revisit only if cross-site CSRF becomes a demonstrated risk
-What: The refresh token cookie uses `sameSite: 'lax'` rather than `'strict'`.
-Why accepted: The app deploys across two origins (Vercel frontend → Railway backend). Vercel preview deploys need the cookie to be sent on the top-level navigation that lands on the preview URL. `'strict'` would break token refresh for any preview deploy that isn't on a custom domain. The risk from `'lax'` is mild — it allows cross-site requests on top-level navigations, but the refresh endpoint already validates the token and rotates it; a CSRF attack would need to also intercept the rotated token to do any damage. This is documented, understood, and acceptable until a custom domain is set for both origins, at which point `'strict'` is a one-line change in `auth.service.ts`.
+### SameSite Cookie ✅ CLOSED (2026-09-16, security gate G19)
+`sameSite: 'strict'` on the refresh cookie since the app is served from `just-train.fit` with `/api/*` proxied to Railway (first-party, same-site). The cookie is path-scoped to `/api/v1/auth` and only the app's own fetches call it, so strict costs nothing: email links land on public pages, preview deploys make same-site fetches from their own origin. Was `'lax'` while the app lived on a vercel.app origin.
 
 ### MIME Type Validation ✅ CLOSED (2026-09-15, security gate G17)
 Upload routes now decide the type from the file's first bytes (`lib/magicBytes.ts`) and ignore the client's `Content-Type`. No dependency — `file-type` is ESM-only from v17 and the backend is CJS; the seven accepted formats are sniffed directly. Cloudinary's own validation remains the second layer.

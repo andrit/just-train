@@ -243,3 +243,13 @@ describe('generateRefreshToken', () => {
     expect(valid).toBe(false)
   })
 })
+
+describe('refreshTokenCookieOptions', () => {
+  it('is httpOnly, path-scoped to the auth routes, and SameSite=Strict (G19)', async () => {
+    const { refreshTokenCookieOptions } = await import('../../services/auth.service')
+    const opts = refreshTokenCookieOptions()
+    expect(opts.httpOnly).toBe(true)
+    expect(opts.path).toBe('/api/v1/auth')
+    expect(opts.sameSite).toBe('strict')
+  })
+})

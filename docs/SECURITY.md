@@ -115,7 +115,7 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | G5 | **Mass-assignment** — privileged fields never survive input schemas | Claude | ✅ 2026-09-15 | `mass-assignment.test.ts` |
 | G6 | **Response leak** — `passwordHash` cannot reach a response | Claude | ✅ 2026-09-15 | `response-leak.test.ts` |
 | G7 | **Rate limits** — every POST has a per-route limit or a listed reason | Claude | ✅ 2026-09-15 | `rate-limit-presence.test.ts` |
-| G8 | **Dependency audit** — `pnpm audit` from the repo root, zero high/critical | you | ⬜ | record date + counts here |
+| G8 | **Dependency audit** — `pnpm audit` from the repo root, zero high/critical | you + Claude | 🔄 2026-09-16: 97 findings (2 critical, 50 high) triaged below; tier 1 applied → **65** (2 critical, 36 high — both criticals and the bulk of the highs are install-time / dev tooling); **tier 2 (Fastify 5, drizzle 0.45, Sentry 10, argon2 0.45) is a launch blocker** because Fastify 4 is EOL with a reachable validation bypass | see *Dependency audit — 2026-09-16* |
 | G9 | **Production surface, verified live** — `curl -sI …railway.app/documentation` → 404; `curl -sI …/health` shows CSP + `Cache-Control: no-store`; no debug routes | you | ⬜ | config says so; the header is proof |
 | G10 | **Secrets hygiene** — rotate Railway Postgres password (pasted in chat, Aug); `git log --all --diff-filter=A -- '*.env'` empty; one-off `npx gitleaks git .` over history | you | ⬜ | |
 | G11 | **Validation-before-auth** — bare POST → 400 not 401; decide leave-documented vs `authenticate` as `onRequest` | you ⚖ | ⬜ decision | also why G4's runtime layer is GET/DELETE only |
@@ -171,6 +171,37 @@ Three tiers. **Gate** = must be done (dated) before public registration. **3.0**
 | Account lockout after N failures | ✅ C9 | 5/15 min per email (`423`), 20/15 min per IP (`429`), in-process store; Turnstile pending |
 
 Plan: `.workbench/designer/current/task-plan-account.md` (Phase 19 track).
+
+## Dependency audit — 2026-09-16
+
+`pnpm audit` from the root: **97 findings / 94 advisories** (2 critical, 50 high, 37 moderate, 8 low). Raw output in `docs/user-tasks/audit-2026-09-16.{json,txt}` (untracked). Most of the count is one advisory × many transitive paths (`brace-expansion` alone is 138 paths). What matters is *reachability*: does the vulnerable code run in production, and can a request reach it?
+
+### Runtime, reachable — the real list
+| Package | Installed → fixed | Advisory | Reachability | Fix |
+|---|---|---|---|---|
+| `fastify` | 4.29.1 → ≥5.7.2 | **high** CVE-2026-25223 — `Content-Type` with a tab bypasses body validation; also 5.8.3 host/proto spoofing, 5.12.1 schema-coercion bypass | **Yes.** Zod body validation is the input guard on every route | **Fastify 4 is EOL — no 4.x patch.** Major upgrade: `fastify`, every `@fastify/*` plugin, `fastify-type-provider-zod`. **Tier 2, before Go Live.** |
+| `fast-uri` (via fastify → ajv) | 2.4.0 / 3.1.0 → 2.4.7 / 3.1.8 | 7× high — host confusion, path traversal, SSRF in URI parsing | Yes — request URIs | **Tier 1 — pnpm overrides `fast-uri@2`, `fast-uri@3`** (2026-09-16) |
+| `drizzle-orm` | 0.30.10 → 0.45.2 | high CVE-2026-39356 — SQL injection via unescaped identifiers | Low today: every identifier is a static schema name; `sql.raw` appears only in the test harness | Tier 2 with `drizzle-kit` 0.31 (15 minor versions; migrations tooling changes) |
+| `@opentelemetry/core` (via `@sentry/node` 8) | 1.30.1 → 2.8.0 | moderate — unbounded allocation parsing a `baggage` header | Yes — incoming header, propagator runs on every request | Tier 2: `@sentry/node` 8 → 10 (brings OTel 2) |
+
+### Runtime, not reachable
+- `find-my-way` 8.2.2 — HTTP/2 DDoS; the app does not serve HTTP/2 (Railway terminates TLS, backend is HTTP/1.1). Goes away with Fastify 5.
+- `@fastify/static` 7 (via `@fastify/swagger-ui`) — path-traversal guard bypass; Swagger UI is registered **only outside production**. Goes away with Fastify 5 (`swagger-ui` 5).
+- `js-cookie` (via `resend` → `@react-email/render` → `js-beautify`) — a browser cookie helper that never executes server-side.
+
+### Frontend bundle — Tier 1, applied 2026-09-16
+- `dompurify` 3.3.3 → ^3.4.15 (14 advisories, all sanitiser bypasses; used on the report preview iframe).
+- `react-router-dom` 6.30.3 → ^6.30.6 (open redirect → XSS via `//` and backslash paths). The two "fix ≥7.18" entries are SSR-only (`deserializeErrors`) — not used.
+- `bullmq` 5.73 → ^5.81.5 — drops `uuid` as a dependency (moderate, v3/v5/v6 buffer bounds; BullMQ used v4 anyway).
+
+### Install-time only
+- `tar` ×12 incl. the **critical** — `argon2` 0.31's `node-pre-gyp` extracts a prebuilt binary during `pnpm install` on the build box; never at runtime, and the archive comes from argon2's own release. Fix: `argon2` → 0.45 (prebuildify, no `tar`). Native module — its own step, verify the Railway build. Tier 2.
+
+### Dev / build tooling — never ships (~70 of 97)
+`vitest` (the other **critical**: only when `vitest --ui`'s server is listening — never in CI or prod), `vite`, `postcss`, `nanoid`, `ws` (jsdom), `esbuild`, `@babel/*`, `browserslist`, `brace-expansion` (glob/minimatch under eslint, rimraf, node-pre-gyp), `js-yaml` (eslint), `serialize-javascript` (workbox-build at build time), `@humanfs/node`. Addressed by a tooling upgrade (vitest 1 → 3 brings vite 6) — a deliberate session, not a security fix. **Not** a launch blocker.
+
+### Decision
+Tier 1 applied 2026-09-16 → 97 to **65** (4 low / 23 moderate / 36 high / 2 critical); the remaining runtime-reachable set is exactly fastify, drizzle-orm, @opentelemetry/core. **Tier 2 — Fastify 5 first** (closes fastify + find-my-way + fast-uri-at-source + @fastify/static in one move), then drizzle 0.45 + drizzle-kit, Sentry 10, argon2 0.45 — each its own commit with `pnpm verify` + the real-DB lane green, before Go Live. Tier 3 (tooling) when convenient. Re-run the audit after each and update this section.
 
 ## Roadmap
 

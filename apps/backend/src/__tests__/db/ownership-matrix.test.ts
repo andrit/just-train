@@ -98,7 +98,7 @@ const MATRIX: Case[] = [
   { route: 'GET /templates/:id',                              url: (s) => `/templates/${s.a.template}` },
   { route: 'PATCH /templates/:id',                            url: (s) => `/templates/${s.a.template}`, body: () => ({ name: 'Renamed' }) },
   { route: 'DELETE /templates/:id',                           url: (s) => `/templates/${s.a.template}` },
-  { route: 'POST /templates/:id/fork',                        url: (s) => `/templates/${s.a.template}/fork` },
+  { route: 'POST /templates/:id/fork',                        url: (s) => `/templates/${s.a.template}/fork`, body: () => ({}) },   // optional body schema: no body → 400 before ownership
   { route: 'POST /templates/:id/exercises',                   url: (s) => `/templates/${s.a.template}/exercises`, body: (s) => ({ exerciseId: s.publicExercise }) },
   { route: 'POST /templates/:id/circuits',                    url: (s) => `/templates/${s.a.template}/circuits`, body: (s) => ({ exerciseIds: [s.publicExercise, s.publicExercise], rounds: 2 }) },
   { route: 'PATCH /templates/:id/exercises/reorder',          url: (s) => `/templates/${s.a.template}/exercises/reorder`, body: (s) => ({ orderedIds: [s.a.templateExercise] }) },
@@ -117,6 +117,7 @@ const BODY_MATRIX: Case[] = [
   { route: 'POST /clients/:clientId/challenges',              url: (s) => `/clients/${s.b.selfClient}/challenges`, body: (s) => ({ title: 't', metricType: 'reps_achieved', exerciseId: s.a.privateExercise, targetValue: 3, deadline: '2026-12-31' }) },
   { route: 'POST /templates/from-session',                    url: () => '/templates/from-session', body: (s) => ({ sessionId: s.a.session, name: 'Stolen' }) },
   { route: 'PATCH /sessions/:id/exercises/reorder',           url: (s) => `/sessions/${s.b.session}/exercises/reorder`, body: (s) => ({ orderedIds: [s.a.sessionExercise] }) },
+  { route: 'PATCH /templates/:id/exercises/reorder',          url: (s) => `/templates/${s.b.template}/exercises/reorder`, body: (s) => ({ orderedIds: [s.a.templateExercise] }) },
 ]
 
 let app: FastifyInstance

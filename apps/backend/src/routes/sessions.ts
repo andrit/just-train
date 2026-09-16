@@ -591,7 +591,7 @@ To add an exercise not in the library, first call \`POST /exercises/quick-add\` 
       // Look up the exercises — all must be visible (public or own), single workout type, laterality.
       const exRows = await visibleExercises(body.exerciseIds, request.trainer.trainerId)
       if (!exRows) {
-        return reply.status(400).send({ error: 'One or more exercises not found' })
+        return reply.status(404).send({ error: 'One or more exercises not found' })   // a foreign private id must look like a missing one
       }
       const found = new Map(exRows.map((e) => [e.id, e]))
       const types = new Set(exRows.map((e) => e.workoutType))
@@ -1000,6 +1000,17 @@ Which fields you populate depends on the workout type:
         columns: { id: true },
       })
       if (!session) return reply.status(404).send({ error: 'Session not found' })   // 404, never 403 — do not confirm existence
+
+      // Every id must belong to THIS session. The scoped update below would
+      // silently skip a foreign id and still answer 204 (found by the real-DB
+      // matrix); a foreign id is a 404 like everywhere else.
+      const own = await db.query.sessionExercises.findMany({
+        where: eq(sessionExercises.sessionId, sessionId), columns: { id: true },
+      })
+      const ownIds = new Set(own.map((r) => r.id))
+      if (orderedIds.some((exId) => !ownIds.has(exId))) {
+        return reply.status(404).send({ error: 'Session exercise not found' })
+      }
 
       await Promise.all(
         orderedIds.map((exId, index) =>

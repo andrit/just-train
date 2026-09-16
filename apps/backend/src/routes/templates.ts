@@ -40,12 +40,22 @@ import { z } from 'zod'
 
 const UpdateTemplateSchema = CreateTemplateSchema.partial()
 
-function serializeDates<T extends { createdAt: Date | string; updatedAt: Date | string }>(row: T): T {
-  return {
-    ...row,
-    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
-    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
+/**
+ * Every `Date` anywhere in the tree → ISO string. The detail tree nests
+ * templateExercises → exercise → media, and media rows carry their own
+ * createdAt; a top-level-only conversion 500'd `GET /templates/:id` the
+ * moment a template exercise had media (found by the real-database lane —
+ * the mocked tests only ever saw factory rows that already held strings).
+ */
+function serializeDates<T>(value: T): T {
+  if (value instanceof Date) return value.toISOString() as unknown as T
+  if (Array.isArray(value)) return value.map(serializeDates) as unknown as T
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = serializeDates(v)
+    return out as T
   }
+  return value
 }
 
 // Full template tree for a detail response. `media: true` is required — the
@@ -493,7 +503,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
       // Look up the exercises — all must be visible (public or own), single workout type.
       const exRows = await visibleExercises(body.exerciseIds, request.trainer.trainerId)
       if (!exRows) {
-        return reply.status(400).send({ error: 'One or more exercises not found' })
+        return reply.status(404).send({ error: 'One or more exercises not found' })   // a foreign private id must look like a missing one
       }
       const types = new Set(exRows.map((e) => e.workoutType))
       if (types.size > 1) {
@@ -605,6 +615,15 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
         columns: { id: true },
       })
       if (!template) return reply.status(404).send({ error: 'Template not found' })   // 404, never 403 — do not confirm existence
+
+      // Every id must belong to THIS template — see the session twin.
+      const own = await db.query.templateExercises.findMany({
+        where: eq(templateExercises.templateId, templateId), columns: { id: true },
+      })
+      const ownIds = new Set(own.map((r) => r.id))
+      if (orderedIds.some((exId) => !ownIds.has(exId))) {
+        return reply.status(404).send({ error: 'Template exercise not found' })
+      }
 
       await Promise.all(
         orderedIds.map((exerciseId, index) =>

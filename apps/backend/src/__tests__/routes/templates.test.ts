@@ -549,12 +549,26 @@ describe('PATCH /templates/:id/exercises/reorder', () => {
   it('reorders exercises for an owned template and returns 204', async () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TEST_TEMPLATE_ID } as never)
+    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([{ id: TEST_TEMPLATE_EXERCISE_ID }] as never)
 
     const res = await app.inject({
       method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises/reorder`,
       headers: authHeader(), payload: { orderedIds: [TEST_TEMPLATE_EXERCISE_ID] },
     })
     expect(res.statusCode).toBe(204)
+  })
+
+  it('returns 404 when an ordered id belongs to another template (a silent no-op used to answer 204)', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.templates.findFirst).mockResolvedValueOnce({ id: TEST_TEMPLATE_ID } as never)
+    vi.mocked(db.query.templateExercises.findMany).mockResolvedValueOnce([] as never)
+
+    const res = await app.inject({
+      method: 'PATCH', url: `/api/v1/templates/${TEST_TEMPLATE_ID}/exercises/reorder`,
+      headers: authHeader(), payload: { orderedIds: [TEST_TEMPLATE_EXERCISE_ID] },
+    })
+    expect(res.statusCode).toBe(404)
+    expect(db.update).not.toHaveBeenCalled()
   })
 })
 

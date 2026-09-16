@@ -496,7 +496,7 @@ describe('POST /sessions/:id/circuits', () => {
     expect(res.statusCode).toBe(400)
   })
 
-  it('rejects when an exercise is missing', async () => {
+  it('answers 404 when an exercise is missing or not visible (a foreign private id must look like a missing one)', async () => {
     const { db } = await import('../../db')
     vi.mocked(db.query.sessions.findFirst).mockResolvedValueOnce({ id: TEST_SESSION_ID } as never)
     vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
@@ -509,7 +509,7 @@ describe('POST /sessions/:id/circuits', () => {
       headers: authHeader(),
       payload: { exerciseIds: [EX_A, EX_B], rounds: 3 },
     })
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(404)
   })
 
   it('returns 404 when the session is not the trainer\'s', async () => {

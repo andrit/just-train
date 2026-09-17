@@ -282,14 +282,12 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               >
                 <BicepLogo className="w-7 h-7" />
                 <span className="font-display text-2xl tracking-wider uppercase">
-                  <span className="text-white">Trainer</span>
-                  <span className="text-command-blue">App</span>
+                  <span className="text-white">Just Train</span>
                 </span>
               </button>
             ) : (
               <span className="font-display text-2xl tracking-wider uppercase">
-                <span className="text-white">Trainer</span>
-                <span className="text-command-blue">App</span>
+                <span className="text-white">Just Train</span>
               </span>
             )}
             {pendingSyncCount > 0 && (

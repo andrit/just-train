@@ -57,9 +57,9 @@ export default defineConfig({
       // Web App Manifest — defines how the app appears when installed
       // on a home screen (name, icon, colors, display mode).
       manifest: {
-        name: 'Trainer App',
-        short_name: 'Trainer',
-        description: 'Professional fitness trainer — workout tracking and client management',
+        name: 'Just Train',
+        short_name: 'Just Train',   // the label under the home-screen icon (≤ 12 chars)
+        description: 'A private training record. Log the work, keep going, nothing else.',
 
         // The URL opened when the user taps the home screen icon
         start_url: '/',

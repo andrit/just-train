@@ -1,6 +1,6 @@
 # Sentry SDK 8 → 10 (backend; frontend optional): Task Plan
 **Why:** audit tier 2 — `@opentelemetry/core` 1.30 (via `@sentry/node` 8.55) has a moderate advisory: unbounded allocation parsing a `baggage` header, which is an *incoming request header* — reachable from the internet on every request. The fix (core ≥2.8) only ships inside Sentry 9+/10, which moved to OpenTelemetry 2. Also: `@sentry/node` 8 is out of support.
-**Written:** 2026-09-17 · **Status:** CONFIRMED (designer, 2026-09-17) — task 1 applied; 2–3 are the designer's install/verify/deploy/prove cycle.
+**Written:** 2026-09-17 · **Status:** CONFIRMED (designer, 2026-09-17) — DONE 2026-09-17 — deployed; forged-Origin 500 captured; audit 58 → 57 (`@opentelemetry/core` gone). Cron heartbeat NOT verified (Redis unset). Frontend SDK still 8 (optional task 4 open).
 
 ## Verified (registry + repo, 2026-09-17)
 - `@sentry/node` 10.75.0: `engines.node >=18`; deps pull `@opentelemetry/sdk-trace-base ^2.9` → `@opentelemetry/core` 2.9 — the advisory closes. Node on Railway is 24. ✓

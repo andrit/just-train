@@ -12,8 +12,7 @@ export function OfflineAuthScreen({ onRetry }: OfflineAuthScreenProps): React.JS
 
       {/* Logo */}
       <h1 className="font-display text-3xl tracking-wider uppercase">
-        <span className="text-white">Trainer</span>
-        <span className="text-command-blue">App</span>
+        <span className="text-white">Just Train</span>
       </h1>
 
       {/* Icon */}

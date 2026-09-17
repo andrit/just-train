@@ -20,7 +20,7 @@ export function InstallPromptBanner({
   return (
     <div
       role="dialog"
-      aria-label="Install TrainerApp to your home screen"
+      aria-label="Install Just Train to your home screen"
       className={cn(
         'fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80',
         'z-[55] bg-brand-accent border border-command-blue/30 rounded-2xl shadow-xl p-4',

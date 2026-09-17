@@ -49,7 +49,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
       <div className="w-full max-w-sm text-center">
         {/* Logo / wordmark */}
         <p className="font-display text-2xl uppercase tracking-widest text-white mb-10">
-          TrainerApp
+          Just Train
         </p>
 
         {state === 'loading' && (

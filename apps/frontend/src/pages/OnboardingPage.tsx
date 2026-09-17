@@ -239,8 +239,7 @@ export default function OnboardingPage(): React.JSX.Element {
       <header className="flex items-center justify-center pt-10 pb-6 px-6">
         <div className="text-center">
           <span className="font-display text-3xl tracking-widest uppercase">
-            <span className="text-white">Trainer</span>
-            <span className="text-command-blue">App</span>
+            <span className="text-white">Just Train</span>
           </span>
         </div>
       </header>
@@ -256,7 +255,7 @@ export default function OnboardingPage(): React.JSX.Element {
               <>
                 <h1 className="font-display text-4xl md:text-5xl text-white uppercase tracking-wide mb-3">
                   How will you use
-                  <span className="text-command-blue block">TrainerApp?</span>
+                  <span className="text-command-blue block">Just Train?</span>
                 </h1>
                 <p className="text-gray-400 text-sm">
                   Choose your path — you can always change this in settings later.
@@ -266,7 +265,7 @@ export default function OnboardingPage(): React.JSX.Element {
               <>
                 <h1 className="font-display text-4xl md:text-5xl text-white uppercase tracking-wide mb-3">
                   Welcome to
-                  <span className="text-command-blue block">TrainerApp</span>
+                  <span className="text-command-blue block">Just Train</span>
                 </h1>
                 <p className="text-gray-400 text-sm">
                   Your training, tracked — sessions, progress, and personal records.

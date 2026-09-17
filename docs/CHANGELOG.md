@@ -7,6 +7,10 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Brand — the app is called Just Train (2026-09-17)
+- Every user-facing surface that still said "TrainerApp" now says **Just Train**: the wordmark on the sign-in, onboarding, offline-hold and verify-email screens and in the sidebar (single-colour, per the brand guardrail — the two-tone `Trainer`/`App` split is gone), the install banner label, `<title>`, the meta description, and the PWA manifest (`name`/`short_name: 'Just Train'` — the label under the home-screen icon; Android updates an installed WebAPK's label on its own schedule, so an existing install may show "Trainer" for a while or need a reinstall).
+- The story and brand docs record the name and what it changes: `design/product-story.md` → *The name, resolved* (the Phase-0 narrative stays as written), `docs/product-development/brand-identity.md` (values: "Forge yourself" → "Keep going"; voice: no metaphor — the instruction is the brand; domain section current). Colour token names are unchanged. Logo, USPTO clearance and sign-off remain launch gates.
+
 ### Platform — Sentry SDK 8 → 10, backend (audit tier 2, 2026-09-17)
 - `@sentry/node` ^10.75. Why: the 8.x line pins OpenTelemetry 1.30, whose `@opentelemetry/core` parses an incoming `baggage` header with unbounded allocation (moderate advisory, reachable on every request); the fix ships only with OTel 2, which Sentry 9+/10 carries. The 8.x line is also out of support.
 - Nothing in our code changes: the whole Sentry surface is six calls in `lib/sentry.ts` (init, Fastify error handler, captureException/Message, setUser, withMonitor), all unchanged across the majors; `instrument.ts` already initialises before any other module loads. The privacy pinning (`sendDefaultPii: false`, `beforeSend` scrubbing) is guarded by `__tests__/lib/sentry.test.ts`. Plan + vet: `.workbench/designer/current/task-plan-sentry-10.md`.

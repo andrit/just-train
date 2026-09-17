@@ -129,8 +129,7 @@ export default function LoginPage(): React.JSX.Element {
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="font-display text-4xl tracking-wider uppercase">
-            <span className="text-white">Trainer</span>
-            <span className="text-command-blue">App</span>
+            <span className="text-white">Just Train</span>
           </h1>
           <p className="text-gray-500 mt-2 text-sm">
             {mode === 'login' ? 'Sign in to your account' : 'Create your account'}

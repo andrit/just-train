@@ -107,6 +107,12 @@ Also small, separate: **clear `cloudinary-media` from Cache Storage on sign-out*
 
 ---
 
+### Camera sheet — say why the viewfinder is black
+When: next session-media UX pass, or the first support question about it.
+What: `InlineCameraSheet` falls back to the file picker when `getUserMedia` *rejects*, but when it resolves with a stream that renders nothing (installed Android PWA whose WebAPK permission differs from the browser's; camera held by another app) the user gets a silent black rectangle. Seen 2026-09-17 on the first launch from the new origin (`www.just-train.fit` is a new permission scope). Fix: detect a stream with no live video track / no frames after ~2 s and show "Camera blocked — allow it in the app's permissions, or pick a file", with the file-picker fallback offered right there.
+
+---
+
 ## Trainer Profile & Settings
 
 ### Trainer Profile Edit

@@ -1,6 +1,6 @@
 # Fastify 4 → 5 upgrade: Task Plan
 **Why:** dependency audit 2026-09-16 (`docs/SECURITY.md` → *Dependency audit*). Fastify 4 is end-of-life and carries a **reachable body-validation bypass** (CVE-2026-25223, `Content-Type` with a tab character) with no 4.x patch. Zod body validation is this app's input guard on every route, so the bypass is the one audit finding that is a launch blocker. The same move retires `find-my-way` 8, `@fastify/static` 7 and the `fast-uri` chain at source.
-**Written:** 2026-09-16 · **Status:** DRAFT — awaiting designer confirmation after vet.
+**Written:** 2026-09-16 · **Status:** DONE 2026-09-17 — deployed; CI + real-DB matrix green with no guard relaxed; Sentry receiving from the new build (CORS event with `@fastify+cors@11.3.0` in the stack); phone: login, standalone reopen (strict cookie), set logged; audit 65 → 58 with the whole Fastify chain gone. Unknown 1 (Sentry 8.55 + Fastify 5) closed positive. Unknowns 4–5 (multipart limits, rate-limit 429 body) not separately tested — covered by unchanged config + the existing route tests; left as a note.
 
 ## Verified constraints (registry + repo, 2026-09-16)
 - Every plugin's current major targets Fastify 5 (`fastify-plugin ^6`): `@fastify/cookie` 9→**11**, `cors` 9→**11**, `helmet` 11→**13**, `multipart` 8→**10**, `rate-limit` 9→**11**, `swagger` 8→**9**, `swagger-ui` 4→**6**.

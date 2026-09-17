@@ -98,6 +98,16 @@ skipped; the dashboard banner never clears — verification is advisory anyway),
 **forgot-password accepts the request but no mail arrives** (`send_failed` in the logs and a
 Sentry event). Password recovery is therefore unavailable until email is configured.
 
+**Two things about Railway variables that cost an hour each on the 2026-09-16 cut-over:**
+- **They belong on the backend service, not Postgres.** Every service has its own Variables
+  tab; `CORS_ORIGIN`, `APP_URL`, the Cloudinary/Resend/Sentry keys are read by the Node
+  process. Putting them on the Postgres service redeploys Postgres and changes nothing.
+- **Edits are staged until you click Deploy.** Saving a variable shows a banner on the
+  service ("N changes — Deploy"); until it is clicked the running deployment keeps its old
+  environment, and *Redeploy* on the deployments list rebuilds the old snapshot. The tell
+  in the logs: `hostname` / `deployment` unchanged. Symptom seen: `Origin https://www.just-train.fit
+  not allowed by CORS` on every request an hour after the variable was "set".
+
 ### 1d. Run the database migration
 
 > ⚠️ **Never run `db:push` against production.** `drizzle-kit push` applies *additive*
@@ -243,11 +253,19 @@ Redeploy the backend after updating the variable.
 
 ---
 
-## Custom domain (optional)
+## Custom domain (done 2026-09-16: `just-train.fit`)
 
-- **Vercel**: Project Settings → Domains → Add your domain → update DNS
-- **Railway**: Service Settings → Domains → Add custom domain → update DNS
-- Update `CORS_ORIGIN` on Railway to use the custom domain instead of the Vercel URL
+- **Vercel**: Project Settings → Domains → add the apex and `www`. Vercel picks one as
+  canonical and 308-redirects the other — for this app **`www.just-train.fit` is canonical**.
+  DNS records must be **DNS-only** at Cloudflare (grey cloud), not proxied — Vercel issues the
+  certificate itself, and a proxied record adds a hop to `X-Forwarded-For` and can inject
+  scripts into the page.
+- **Railway needs no domain** — the browser only ever talks to Vercel, which proxies `/api/*`.
+  But the proxy forwards the browser's `Origin`, so the backend's CORS allow-list must list
+  the new hosts: `CORS_ORIGIN=https://just-train.fit,https://www.just-train.fit` and
+  `APP_URL=https://www.just-train.fit` (canonical host, so email links don't bounce through
+  a redirect). Then click Deploy (see 1c).
+- The refresh cookie is `SameSite=Strict` now that the app is first-party on its own domain (G19).
 
 ---
 

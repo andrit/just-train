@@ -1,7 +1,7 @@
 // ------------------------------------------------------------
 // instrument.ts — Sentry bootstrap. MUST be the first import in index.ts.
 //
-// @sentry/node v8 instruments Fastify/pg/ioredis by hooking `require`, so
+// @sentry/node (v10 since 2026-09-17) instruments Fastify/pg/ioredis by hooking `require`, so
 // `Sentry.init` has to run before those modules are loaded. TypeScript emits
 // CJS `require` calls in source order, so importing this file first is enough.
 //

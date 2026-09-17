@@ -7,6 +7,12 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Platform — Sentry SDK 8 → 10, backend (audit tier 2, 2026-09-17)
+- `@sentry/node` ^10.75. Why: the 8.x line pins OpenTelemetry 1.30, whose `@opentelemetry/core` parses an incoming `baggage` header with unbounded allocation (moderate advisory, reachable on every request); the fix ships only with OTel 2, which Sentry 9+/10 carries. The 8.x line is also out of support.
+- Nothing in our code changes: the whole Sentry surface is six calls in `lib/sentry.ts` (init, Fastify error handler, captureException/Message, setUser, withMonitor), all unchanged across the majors; `instrument.ts` already initialises before any other module loads. The privacy pinning (`sendDefaultPii: false`, `beforeSend` scrubbing) is guarded by `__tests__/lib/sentry.test.ts`. Plan + vet: `.workbench/designer/current/task-plan-sentry-10.md`.
+- Known, accepted: v9+ instruments Fastify differently (`@fastify/otel` semantics); error capture is unaffected, request *tracing* may be absent until `@fastify/otel` is added — tracing was never a Phase 18 criterion. Cron heartbeat still unverifiable until `UPSTASH_REDIS_URL` is set in production.
+- Frontend `@sentry/react` stays on 8 for now (no advisory); a separate commit when convenient.
+
 ### Security — refresh cookie is SameSite=Strict (gate G19, 2026-09-16)
 - With the app served from `just-train.fit` and `/api/*` proxied to Railway, the refresh cookie is first-party on the app's own origin, so the last reason for `'lax'` (a vercel.app origin) is gone. `'strict'` now: the cookie is never sent on a cross-site request. It is path-scoped to `/api/v1/auth` and only the app's own fetches call those routes — email links land on public pages, so nothing that used to work stops working. Unit test pins the options.
 - **Domain cut-over, same day (yours):** `CORS_ORIGIN` on Railway now lists `https://just-train.fit,https://www.just-train.fit` — the Vercel proxy forwards the browser's `Origin`, so the backend's allow-list is effectively an origin guard on the API; with the old value every call 500'd (seen in Sentry: `Origin https://www.just-train.fit not allowed by CORS`). `APP_URL` set to the domain.

@@ -1,7 +1,7 @@
-# Product Story — FORGE
+# Product Story — Just Train
 
 **Phase 0 artifact** — the narrative below is preserved as written on 2026-06-17 (working name "TrainerApp").
-**Last updated:** 2026-07-22 — product renamed **TrainerApp → FORGE**; post-build section appended at the end.
+**Last updated:** 2026-09-17 — the name is **Just Train** (`www.just-train.fit`, live). Earlier renames: TrainerApp → FORGE (2026-07-22, superseded). Two post-build sections appended at the end; the 2026-07-22 one is kept as written because the FORGE reasoning still explains the values.
 
 ---
 
@@ -184,3 +184,36 @@ Push notifications remain deferred (post-SaaS). SaaS / Stripe billing is v3.0. T
 
 ### The one-line version, post-build
 **FORGE is a bare-metal training record — where you make your body your machine. Log the work, get stronger, nothing else. Just train.**
+
+---
+
+## The name, resolved — Just Train  *(added 2026-09-17)*
+
+FORGE was a fallback and it was never quite right (`design/brand/grit.md`: "too mixed signal"; the domain was never acquired). The tagline was always the true name. **Just Train** — `www.just-train.fit`, live since 2026-09-16 — is the product.
+
+### What the name changes, and what it doesn't
+The mechanics don't move. Athlete is the atom; Capture → Compare → Communicate; the isSelf bridge; the PWA promise; the refusals. All confirmed in code and unchanged.
+
+What moves is the **register**. FORGE carried a metaphor — *make your body your machine, forge yourself* — one layer between the athlete and the work. Just Train has no metaphor. It is an instruction, in the same grammar as *Just Do It*: strip away the reasons not to and do the thing. The Phase-0 story already contained the sentence that is now the brand: *"They want to open it, log the workout, and leave."*
+
+Three beats, each already built:
+
+- **Focus on it.** The set in front of you. One hand, three seconds, poor signal. That is what Capture was designed for and what the live-session rework (horizontal exercise navigation, prefill from last time, rest timer in the footer) sharpened. Everything on the screen that is not the next set is a candidate for removal.
+- **Get it done.** The number, the last-time context, the PR when it happens. Compare is how a session becomes *done* rather than merely *over*.
+- **Keep it going.** Streaks, consistency, the at-risk flag, the record that compounds instead of getting lost in a notes app. This is where `grit.md` was right about the mentality: *grit* is showing up over months and years. Just Train is grit as an imperative rather than a noun.
+
+### The values, restated
+1. **Log the work.** Logging is the whole product. Everything else is output.
+2. **Progress, not engagement.** Open it, log, leave. The app wants your progress, not your time.
+3. **Private by default.** No feed, no followers, nothing shared you didn't ask for. (Client media is served only with a signature; signed out is signed out.)
+4. **You're the coach.** No algorithm between you and the work.
+5. **Keep going.** Consistency is the product's real output — the streak, the arc from the first goal to the last PR. *(Was "Forge yourself." The intent survives; the metaphor doesn't.)*
+
+### Voice
+Same register — flat, declarative, second person, no hype, the terminal period does the work. One change: **no metaphor.** The instruction is the brand. "Log the set." "Next set." "Just train."
+
+### What this means for launch
+The name unblocked the domain, the email sender (`just-train.fit` verified in Resend), and the cookie posture (first-party, strict). Still open on the brand side: the wordmark/logo (the `💪` placeholder icons), USPTO clearance for the name, and the sign-off itself — all launch gates, none of them code. The colour palette keeps its token names (Forge Black, Iron Grey, Ember Red, Command Blue, Signal Yellow) — they are internal identifiers in `COLOR_SYSTEM.md` and the Tailwind config, and renaming them is churn with no product value.
+
+### The one-line version, current
+**Just Train is a private training record for athletes and the coaches who guide them — built for the gym floor. Log the work. Keep going. Nothing else.**

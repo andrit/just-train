@@ -148,6 +148,7 @@ trainer-app/
 | `trainer_usage_monthly` | Billing meter — aggregated usage per trainer per month |
 | `exercises` | Exercise library (shared + per-trainer) |
 | `exercise_media` | Cloudinary media for exercises |
+| `exercise_muscles` | Worked muscles per exercise (34-vocab, primary/secondary) — drives the muscle-highlight map |
 | `body_parts` | Muscle group taxonomy |
 | `templates` | Saved session templates |
 | `template_workouts` | Workout blocks within a template |
@@ -995,12 +996,9 @@ To add individual exercises after initial seed: use `POST /exercises`, or an ide
 - **Footer CTA** — "Add to Workout" (context-aware: disabled if no active/planned session)
 - **Draft badge** — shown on exercises created mid-session, prompts enrichment
 
-### Visualization and demonstration content (Phase 9 — deferred)
-- Visualizations: muscle-group highlight diagrams (like gym machine graphics)
-- Demonstrations: video links to proper form demonstrations
-- Content population deferred to Phase 9 (post-SPA refactor)
-- May be AI-generated, licensed, or user-uploaded depending on cost/quality tradeoff
-- Schema is ready — fields exist, currently null in seed
+### Visualization and demonstration content
+- **Visualizations ✅ (2026-10-11):** muscle-group highlight diagrams shipped as the **exercise muscle map** — rendered client-side from the `exercise_muscles` join (34-muscle vocab) via `MuscleMap.tsx`, not stored images. Deterministic, themeable, offline, no licensing. The `exercises.visualization` URL column is now vestigial.
+- **Demonstrations → Project 2 (next):** start→finish movement images/clips from the public-domain free-exercise-db, matched by name → Cloudinary, gap hand-sourced. The `exercises.demonstration` column is the home. See `DEFERRED_ITEMS.md`.
 
 ### db:seed command
 ```bash

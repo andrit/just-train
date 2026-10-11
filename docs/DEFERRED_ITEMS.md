@@ -131,14 +131,12 @@ What: Routes gated to `requireRole('admin')`. Middleware built, role in schema a
 
 ## Exercise Library
 
-### Visualization Content (Phase 9)
-When: Post-SPA refactor (v2.5.0 or later)
-What: Populate `exercises.visualization` with muscle-group highlight images (like gym machine diagrams). Schema column exists, currently null in seed.
-Options: AI-generated SVG, licensed library (Muscle & Motion), commissioned art.
+### Visualization Content (Phase 9) ✅ DONE (2026-10-11, differently than planned)
+The "muscle-group highlight" need is met by the **exercise muscle map** — but rendered from data (the `exercise_muscles` join + a client-side SVG in `MuscleMap.tsx`), not by populating the `exercises.visualization` image-URL column. Deterministic, themeable, offline, no per-exercise asset or licensing. The `visualization` column is now vestigial (left in place; a later migration can drop it). Muscle data authored for 103 exercises; see the CHANGELOG muscle-map entry.
 
-### Demonstration Content (Phase 9)
-When: Post-SPA refactor
-What: Populate `exercises.demonstration` with video URLs showing proper form. Schema column exists, currently null.
+### Demonstration Content (Phase 9) → now **Project 2 (movement demonstration)**
+When: After the muscle map (Project 1, done). Next exercise-media initiative.
+What: The start→finish **movement** images/clips (the other half of the gym placard). Source: the same public-domain free-exercise-db (Unlicense) — 876 exercises, 2-frame start/finish images — matched by name, ingested to Cloudinary (or bundled), with the machine-specific gap (Assault Bike, Hip Flexors Rotary Machine, …) hand-sourced/commissioned. AI generation is **not** the primary path (form-correctness risk); at most a stylized gap-filler with review. The `exercises.demonstration` column is the natural home. Full scoping in `.workbench/designer/current/task-plan-exercise-muscle-map.md` (Project 2 section).
 
 ### Exercise "In Use" Guard on Delete
 When: v1.9.x polish

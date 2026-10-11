@@ -22,3 +22,6 @@ export * from './utils/weight'
 
 // Per-side reps + set volume (unilateral tracking) — the single volume source.
 export * from './utils/setMath'
+
+// Muscle taxonomy helpers (muscle → body part, labels)
+export * from './utils/muscles'

@@ -38,6 +38,8 @@ import {
   DIFFICULTY_COLOR,
 }                                                from '@/lib/exerciseLabels'
 import ExerciseForm                              from './ExerciseForm'
+import { MuscleMap }                             from '@/components/charts/MuscleMap'
+import { muscleLabel }                           from '@trainer-app/shared'
 import MediaUploader                             from './MediaUploader'
 import { ExerciseProgressSection }               from './ExerciseProgressSection'
 import type { ActiveSession }                    from '@/store/sessionStore'
@@ -430,6 +432,27 @@ export default function ExerciseDetailPanel({
             </span>
           )}
         </div>
+
+        {/* Muscles worked — highlight map + precise labels (hidden when none,
+            e.g. cardio/stretching/cooldown or an un-enriched draft) */}
+        {(exercise.muscles.primary.length > 0 || exercise.muscles.secondary.length > 0) && (
+          <section>
+            <h3 className="text-[10px] uppercase tracking-widest text-gray-500 mb-3">Muscles Worked</h3>
+            <MuscleMap primary={exercise.muscles.primary} secondary={exercise.muscles.secondary} />
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {exercise.muscles.primary.map((m) => (
+                <span key={m} className="text-[11px] px-2 py-0.5 rounded-full bg-ember-red/15 text-ember-red border border-ember-red/30">
+                  {muscleLabel(m)}
+                </span>
+              ))}
+              {exercise.muscles.secondary.map((m) => (
+                <span key={m} className="text-[11px] px-2 py-0.5 rounded-full border border-surface-border text-gray-400">
+                  {muscleLabel(m)}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Description */}
         {exercise.description && (

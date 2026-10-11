@@ -10,14 +10,15 @@
 // ------------------------------------------------------------
 
 import {
-  pgTable, uuid, text, boolean, integer, pgEnum, timestamp
+  pgTable, uuid, text, boolean, integer, pgEnum, timestamp, unique
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import {
   BodyPartEnum, WorkoutTypeEnum, EquipmentEnum,
   DifficultyEnum, MediaTypeEnum, ExerciseCategoryEnum,
-  LateralityEnum,
+  LateralityEnum, MuscleRoleEnum,
 } from '@trainer-app/shared'
+import type { Muscle } from '@trainer-app/shared'
 import { trainers } from './trainers'
 
 // ------------------------------------------------------------
@@ -30,6 +31,9 @@ export const difficultyEnum      = pgEnum('difficulty',      DifficultyEnum.opti
 export const mediaTypeEnum       = pgEnum('media_type',      MediaTypeEnum.options)
 export const exerciseCategoryEnum = pgEnum('exercise_category', ExerciseCategoryEnum.options)
 export const lateralityEnum      = pgEnum('laterality',      LateralityEnum.options)
+// muscle is text (not a pg enum): the anatomical vocabulary is under active
+// refinement, so a code-only Zod enum avoids ALTER TYPE churn. role is stable.
+export const muscleRoleEnum      = pgEnum('muscle_role',     MuscleRoleEnum.options)
 
 // ------------------------------------------------------------
 // BODY PARTS — lookup/reference table
@@ -121,6 +125,31 @@ export type ExerciseMedia    = typeof exerciseMedia.$inferSelect
 export type NewExerciseMedia = typeof exerciseMedia.$inferInsert
 
 // ------------------------------------------------------------
+// EXERCISE MUSCLES — the muscles an exercise works.
+// Finer than bodyPart (17-muscle vocab). Drives the client-side
+// muscle-highlight map on the exercise detail view. One row per
+// (exercise, muscle); role marks prime mover vs assister.
+// Read whole with the exercise; also queryable for future
+// "muscles worked this week" analytics (why a join, not comma-text).
+// ------------------------------------------------------------
+export const exerciseMuscles = pgTable('exercise_muscles', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  exerciseId: uuid('exercise_id')
+    .notNull()
+    .references(() => exercises.id, { onDelete: 'cascade' }),
+  // text + Zod MuscleEnum validation (see note on muscleRoleEnum above).
+  muscle: text('muscle').notNull().$type<Muscle>(),
+  role:   muscleRoleEnum('role').notNull(),
+}, (t) => ({
+  // A muscle appears at most once per exercise (can't be both primary and
+  // secondary, and no accidental dupes from a re-run seed).
+  uniqExerciseMuscle: unique('uniq_exercise_muscle').on(t.exerciseId, t.muscle),
+}))
+
+export type ExerciseMuscle    = typeof exerciseMuscles.$inferSelect
+export type NewExerciseMuscle = typeof exerciseMuscles.$inferInsert
+
+// ------------------------------------------------------------
 // RELATIONS
 // ------------------------------------------------------------
 export const bodyPartsRelations = relations(bodyParts, ({ many }) => ({
@@ -131,8 +160,13 @@ export const exercisesRelations = relations(exercises, ({ one, many }) => ({
   trainer:  one(trainers,   { fields: [exercises.trainerId],  references: [trainers.id] }),
   bodyPart: one(bodyParts,  { fields: [exercises.bodyPartId], references: [bodyParts.id] }),
   media:    many(exerciseMedia),
+  muscles:  many(exerciseMuscles),
 }))
 
 export const exerciseMediaRelations = relations(exerciseMedia, ({ one }) => ({
   exercise: one(exercises, { fields: [exerciseMedia.exerciseId], references: [exercises.id] }),
+}))
+
+export const exerciseMusclesRelations = relations(exerciseMuscles, ({ one }) => ({
+  exercise: one(exercises, { fields: [exerciseMuscles.exerciseId], references: [exercises.id] }),
 }))

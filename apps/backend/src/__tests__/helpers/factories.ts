@@ -18,7 +18,7 @@
 import type {
   Trainer, Client, RefreshToken, ClientGoal, ClientSnapshot,
   Session, Challenge, Template, TemplateExercise,
-  Exercise, SessionExercise, Set,
+  Exercise, ExerciseMuscle, SessionExercise, Set,
 } from '../../db/schema'
 
 // Stable test IDs — using fixed UUIDs makes test output easier to read
@@ -345,6 +345,18 @@ export function makeExercise(overrides: Partial<Exercise> = {}): Exercise {
     demonstration: null,
     createdAt:     new Date(),
     updatedAt:     new Date(),
+    ...overrides,
+  }
+}
+
+// ── Exercise Muscle ──────────────────────────────────────────────────────────
+// One worked muscle for an exercise. Default: quadriceps as prime mover.
+export function makeExerciseMuscle(overrides: Partial<ExerciseMuscle> = {}): ExerciseMuscle {
+  return {
+    id:         'ffffffff-3333-3333-3333-ffffffffffff',
+    exerciseId: TEST_EXERCISE_ID,
+    muscle:     'quadriceps' as const,
+    role:       'primary' as const,
     ...overrides,
   }
 }

@@ -248,6 +248,31 @@ describe('GET /api/v1/exercises/:id', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.json().name).toBe('Barbell Back Squat')
+    // No muscle rows on the fixture → empty groups, not a 500.
+    expect(res.json().muscles).toEqual({ primary: [], secondary: [] })
+  })
+
+  it('groups worked muscles into primary/secondary for the map', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.exercises.findFirst).mockResolvedValueOnce(makeExercise({
+      muscles: [
+        { id: 'm1', exerciseId: TEST_CLIENT_ID, muscle: 'quadriceps',      role: 'primary' },
+        { id: 'm2', exerciseId: TEST_CLIENT_ID, muscle: 'gluteus_maximus', role: 'secondary' },
+        { id: 'm3', exerciseId: TEST_CLIENT_ID, muscle: 'hamstrings',      role: 'secondary' },
+      ],
+    }))
+
+    const res = await app.inject({
+      method:  'GET',
+      url:     `/api/v1/exercises/${TEST_CLIENT_ID}`,
+      headers: { authorization: authHeader() },
+    })
+
+    expect(res.statusCode).toBe(200)
+    expect(res.json().muscles).toEqual({
+      primary:   ['quadriceps'],
+      secondary: ['gluteus_maximus', 'hamstrings'],
+    })
   })
 
   it('returns 404 when exercise does not exist', async () => {

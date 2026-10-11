@@ -167,6 +167,7 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         with: {
           bodyPart: true,
           media: { orderBy: exerciseMedia.displayOrder },
+          muscles: true,
         },
       })
 
@@ -174,8 +175,18 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(404).send({ error: 'Exercise not found' })
       }
 
+      // Group the muscle join rows into { primary, secondary } for the map,
+      // overriding the raw relation on the row. Default to [] — the relation
+      // is absent on a mocked row, and empty is the right answer for
+      // cardio/stretching/cooldown and un-enriched drafts.
+      const muscleRows = result.muscles ?? []
+      const muscles = {
+        primary:   muscleRows.filter((m) => m.role === 'primary').map((m) => m.muscle),
+        secondary: muscleRows.filter((m) => m.role === 'secondary').map((m) => m.muscle),
+      }
+
       // Deep: media rows carry their own createdAt (real-DB lane finding).
-      return reply.send(serializeDates(result))
+      return reply.send(serializeDates({ ...result, muscles }))
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercise' })

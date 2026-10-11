@@ -27,6 +27,41 @@ export const WORKOUT_TYPE_DEFAULT_ORDER: Record<WorkoutType, number> = {
 export const BodyPartEnum = z.enum(['arms', 'back', 'chest', 'legs', 'shoulders', 'core', 'full_body'])
 export type BodyPart = z.infer<typeof BodyPartEnum>
 
+// Muscle — the anatomical vocabulary for the per-exercise muscle map.
+// Finer than BodyPart, and finer than the SVG can render: the data stores
+// precise muscles (shown as labels + queryable for analytics); the highlight
+// map paints at the SVG's coarser region granularity via a muscle→region map.
+// The free-exercise-db import is a coarse-source→fine-target first pass
+// (its "shoulders" seeds all three deltoid heads, etc.), refined by hand.
+// Stored as text + validated here, so refining this list needs no DB migration.
+export const MuscleEnum = z.enum([
+  // Shoulders
+  'deltoid_anterior', 'deltoid_lateral', 'deltoid_posterior', 'rotator_cuff',
+  // Chest
+  'pectoralis_major', 'pectoralis_minor', 'serratus_anterior',
+  // Back
+  'latissimus_dorsi', 'trapezius_upper', 'trapezius_middle', 'trapezius_lower',
+  'rhomboids', 'teres_major', 'erector_spinae',
+  // Arms
+  'biceps_brachii', 'brachialis', 'triceps_brachii',
+  'brachioradialis', 'forearm_flexors', 'forearm_extensors',
+  // Core
+  'rectus_abdominis', 'obliques', 'transverse_abdominis',
+  // Hips & glutes
+  'gluteus_maximus', 'gluteus_medius', 'hip_flexors', 'hip_adductors', 'hip_abductors',
+  // Thigh
+  'quadriceps', 'hamstrings',
+  // Lower leg
+  'gastrocnemius', 'soleus', 'tibialis_anterior',
+  // Neck
+  'sternocleidomastoid',
+])
+export type Muscle = z.infer<typeof MuscleEnum>
+
+// Whether a muscle is the prime mover or an assister for an exercise.
+export const MuscleRoleEnum = z.enum(['primary', 'secondary'])
+export type MuscleRole = z.infer<typeof MuscleRoleEnum>
+
 export const EquipmentEnum = z.enum(['none', 'bodyweight', 'barbell', 'dumbbell', 'cable', 'machine', 'kettlebell', 'resistance_band', 'cardio_machine', 'other'])
 export type Equipment = z.infer<typeof EquipmentEnum>
 

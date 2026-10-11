@@ -25,6 +25,7 @@ import {
   SideEnum,
   DifficultyEnum,
   LateralityEnum,
+  MuscleEnum,
   MediaTypeEnum,
   TrainerRoleEnum,
   ClientFocusEnum,
@@ -320,8 +321,18 @@ export const ExerciseSummaryResponseSchema = z.object({
 })
 export type ExerciseSummaryResponse = z.infer<typeof ExerciseSummaryResponseSchema>
 
+// Muscles worked, grouped for the highlight map. Empty arrays = no muscle
+// data (cardio/stretching/cooldown, or an un-enriched draft) → no map shown.
+export const MuscleTargetsResponseSchema = z.object({
+  primary:   z.array(MuscleEnum),
+  secondary: z.array(MuscleEnum),
+})
+export type MuscleTargetsResponse = z.infer<typeof MuscleTargetsResponseSchema>
+
 export const ExerciseDetailResponseSchema = ExerciseSummaryResponseSchema.extend({
   trainerId:     z.string().uuid().nullable(),
+  muscles:       MuscleTargetsResponseSchema.default({ primary: [], secondary: [] })
+    .describe('Worked muscles grouped primary/secondary, for the muscle-highlight map'),
   bodyPartId:    z.string().uuid().nullable(),
   description:   z.string().nullable(),
   instructions:  z.string().nullable().describe('Step-by-step form instructions'),

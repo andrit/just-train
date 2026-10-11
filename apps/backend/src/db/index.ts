@@ -50,6 +50,7 @@ export const {
   bodyParts,
   exercises,
   exerciseMedia,
+  exerciseMuscles,
 
   // Templates
   templates,

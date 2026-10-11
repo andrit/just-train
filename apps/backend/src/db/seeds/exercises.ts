@@ -14,8 +14,9 @@
 
 import { readFileSync } from 'fs'
 import { join }         from 'path'
-import { db, bodyParts, exercises } from '../index'
+import { db, bodyParts, exercises, exerciseMuscles } from '../index'
 import { eq }           from 'drizzle-orm'
+import type { Muscle }  from '@trainer-app/shared'
 
 // ── Load JSON library ─────────────────────────────────────────────────────────
 
@@ -49,6 +50,25 @@ function buildInsert(e: any, bodyPartId: string, workoutType: string) {
     isPublic:      true,
     trainerId:     null,
   }
+}
+
+// name → worked muscles, flattened across all categories. Muscles are
+// seed-only fields (primaryMuscles/secondaryMuscles) on the JSON; validated
+// against MuscleEnum at authoring time, so the cast is safe here.
+function collectMuscleData(): Record<string, { primary: Muscle[]; secondary: Muscle[] }> {
+  const out: Record<string, { primary: Muscle[]; secondary: Muscle[] }> = {}
+  const add = (e: any) => {
+    out[e.name] = {
+      primary:   (e.primaryMuscles   ?? []) as Muscle[],
+      secondary: (e.secondaryMuscles ?? []) as Muscle[],
+    }
+  }
+  library.resistance.compound.forEach(add)
+  library.resistance.isolation.forEach(add)
+  for (const key of ['cardio', 'calisthenics', 'stretching', 'cooldown']) {
+    (library[key] ?? []).forEach(add)
+  }
+  return out
 }
 
 // ── Seed ─────────────────────────────────────────────────────────────────────
@@ -110,7 +130,26 @@ export async function seedExercises(): Promise<void> {
     await db.insert(exercises).values(toInsert.slice(i, i + batchSize))
   }
 
-  console.log(`✅ Seeded ${toInsert.length} exercises`)
+  // Seed muscle links (exercise_muscles). Muscles are seed-only fields on the
+  // JSON, not columns on the exercise, so map them to the just-inserted rows by
+  // name. Exercises with no muscle data (cardio, breathing) contribute nothing.
+  const muscleByName = collectMuscleData()
+  const seeded = await db.query.exercises.findMany({
+    where: eq(exercises.isPublic, true),
+    columns: { id: true, name: true },
+  })
+  const muscleRows: (typeof exerciseMuscles.$inferInsert)[] = []
+  for (const ex of seeded) {
+    const md = muscleByName[ex.name]
+    if (!md) continue
+    for (const m of md.primary)   muscleRows.push({ exerciseId: ex.id, muscle: m, role: 'primary' })
+    for (const m of md.secondary) muscleRows.push({ exerciseId: ex.id, muscle: m, role: 'secondary' })
+  }
+  for (let i = 0; i < muscleRows.length; i += batchSize) {
+    await db.insert(exerciseMuscles).values(muscleRows.slice(i, i + batchSize))
+  }
+
+  console.log(`✅ Seeded ${toInsert.length} exercises, ${muscleRows.length} muscle links`)
   console.log(`   Resistance compound:  ${library.resistance.compound.length}`)
   console.log(`   Resistance isolation: ${library.resistance.isolation.length}`)
   console.log(`   Cardio:               ${library.cardio.length}`)

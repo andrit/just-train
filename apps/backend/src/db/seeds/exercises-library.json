@@ -12,7 +12,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "1-2 sentence overview",
-      "instructions": "Step-by-step cues"
+      "instructions": "Step-by-step cues",
+      "primaryMuscles": "array of muscle slugs (MuscleEnum) — prime movers; [] if N/A",
+      "secondaryMuscles": "array of muscle slugs (MuscleEnum) — assisters; [] if N/A"
     }
   },
   "resistance": {
@@ -26,7 +28,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "The foundational horizontal push. Builds chest thickness and pressing strength.",
-        "instructions": "Lie flat on a bench with feet on the floor. Grip the bar slightly wider than shoulder-width. Unrack and lower to mid-chest with control. Press back to lockout."
+        "instructions": "Lie flat on a bench with feet on the floor. Grip the bar slightly wider than shoulder-width. Unrack and lower to mid-chest with control. Press back to lockout.",
+        "primaryMuscles": ["pectoralis_major"],
+        "secondaryMuscles": ["deltoid_anterior", "triceps_brachii"]
       },
       {
         "name": "Incline Barbell Bench Press",
@@ -37,7 +41,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Upper chest emphasis. Bench set to 30–45 degrees.",
-        "instructions": "Set bench to 30–45°. Grip slightly wider than shoulders. Lower the bar to upper chest, press back to lockout. Keep feet flat and back in contact with the pad."
+        "instructions": "Set bench to 30–45°. Grip slightly wider than shoulders. Lower the bar to upper chest, press back to lockout. Keep feet flat and back in contact with the pad.",
+        "primaryMuscles": ["pectoralis_major", "deltoid_anterior"],
+        "secondaryMuscles": ["triceps_brachii"]
       },
       {
         "name": "Decline Barbell Bench Press",
@@ -48,7 +54,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Lower chest emphasis. Bench set to -30 to -45 degrees.",
-        "instructions": "Set bench to  -30° to -45°. Grip slightly wider than shoulders. Lower the bar to lower chest, press back to lockout. Keep feet flat and back in contact with the pad."
+        "instructions": "Set bench to  -30° to -45°. Grip slightly wider than shoulders. Lower the bar to lower chest, press back to lockout. Keep feet flat and back in contact with the pad.",
+        "primaryMuscles": ["pectoralis_major"],
+        "secondaryMuscles": ["triceps_brachii", "deltoid_anterior"]
       },
       {
         "name": "Dumbbell Bench Press",
@@ -59,7 +67,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Greater range of motion than barbell. Good for identifying and correcting side imbalances.",
-        "instructions": "Lie flat, dumbbells at chest level. Press up and in, bringing the bells close at the top. Lower with control to a comfortable stretch."
+        "instructions": "Lie flat, dumbbells at chest level. Press up and in, bringing the bells close at the top. Lower with control to a comfortable stretch.",
+        "primaryMuscles": ["pectoralis_major"],
+        "secondaryMuscles": ["deltoid_anterior", "triceps_brachii"]
       },
       {
         "name": "Dips",
@@ -70,7 +80,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Bodyweight vertical push. Lean forward to emphasise chest, stay upright for triceps. Strap a specialized belt on and hang weights from it to turn this into a freeweight exercise.",
-        "instructions": "Support yourself on parallel bars. Lower your body by bending at the elbows, leaning slightly forward. Push back up to full arm extension."
+        "instructions": "Support yourself on parallel bars. Lower your body by bending at the elbows, leaning slightly forward. Push back up to full arm extension.",
+        "primaryMuscles": ["pectoralis_major", "triceps_brachii"],
+        "secondaryMuscles": ["deltoid_anterior"]
       },
       {
         "name": "Barbell Deadlift",
@@ -81,7 +93,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "The king of posterior chain movements. Works everything from traps to hamstrings.",
-        "instructions": "Bar over mid-foot. Hip-width stance. Hinge at hips to grip bar. Brace core, flatten back. Drive through the floor, extend hips and knees simultaneously. Lock out at the top."
+        "instructions": "Bar over mid-foot. Hip-width stance. Hinge at hips to grip bar. Brace core, flatten back. Drive through the floor, extend hips and knees simultaneously. Lock out at the top.",
+        "primaryMuscles": ["erector_spinae", "gluteus_maximus", "hamstrings"],
+        "secondaryMuscles": ["quadriceps", "trapezius_upper", "latissimus_dorsi", "forearm_flexors"]
       },
       {
         "name": "Barbell Row",
@@ -92,7 +106,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Horizontal pull. Builds back thickness and helps counteract pressing movements.",
-        "instructions": "Hinge to roughly 45°. Pull bar to lower chest / upper abdomen. Lead with the elbows. Lower with control."
+        "instructions": "Hinge to roughly 45°. Pull bar to lower chest / upper abdomen. Lead with the elbows. Lower with control.",
+        "primaryMuscles": ["latissimus_dorsi", "rhomboids"],
+        "secondaryMuscles": ["trapezius_middle", "deltoid_posterior", "biceps_brachii", "erector_spinae"]
       },
       {
         "name": "Dumbbell Row",
@@ -104,7 +120,9 @@
         "visualization": null,
         "description": "Single-arm horizontal pull. Allows full range of motion and helps fix imbalances.",
         "instructions": "Brace one hand and knee on a bench. Pull the dumbbell to your hip, keeping elbow close. Lower with control. Full stretch at the bottom.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["latissimus_dorsi"],
+        "secondaryMuscles": ["rhomboids", "trapezius_middle", "deltoid_posterior", "biceps_brachii"]
       },
       {
         "name": "Pull-Up",
@@ -115,7 +133,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "The definitive vertical pull. Overhand grip emphasises width.",
-        "instructions": "Hang from a bar with an overhand grip, hands slightly wider than shoulders. Pull until chin clears the bar, focusing on driving elbows to hips. Lower with control."
+        "instructions": "Hang from a bar with an overhand grip, hands slightly wider than shoulders. Pull until chin clears the bar, focusing on driving elbows to hips. Lower with control.",
+        "primaryMuscles": ["latissimus_dorsi"],
+        "secondaryMuscles": ["biceps_brachii", "rhomboids", "teres_major", "trapezius_lower"]
       },
       {
         "name": "Chin-Up",
@@ -126,7 +146,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Vertical pull with supinated grip. Greater bicep contribution than pull-up.",
-        "instructions": "Hang with a supinated (underhand) grip, hands shoulder-width. Pull until chin clears the bar. Lower with control."
+        "instructions": "Hang with a supinated (underhand) grip, hands shoulder-width. Pull until chin clears the bar. Lower with control.",
+        "primaryMuscles": ["latissimus_dorsi", "biceps_brachii"],
+        "secondaryMuscles": ["rhomboids", "teres_major"]
       },
       {
         "name": "Lat Pulldown",
@@ -137,7 +159,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Cable pull-up substitute. Good for building the lat strength needed for bodyweight pull-ups.",
-        "instructions": "Grip wide bar with overhand grip. Sit with thighs under pads. Pull bar to upper chest, leading with elbows. Control the return."
+        "instructions": "Grip wide bar with overhand grip. Sit with thighs under pads. Pull bar to upper chest, leading with elbows. Control the return.",
+        "primaryMuscles": ["latissimus_dorsi"],
+        "secondaryMuscles": ["biceps_brachii", "rhomboids", "teres_major"]
       },
       {
         "name": "Cable Row",
@@ -148,7 +172,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Seated horizontal pull with constant cable tension. Back thickness builder.",
-        "instructions": "Sit upright at cable station, slight forward lean. Pull handle to lower abdomen, driving elbows back. Hold briefly, return with control."
+        "instructions": "Sit upright at cable station, slight forward lean. Pull handle to lower abdomen, driving elbows back. Hold briefly, return with control.",
+        "primaryMuscles": ["latissimus_dorsi", "rhomboids"],
+        "secondaryMuscles": ["trapezius_middle", "biceps_brachii", "deltoid_posterior"]
       },
       {
         "name": "Overhead Press",
@@ -159,7 +185,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "The foundational overhead push. Builds shoulder strength and stability.",
-        "instructions": "Bar at front rack position. Grip just outside shoulders. Brace everything. Press overhead to full lockout. Return under control."
+        "instructions": "Bar at front rack position. Grip just outside shoulders. Brace everything. Press overhead to full lockout. Return under control.",
+        "primaryMuscles": ["deltoid_anterior"],
+        "secondaryMuscles": ["deltoid_lateral", "triceps_brachii", "trapezius_upper"]
       },
       {
         "name": "Dumbbell Shoulder Press",
@@ -171,7 +199,9 @@
         "visualization": null,
         "description": "Overhead press with dumbbells. Greater range of motion and unilateral balance demand.",
         "instructions": "Seated or standing. Press from ear level to full lockout. Avoid excessive arching. Lower with control.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["deltoid_anterior"],
+        "secondaryMuscles": ["deltoid_lateral", "triceps_brachii"]
       },
       {
         "name": "Arnold Press",
@@ -182,7 +212,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Rotating dumbbell press that works all three deltoid heads through a wide arc.",
-        "instructions": "Start with palms facing you, bells at chin level. Rotate hands outward as you press overhead. Reverse on the way down."
+        "instructions": "Start with palms facing you, bells at chin level. Rotate hands outward as you press overhead. Reverse on the way down.",
+        "primaryMuscles": ["deltoid_anterior"],
+        "secondaryMuscles": ["deltoid_lateral", "triceps_brachii", "deltoid_posterior"]
       },
       {
         "name": "Barbell Back Squat",
@@ -193,7 +225,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "The foundational lower body movement. Quad-dominant with significant glute and core demand.",
-        "instructions": "Bar on upper traps, feet shoulder-width. Brace and squat down until thighs parallel or below. Drive through the floor to stand. Knees track over toes."
+        "instructions": "Bar on upper traps, feet shoulder-width. Brace and squat down until thighs parallel or below. Drive through the floor to stand. Knees track over toes.",
+        "primaryMuscles": ["quadriceps", "gluteus_maximus"],
+        "secondaryMuscles": ["hamstrings", "erector_spinae", "hip_adductors"]
       },
       {
         "name": "Barbell Front Squat",
@@ -204,7 +238,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "More upright torso than back squat. Greater quad demand, requires significant wrist and shoulder mobility.",
-        "instructions": "Bar across front delts, elbows high. Squat upright, keeping elbows pointing forward throughout. Drive through the floor."
+        "instructions": "Bar across front delts, elbows high. Squat upright, keeping elbows pointing forward throughout. Drive through the floor.",
+        "primaryMuscles": ["quadriceps"],
+        "secondaryMuscles": ["gluteus_maximus", "erector_spinae", "rectus_abdominis"]
       },
       {
         "name": "Hack Squat",
@@ -215,7 +251,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "focusing heavily on quads while limiting lower back strain and eliminating the need for stabilization, making them ideal for hypertrophy and beginners",
-        "instructions": "Place your back against the pad with shoulders under the pads, feet shoulder-width apart on the platform, and unlock the safety handles. Lower the sled slowly until hips are below knees, keeping your back straight, then drive through your heels to return to the starting position."
+        "instructions": "Place your back against the pad with shoulders under the pads, feet shoulder-width apart on the platform, and unlock the safety handles. Lower the sled slowly until hips are below knees, keeping your back straight, then drive through your heels to return to the starting position.",
+        "primaryMuscles": ["quadriceps"],
+        "secondaryMuscles": ["gluteus_maximus", "hamstrings"]
       },
       {
         "name": "Romanian Deadlift",
@@ -226,7 +264,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Hip hinge with straight legs. Primary hamstring and glute developer.",
-        "instructions": "Hold bar at hip level. Hinge back, pushing hips behind you with a slight knee bend. Lower until you feel a deep hamstring stretch. Drive hips forward to return."
+        "instructions": "Hold bar at hip level. Hinge back, pushing hips behind you with a slight knee bend. Lower until you feel a deep hamstring stretch. Drive hips forward to return.",
+        "primaryMuscles": ["hamstrings", "gluteus_maximus"],
+        "secondaryMuscles": ["erector_spinae", "forearm_flexors"]
       },
       {
         "name": "Bulgarian Split Squat",
@@ -238,7 +278,9 @@
         "visualization": null,
         "description": "Unilateral squat with rear foot elevated. High quad and glute demand, good for balance.",
         "instructions": "Rear foot elevated on a bench. Lower the back knee toward the floor, keeping front shin vertical. Drive through the front heel to stand.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["quadriceps", "gluteus_maximus"],
+        "secondaryMuscles": ["hamstrings", "hip_adductors", "gluteus_medius"]
       },
       {
         "name": "Leg Press",
@@ -249,7 +291,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Machine squat pattern. Lower back load is reduced compared to barbell squat.",
-        "instructions": "Feet shoulder-width on platform. Lower sled until knees reach 90°. Press through heels to extend. Do not lock knees at top."
+        "instructions": "Feet shoulder-width on platform. Lower sled until knees reach 90°. Press through heels to extend. Do not lock knees at top.",
+        "primaryMuscles": ["quadriceps", "gluteus_maximus"],
+        "secondaryMuscles": ["hamstrings"]
       },
       {
         "name": "Hip Thrust",
@@ -260,7 +304,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Primary glute builder. Bar positioned across the hips.",
-        "instructions": "Upper back on a bench, bar across hips. Drive hips to ceiling by squeezing glutes. Hold briefly at top. Lower with control."
+        "instructions": "Upper back on a bench, bar across hips. Drive hips to ceiling by squeezing glutes. Hold briefly at top. Lower with control.",
+        "primaryMuscles": ["gluteus_maximus"],
+        "secondaryMuscles": ["hamstrings", "quadriceps"]
       },
       {
         "name": "Lunges",
@@ -272,7 +318,9 @@
         "visualization": null,
         "description": "Unilateral leg exercise. Works quad, glute, and balance simultaneously.",
         "instructions": "Step forward into a split stance. Lower back knee toward the floor. Push off the front foot to return. Alternate legs.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["quadriceps", "gluteus_maximus"],
+        "secondaryMuscles": ["hamstrings", "gluteus_medius"]
       },
       {
         "name": "Barbell Lunges",
@@ -284,7 +332,9 @@
         "visualization": null,
         "description": "Unilateral leg exercise. Works quad, glute, and balance simultaneously.",
         "instructions": "Place barbell over your shoulders like a back squat. Step forward into a split stance. Lower back knee toward the floor. Push off the front foot to return. Alternate legs.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["quadriceps", "gluteus_maximus"],
+        "secondaryMuscles": ["hamstrings", "gluteus_medius"]
       },
       {
         "name": "Good Mornings",
@@ -295,7 +345,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "A hip-hinge that loads the hamstrings, glutes, and lower back. Builds posterior-chain strength and reinforces the hip-hinge pattern used in deadlifts and cleans.",
-        "instructions": "Rest a barbell across your upper back as in a back squat. With a soft bend in the knees, hinge at the hips and lower your torso toward parallel, keeping a flat back and the bar tracking over your midfoot. Drive the hips forward to return to standing."
+        "instructions": "Rest a barbell across your upper back as in a back squat. With a soft bend in the knees, hinge at the hips and lower your torso toward parallel, keeping a flat back and the bar tracking over your midfoot. Drive the hips forward to return to standing.",
+        "primaryMuscles": ["hamstrings", "erector_spinae"],
+        "secondaryMuscles": ["gluteus_maximus"]
       },
       {
         "name": "Pendlay Row",
@@ -306,7 +358,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "An explosive barbell row performed from a dead stop on the floor each rep. Builds mid-back thickness and reinforces a strong, flat-backed hinge.",
-        "instructions": "Set the bar on the floor over your midfoot. Hinge until your torso is roughly parallel to the ground with a flat back. Pull the bar explosively to your lower chest/upper abdomen, then return it to the floor and reset before each rep."
+        "instructions": "Set the bar on the floor over your midfoot. Hinge until your torso is roughly parallel to the ground with a flat back. Pull the bar explosively to your lower chest/upper abdomen, then return it to the floor and reset before each rep.",
+        "primaryMuscles": ["latissimus_dorsi", "rhomboids"],
+        "secondaryMuscles": ["trapezius_middle", "deltoid_posterior", "biceps_brachii", "erector_spinae"]
       },
       {
         "name": "Yates Row",
@@ -317,7 +371,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "An underhand-grip barbell row done with a more upright torso (~45 degrees), popularized by Dorian Yates. Emphasizes the lower lats and biceps with heavier loads.",
-        "instructions": "Grip the bar underhand, slightly wider than shoulder width. Hinge to about a 45-degree torso angle with a flat back. Drive the bar toward your waistline, keeping elbows close to the body, then lower under control."
+        "instructions": "Grip the bar underhand, slightly wider than shoulder width. Hinge to about a 45-degree torso angle with a flat back. Drive the bar toward your waistline, keeping elbows close to the body, then lower under control.",
+        "primaryMuscles": ["latissimus_dorsi", "rhomboids"],
+        "secondaryMuscles": ["trapezius_middle", "biceps_brachii", "deltoid_posterior"]
       },
       {
         "name": "Dumbbell Upright Row",
@@ -328,7 +384,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "A vertical pull that targets the lateral delts and traps. Multi-joint through the shoulder and elbow.",
-        "instructions": "Hold a dumbbell in each hand in front of your thighs, palms facing you. Pull the dumbbells straight up along the body, leading with the elbows until the upper arms are roughly parallel to the floor. Keep the elbows above the wrists, then lower under control. Avoid pulling too high if it causes shoulder pinching."
+        "instructions": "Hold a dumbbell in each hand in front of your thighs, palms facing you. Pull the dumbbells straight up along the body, leading with the elbows until the upper arms are roughly parallel to the floor. Keep the elbows above the wrists, then lower under control. Avoid pulling too high if it causes shoulder pinching.",
+        "primaryMuscles": ["deltoid_lateral", "trapezius_upper"],
+        "secondaryMuscles": ["deltoid_anterior", "biceps_brachii"]
       },
       {
         "name": "Monkey Rows",
@@ -339,7 +397,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "A wide dumbbell upright-row variant that drives the elbows high and out to the sides, biasing the lateral delts and traps.",
-        "instructions": "Hold a dumbbell in each hand in front of your thighs, palms facing your body. Pull the dumbbells up close to the torso toward the chest, flaring your elbows high and out to the sides (wider than a standard upright row). Pause at the top with the elbows above the hands, then lower under control."
+        "instructions": "Hold a dumbbell in each hand in front of your thighs, palms facing your body. Pull the dumbbells up close to the torso toward the chest, flaring your elbows high and out to the sides (wider than a standard upright row). Pause at the top with the elbows above the hands, then lower under control.",
+        "primaryMuscles": ["deltoid_lateral", "trapezius_upper"],
+        "secondaryMuscles": ["deltoid_posterior"]
       }
     ],
     "isolation": [
@@ -353,7 +413,9 @@
         "visualization": null,
         "description": "Single-arm rotator cuff work from a high pulley. Facing away from the machine, the arm rolls inward toward the midline — targets the subscapularis, the rotator cuff muscle on the front of the shoulder blade, with the chest and lats assisting.",
         "instructions": "Set the cable at or above head height with a single handle. Face AWAY from the machine and take the handle overhead with one arm, elbow bent and the upper arm roughly at shoulder height. Pull down and forward across the body, rotating the shoulder inward, keeping the elbow bent throughout — the forearm sweeps, the elbow does not travel far. Control the return until the shoulder is fully rotated back. One arm at a time.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["rotator_cuff"],
+        "secondaryMuscles": []
       },
       {
         "name": "Low External Cable Rotation",
@@ -365,7 +427,9 @@
         "visualization": null,
         "description": "Single-arm rotator cuff work from a low pulley — the counterpart to the overhead internal rotation. Facing the machine and driving up and back, the arm rotates away from the midline and the shoulder extends.",
         "instructions": "Set the cable at or near the floor with a single handle. FACE the machine and take the handle with one arm, palm turned so the back of the hand leads forward. Drive up and back, rotating the shoulder outward and taking the arm behind the body. Keep the torso still — no leaning back to gain range. Control the return. One arm at a time.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["rotator_cuff"],
+        "secondaryMuscles": ["deltoid_posterior"]
       },
       {
         "name": "Dumbbell Flye",
@@ -376,7 +440,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Chest stretch and squeeze without tricep involvement.",
-        "instructions": "Lie flat, dumbbells above chest with slight elbow bend. Lower in a wide arc until you feel a stretch. Squeeze chest to bring bells back together."
+        "instructions": "Lie flat, dumbbells above chest with slight elbow bend. Lower in a wide arc until you feel a stretch. Squeeze chest to bring bells back together.",
+        "primaryMuscles": ["pectoralis_major"],
+        "secondaryMuscles": ["deltoid_anterior"]
       },
       {
         "name": "Incline Dumbbell Flye",
@@ -387,7 +453,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Upper chest isolation with a deep stretch. Greater range of motion than barbell incline press.",
-        "instructions": "Set bench to 30–45°. Hold dumbbells above upper chest with slight elbow bend. Lower in a wide arc until you feel a stretch. Squeeze chest to bring bells back together at the top."
+        "instructions": "Set bench to 30–45°. Hold dumbbells above upper chest with slight elbow bend. Lower in a wide arc until you feel a stretch. Squeeze chest to bring bells back together at the top.",
+        "primaryMuscles": ["pectoralis_major"],
+        "secondaryMuscles": ["deltoid_anterior"]
       },
       {
         "name": "Hip Abductors",
@@ -398,7 +466,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "a seated isolation exercise designed to strengthen the outer hips and glutes by forcing the legs apart against resistance. It effectively targets the gluteus medius, minimus, and tensor fasciae latae (TFL) to improve pelvic stability, enhance hip strength, and shape the outer thighs.",
-        "instructions": "Sit with your back against the pad, feet on the rests, and knees against the pads. Push outward slowly, hold for 1–2 seconds, and return to center without letting the weights touch."
+        "instructions": "Sit with your back against the pad, feet on the rests, and knees against the pads. Push outward slowly, hold for 1–2 seconds, and return to center without letting the weights touch.",
+        "primaryMuscles": ["hip_abductors", "gluteus_medius"],
+        "secondaryMuscles": []
       },
       {
         "name": "Hip Adductors",
@@ -409,7 +479,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "a seated, isolation exercise designed to strengthen the inner thigh muscles (adductors) by bringing the legs toward the body's midline against resistance. It targets the adductor magnus, longus, and gracilis, improving hip stability and enhancing lower body strength for compound movements like squats.",
-        "instructions": "Sit with your back against the pad, adjust the knee pads to the outside, and place your feet on the rest. Squeeze your thighs together against the pads in a controlled, slow motion until they almost touch, then slowly return to the starting position."
+        "instructions": "Sit with your back against the pad, adjust the knee pads to the outside, and place your feet on the rest. Squeeze your thighs together against the pads in a controlled, slow motion until they almost touch, then slowly return to the starting position.",
+        "primaryMuscles": ["hip_adductors"],
+        "secondaryMuscles": []
       },
       {
         "name": "Cable Fly",
@@ -420,7 +492,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Cable keeps constant tension through the full arc of motion.",
-        "instructions": "Set cables high or low depending on chest portion targeted. Step forward, bring hands together in a hugging motion. Squeeze at the peak. Cross hands to get that last flex."
+        "instructions": "Set cables high or low depending on chest portion targeted. Step forward, bring hands together in a hugging motion. Squeeze at the peak. Cross hands to get that last flex.",
+        "primaryMuscles": ["pectoralis_major"],
+        "secondaryMuscles": ["deltoid_anterior"]
       },
       {
         "name": "Pec Deck",
@@ -431,7 +505,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Machine fly that removes stabilisation demand. Good for learning the chest contraction.",
-        "instructions": "Sit upright, arms on pads at chest height. Bring pads together, squeezing at the peak. Return with control."
+        "instructions": "Sit upright, arms on pads at chest height. Bring pads together, squeezing at the peak. Return with control.",
+        "primaryMuscles": ["pectoralis_major"],
+        "secondaryMuscles": ["deltoid_anterior"]
       },
       {
         "name": "Straight Arm Pulldown",
@@ -442,7 +518,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Isolates the lats without bicep involvement. Good lat mind-muscle connection builder.",
-        "instructions": "Stand at cable station. Arms straight with slight elbow bend. Pull bar down to hips in an arc. Squeeze lats at the bottom."
+        "instructions": "Stand at cable station. Arms straight with slight elbow bend. Pull bar down to hips in an arc. Squeeze lats at the bottom.",
+        "primaryMuscles": ["latissimus_dorsi"],
+        "secondaryMuscles": ["teres_major", "triceps_brachii"]
       },
       {
         "name": "Face Pull",
@@ -453,7 +531,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Rear delt and external rotation. Essential for shoulder health when pressing volume is high.",
-        "instructions": "Cable set at head height with rope attachment. Palms facing in on the rope. Pull toward your face, elbows high and wide. Externally rotate at the end of the movement."
+        "instructions": "Cable set at head height with rope attachment. Palms facing in on the rope. Pull toward your face, elbows high and wide. Externally rotate at the end of the movement.",
+        "primaryMuscles": ["deltoid_posterior", "trapezius_middle"],
+        "secondaryMuscles": ["rhomboids", "rotator_cuff"]
       },
       {
         "name": "Dumbbell Lateral Raise",
@@ -464,7 +544,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Lateral deltoid isolation. Builds shoulder width.",
-        "instructions": "Stand with dumbbells at sides. Raise arms out to the sides to shoulder height. Lead with elbows, slight forward lean. Lower with control."
+        "instructions": "Stand with dumbbells at sides. Raise arms out to the sides to shoulder height. Lead with elbows, slight forward lean. Lower with control.",
+        "primaryMuscles": ["deltoid_lateral"],
+        "secondaryMuscles": ["deltoid_anterior", "trapezius_upper"]
       },
       {
         "name": "Dumbbell Front Raise",
@@ -476,7 +558,9 @@
         "visualization": null,
         "description": "Anterior deltoid isolation.",
         "instructions": "Hold dumbbells in front of thighs. Raise one or both arms straight ahead to shoulder height. Lower with control.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["deltoid_anterior"],
+        "secondaryMuscles": ["deltoid_lateral"]
       },
       {
         "name": "Reverse Fly",
@@ -487,7 +571,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Rear deltoid isolation. Counterbalances heavy pressing work.",
-        "instructions": "Hinge forward at the waist. Raise dumbbells out to the sides, leading with elbows. Squeeze rear delts at the top."
+        "instructions": "Hinge forward at the waist. Raise dumbbells out to the sides, leading with elbows. Squeeze rear delts at the top.",
+        "primaryMuscles": ["deltoid_posterior"],
+        "secondaryMuscles": ["rhomboids", "trapezius_middle"]
       },
       {
         "name": "Barbell Curl",
@@ -498,7 +584,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Classic bicep builder.",
-        "instructions": "Stand with shoulder-width underhand grip. Curl bar to shoulder height, keeping elbows close to sides. Squeeze at top. Lower fully."
+        "instructions": "Stand with shoulder-width underhand grip. Curl bar to shoulder height, keeping elbows close to sides. Squeeze at top. Lower fully.",
+        "primaryMuscles": ["biceps_brachii"],
+        "secondaryMuscles": ["brachialis", "forearm_flexors"]
       },
       {
         "name": "Dumbbell Curl",
@@ -510,7 +598,9 @@
         "visualization": null,
         "description": "Unilateral bicep curl. Allows supination through the movement.",
         "instructions": "Curl from neutral to supinated as you raise. One arm at a time or alternating. Keep elbows stationary.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["biceps_brachii"],
+        "secondaryMuscles": ["brachialis", "forearm_flexors"]
       },
       {
         "name": "Hammer Curl",
@@ -522,7 +612,9 @@
         "visualization": null,
         "description": "Neutral grip curl. Works brachialis and brachioradialis in addition to biceps.",
         "instructions": "Keep palms neutral throughout the movement. Curl to shoulder height. Lower fully.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["brachioradialis", "biceps_brachii"],
+        "secondaryMuscles": ["brachialis"]
       },
       {
         "name": "Preacher Curl",
@@ -533,7 +625,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Bicep curl with the upper arm anchored on a pad. Removes cheating.",
-        "instructions": "Rest upper arm on the preacher pad. Curl through full range. Lower slowly — the eccentric is key here."
+        "instructions": "Rest upper arm on the preacher pad. Curl through full range. Lower slowly — the eccentric is key here.",
+        "primaryMuscles": ["biceps_brachii"],
+        "secondaryMuscles": ["brachialis"]
       },
       {
         "name": "Tricep Pushdown",
@@ -544,7 +638,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Cable tricep isolation. Good for high rep pump work.",
-        "instructions": "Cable set high with bar or rope. Elbows close to sides. Extend arms fully, squeezing triceps. Return only to 90°."
+        "instructions": "Cable set high with bar or rope. Elbows close to sides. Extend arms fully, squeezing triceps. Return only to 90°.",
+        "primaryMuscles": ["triceps_brachii"],
+        "secondaryMuscles": []
       },
       {
         "name": "Skull Crusher",
@@ -555,7 +651,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Lying tricep extension. Excellent mass builder for the long head.",
-        "instructions": "Lie on a bench, bar extended above chest. Lower bar toward the forehead by bending elbows. Extend back to lockout."
+        "instructions": "Lie on a bench, bar extended above chest. Lower bar toward the forehead by bending elbows. Extend back to lockout.",
+        "primaryMuscles": ["triceps_brachii"],
+        "secondaryMuscles": []
       },
       {
         "name": "Overhead Tricep Extension",
@@ -566,7 +664,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Stretches the long head of the tricep under load.",
-        "instructions": "Hold one dumbbell with both hands overhead. Lower behind the head by bending elbows. Extend back to lockout."
+        "instructions": "Hold one dumbbell with both hands overhead. Lower behind the head by bending elbows. Extend back to lockout.",
+        "primaryMuscles": ["triceps_brachii"],
+        "secondaryMuscles": []
       },
       {
         "name": "Leg Extension",
@@ -577,7 +677,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Quad isolation. Useful for building VMO strength.",
-        "instructions": "Adjust machine so the pad sits above the ankles. Extend both legs to full lockout. Squeeze quads at the top. Lower with control."
+        "instructions": "Adjust machine so the pad sits above the ankles. Extend both legs to full lockout. Squeeze quads at the top. Lower with control.",
+        "primaryMuscles": ["quadriceps"],
+        "secondaryMuscles": []
       },
       {
         "name": "Hamstring Curl",
@@ -588,7 +690,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Hamstring isolation. Lying or seated.",
-        "instructions": "Position pad behind the ankles. Curl heels toward glutes. Squeeze hamstrings at full contraction. Lower fully."
+        "instructions": "Position pad behind the ankles. Curl heels toward glutes. Squeeze hamstrings at full contraction. Lower fully.",
+        "primaryMuscles": ["hamstrings"],
+        "secondaryMuscles": ["gastrocnemius"]
       },
       {
         "name": "Calf Raise",
@@ -599,7 +703,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Gastrocnemius and soleus isolation.",
-        "instructions": "Stand with shoulders under the pads, toes on the edge of the platform. Lower heels as far as comfortable. Rise up fully on toes. Hold briefly at top."
+        "instructions": "Stand with shoulders under the pads, toes on the edge of the platform. Lower heels as far as comfortable. Rise up fully on toes. Hold briefly at top.",
+        "primaryMuscles": ["gastrocnemius"],
+        "secondaryMuscles": ["soleus"]
       },
       {
         "name": "Seated Calf Raise",
@@ -610,7 +716,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Seated version isolates the soleus more than the standing variation.",
-        "instructions": "Sit with pads on the lower thigh. Rise on toes through full range. Lower heels below the platform level."
+        "instructions": "Sit with pads on the lower thigh. Rise on toes through full range. Lower heels below the platform level.",
+        "primaryMuscles": ["soleus"],
+        "secondaryMuscles": ["gastrocnemius"]
       },
       {
         "name": "Glute Kickback",
@@ -622,7 +730,9 @@
         "visualization": null,
         "description": "Cable glute isolation. Targets the gluteus maximus directly.",
         "instructions": "Attach ankle strap to cable set low. Stand facing the machine. Extend one leg back until hip fully extended. Squeeze glute at peak. Return with control.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["gluteus_maximus"],
+        "secondaryMuscles": ["hamstrings"]
       },
       {
         "name": "Cable Crunch",
@@ -633,7 +743,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "Weighted ab flexion. Allows progressive overload for the core.",
-        "instructions": "Kneel below a high cable pulley. Hold rope at head level. Flex spine downward, bringing elbows toward knees. Squeeze abs at the bottom."
+        "instructions": "Kneel below a high cable pulley. Hold rope at head level. Flex spine downward, bringing elbows toward knees. Squeeze abs at the bottom.",
+        "primaryMuscles": ["rectus_abdominis"],
+        "secondaryMuscles": ["obliques"]
       },
       {
         "name": "Pallof Press",
@@ -645,7 +757,9 @@
         "visualization": null,
         "description": "Anti-rotation core exercise. Builds stability rather than flexion strength.",
         "instructions": "Stand side-on to a cable machine. Hold the handle at chest level. Press it straight out in front of you. The challenge is resisting rotation.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["obliques", "transverse_abdominis"],
+        "secondaryMuscles": ["rectus_abdominis"]
       },
       {
         "name": "Hip Flexors (Rotary Machine)",
@@ -657,7 +771,9 @@
         "visualization": null,
         "description": "A standing rotary-hip (multi-hip) machine movement that isolates the hip flexors by driving the working thigh forward and up against resistance. Strengthens the iliopsoas and rectus femoris for knee drive and sprint mechanics.",
         "instructions": "Stand in the rotary hip machine with the pad against the front of the working thigh and hold the support handles. Drive your knee forward and up against the resistance, pause briefly at the top, then lower under control. Finish the set, then switch to the other leg.",
-        "laterality": "unilateral"
+        "laterality": "unilateral",
+        "primaryMuscles": ["hip_flexors"],
+        "secondaryMuscles": ["rectus_abdominis"]
       },
       {
         "name": "Overhead Face Pulls",
@@ -668,7 +784,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "A face pull performed with the cable set overhead, pulling down and apart. Targets the rear delts and upper-back rotators for posture and shoulder health.",
-        "instructions": "Set a cable with a rope attachment above head height. Grip the rope with palms facing in and step back into tension. Pull the rope down and toward your forehead, driving the elbows down and out and externally rotating at the end. Return under control."
+        "instructions": "Set a cable with a rope attachment above head height. Grip the rope with palms facing in and step back into tension. Pull the rope down and toward your forehead, driving the elbows down and out and externally rotating at the end. Return under control.",
+        "primaryMuscles": ["deltoid_posterior", "trapezius_middle"],
+        "secondaryMuscles": ["rhomboids", "trapezius_lower"]
       },
       {
         "name": "Machine Shrugs",
@@ -679,7 +797,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "A trap-focused shrug performed on a machine, which fixes the movement path and lets you load the upper traps with minimal grip demand.",
-        "instructions": "Grip the handles or rest your shoulders under the pads. Keeping the arms straight, elevate your shoulders straight up toward your ears, pause and squeeze at the top, then lower under control. Avoid rolling the shoulders."
+        "instructions": "Grip the handles or rest your shoulders under the pads. Keeping the arms straight, elevate your shoulders straight up toward your ears, pause and squeeze at the top, then lower under control. Avoid rolling the shoulders.",
+        "primaryMuscles": ["trapezius_upper"],
+        "secondaryMuscles": []
       },
       {
         "name": "Diamond Bar Shrugs",
@@ -690,7 +810,9 @@
         "demonstration": null,
         "visualization": null,
         "description": "A shrug performed with a diamond (hex/trap) bar, so the load sits at your sides for a neutral, spine-friendly line of pull on the upper traps.",
-        "instructions": "Stand inside a loaded diamond/trap bar and grip the neutral handles. With arms straight and a tall chest, elevate your shoulders straight up toward your ears, squeeze at the top, then lower under control."
+        "instructions": "Stand inside a loaded diamond/trap bar and grip the neutral handles. With arms straight and a tall chest, elevate your shoulders straight up toward your ears, squeeze at the top, then lower under control.",
+        "primaryMuscles": ["trapezius_upper"],
+        "secondaryMuscles": []
       }
     ]
   },
@@ -704,7 +826,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Controlled running on a treadmill. Speed and incline adjustable.",
-      "instructions": "Set speed and incline. Maintain an upright posture. Land mid-foot. Use as steady-state cardio or interval training."
+      "instructions": "Set speed and incline. Maintain an upright posture. Land mid-foot. Use as steady-state cardio or interval training.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Stationary Bike",
@@ -715,7 +839,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Low-impact leg cardio. Good for recovery days and knee rehabilitation.",
-      "instructions": "Adjust seat height so the knee has a slight bend at full extension. Maintain an upright or slightly forward posture. Pedal at a consistent cadence."
+      "instructions": "Adjust seat height so the knee has a slight bend at full extension. Maintain an upright or slightly forward posture. Pedal at a consistent cadence.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Cycling",
@@ -726,7 +852,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Road or outdoor cycling. Great for endurance base building.",
-      "instructions": "Maintain a cadence of 70–100 RPM. Keep a neutral spine. Use gears to manage effort rather than grinding at low cadence."
+      "instructions": "Maintain a cadence of 70–100 RPM. Keep a neutral spine. Use gears to manage effort rather than grinding at low cadence.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Rowing Machine",
@@ -737,7 +865,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Full body cardio with 60% leg drive and 40% upper body pull. Low impact.",
-      "instructions": "Drive sequence: legs → lean back → arms. Return: arms → lean forward → legs. Keep the chain level and the stroke smooth."
+      "instructions": "Drive sequence: legs → lean back → arms. Return: arms → lean forward → legs. Keep the chain level and the stroke smooth.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Jump Rope",
@@ -748,7 +878,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "High-impact conditioning. Improves coordination and cardiovascular fitness.",
-      "instructions": "Keep elbows close to sides, wrists rotating the rope. Land softly on the balls of your feet. Start with basic two-foot jumps."
+      "instructions": "Keep elbows close to sides, wrists rotating the rope. Land softly on the balls of your feet. Start with basic two-foot jumps.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Sprint Intervals",
@@ -759,7 +891,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Short maximum effort sprints with rest intervals. Excellent for conditioning and metabolism.",
-      "instructions": "Sprint at maximum effort for the prescribed distance or time. Walk or jog for the rest interval. Stop when form degrades."
+      "instructions": "Sprint at maximum effort for the prescribed distance or time. Walk or jog for the rest interval. Stop when form degrades.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Sled Push",
@@ -770,7 +904,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Loaded pushing cardio. Builds explosive leg power and cardiovascular endurance simultaneously.",
-      "instructions": "Lean into the sled handles at a 45° angle. Drive through the legs in short powerful strides. Keep hips low."
+      "instructions": "Lean into the sled handles at a 45° angle. Drive through the legs in short powerful strides. Keep hips low.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Sled Pull",
@@ -781,7 +917,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Loaded pulling cardio. Excellent for hamstrings and posterior chain.",
-      "instructions": "Attach a harness or hold straps. Walk or jog backward, driving through the heels. Keep a slight knee bend throughout."
+      "instructions": "Attach a harness or hold straps. Walk or jog backward, driving through the heels. Keep a slight knee bend throughout.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Battle Ropes",
@@ -792,7 +930,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Upper body cardiovascular conditioning. Works shoulders, arms, and core.",
-      "instructions": "Hold one end of each rope. Create waves by alternating arm movements. Keep core braced and knees slightly bent."
+      "instructions": "Hold one end of each rope. Create waves by alternating arm movements. Keep core braced and knees slightly bent.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Ski Erg",
@@ -803,7 +943,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Upper body pulling cardio. Mimics the double-pole action of cross-country skiing.",
-      "instructions": "Stand facing the machine. Pull both handles down and back simultaneously in a powerful downward swing. Use lat and core strength."
+      "instructions": "Stand facing the machine. Pull both handles down and back simultaneously in a powerful downward swing. Use lat and core strength.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Swimming",
@@ -814,7 +956,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Full body, zero-impact cardio. Excellent for recovery and aerobic base.",
-      "instructions": "Choose a stroke. Focus on technique over speed. Track laps or time."
+      "instructions": "Choose a stroke. Focus on technique over speed. Track laps or time.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Assault Bike",
@@ -825,7 +969,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Air resistance bike — the harder you push the more resistance it creates. Full body.",
-      "instructions": "Pedal and push/pull the handles simultaneously. Pace yourself — the resistance is infinite. Often used for intervals."
+      "instructions": "Pedal and push/pull the handles simultaneously. Pace yourself — the resistance is infinite. Often used for intervals.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Stair Climber",
@@ -836,7 +982,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Simulated stair climbing. Higher glute activation than walking.",
-      "instructions": "Set a pace you can maintain for the prescribed duration. Keep upright. Drive through the whole foot."
+      "instructions": "Set a pace you can maintain for the prescribed duration. Keep upright. Drive through the whole foot.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Elliptical",
@@ -847,7 +995,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Low-impact full-body cardio machine. Good for those with knee or hip issues.",
-      "instructions": "Use the arm handles to engage upper body. Maintain an upright posture. Adjust resistance and incline to increase intensity."
+      "instructions": "Use the arm handles to engage upper body. Maintain an upright posture. Adjust resistance and incline to increase intensity.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     }
   ],
   "calisthenics": [
@@ -860,7 +1010,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Full body conditioning movement combining a squat, plank, push-up, and jump.",
-      "instructions": "Squat down, place hands on floor, jump feet back to plank, push-up, jump feet to hands, jump up with arms overhead."
+      "instructions": "Squat down, place hands on floor, jump feet back to plank, push-up, jump feet to hands, jump up with arms overhead.",
+      "primaryMuscles": ["quadriceps", "pectoralis_major"],
+      "secondaryMuscles": ["gluteus_maximus", "triceps_brachii", "rectus_abdominis"]
     },
     {
       "name": "Box Jump",
@@ -871,7 +1023,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Explosive lower body plyometric. Builds power and coordination.",
-      "instructions": "Dip into a quarter squat, swing arms, explode upward. Land softly with bent knees. Step down — don't jump down."
+      "instructions": "Dip into a quarter squat, swing arms, explode upward. Land softly with bent knees. Step down — don't jump down.",
+      "primaryMuscles": ["quadriceps", "gluteus_maximus"],
+      "secondaryMuscles": ["hamstrings", "gastrocnemius"]
     },
     {
       "name": "Jump Squat",
@@ -882,7 +1036,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Plyometric squat variation. Builds leg power and cardiovascular fitness.",
-      "instructions": "Squat to parallel. Explode upward to full extension. Land softly by bending knees. Go straight into the next rep."
+      "instructions": "Squat to parallel. Explode upward to full extension. Land softly by bending knees. Go straight into the next rep.",
+      "primaryMuscles": ["quadriceps", "gluteus_maximus"],
+      "secondaryMuscles": ["hamstrings", "gastrocnemius"]
     },
     {
       "name": "Mountain Climbers",
@@ -893,7 +1049,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Dynamic plank variation. Core stability with high heart rate demand.",
-      "instructions": "Start in a high plank. Drive one knee toward your chest, then the other in an alternating running motion. Keep hips level."
+      "instructions": "Start in a high plank. Drive one knee toward your chest, then the other in an alternating running motion. Keep hips level.",
+      "primaryMuscles": ["rectus_abdominis", "hip_flexors"],
+      "secondaryMuscles": ["obliques", "deltoid_anterior"]
     },
     {
       "name": "High Knees",
@@ -904,7 +1062,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Running in place with an exaggerated knee drive. Great warm-up or conditioning.",
-      "instructions": "Drive alternating knees to hip height. Pump arms in opposition. Stay on the balls of your feet."
+      "instructions": "Drive alternating knees to hip height. Pump arms in opposition. Stay on the balls of your feet.",
+      "primaryMuscles": ["hip_flexors", "quadriceps"],
+      "secondaryMuscles": ["gastrocnemius", "rectus_abdominis"]
     },
     {
       "name": "Jumping Jacks",
@@ -915,7 +1075,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Classic conditioning movement. Good for warm-up and active recovery.",
-      "instructions": "Start with feet together, arms at sides. Jump feet apart while raising arms overhead. Return to start."
+      "instructions": "Start with feet together, arms at sides. Jump feet apart while raising arms overhead. Return to start.",
+      "primaryMuscles": ["deltoid_lateral", "hip_abductors"],
+      "secondaryMuscles": ["gastrocnemius"]
     },
     {
       "name": "Push-Up",
@@ -926,7 +1088,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Foundational pushing movement. Many progressions available.",
-      "instructions": "High plank with hands slightly wider than shoulders. Lower chest to the floor. Press back up. Keep body in a straight line."
+      "instructions": "High plank with hands slightly wider than shoulders. Lower chest to the floor. Press back up. Keep body in a straight line.",
+      "primaryMuscles": ["pectoralis_major"],
+      "secondaryMuscles": ["triceps_brachii", "deltoid_anterior", "rectus_abdominis"]
     },
     {
       "name": "Diamond Push-Up",
@@ -937,7 +1101,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Close grip push-up variation. Greater tricep demand than standard push-up.",
-      "instructions": "Form a diamond shape with hands under your chest. Lower chest toward hands. Press back up. Keep elbows close to sides."
+      "instructions": "Form a diamond shape with hands under your chest. Lower chest toward hands. Press back up. Keep elbows close to sides.",
+      "primaryMuscles": ["triceps_brachii", "pectoralis_major"],
+      "secondaryMuscles": ["deltoid_anterior"]
     },
     {
       "name": "Plank",
@@ -948,7 +1114,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Isometric core stability hold. Foundation of anti-extension strength.",
-      "instructions": "Forearms or hands on the floor. Body in a straight line from head to heels. Brace the core, squeeze glutes. Hold."
+      "instructions": "Forearms or hands on the floor. Body in a straight line from head to heels. Brace the core, squeeze glutes. Hold.",
+      "primaryMuscles": ["rectus_abdominis", "transverse_abdominis"],
+      "secondaryMuscles": ["obliques", "erector_spinae"]
     },
     {
       "name": "Side Plank",
@@ -960,7 +1128,9 @@
       "visualization": null,
       "description": "Lateral core stability. Works the obliques and hip abductors.",
       "instructions": "On one forearm, feet stacked. Raise hips until body is in a straight line. Hold. Keep hips from sagging.",
-      "laterality": "unilateral"
+      "laterality": "unilateral",
+      "primaryMuscles": ["obliques"],
+      "secondaryMuscles": ["transverse_abdominis", "gluteus_medius"]
     },
     {
       "name": "V-Up",
@@ -971,7 +1141,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Full ab contraction — upper and lower simultaneously.",
-      "instructions": "Lie flat. Simultaneously raise arms and legs, bringing hands to feet at the top. Lower with control."
+      "instructions": "Lie flat. Simultaneously raise arms and legs, bringing hands to feet at the top. Lower with control.",
+      "primaryMuscles": ["rectus_abdominis"],
+      "secondaryMuscles": ["hip_flexors", "obliques"]
     },
     {
       "name": "Hollow Body Hold",
@@ -982,7 +1154,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Gymnastics core position. Teaches total body tension and anterior core control.",
-      "instructions": "Lie on your back. Press lower back into the floor. Raise arms overhead and legs off the floor. Hold while maintaining lower back contact."
+      "instructions": "Lie on your back. Press lower back into the floor. Raise arms overhead and legs off the floor. Hold while maintaining lower back contact.",
+      "primaryMuscles": ["rectus_abdominis", "transverse_abdominis"],
+      "secondaryMuscles": ["hip_flexors"]
     },
     {
       "name": "Bear Crawl",
@@ -993,7 +1167,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Quadrupedal movement pattern. Core stability and coordination.",
-      "instructions": "On all fours with knees hovering an inch off the floor. Crawl forward, moving opposite hand and foot together. Keep hips low and level."
+      "instructions": "On all fours with knees hovering an inch off the floor. Crawl forward, moving opposite hand and foot together. Keep hips low and level.",
+      "primaryMuscles": ["rectus_abdominis", "deltoid_anterior"],
+      "secondaryMuscles": ["quadriceps", "triceps_brachii"]
     },
     {
       "name": "Lateral Bound",
@@ -1004,7 +1180,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Single-leg lateral jump. Builds lateral power and coordination.",
-      "instructions": "Jump off one foot to the side. Land on the opposite foot, absorbing force by bending the knee. Bound back immediately."
+      "instructions": "Jump off one foot to the side. Land on the opposite foot, absorbing force by bending the knee. Bound back immediately.",
+      "primaryMuscles": ["gluteus_medius", "quadriceps"],
+      "secondaryMuscles": ["gluteus_maximus", "hamstrings"]
     },
     {
       "name": "Tuck Jump",
@@ -1015,7 +1193,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Explosive vertical jump with knee tuck at peak height.",
-      "instructions": "Jump vertically as high as possible. At the peak, tuck both knees to your chest. Extend legs to land. Absorb landing with bent knees."
+      "instructions": "Jump vertically as high as possible. At the peak, tuck both knees to your chest. Extend legs to land. Absorb landing with bent knees.",
+      "primaryMuscles": ["quadriceps", "gluteus_maximus"],
+      "secondaryMuscles": ["gastrocnemius", "hip_flexors"]
     },
     {
       "name": "Inchworm",
@@ -1026,7 +1206,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Dynamic warm-up movement. Hamstring flexibility and shoulder stability.",
-      "instructions": "Stand and hinge forward to touch the floor. Walk hands out to a plank. Walk feet toward hands. Stand and repeat."
+      "instructions": "Stand and hinge forward to touch the floor. Walk hands out to a plank. Walk feet toward hands. Stand and repeat.",
+      "primaryMuscles": ["rectus_abdominis", "hamstrings"],
+      "secondaryMuscles": ["deltoid_anterior", "pectoralis_major"]
     },
     {
       "name": "Sit ups",
@@ -1037,7 +1219,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Fundamental, equipment-free core strengthening exercise performed by lying on your back, bending your knees, and lifting your torso toward your thighs using abdominal muscles. It primarily targets the rectus abdominis, hip flexors, and lower back, helping to increase core strength, flexibility, and posture.",
-      "instructions": "lie on your back with knees bent and feet flat on the floor or anchored, ensuring your lower back stays supported. Cross your arms over your chest or interlock your fingers behind your head, engage your abs, and exhale as you lift your torso toward your knees, slowly rolling down with control."
+      "instructions": "lie on your back with knees bent and feet flat on the floor or anchored, ensuring your lower back stays supported. Cross your arms over your chest or interlock your fingers behind your head, engage your abs, and exhale as you lift your torso toward your knees, slowly rolling down with control.",
+      "primaryMuscles": ["rectus_abdominis"],
+      "secondaryMuscles": ["hip_flexors", "obliques"]
     },
     {
       "name": "Crunches",
@@ -1048,7 +1232,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Foundational core-strengthening exercise primarily targeting the rectus abdominis by lifting the shoulder blades off the floor while keeping the lower back grounded. Unlike sit-ups, they offer a smaller range of motion, reducing hip flexor involvement and focusing tension on the upper abdominal area.",
-      "instructions": "Lie on your back with knees bent and feet flat or off the ground crossed, knees bent at a right angle. Place hands behind your head or crossed over your chest. Exhale, engaging your core to lift your shoulder blades off the floor, keeping your lower back down. Crunch your solar plexus down towards your hips by contracting your abdominal muscles, like an accordion. Inhale as you slowly lower with control, preventing neck strain."
+      "instructions": "Lie on your back with knees bent and feet flat or off the ground crossed, knees bent at a right angle. Place hands behind your head or crossed over your chest. Exhale, engaging your core to lift your shoulder blades off the floor, keeping your lower back down. Crunch your solar plexus down towards your hips by contracting your abdominal muscles, like an accordion. Inhale as you slowly lower with control, preventing neck strain.",
+      "primaryMuscles": ["rectus_abdominis"],
+      "secondaryMuscles": ["obliques"]
     }
   ],
   "stretching": [
@@ -1061,7 +1247,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Yoga pose. Stretches hamstrings, calves, and shoulders simultaneously.",
-      "instructions": "Start on all fours. Press through palms, lift hips up and back, forming an inverted V. Heels push toward the floor. Head between arms."
+      "instructions": "Start on all fours. Press through palms, lift hips up and back, forming an inverted V. Heels push toward the floor. Head between arms.",
+      "primaryMuscles": ["hamstrings", "gastrocnemius"],
+      "secondaryMuscles": ["latissimus_dorsi", "deltoid_anterior"]
     },
     {
       "name": "Pigeon Pose",
@@ -1072,7 +1260,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Deep hip opener. Stretches the piriformis and hip flexors.",
-      "instructions": "From downward dog, bring one knee to the wrist on the same side. Extend the opposite leg behind. Sink hips toward the floor. Hold and breathe."
+      "instructions": "From downward dog, bring one knee to the wrist on the same side. Extend the opposite leg behind. Sink hips toward the floor. Hold and breathe.",
+      "primaryMuscles": ["gluteus_maximus", "hip_flexors"],
+      "secondaryMuscles": []
     },
     {
       "name": "Warrior I",
@@ -1083,7 +1273,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Standing yoga pose. Hip flexor and thoracic stretch.",
-      "instructions": "Lunge forward with the front knee over the ankle. Back foot at 45°. Raise arms overhead. Square hips forward. Hold."
+      "instructions": "Lunge forward with the front knee over the ankle. Back foot at 45°. Raise arms overhead. Square hips forward. Hold.",
+      "primaryMuscles": ["hip_flexors", "quadriceps"],
+      "secondaryMuscles": ["pectoralis_major"]
     },
     {
       "name": "Warrior II",
@@ -1094,7 +1286,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Open stance yoga pose. Hip and inner thigh stretch.",
-      "instructions": "Wide stance. Front knee over front ankle, back leg straight. Arms out to the side parallel to the floor. Gaze over the front hand."
+      "instructions": "Wide stance. Front knee over front ankle, back leg straight. Arms out to the side parallel to the floor. Gaze over the front hand.",
+      "primaryMuscles": ["hip_adductors", "hip_flexors"],
+      "secondaryMuscles": []
     },
     {
       "name": "Child's Pose",
@@ -1105,7 +1299,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Restorative yoga pose. Gentle lower back and lat stretch.",
-      "instructions": "Kneel and sit back on your heels. Extend arms forward on the floor. Rest forehead on the floor. Breathe into your back."
+      "instructions": "Kneel and sit back on your heels. Extend arms forward on the floor. Rest forehead on the floor. Breathe into your back.",
+      "primaryMuscles": ["latissimus_dorsi", "erector_spinae"],
+      "secondaryMuscles": []
     },
     {
       "name": "Cat-Cow",
@@ -1116,7 +1312,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Spinal mobility sequence. Flexion and extension of the thoracic and lumbar spine.",
-      "instructions": "On all fours. Inhale: drop belly, lift head and tailbone (cow). Exhale: round spine toward ceiling, tuck chin and pelvis (cat)."
+      "instructions": "On all fours. Inhale: drop belly, lift head and tailbone (cow). Exhale: round spine toward ceiling, tuck chin and pelvis (cat).",
+      "primaryMuscles": ["erector_spinae"],
+      "secondaryMuscles": ["rectus_abdominis"]
     },
     {
       "name": "Seated Forward Fold",
@@ -1127,7 +1325,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Hamstring and lower back stretch.",
-      "instructions": "Sit with legs extended. Hinge forward from the hips, reaching for toes. Keep spine long. Hold and breathe."
+      "instructions": "Sit with legs extended. Hinge forward from the hips, reaching for toes. Keep spine long. Hold and breathe.",
+      "primaryMuscles": ["hamstrings", "erector_spinae"],
+      "secondaryMuscles": ["gastrocnemius"]
     },
     {
       "name": "Supine Twist",
@@ -1138,7 +1338,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Lying spinal rotation. Releases the thoracic spine and piriformis.",
-      "instructions": "Lie on your back. Bring one knee across the body to the floor. Extend that arm out to the side. Look in the opposite direction."
+      "instructions": "Lie on your back. Bring one knee across the body to the floor. Extend that arm out to the side. Look in the opposite direction.",
+      "primaryMuscles": ["obliques", "erector_spinae"],
+      "secondaryMuscles": ["gluteus_maximus"]
     },
     {
       "name": "Bridge Pose",
@@ -1149,7 +1351,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Hip flexor stretch combined with light glute activation.",
-      "instructions": "Lie on your back, knees bent. Press through the feet to lift hips. Clasp hands under your back. Hold and breathe into the chest."
+      "instructions": "Lie on your back, knees bent. Press through the feet to lift hips. Clasp hands under your back. Hold and breathe into the chest.",
+      "primaryMuscles": ["hip_flexors", "pectoralis_major"],
+      "secondaryMuscles": ["rectus_abdominis"]
     },
     {
       "name": "Lizard Pose",
@@ -1160,7 +1364,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Deep hip flexor and groin stretch. Good for athletic populations.",
-      "instructions": "From a lunge, bring front foot outside the hand. Lower the back knee to the floor. Sink hips forward and down. Optional: drop to forearms."
+      "instructions": "From a lunge, bring front foot outside the hand. Lower the back knee to the floor. Sink hips forward and down. Optional: drop to forearms.",
+      "primaryMuscles": ["hip_flexors", "hip_adductors"],
+      "secondaryMuscles": ["hamstrings"]
     },
     {
       "name": "Standing Quad Stretch",
@@ -1171,7 +1377,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Classic quad stretch. Essential post-run and post-leg day.",
-      "instructions": "Stand on one leg. Pull the other foot to your glute, keeping knees together. Hold onto a wall for balance if needed."
+      "instructions": "Stand on one leg. Pull the other foot to your glute, keeping knees together. Hold onto a wall for balance if needed.",
+      "primaryMuscles": ["quadriceps"],
+      "secondaryMuscles": ["hip_flexors"]
     },
     {
       "name": "Standing Hamstring Stretch",
@@ -1182,7 +1390,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Hip hinge-based hamstring stretch.",
-      "instructions": "Stand with feet together. Hinge forward at the hips, reaching for the floor. Keep a micro-bend in the knees. Hold at the point of tension."
+      "instructions": "Stand with feet together. Hinge forward at the hips, reaching for the floor. Keep a micro-bend in the knees. Hold at the point of tension.",
+      "primaryMuscles": ["hamstrings"],
+      "secondaryMuscles": ["gastrocnemius"]
     },
     {
       "name": "Hip Flexor Stretch",
@@ -1193,7 +1403,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Kneeling lunge stretch targeting the iliopsoas.",
-      "instructions": "Kneel with one knee on the floor. Shift hips forward until a stretch is felt in the front of the hip. Keep torso upright. Hold."
+      "instructions": "Kneel with one knee on the floor. Shift hips forward until a stretch is felt in the front of the hip. Keep torso upright. Hold.",
+      "primaryMuscles": ["hip_flexors"],
+      "secondaryMuscles": ["quadriceps"]
     },
     {
       "name": "Chest Opener",
@@ -1204,7 +1416,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Counteracts the forward rounding from pressing and desk work.",
-      "instructions": "Clasp hands behind your back. Squeeze shoulder blades together and lift arms slightly. Open chest toward the ceiling. Hold."
+      "instructions": "Clasp hands behind your back. Squeeze shoulder blades together and lift arms slightly. Open chest toward the ceiling. Hold.",
+      "primaryMuscles": ["pectoralis_major"],
+      "secondaryMuscles": ["deltoid_anterior"]
     },
     {
       "name": "Cross Body Shoulder Stretch",
@@ -1215,7 +1429,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Posterior shoulder and upper back stretch.",
-      "instructions": "Bring one arm across your body at shoulder height. Use the other arm to pull it closer to your chest. Hold."
+      "instructions": "Bring one arm across your body at shoulder height. Use the other arm to pull it closer to your chest. Hold.",
+      "primaryMuscles": ["deltoid_posterior"],
+      "secondaryMuscles": ["trapezius_middle"]
     },
     {
       "name": "Doorway Chest Stretch",
@@ -1226,7 +1442,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Passive pec and anterior shoulder stretch using a doorframe.",
-      "instructions": "Place forearm against a doorframe at 90°. Step forward until a stretch is felt across the chest. Hold. Adjust arm height to target different portions."
+      "instructions": "Place forearm against a doorframe at 90°. Step forward until a stretch is felt across the chest. Hold. Adjust arm height to target different portions.",
+      "primaryMuscles": ["pectoralis_major"],
+      "secondaryMuscles": ["deltoid_anterior"]
     },
     {
       "name": "Calf Stretch",
@@ -1237,7 +1455,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Gastrocnemius and soleus stretch. Essential for runners.",
-      "instructions": "Place hands against a wall. Step one foot back. For gastroc: keep back leg straight. For soleus: bend the back knee. Lean forward."
+      "instructions": "Place hands against a wall. Step one foot back. For gastroc: keep back leg straight. For soleus: bend the back knee. Lean forward.",
+      "primaryMuscles": ["gastrocnemius", "soleus"],
+      "secondaryMuscles": []
     },
     {
       "name": "Seated Piriformis Stretch",
@@ -1248,7 +1468,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Targets the piriformis and external hip rotators.",
-      "instructions": "Sit in a chair. Cross one ankle over the opposite knee. Gently press the crossed knee downward. Lean forward for a deeper stretch."
+      "instructions": "Sit in a chair. Cross one ankle over the opposite knee. Gently press the crossed knee downward. Lean forward for a deeper stretch.",
+      "primaryMuscles": ["gluteus_maximus"],
+      "secondaryMuscles": ["gluteus_medius"]
     },
     {
       "name": "Thoracic Extension on Foam Roller",
@@ -1259,7 +1481,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Mobilises the thoracic spine into extension. Counters desk posture.",
-      "instructions": "Place foam roller perpendicular to the spine at mid-back. Support your head. Extend over the roller. Move roller up and down the mid-back."
+      "instructions": "Place foam roller perpendicular to the spine at mid-back. Support your head. Extend over the roller. Move roller up and down the mid-back.",
+      "primaryMuscles": ["erector_spinae"],
+      "secondaryMuscles": ["latissimus_dorsi"]
     },
     {
       "name": "Neck Side Stretch",
@@ -1270,7 +1494,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Stretches the upper trapezius and scalenes.",
-      "instructions": "Sit or stand. Tilt your ear toward your shoulder. Hold. For a deeper stretch, gently place one hand on the side of the head and apply light pressure."
+      "instructions": "Sit or stand. Tilt your ear toward your shoulder. Hold. For a deeper stretch, gently place one hand on the side of the head and apply light pressure.",
+      "primaryMuscles": ["sternocleidomastoid", "trapezius_upper"],
+      "secondaryMuscles": []
     },
     {
       "name": "Figure Four Stretch",
@@ -1281,7 +1507,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Supine glute and piriformis stretch.",
-      "instructions": "Lie on your back, knees bent. Cross one ankle over the opposite knee. Pull both legs toward your chest. Hold."
+      "instructions": "Lie on your back, knees bent. Cross one ankle over the opposite knee. Pull both legs toward your chest. Hold.",
+      "primaryMuscles": ["gluteus_maximus", "gluteus_medius"],
+      "secondaryMuscles": []
     },
     {
       "name": "Lat Stretch",
@@ -1292,7 +1520,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Overhead lat and shoulder stretch.",
-      "instructions": "Reach one arm overhead and hold onto something fixed. Lean away. Alternatively, hang from a bar and shift your weight to one side."
+      "instructions": "Reach one arm overhead and hold onto something fixed. Lean away. Alternatively, hang from a bar and shift your weight to one side.",
+      "primaryMuscles": ["latissimus_dorsi"],
+      "secondaryMuscles": ["teres_major"]
     }
   ],
   "cooldown": [
@@ -1305,7 +1535,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Activates the parasympathetic nervous system. Accelerates recovery.",
-      "instructions": "Lie on your back. One hand on chest, one on belly. Inhale for 4 into the belly. Hold for 4. Exhale for 6. Repeat."
+      "instructions": "Lie on your back. One hand on chest, one on belly. Inhale for 4 into the belly. Hold for 4. Exhale for 6. Repeat.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Box Breathing",
@@ -1316,7 +1548,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "4-4-4-4 breathing pattern for nervous system regulation.",
-      "instructions": "Inhale for 4 counts. Hold for 4. Exhale for 4. Hold for 4. Repeat for 4–8 cycles."
+      "instructions": "Inhale for 4 counts. Hold for 4. Exhale for 4. Hold for 4. Repeat for 4–8 cycles.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Supine Savasana",
@@ -1327,7 +1561,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Total relaxation. Final resting pose from yoga. Allows the nervous system to downregulate.",
-      "instructions": "Lie flat on your back, arms at sides, palms up. Close your eyes. Relax every muscle. Focus on breathing. Hold for 2–5 minutes."
+      "instructions": "Lie flat on your back, arms at sides, palms up. Close your eyes. Relax every muscle. Focus on breathing. Hold for 2–5 minutes.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Walking",
@@ -1338,7 +1574,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Light walking to gradually lower heart rate after intense effort.",
-      "instructions": "Walk at a comfortable pace. Allow breathing to normalise. Continue until heart rate approaches resting."
+      "instructions": "Walk at a comfortable pace. Allow breathing to normalise. Continue until heart rate approaches resting.",
+      "primaryMuscles": [],
+      "secondaryMuscles": []
     },
     {
       "name": "Foam Rolling — Quads",
@@ -1349,7 +1587,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Self-myofascial release for the quadriceps.",
-      "instructions": "Lie face down with roller under the quads. Slowly roll from hip to knee. Pause on tender spots for 20–30 seconds."
+      "instructions": "Lie face down with roller under the quads. Slowly roll from hip to knee. Pause on tender spots for 20–30 seconds.",
+      "primaryMuscles": ["quadriceps"],
+      "secondaryMuscles": []
     },
     {
       "name": "Foam Rolling — IT Band",
@@ -1360,7 +1600,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Self-myofascial release for the iliotibial band.",
-      "instructions": "Lie on one side with roller under the outer thigh. Roll from hip to knee. Adjust body angle to find tender spots."
+      "instructions": "Lie on one side with roller under the outer thigh. Roll from hip to knee. Adjust body angle to find tender spots.",
+      "primaryMuscles": ["hip_abductors"],
+      "secondaryMuscles": ["quadriceps"]
     },
     {
       "name": "Foam Rolling — Upper Back",
@@ -1371,7 +1613,9 @@
       "demonstration": null,
       "visualization": null,
       "description": "Self-myofascial release for the thoracic spine and upper back.",
-      "instructions": "Place roller perpendicular to the spine at mid-back. Support your head. Slowly roll up and down the upper back. Pause on tight areas."
+      "instructions": "Place roller perpendicular to the spine at mid-back. Support your head. Slowly roll up and down the upper back. Pause on tight areas.",
+      "primaryMuscles": ["trapezius_middle", "rhomboids"],
+      "secondaryMuscles": ["erector_spinae"]
     }
   ]
 }

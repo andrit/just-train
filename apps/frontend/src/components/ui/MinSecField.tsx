@@ -6,9 +6,14 @@
 // so a 20-minute bike is entered as 20 : 00 rather than 1200 seconds.
 //
 // The value in and out is always total seconds — the component owns
-// only the min/sec split for display. Seconds clamp 0–59; minutes 0–300.
+// only the min/sec split for display. Each box keeps its own string
+// state so it can be cleared and overwritten freely (an empty box
+// counts as 0 when emitting); seconds clamp 0–59, minutes 0–300.
+// External changes to `seconds` (prefill, next set) resync the boxes;
+// the component's own emits do not, so typing is never clobbered.
 // ------------------------------------------------------------
 
+import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/cn'
 
 interface MinSecFieldProps {
@@ -25,16 +30,49 @@ interface MinSecFieldProps {
 const clampMin = (m: number): number => Math.max(0, Math.min(300, m))
 const clampSec = (s: number): number => Math.max(0, Math.min(59, s))
 
-export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: MinSecFieldProps): React.JSX.Element {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
+// Keep only digits, then clamp numerically — an empty string stays empty
+// (so the box can be cleared) and emits as 0.
+const sanitize = (raw: string, clamp: (n: number) => number): string => {
+  const digits = raw.replace(/\D/g, '')
+  if (digits === '') return ''
+  return String(clamp(parseInt(digits, 10)))
+}
 
-  const setMinutes = (raw: string): void => onChange(clampMin(parseInt(raw, 10) || 0) * 60 + secs)
-  const setSeconds = (raw: string): void => onChange(mins * 60 + clampSec(parseInt(raw, 10) || 0))
+export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: MinSecFieldProps): React.JSX.Element {
+  const [minStr, setMinStr] = useState(String(Math.floor(seconds / 60)))
+  const [secStr, setSecStr] = useState(String(seconds % 60))
+  // The last total this component emitted — lets us tell an external change
+  // (prefill, set advance) apart from the echo of our own onChange.
+  const lastTotal = useRef(seconds)
+
+  useEffect(() => {
+    if (seconds !== lastTotal.current) {
+      setMinStr(String(Math.floor(seconds / 60)))
+      setSecStr(String(seconds % 60))
+      lastTotal.current = seconds
+    }
+  }, [seconds])
+
+  const emit = (mStr: string, sStr: string): void => {
+    const total = (parseInt(mStr, 10) || 0) * 60 + (parseInt(sStr, 10) || 0)
+    lastTotal.current = total
+    onChange(total)
+  }
+
+  const onMin = (raw: string): void => {
+    const next = sanitize(raw, clampMin)
+    setMinStr(next)
+    emit(next, secStr)
+  }
+  const onSec = (raw: string): void => {
+    const next = sanitize(raw, clampSec)
+    setSecStr(next)
+    emit(minStr, next)
+  }
 
   const boxClass = cn(
     'text-center font-mono font-bold rounded-xl',
-    'bg-brand-primary border-2 border-surface-border text-white',
+    'bg-brand-primary border-2 border-surface-border text-white placeholder-gray-700',
     'focus:outline-none focus:border-command-blue transition-colors',
     size === 'lg' ? 'text-3xl py-3 w-24' : 'text-2xl py-2 w-20',
   )
@@ -47,12 +85,11 @@ export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: 
       <div className="flex items-end gap-2">
         <div className="flex flex-col items-center gap-1">
           <input
-            type="number"
+            type="text"
             inputMode="numeric"
-            value={mins}
-            min={0}
-            max={300}
-            onChange={(e) => setMinutes(e.target.value)}
+            value={minStr}
+            onChange={(e) => onMin(e.target.value)}
+            placeholder="0"
             aria-label="Minutes"
             className={boxClass}
           />
@@ -61,13 +98,12 @@ export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: 
         <span className="font-mono font-bold text-gray-500 pb-5 text-2xl">:</span>
         <div className="flex flex-col items-center gap-1">
           <input
-            type="number"
+            type="text"
             inputMode="numeric"
-            value={secs}
-            min={0}
-            max={59}
-            onChange={(e) => setSeconds(e.target.value)}
+            value={secStr}
+            onChange={(e) => onSec(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && onEnter) onEnter() }}
+            placeholder="0"
             aria-label="Seconds"
             className={boxClass}
           />

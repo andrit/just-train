@@ -21,7 +21,7 @@ import { Button }           from '@/components/ui/Button'
 import { Input }            from '@/components/ui/Input'
 import { ConfirmDialog }    from '@/components/ui/ConfirmDialog'
 import {
-  PROGRESSION_STATE_LABEL,
+  progressionStateLabel,
   PROGRESSION_STATE_COLOR,
   FOCUS_LABEL,
   FOCUS_ICON,
@@ -114,6 +114,7 @@ function GoalRow({
 
 interface OverviewTabProps {
   clientId:         string
+  isAthlete?:       boolean
   progressionState: string
   primaryFocus?:    string | null
   secondaryFocus?:  string | null
@@ -124,6 +125,7 @@ interface OverviewTabProps {
 
 export function OverviewTab({
   clientId,
+  isAthlete = false,
   progressionState,
   primaryFocus,
   secondaryFocus,
@@ -175,7 +177,7 @@ export function OverviewTab({
       <div className="grid grid-cols-3 gap-3">
         <StatCard
           label="State"
-          value={PROGRESSION_STATE_LABEL[progressionState]}
+          value={progressionStateLabel(progressionState, isAthlete)}
           colorClass={PROGRESSION_STATE_COLOR[progressionState]}
         />
         <StatCard

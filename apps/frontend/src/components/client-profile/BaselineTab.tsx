@@ -5,10 +5,13 @@
 // historical snapshot list, take snapshot CTA.
 // ------------------------------------------------------------
 
+import { useState }          from 'react'
 import { cn }                from '@/lib/cn'
 import { interactions }      from '@/lib/interactions'
 import { useLatestSnapshot, useClientSnapshots } from '@/lib/queries/clients'
 import { Spinner }           from '@/components/ui/Spinner'
+import { SnapshotCaptureSheet } from '@/components/client-profile/SnapshotCaptureSheet'
+import { progressionStateLabel } from '@/components/clients/utils'
 
 // ── Snapshot card ─────────────────────────────────────────────────────────────
 
@@ -85,9 +88,10 @@ function SnapshotCard({
 
 // ── Baseline tab ──────────────────────────────────────────────────────────────
 
-export function BaselineTab({ clientId }: { clientId: string }): React.JSX.Element {
+export function BaselineTab({ clientId, isAthlete = false }: { clientId: string; isAthlete?: boolean }): React.JSX.Element {
   const { data: latest,    isLoading: latestLoading    } = useLatestSnapshot(clientId)
   const { data: snapshots, isLoading: snapshotsLoading } = useClientSnapshots(clientId)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   const isLoading = latestLoading || snapshotsLoading
 
@@ -109,6 +113,7 @@ export function BaselineTab({ clientId }: { clientId: string }): React.JSX.Eleme
       {/* Take Snapshot CTA */}
       <button
         type="button"
+        onClick={() => setSheetOpen(true)}
         className={cn(
           'w-full card p-4 text-left border-dashed',
           'hover:border-command-blue/30 hover:bg-surface',
@@ -160,7 +165,7 @@ export function BaselineTab({ clientId }: { clientId: string }): React.JSX.Eleme
                 <p className="text-xs text-gray-600 mb-1">
                   {new Date(snap.capturedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   {' · '}
-                  <span className="capitalize">{snap.progressionState}</span>
+                  <span>{progressionStateLabel(snap.progressionState, isAthlete)}</span>
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {snap.weightLbs      && <span>{snap.weightLbs} lbs</span>}
@@ -172,6 +177,13 @@ export function BaselineTab({ clientId }: { clientId: string }): React.JSX.Eleme
           </div>
         </section>
       )}
+
+      <SnapshotCaptureSheet
+        clientId={clientId}
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        isFirst={(snapshots?.length ?? 0) === 0}
+      />
     </div>
   )
 }

@@ -12,6 +12,20 @@ export const PROGRESSION_STATE_LABEL: Record<string, string> = {
   maintenance: 'Maintenance',
 }
 
+// Athlete-facing wording. `progressionState` is trainer vocabulary (where a
+// client sits in their arc); athletes never see client vocabulary, so on the
+// "Your Training" surfaces these plain-language phases are shown instead.
+export const PROGRESSION_STATE_LABEL_ATHLETE: Record<string, string> = {
+  assessment:  'Baseline',
+  programming: 'Building',
+  maintenance: 'Maintaining',
+}
+
+export function progressionStateLabel(state: string, isAthlete = false): string {
+  const map = isAthlete ? PROGRESSION_STATE_LABEL_ATHLETE : PROGRESSION_STATE_LABEL
+  return map[state] ?? state
+}
+
 export const PROGRESSION_STATE_COLOR: Record<string, string> = {
   assessment:  'bg-amber-500/15 text-amber-400 border-amber-500/20',
   programming: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',

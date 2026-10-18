@@ -27,7 +27,7 @@ import { ChallengesTab }                     from '@/components/client-profile/C
 import { SilhouetteAvatar }                  from '@/components/clients/SilhouetteAvatar'
 import { Spinner }                           from '@/components/ui/Spinner'
 import {
-  PROGRESSION_STATE_LABEL,
+  progressionStateLabel,
   PROGRESSION_STATE_COLOR,
   isOverviewIncomplete,
   isBaselineIncomplete,
@@ -156,7 +156,7 @@ export default function MyTrainingPage(): React.JSX.Element {
                 'text-[10px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider',
                 PROGRESSION_STATE_COLOR[client.progressionState],
               )}>
-                {PROGRESSION_STATE_LABEL[client.progressionState]}
+                {progressionStateLabel(client.progressionState, trainerMode === 'athlete')}
               </span>
             </div>
           </div>
@@ -198,6 +198,7 @@ export default function MyTrainingPage(): React.JSX.Element {
         {tab === 'overview' && (
           <OverviewTab
             clientId={client.id}
+            isAthlete={trainerMode === 'athlete'}
             progressionState={client.progressionState}
             primaryFocus={client.primaryFocus}
             secondaryFocus={client.secondaryFocus}
@@ -207,7 +208,7 @@ export default function MyTrainingPage(): React.JSX.Element {
           />
         )}
         {tab === 'timeline'   && <TimelineTab clientId={client.id} clientName={client.name} />}
-        {tab === 'baseline'   && <BaselineTab clientId={client.id} />}
+        {tab === 'baseline'   && <BaselineTab clientId={client.id} isAthlete={trainerMode === 'athlete'} />}
         {tab === 'prs'        && <PersonalBestsTab clientId={client.id} />}
         {tab === 'challenges' && <ChallengesTab clientId={client.id} clientName={client.name} isSelf={true} />}
       </div>

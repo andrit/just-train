@@ -17,6 +17,7 @@ import { interactions }                        from '@/lib/interactions'
 import { Spinner }                             from '@/components/ui/Spinner'
 import { Modal }                               from '@/components/ui/Modal'
 import { Button }                              from '@/components/ui/Button'
+import { ScoreSlider }                         from '@/components/ui/ScoreSlider'
 import { useChallenges }                       from '@/lib/queries/challenges'
 import { resolveNameTokens, defaultSessionName } from '@/lib/sessionName'
 import { HintPopover }                         from '@/components/ui/HintPopover'
@@ -255,9 +256,9 @@ export function SessionCloseout({
               {/* Muted until touched — a control reading "7" that saves nothing
                   would be lying about what it is about to do. */}
               <div className={cn('space-y-5 transition-opacity', !recordFeel && 'opacity-50')}>
-                <SliderRow label="Energy"   hint="How energised did you feel?"    value={energy}   onChange={touch(setEnergy)}   lowLabel="Exhausted" highLabel="Full energy" />
-                <SliderRow label="Mobility" hint="How did your body feel moving?" value={mobility} onChange={touch(setMobility)} lowLabel="Very stiff" highLabel="Full range" />
-                <SliderRow label="Stress"   hint="General stress level today"     value={stress}   onChange={touch(setStress)}   lowLabel="Calm"      highLabel="Very stressed" />
+                <ScoreSlider label="Energy"   hint="How energised did you feel?"    value={energy}   onChange={touch(setEnergy)}   lowLabel="Exhausted" highLabel="Full energy" />
+                <ScoreSlider label="Mobility" hint="How did your body feel moving?" value={mobility} onChange={touch(setMobility)} lowLabel="Very stiff" highLabel="Full range" />
+                <ScoreSlider label="Stress"   hint="General stress level today"     value={stress}   onChange={touch(setStress)}   lowLabel="Calm"      highLabel="Very stressed" />
               </div>
             </>
           )}
@@ -294,45 +295,6 @@ export function SessionCloseout({
             {loading ? <Spinner size="sm" /> : 'Finish session'}
           </button>
         </div>
-      </div>
-    </div>
-  )
-}
-
-function SliderRow({ label, hint, value, onChange, lowLabel, highLabel }: {
-  label: string; hint: string; value: number
-  onChange: (v: number) => void
-  lowLabel: string; highLabel: string
-}): React.JSX.Element {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-200">{label}</p>
-          <p className="text-xs text-gray-600">{hint}</p>
-        </div>
-        <span className="font-mono text-2xl font-bold text-white w-8 text-right">{value}</span>
-      </div>
-      <input
-        type="range"
-        min={1}
-        max={10}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 rounded-full appearance-none cursor-pointer
-          bg-surface-border
-          [&::-webkit-slider-thumb]:appearance-none
-          [&::-webkit-slider-thumb]:w-5
-          [&::-webkit-slider-thumb]:h-5
-          [&::-webkit-slider-thumb]:rounded-full
-          [&::-webkit-slider-thumb]:bg-command-blue
-          [&::-webkit-slider-thumb]:cursor-pointer
-          [&::-webkit-slider-thumb]:shadow-md"
-        aria-label={`${label}: ${value} out of 10`}
-      />
-      <div className="flex justify-between text-[10px] text-gray-700 uppercase tracking-wider">
-        <span>{lowLabel}</span>
-        <span>{highLabel}</span>
       </div>
     </div>
   )

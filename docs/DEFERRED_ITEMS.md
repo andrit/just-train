@@ -18,6 +18,12 @@ At the start of each phase, review this list:
 
 Captured from the user's own training sessions. Small, concrete, not yet scheduled.
 
+### Athlete progression phase — review labels, then consider deriving it from data (2026-10-18)
+When: a dedicated athlete-insights pass (the data-derived part is Insight-context work, akin to the KPI/stall-detection roadmap).
+What: Shipped 2026-10-18 — athletes now see `assessment/programming/maintenance` relabelled **Baseline / Building / Maintaining** (`progressionStateLabel(state, isAthlete)` in `components/clients/utils.ts`; trainer views unchanged). Two open directions the user flagged:
+  1. **Personalize the wording** — the three athlete labels are a first pass; revisit the words (e.g. "Getting Started" vs "Baseline") and possibly let the athlete/trainer tune them.
+  2. **Derive the phase from training data, don't just display a stored field.** Today `progressionState` is a static column set at client creation / by the trainer. The richer idea: surface *actual* phase transitions from the logged data — detect plateau crossings (e.g. est-1RM/volume trend flattening across N weeks), breakthroughs, and consistency regimes, and move the athlete between phases (or annotate the timeline) automatically. This reuses the per-exercise `weightTrend()` / `buildExerciseProgress()` machinery (`lib/progression.ts`, `lib/exerciseProgress.ts`) and belongs with the Phase-7 KPI / stall-detection work. Product + threshold design needed before building.
+
 ### Session review — not enough room at the bottom ✅ DONE (2026-10-18)
 Screenshot (`app-snapshots/scroll-cutoff.png`) pinned it to the slide-in `SessionHistoryPanel`: a `z-[10]` scroll container under the `z-50` tab bar whose last block had only `py-4`, so the final set hid behind the bar unscrollably. Fixed with `pb-nav-clear md:pb-8` on the breakdown block (`py-4`→`pt-4` so the bottom token wins). Standalone `SessionHistoryPage` was already fine (inside `<main>`, which has `pb-nav-clear`).
 

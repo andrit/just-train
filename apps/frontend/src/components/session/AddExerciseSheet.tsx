@@ -252,12 +252,12 @@ function ResistanceTargets({
 }
 
 function CardioTargets({
-  rounds, metric, distance, duration, intensity,
-  onRounds, onMetric, onDistance, onDuration, onIntensity,
+  rounds, metrics, distance, duration, intensity,
+  onRounds, onToggleMetric, onDistance, onDuration, onIntensity,
 }: {
-  rounds: number; metric: CardioMetric
+  rounds: number; metrics: Set<CardioMetric>
   distance: string; duration: number; intensity: IntensityLevel
-  onRounds: (v: number) => void; onMetric: (v: CardioMetric) => void
+  onRounds: (v: number) => void; onToggleMetric: (v: CardioMetric) => void
   onDistance: (v: string) => void; onDuration: (v: number) => void
   onIntensity: (v: IntensityLevel) => void
 }): React.JSX.Element {
@@ -268,20 +268,21 @@ function CardioTargets({
         <DragStepper value={rounds} onChange={onRounds} min={1} max={20} label="Rounds / Intervals" />
       </div>
 
-      {/* Metric picker */}
+      {/* Metric picker — multi-select, any combination */}
       <div>
         <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center mb-3">
-          Measure by
+          Measure by — pick any
         </p>
         <div className="flex gap-2">
           {(['distance', 'time', 'intensity'] as CardioMetric[]).map((m) => (
             <button
               key={m}
               type="button"
-              onClick={() => onMetric(m)}
+              aria-pressed={metrics.has(m)}
+              onClick={() => onToggleMetric(m)}
               className={cn(
                 'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
-                metric === m
+                metrics.has(m)
                   ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
                   : 'border-surface-border text-gray-500 hover:text-gray-300',
               )}
@@ -292,8 +293,8 @@ function CardioTargets({
         </div>
       </div>
 
-      {/* Metric input */}
-      {metric === 'distance' && (
+      {/* Metric inputs — one per enabled metric */}
+      {metrics.has('distance') && (
         <div>
           <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center mb-2">Distance (m)</p>
           <input
@@ -308,13 +309,13 @@ function CardioTargets({
         </div>
       )}
 
-      {metric === 'time' && (
+      {metrics.has('time') && (
         <div className="flex justify-center">
           <MinSecField seconds={duration} onChange={onDuration} label="Time per round" />
         </div>
       )}
 
-      {metric === 'intensity' && (
+      {metrics.has('intensity') && (
         <div>
           <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center mb-3">Intensity level</p>
           <div className="flex gap-2">
@@ -472,12 +473,21 @@ export function AddExerciseSheet({
     .map((s) => s.weight)
     .filter((w): w is number => w != null)
 
-  // Cardio
+  // Cardio — any combination of distance / time / intensity may be captured
   const [cardioRounds,   setCardioRounds]   = useState(4)
-  const [cardioMetric,   setCardioMetric]   = useState<CardioMetric>('time')
+  const [cardioMetrics,  setCardioMetrics]  = useState<Set<CardioMetric>>(new Set<CardioMetric>(['time']))
   const [cardioDistance, setCardioDistance] = useState('')
   const [cardioDuration, setCardioDuration] = useState(60)
   const [cardioIntensity, setCardioIntensity] = useState<IntensityLevel>('moderate')
+
+  const toggleCardioMetric = (m: CardioMetric): void => {
+    setCardioMetrics((prev) => {
+      const next = new Set(prev)
+      if (next.has(m)) next.delete(m)
+      else next.add(m)
+      return next
+    })
+  }
 
   // Calisthenics
   const [caliMode,      setCaliMode]      = useState<'reps' | 'time'>('reps')
@@ -614,9 +624,9 @@ export function AddExerciseSheet({
       case 'cardio':
         return {
           targetSets: cardioRounds,
-          ...(cardioMetric === 'distance' && cardioDistance.trim() && { targetDistance: parseFloat(cardioDistance) }),
-          ...(cardioMetric === 'time'     && cardioDuration >= 1 && { targetDurationSeconds: cardioDuration }),
-          ...(cardioMetric === 'intensity'&& { targetIntensity: cardioIntensity }),
+          ...(cardioMetrics.has('distance')  && cardioDistance.trim() && { targetDistance: parseFloat(cardioDistance) }),
+          ...(cardioMetrics.has('time')      && cardioDuration >= 1 && { targetDurationSeconds: cardioDuration }),
+          ...(cardioMetrics.has('intensity') && { targetIntensity: cardioIntensity }),
         }
       case 'calisthenics':
         return {
@@ -822,9 +832,9 @@ export function AddExerciseSheet({
           )}
           {effectiveType === 'cardio' && (
             <CardioTargets
-              rounds={cardioRounds} metric={cardioMetric}
+              rounds={cardioRounds} metrics={cardioMetrics}
               distance={cardioDistance} duration={cardioDuration} intensity={cardioIntensity}
-              onRounds={setCardioRounds} onMetric={setCardioMetric}
+              onRounds={setCardioRounds} onToggleMetric={toggleCardioMetric}
               onDistance={setCardioDistance} onDuration={setCardioDuration} onIntensity={setCardioIntensity}
             />
           )}

@@ -82,11 +82,15 @@ function BigInput({ label, value, onChange, placeholder, mode = 'decimal', onEnt
 
 type CardioMode = 'distance' | 'time' | 'intensity' | 'reps'
 
-function detectCardioMode(se: SessionExerciseResponse): CardioMode {
-  if (se.targetDistance   != null) return 'distance'
-  if (se.targetIntensity  != null) return 'intensity'
-  if (se.targetReps       != null) return 'reps'
-  return 'time'  // default
+// Every metric this cardio exercise was set up to capture — any combination of
+// distance / time / intensity / reps. Falls back to time when none were targeted.
+function detectCardioModes(se: SessionExerciseResponse): CardioMode[] {
+  const modes: CardioMode[] = []
+  if (se.targetDistance        != null) modes.push('distance')
+  if (se.targetDurationSeconds != null) modes.push('time')
+  if (se.targetIntensity       != null) modes.push('intensity')
+  if (se.targetReps            != null) modes.push('reps')
+  return modes.length > 0 ? modes : ['time']
 }
 
 // ── Intensity selector ────────────────────────────────────────────────────────
@@ -164,7 +168,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
   }
 
   // ── Cardio state ──────────────────────────────────────────────────────────
-  const cardioMode = detectCardioMode(sessionExercise)
+  const cardioModes = detectCardioModes(sessionExercise)
   const [distance,  setDistance]  = useState(String(sessionExercise.targetDistance ?? ''))
   const [duration,  setDuration]  = useState(String(sessionExercise.targetDurationSeconds ?? ''))
   const [intensity, setIntensity] = useState<string>(sessionExercise.targetIntensity ?? 'moderate')
@@ -202,11 +206,17 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
         return perSide && splitOpen
           ? repsLeft.trim().length > 0 && repsRight.trim().length > 0
           : reps.trim().length > 0
-      case 'cardio':
-        if (cardioMode === 'distance')  return distance.trim().length > 0
-        if (cardioMode === 'time')      return (parseInt(duration, 10) || 0) > 0
-        if (cardioMode === 'reps')      return cardioReps.trim().length > 0
-        return true // intensity always loggable
+      case 'cardio': {
+        // Loggable once any enabled metric has a value. Intensity always counts
+        // (it carries a default), so a cardio exercise that tracks intensity is
+        // always loggable; distance/time/reps need a value entered.
+        const vals: boolean[] = []
+        if (cardioModes.includes('distance'))  vals.push(distance.trim().length > 0)
+        if (cardioModes.includes('time'))      vals.push((parseInt(duration, 10) || 0) > 0)
+        if (cardioModes.includes('reps'))      vals.push(cardioReps.trim().length > 0)
+        if (cardioModes.includes('intensity')) vals.push(true)
+        return vals.some(Boolean)
+      }
       case 'calisthenics': return caliIsTime ? caliTime.trim().length > 0 : caliReps.trim().length > 0
       case 'stretching':   return duration.trim().length > 0
       case 'cooldown':     return duration.trim().length > 0
@@ -243,11 +253,13 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
         break
       }
       case 'cardio':
+        // Log every enabled metric that has a value — distance, time, intensity
+        // and reps can all travel on one set.
         onLog({
-          ...(cardioMode === 'distance'  && { distance:        parseFloat(distance) }),
-          ...(cardioMode === 'time'      && { durationSeconds: parseInt(duration, 10) }),
-          ...(cardioMode === 'intensity' && { intensity:       intensity as IntensityLevel }),
-          ...(cardioMode === 'reps'      && { reps:            parseInt(cardioReps, 10) }),
+          ...(cardioModes.includes('distance')  && distance.trim()            && { distance:        parseFloat(distance) }),
+          ...(cardioModes.includes('time')      && (parseInt(duration, 10) || 0) > 0 && { durationSeconds: parseInt(duration, 10) }),
+          ...(cardioModes.includes('intensity') && { intensity:       intensity as IntensityLevel }),
+          ...(cardioModes.includes('reps')      && cardioReps.trim()          && { reps:            parseInt(cardioReps, 10) }),
         })
         break
       case 'calisthenics':
@@ -336,13 +348,13 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
           </div>
         )}
 
-        {/* ── Cardio: context-specific metric ───────────────────── */}
+        {/* ── Cardio: one input per enabled metric (any combination) ─ */}
         {workoutType === 'cardio' && (
           <div className="mb-3 space-y-3">
-            {cardioMode === 'distance' && (
+            {cardioModes.includes('distance') && (
               <BigInput label="Distance (m)" value={distance} onChange={setDistance} placeholder={sessionExercise.targetDistance ? String(sessionExercise.targetDistance) : '—'} onEnter={handleLog} />
             )}
-            {cardioMode === 'time' && (
+            {cardioModes.includes('time') && (
               <div className="flex justify-center">
                 <MinSecField
                   seconds={parseInt(duration, 10) || 0}
@@ -353,10 +365,10 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
                 />
               </div>
             )}
-            {cardioMode === 'intensity' && (
+            {cardioModes.includes('intensity') && (
               <IntensityPicker value={intensity} onChange={setIntensity} />
             )}
-            {cardioMode === 'reps' && (
+            {cardioModes.includes('reps') && (
               <BigInput label="Reps" value={cardioReps} onChange={setCardioReps} mode="numeric" placeholder={effectiveTargetReps ? String(effectiveTargetReps) : '—'} onEnter={handleLog} />
             )}
           </div>

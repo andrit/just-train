@@ -242,7 +242,9 @@ export default function SessionHistoryPage(): React.JSX.Element {
                                 {[
                                   s.weight != null ? `${s.weight}` : null,
                                   s.reps   != null ? `${s.reps} reps` : null,
+                                  s.distance != null ? `${s.distance}m` : null,
                                   s.durationSeconds != null ? formatSeconds(s.durationSeconds) : null,
+                                  s.intensity != null ? s.intensity : null,
                                 ].filter(Boolean).join(' × ')}
                               </span>
 

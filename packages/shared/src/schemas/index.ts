@@ -20,6 +20,7 @@ import {
   DifficultyEnum,
   ExerciseCategoryEnum,
   LateralityEnum,
+  MuscleEnum,
   ClientFocusEnum,
   ProgressionStateEnum,
   TrainerModeEnum,
@@ -254,6 +255,15 @@ export type UpdateClientSnapshotInput = z.infer<typeof UpdateClientSnapshotSchem
 // EXERCISE
 // ============================================================
 
+// Worked muscles grouped primary/secondary, for create/enrich. A muscle
+// appears at most once overall (the DB has a unique (exercise, muscle));
+// the backend dedupes primary-wins, but reject an obvious both-lists overlap.
+export const MuscleTargetsSchema = z.object({
+  primary:   z.array(MuscleEnum).max(34).default([]),
+  secondary: z.array(MuscleEnum).max(34).default([]),
+})
+export type MuscleTargetsInput = z.infer<typeof MuscleTargetsSchema>
+
 export const CreateExerciseSchema = z.object({
   name: z.string().min(1).max(150),
   description: z.string().max(2000).optional(),
@@ -272,6 +282,8 @@ export const CreateExerciseSchema = z.object({
     .describe('true = quick-added mid-session, needs enriching in the library later'),
   isPublic: z.boolean().default(false)
     .describe('When true, visible to all trainers (future multi-trainer support)'),
+  muscles: MuscleTargetsSchema.optional()
+    .describe('Worked muscles grouped primary/secondary — drives the muscle-highlight map. Omit on PATCH to leave existing muscles untouched.'),
 })
 export type CreateExerciseInput = z.infer<typeof CreateExerciseSchema>
 

@@ -21,8 +21,9 @@ import { routeLog } from '../lib/logger'
 
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
-import { db, exercises, bodyParts, exerciseMedia } from '../db'
+import { db, exercises, bodyParts, exerciseMedia, exerciseMuscles } from '../db'
 import { eq, and, ilike, or, isNull } from 'drizzle-orm'
+import { buildMuscleRows } from '../lib/exerciseMuscles'
 import {
   CreateExerciseSchema,
   QuickAddExerciseSchema,
@@ -211,17 +212,31 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
       },
     },
   }, async (request, reply) => {
-    const body = request.body as z.infer<typeof CreateExerciseSchema>
+    const { muscles, ...body } = request.body as z.infer<typeof CreateExerciseSchema>
 
     try {
-      const [newExercise] = await db
-        .insert(exercises)
-        .values({
-          ...body,
-          trainerId: request.trainer.trainerId,
-          isDraft: false,
-        })
-        .returning()
+      const newExercise = await db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(exercises)
+          .values({
+            ...body,
+            trainerId: request.trainer.trainerId,
+            isDraft: false,
+          })
+          .returning()
+
+        if (!created) return null
+
+        if (muscles) {
+          const rows = buildMuscleRows(created.id, muscles)
+          if (rows.length > 0) await tx.insert(exerciseMuscles).values(rows)
+        }
+        return created
+      })
+
+      if (!newExercise) {
+        return reply.status(500).send({ error: 'Failed to create exercise' })
+      }
 
       return reply.status(201).send({
         ...newExercise,
@@ -305,19 +320,32 @@ The exercise is flagged with \`isDraft: true\`. It appears in the library with a
     },
   }, async (request, reply) => {
     const { id } = request.params as z.infer<typeof UuidParamSchema>
-    const body = request.body as z.infer<typeof UpdateExerciseSchema>
+    const { muscles, ...body } = request.body as z.infer<typeof UpdateExerciseSchema>
 
     try {
-      const [updated] = await db
-        .update(exercises)
-        .set({ ...body, updatedAt: new Date() })
-        .where(
-          and(
-            eq(exercises.id, id),
-            eq(exercises.trainerId, request.trainer.trainerId)
+      const updated = await db.transaction(async (tx) => {
+        const [row] = await tx
+          .update(exercises)
+          .set({ ...body, updatedAt: new Date() })
+          .where(
+            and(
+              eq(exercises.id, id),
+              eq(exercises.trainerId, request.trainer.trainerId)
+            )
           )
-        )
-        .returning()
+          .returning()
+
+        if (!row) return null
+
+        // Replace the muscle set only when the caller sent one (PATCH semantics:
+        // omitted = leave existing muscles untouched). Scoped to this owned row.
+        if (muscles) {
+          await tx.delete(exerciseMuscles).where(eq(exerciseMuscles.exerciseId, id))
+          const rows = buildMuscleRows(id, muscles)
+          if (rows.length > 0) await tx.insert(exerciseMuscles).values(rows)
+        }
+        return row
+      })
 
       if (!updated) {
         return reply.status(404).send({ error: 'Exercise not found' })

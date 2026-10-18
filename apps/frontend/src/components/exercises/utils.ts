@@ -42,3 +42,13 @@ export const DIFFICULTY_OPTIONS = [
   { value: 'intermediate', label: 'Intermediate' },
   { value: 'advanced',     label: 'Advanced' },
 ]
+
+export const CATEGORY_OPTIONS = [
+  { value: 'compound',  label: 'Compound (multi-joint)' },
+  { value: 'isolation', label: 'Isolation (single-joint)' },
+]
+
+export const LATERALITY_OPTIONS = [
+  { value: 'bilateral',  label: 'Bilateral (both sides together)' },
+  { value: 'unilateral', label: 'Unilateral (one side at a time)' },
+]

@@ -34,26 +34,33 @@ vi.mock('../../db', () => {
     orderBy:   vi.fn().mockResolvedValue([]),
     returning: vi.fn().mockResolvedValue([]),
   }
-  return {
-    db: {
-      query: {
-        exercises: {
-          findFirst: vi.fn().mockResolvedValue(undefined),
-          findMany:  vi.fn().mockResolvedValue([]),
-        },
-        bodyParts:     { findMany:  vi.fn().mockResolvedValue([]) },
-        exerciseMedia: { findFirst: vi.fn().mockResolvedValue(undefined) },
+  const db = {
+    query: {
+      exercises: {
+        findFirst: vi.fn().mockResolvedValue(undefined),
+        findMany:  vi.fn().mockResolvedValue([]),
       },
-      select: vi.fn().mockReturnValue(chain),
-      insert: vi.fn().mockReturnValue(chain),
-      update: vi.fn().mockReturnValue(chain),
-      delete: vi.fn().mockReturnValue(chain),
-      _chain: chain,
+      bodyParts:     { findMany:  vi.fn().mockResolvedValue([]) },
+      exerciseMedia: { findFirst: vi.fn().mockResolvedValue(undefined) },
     },
-    exercises:     {},
-    bodyParts:     {},
-    exerciseMedia: {},
-    trainers:      {},
+    select: vi.fn().mockReturnValue(chain),
+    insert: vi.fn().mockReturnValue(chain),
+    update: vi.fn().mockReturnValue(chain),
+    delete: vi.fn().mockReturnValue(chain),
+    _chain: chain,
+  }
+  // Run the callback with the same mock as the tx, so a transactional handler
+  // consumes the chained mock exactly as the non-tx code did. Attached after
+  // `db` is declared to avoid referencing it inside its own initializer.
+  ;(db as Record<string, unknown>).transaction =
+    vi.fn(async (cb: (tx: unknown) => unknown) => cb(db))
+  return {
+    db,
+    exercises:      {},
+    bodyParts:      {},
+    exerciseMedia:  {},
+    exerciseMuscles: {},
+    trainers:       {},
   }
 })
 
@@ -365,6 +372,23 @@ describe('POST /api/v1/exercises', () => {
     // The route sets isDraft based on whether required fields are present
     // A full create with name+workoutType+bodyPartId should not be a draft
     expect(res.statusCode).toBe(201)
+  })
+
+  it('persists muscles when provided (inserts into exercise_muscles)', async () => {
+    const { db, exercises, exerciseMuscles } = await import('../../db')
+    ;(db as any)._chain.returning.mockResolvedValueOnce([makeExercise({ name: 'Romanian Deadlift' })])
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     '/api/v1/exercises',
+      payload: { ...validBody, muscles: { primary: ['hamstrings'], secondary: ['gluteus_maximus'] } },
+      headers: { authorization: authHeader() },
+    })
+
+    expect(res.statusCode).toBe(201)
+    // One insert for the exercise row, a second for its muscle rows.
+    expect((db as any).insert).toHaveBeenCalledWith(exercises)
+    expect((db as any).insert).toHaveBeenCalledWith(exerciseMuscles)
   })
 
   it('returns 400 when name is missing', async () => {

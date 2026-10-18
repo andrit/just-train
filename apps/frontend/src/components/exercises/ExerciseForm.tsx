@@ -11,7 +11,11 @@ import { Button }   from '@/components/ui/Button'
 import { Input }    from '@/components/ui/Input'
 import { TextArea } from '@/components/ui/TextArea'
 import { Select }   from '@/components/ui/Select'
-import { WORKOUT_TYPE_OPTIONS, EQUIPMENT_OPTIONS, DIFFICULTY_OPTIONS } from './utils'
+import MusclePicker, { type MuscleTargets } from './MusclePicker'
+import {
+  WORKOUT_TYPE_OPTIONS, EQUIPMENT_OPTIONS, DIFFICULTY_OPTIONS,
+  CATEGORY_OPTIONS, LATERALITY_OPTIONS,
+} from './utils'
 import type { ExerciseDetailResponse, ExerciseSummaryResponse } from '@trainer-app/shared'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -22,6 +26,8 @@ interface FormState {
   bodyPartId:   string
   equipment:    string
   difficulty:   string
+  category:     string
+  laterality:   string
   description:  string
   instructions: string
 }
@@ -50,8 +56,15 @@ export default function ExerciseForm({
     bodyPartId:   exercise?.bodyPartId   ?? '',
     equipment:    exercise?.equipment    ?? 'none',
     difficulty:   exercise?.difficulty   ?? 'beginner',
+    category:     exercise?.category     ?? '',
+    laterality:   exercise?.laterality   ?? 'bilateral',
     description:  exercise?.description  ?? '',
     instructions: exercise?.instructions ?? '',
+  })
+
+  const [muscles, setMuscles] = useState<MuscleTargets>({
+    primary:   exercise?.muscles?.primary   ?? [],
+    secondary: exercise?.muscles?.secondary ?? [],
   })
 
   const [errors, setErrors] = useState<FormErrors>({})
@@ -93,8 +106,13 @@ export default function ExerciseForm({
       bodyPartId:   form.bodyPartId,
       equipment:    form.equipment  || undefined,
       difficulty:   form.difficulty || undefined,
+      category:     form.category   || undefined,
+      laterality:   form.laterality || undefined,
       description:  form.description.trim()  || undefined,
       instructions: form.instructions.trim() || undefined,
+      // Authoritative muscle set from the form. On edit this is a full replace
+      // (prefilled from the exercise); empty arrays clear the muscles.
+      muscles,
     }
 
     if (isEdit && exercise != null) {
@@ -164,6 +182,24 @@ export default function ExerciseForm({
           onChange={(e) => setField('difficulty', e.target.value)}
         />
       </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Select
+          label="Category"
+          options={CATEGORY_OPTIONS}
+          placeholder="— None —"
+          value={form.category}
+          onChange={(e) => setField('category', e.target.value)}
+        />
+        <Select
+          label="Laterality"
+          options={LATERALITY_OPTIONS}
+          value={form.laterality}
+          onChange={(e) => setField('laterality', e.target.value)}
+        />
+      </div>
+
+      <MusclePicker value={muscles} onChange={setMuscles} />
 
       <TextArea
         label="Description"

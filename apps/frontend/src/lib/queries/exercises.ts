@@ -112,8 +112,11 @@ export interface CreateExerciseInput {
   bodyPartId:  string
   equipment?:  string
   difficulty?: string
+  category?:   string
+  laterality?: string
   description?: string
   instructions?: string
+  muscles?:    { primary: string[]; secondary: string[] }
 }
 
 export function useCreateExercise(): UseMutationResult<ExerciseSummaryResponse, Error, CreateExerciseInput> {

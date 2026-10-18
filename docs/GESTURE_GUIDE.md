@@ -59,6 +59,10 @@ Blocks and exercises in the plan/template builder have a grip handle. Press and 
 Sets, reps, scores and the like use a drag-stepper: drag up to raise the value, down to lower it. Prefer buttons? The ▲ / ▼ do the same, and arrow keys work when it's focused.
 *Where:* target setup, subjective score sliders · *Under the hood:* `DragStepper`
 
+**Tap a muscle chip → cycle it through primary / secondary / off.**
+When creating or editing an exercise, each muscle is a chip grouped by body part. Tap once to mark it a primary mover (filled red), tap again for secondary (red tint), tap a third time to clear it. The selection drives the muscle map on the exercise's detail view.
+*Where:* the exercise create/edit form · *Under the hood:* `MusclePicker`
+
 ### Sheets & hints
 
 **Swipe the handle down, tap outside, or press Esc → close a sheet.**

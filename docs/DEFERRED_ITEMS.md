@@ -14,6 +14,20 @@ At the start of each phase, review this list:
 
 ---
 
+## User reports from live use — triage queue
+
+Captured from the user's own training sessions. Small, concrete, not yet scheduled.
+
+### Session review — not enough room at the bottom (2026-10-18)
+When: next live-session UX pass, or as soon as a screenshot pins it down.
+What: reviewing a completed session, content at the very bottom is cramped / cut off. Needs a screenshot to see exactly which view (`SessionHistoryPanel` vs standalone `SessionHistoryPage`) and what's clipped — likely a `pb-nav-clear` / `pb-sheet-bottom` gap, but confirm before touching. **Ask the user for a screenshot.**
+
+### Cable Crossover — add position + grip variants (2026-10-18)
+When: alongside the next exercise-library edit (pairs naturally with the Corkscrew-curls formalize workflow).
+What: the user wants Cable Crossover to distinguish **up / down** (pulley height — low-to-high vs high-to-low) and **regular/parallel** grip, plus a **single**-arm variant. Decide the model: separate library exercises (e.g. "Cable Crossover (Low)", "Single-Arm Cable Crossover") vs a variant field — there is no exercise-variant concept today, so separate named exercises is the likely path (matches how the library already handles close variants). Add muscle data for each (chest primary; the up/down angle shifts upper vs lower pec emphasis — reflect in secondary). Confirm the exact set of variants with the user before authoring.
+
+---
+
 ## PWA — Phase 1 Scaffold Audit Findings
 
 Items surfaced during the Phase 1 Lighthouse audit (2026-06-19). All are non-blocking for Phase 1 sign-off but should be addressed in the phases noted.

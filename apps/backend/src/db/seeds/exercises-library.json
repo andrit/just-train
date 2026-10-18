@@ -617,6 +617,20 @@
         "secondaryMuscles": ["brachialis"]
       },
       {
+        "name": "Corkscrew Dumbbell Curls",
+        "bodyPart": "arms",
+        "category": "isolation",
+        "equipment": "dumbbell",
+        "difficulty": "beginner",
+        "demonstration": null,
+        "visualization": null,
+        "description": "Dumbbell curl with an exaggerated supination — the wrist 'corkscrews' outward as you raise, driving the pinky up and in to maximise the biceps contraction.",
+        "instructions": "Start with the dumbbell at your side, palm facing in (neutral). As you curl, rotate the wrist outward so the palm faces up and the little finger turns toward the shoulder at the top. Squeeze, then reverse the rotation on the way down. One arm at a time or alternating; keep the elbow pinned.",
+        "laterality": "unilateral",
+        "primaryMuscles": ["biceps_brachii"],
+        "secondaryMuscles": ["brachialis", "brachioradialis"]
+      },
+      {
         "name": "Preacher Curl",
         "bodyPart": "arms",
         "category": "isolation",

@@ -23,7 +23,8 @@ import { useExerciseHistory }      from '@/lib/queries/clients'
 import { pickPrefillSet, isPriorInSession } from '@/lib/setPrefill'
 import { useSessionExerciseMedia, useUploadSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { useUXEventRef }           from '@/hooks/useUXEvent'
-import { formatSetReps }           from '@/lib/formatters'
+import { formatSetReps, formatSeconds } from '@/lib/formatters'
+import { MinSecField }             from '@/components/ui/MinSecField'
 import { InlineCameraSheet }       from '@/components/session/InlineCameraSheet'
 import { FormCheckBadge }          from '@/components/session/FormCheckBadge'
 import type { SessionExerciseResponse, SetResponse } from '@trainer-app/shared'
@@ -203,7 +204,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
           : reps.trim().length > 0
       case 'cardio':
         if (cardioMode === 'distance')  return distance.trim().length > 0
-        if (cardioMode === 'time')      return duration.trim().length > 0
+        if (cardioMode === 'time')      return (parseInt(duration, 10) || 0) > 0
         if (cardioMode === 'reps')      return cardioReps.trim().length > 0
         return true // intensity always loggable
       case 'calisthenics': return caliIsTime ? caliTime.trim().length > 0 : caliReps.trim().length > 0
@@ -271,7 +272,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
     const parts: string[] = []
     if (lastSet.weight   != null) parts.push(`${lastSet.weight}${weightUnit}`)
     if (lastSet.reps     != null) parts.push(`${lastSet.reps} reps`)
-    if (lastSet.durationSeconds != null) parts.push(`${lastSet.durationSeconds}s`)
+    if (lastSet.durationSeconds != null) parts.push(formatSeconds(lastSet.durationSeconds))
     if (lastSet.distance != null) parts.push(`${lastSet.distance}m`)
     if (lastSet.intensity!= null) parts.push(lastSet.intensity)
     return parts.length > 0 ? parts.join(' · ') : null
@@ -342,7 +343,15 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
               <BigInput label="Distance (m)" value={distance} onChange={setDistance} placeholder={sessionExercise.targetDistance ? String(sessionExercise.targetDistance) : '—'} onEnter={handleLog} />
             )}
             {cardioMode === 'time' && (
-              <BigInput label="Duration (seconds)" value={duration} onChange={setDuration} mode="numeric" placeholder={sessionExercise.targetDurationSeconds ? String(sessionExercise.targetDurationSeconds) : '—'} onEnter={handleLog} />
+              <div className="flex justify-center">
+                <MinSecField
+                  seconds={parseInt(duration, 10) || 0}
+                  onChange={(secs) => setDuration(String(secs))}
+                  label="Time"
+                  size="lg"
+                  onEnter={handleLog}
+                />
+              </div>
             )}
             {cardioMode === 'intensity' && (
               <IntensityPicker value={intensity} onChange={setIntensity} />
@@ -458,7 +467,7 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
         {workoutType === 'cardio' && (
           <>
             {set.distance        != null && <span className={cn(OUTCOME_COLOR[distOk],  'font-medium')}>{set.distance}m</span>}
-            {set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk],  'font-medium')}>{set.durationSeconds}s</span>}
+            {set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk],  'font-medium')}>{formatSeconds(set.durationSeconds)}</span>}
             {set.intensity       != null && <span className="text-gray-300 font-medium capitalize">{set.intensity}</span>}
             {set.reps            != null && <span className={cn(OUTCOME_COLOR[repsOk],  'font-medium')}>{set.reps} reps</span>}
           </>
@@ -466,11 +475,11 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
         {(workoutType === 'calisthenics') && (
           <>
             {set.reps            != null && <span className={cn(OUTCOME_COLOR[repsOk], 'font-medium')}>{set.reps} reps</span>}
-            {set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk], 'font-medium')}>{set.durationSeconds}s</span>}
+            {set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk], 'font-medium')}>{formatSeconds(set.durationSeconds)}</span>}
           </>
         )}
         {(workoutType === 'stretching' || workoutType === 'cooldown') && (
-          set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk], 'font-medium')}>{set.durationSeconds}s</span>
+          set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk], 'font-medium')}>{formatSeconds(set.durationSeconds)}</span>
         )}
       </div>
 

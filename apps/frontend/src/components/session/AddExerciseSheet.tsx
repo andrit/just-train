@@ -23,6 +23,7 @@ import { cn }                    from '@/lib/cn'
 import { interactions }          from '@/lib/interactions'
 import { BottomSheet }           from '@/components/ui/BottomSheet'
 import { DragStepper }           from '@/components/ui/DragStepper'
+import { MinSecField }           from '@/components/ui/MinSecField'
 import { NumberField }           from '@/components/ui/NumberField'
 import { Spinner }               from '@/components/ui/Spinner'
 import { weightRampSequence }    from '@/lib/weightRamp'
@@ -309,7 +310,7 @@ function CardioTargets({
 
       {metric === 'time' && (
         <div className="flex justify-center">
-          <DragStepper value={duration} onChange={onDuration} min={5} max={3600} label="Seconds per round" />
+          <MinSecField seconds={duration} onChange={onDuration} label="Time per round" />
         </div>
       )}
 
@@ -614,7 +615,7 @@ export function AddExerciseSheet({
         return {
           targetSets: cardioRounds,
           ...(cardioMetric === 'distance' && cardioDistance.trim() && { targetDistance: parseFloat(cardioDistance) }),
-          ...(cardioMetric === 'time'     && { targetDurationSeconds: cardioDuration }),
+          ...(cardioMetric === 'time'     && cardioDuration >= 1 && { targetDurationSeconds: cardioDuration }),
           ...(cardioMetric === 'intensity'&& { targetIntensity: cardioIntensity }),
         }
       case 'calisthenics':

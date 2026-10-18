@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from 'react'
 import { cn }                          from '@/lib/cn'
 import { interactions }                from '@/lib/interactions'
 import { useUXEventRef }               from '@/hooks/useUXEvent'
+import { formatSeconds }               from '@/lib/formatters'
 import type { SetResponse }            from '@trainer-app/shared'
 
 // ── Target vs actual comparison ───────────────────────────────────────────────
@@ -98,7 +99,7 @@ function PastSetRow({
           </span>
         )}
         {set.durationSeconds != null && (
-          <span className="text-emerald-400 font-medium">{set.durationSeconds}s</span>
+          <span className="text-emerald-400 font-medium">{formatSeconds(set.durationSeconds)}</span>
         )}
       </div>
 

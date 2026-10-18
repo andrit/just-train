@@ -20,7 +20,7 @@ import { setVolume } from '@trainer-app/shared'
 import { cn }                                   from '@/lib/cn'
 import { useSession }                           from '@/lib/queries/sessions'
 import { useRestoreScroll }                     from '@/hooks/useScrollRestoration'
-import { formatDuration, formatDateLong }       from '@/lib/formatters'
+import { formatDuration, formatDateLong, formatSeconds } from '@/lib/formatters'
 import { Spinner }                              from '@/components/ui/Spinner'
 import { ErrorState }                          from '@/components/ui/ErrorState'
 import { DeleteSessionButton }                 from '@/components/session/DeleteSessionButton'
@@ -242,7 +242,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
                                 {[
                                   s.weight != null ? `${s.weight}` : null,
                                   s.reps   != null ? `${s.reps} reps` : null,
-                                  s.durationSeconds != null ? `${s.durationSeconds}s` : null,
+                                  s.durationSeconds != null ? formatSeconds(s.durationSeconds) : null,
                                 ].filter(Boolean).join(' × ')}
                               </span>
 

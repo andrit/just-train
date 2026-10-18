@@ -153,7 +153,7 @@ export function WorkoutBlock({
                       const last = prevEx.sets[prevEx.sets.length - 1]
                       return (
                         <p className="text-[9px] font-mono text-gray-400 mt-1 truncate">
-                          {last.weight != null ? `${last.weight}×` : ''}{last.reps ?? last.durationSeconds ?? '—'}
+                          {last.weight != null ? `${last.weight}×` : ''}{last.reps ?? (last.durationSeconds != null ? formatSeconds(last.durationSeconds) : '—')}
                         </p>
                       )
                     })()}

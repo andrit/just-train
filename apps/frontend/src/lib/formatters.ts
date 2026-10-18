@@ -150,7 +150,7 @@ export function formatSetSummary(set: {
   if (set.weight         != null) parts.push(String(set.weight))
   if (set.weight != null && repsStr != null) parts.push('×')
   if (repsStr            != null) parts.push(repsStr)
-  if (set.durationSeconds!= null) parts.push(`${set.durationSeconds}s`)
+  if (set.durationSeconds!= null) parts.push(formatSeconds(set.durationSeconds))
   if (set.distance       != null) parts.push(`${set.distance}m`)
   if (set.intensity      != null) parts.push(set.intensity)
   return parts.join(' ')

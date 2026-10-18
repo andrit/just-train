@@ -22,9 +22,8 @@ Captured from the user's own training sessions. Small, concrete, not yet schedul
 When: next live-session UX pass, or as soon as a screenshot pins it down.
 What: reviewing a completed session, content at the very bottom is cramped / cut off. Needs a screenshot to see exactly which view (`SessionHistoryPanel` vs standalone `SessionHistoryPage`) and what's clipped — likely a `pb-nav-clear` / `pb-sheet-bottom` gap, but confirm before touching. **Ask the user for a screenshot.**
 
-### Cable Crossover — add position + grip variants (2026-10-18)
-When: alongside the next exercise-library edit (pairs naturally with the Corkscrew-curls formalize workflow).
-What: the user wants Cable Crossover to distinguish **up / down** (pulley height — low-to-high vs high-to-low) and **regular/parallel** grip, plus a **single**-arm variant. Decide the model: separate library exercises (e.g. "Cable Crossover (Low)", "Single-Arm Cable Crossover") vs a variant field — there is no exercise-variant concept today, so separate named exercises is the likely path (matches how the library already handles close variants). Add muscle data for each (chest primary; the up/down angle shifts upper vs lower pec emphasis — reflect in secondary). Confirm the exact set of variants with the user before authoring.
+### Cable Crossover — position variants ✅ DONE (2026-10-18)
+Split into three public exercises by pulley height — **High** (high→low), **Middle** (parallel), **Low** (low→high) — via `docs/sql/split-cable-crossover.sql` (history on the old generic repointed to Low, generic deleted; each gets `pectoralis_major` primary + `deltoid_anterior` secondary). The user's "regular/parallel" is Middle; **up/down** map to Low/High. A **single-arm** variant was discussed but not built — revisit if wanted (would be a 4th exercise, `laterality: unilateral`).
 
 ---
 

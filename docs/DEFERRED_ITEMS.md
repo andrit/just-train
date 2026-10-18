@@ -18,9 +18,8 @@ At the start of each phase, review this list:
 
 Captured from the user's own training sessions. Small, concrete, not yet scheduled.
 
-### Session review — not enough room at the bottom (2026-10-18)
-When: next live-session UX pass, or as soon as a screenshot pins it down.
-What: reviewing a completed session, content at the very bottom is cramped / cut off. Needs a screenshot to see exactly which view (`SessionHistoryPanel` vs standalone `SessionHistoryPage`) and what's clipped — likely a `pb-nav-clear` / `pb-sheet-bottom` gap, but confirm before touching. **Ask the user for a screenshot.**
+### Session review — not enough room at the bottom ✅ DONE (2026-10-18)
+Screenshot (`app-snapshots/scroll-cutoff.png`) pinned it to the slide-in `SessionHistoryPanel`: a `z-[10]` scroll container under the `z-50` tab bar whose last block had only `py-4`, so the final set hid behind the bar unscrollably. Fixed with `pb-nav-clear md:pb-8` on the breakdown block (`py-4`→`pt-4` so the bottom token wins). Standalone `SessionHistoryPage` was already fine (inside `<main>`, which has `pb-nav-clear`).
 
 ### Cable Crossover — position variants ✅ DONE (2026-10-18)
 Split into three public exercises by pulley height — **High** (high→low), **Middle** (parallel), **Low** (low→high) — via `docs/sql/split-cable-crossover.sql` (history on the old generic repointed to Low, generic deleted; each gets `pectoralis_major` primary + `deltoid_anterior` secondary). The user's "regular/parallel" is Middle; **up/down** map to Low/High. A **single-arm** variant was discussed but not built — revisit if wanted (would be a 4th exercise, `laterality: unilateral`).

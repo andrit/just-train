@@ -175,7 +175,10 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
       </div>
 
       {/* Exercise breakdown */}
-      <div className="px-4 py-4 space-y-3 flex-1">
+      {/* pb-nav-clear: the panel is a z-[10] scroll container under the z-50
+          mobile tab bar, so the last row must clear the bar (+ safe-area) or it
+          sits behind it unscrollable. md:pb-8 — on desktop the nav is a sidebar. */}
+      <div className="px-4 pt-4 space-y-3 flex-1 pb-nav-clear md:pb-8">
         <SessionExerciseBreakdown
           sessionExercises={session.sessionExercises ?? []}
           prFilter={prFilterOn}

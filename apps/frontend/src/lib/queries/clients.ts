@@ -32,6 +32,7 @@ import type {
   CreateClientSnapshotInput,
   ClientKpiResponse,
   ExerciseProgressResponse,
+  VolumeHistoryResponse,
 } from '@trainer-app/shared'
 
 // ── Query key factory ─────────────────────────────────────────────────────────
@@ -335,6 +336,18 @@ export function useExerciseProgress(
         `/clients/${clientId}/exercise-progress/${exerciseId}`
       ),
     enabled:  !!accessToken && !!clientId && !!exerciseId,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useVolumeHistory(
+  clientId: string | null,
+): UseQueryResult<VolumeHistoryResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  return useQuery({
+    queryKey: ['volume-history', clientId],
+    queryFn:  () => apiClient<VolumeHistoryResponse>(`/clients/${clientId}/volume-history`),
+    enabled:  !!accessToken && !!clientId,
     staleTime: 1000 * 60 * 5,
   })
 }

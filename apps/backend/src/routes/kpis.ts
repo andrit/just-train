@@ -32,6 +32,7 @@ import { mostRecentSessionSets } from '../lib/exerciseHistory'
 import {
   ClientKpiResponseSchema,
   ExerciseProgressResponseSchema,
+  VolumeHistoryResponseSchema,
   UuidParamSchema,
   ErrorResponseSchema,
   setVolume,
@@ -611,6 +612,71 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercise progress' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // GET /clients/:id/volume-history
+  //
+  // Total volume (sum of weight×reps, per-side aware) for each of the most
+  // recent completed sessions, returned oldest → newest for a left-to-right
+  // trend chart. Self-client (athlete) scoped. All completed sessions count,
+  // including zero-volume (e.g. cardio-only) ones.
+  // ----------------------------------------------------------
+  app.get('/clients/:id/volume-history', {
+    schema: {
+      tags:     ['Clients'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Total volume per completed session',
+      description: 'Per-session total volume for the most recent completed sessions, chronological. Self-client scoped.',
+      params:   UuidParamSchema,
+      response: {
+        200: VolumeHistoryResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: clientId } = request.params as z.infer<typeof UuidParamSchema>
+
+    try {
+      // Ownership — the client must belong to this trainer.
+      const client = await db.query.clients.findFirst({
+        where: and(eq(clients.id, clientId), eq(clients.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!client) return reply.status(404).send({ error: 'Client not found' })
+
+      const recent = await db.query.sessions.findMany({
+        where: and(
+          eq(sessions.clientId, clientId),
+          eq(sessions.status, 'completed'),
+        ),
+        columns: { id: true, date: true, name: true },
+        with: { sessionExercises: { with: { sets: true } } },
+        orderBy: desc(sessions.date),
+        limit: 12,
+      })
+
+      // desc from the DB → reverse to chronological (oldest → newest).
+      const points = recent
+        .map((s) => ({
+          sessionId: s.id,
+          date:      s.date,
+          name:      s.name ?? null,
+          volume:    Math.round(
+            s.sessionExercises.reduce(
+              (acc, se) => acc + se.sets.reduce((c, set) => c + setVolume(set), 0),
+              0,
+            ),
+          ),
+        }))
+        .reverse()
+
+      return reply.send({ points })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to fetch volume history' })
     }
   })
 }

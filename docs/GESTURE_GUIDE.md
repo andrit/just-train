@@ -53,6 +53,12 @@ In an exercise picker, swipe a row to the right to drop it straight into the blo
 Blocks and exercises in the plan/template builder have a grip handle. Press and drag it to reorder; the item lifts as you pick it up and settles into place when you drop it. The new order saves on its own.
 *Where:* session plan, template builder · *Under the hood:* `SortableWorkoutList`, `@dnd-kit`
 
+### Charts
+
+**Hover or focus a volume bar → read it; tap it → open that session.**
+On the "Volume per session" chart in My Training, pointing at (or tabbing to) a bar updates the readout above it with that session's volume and date; the latest session shows by default. Tapping a bar opens that session's history.
+*Where:* My Training landing · *Under the hood:* `VolumeBySession`
+
 ### Inputs
 
 **Drag a number up or down → change it.**

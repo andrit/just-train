@@ -20,6 +20,7 @@ import { useSessionStore }                   from '@/store/sessionStore'
 import { useNav }                            from '@/services/navService'
 import { KpiHero }                           from '@/components/kpi/KpiHero'
 import { RecentSessionsWidget }              from '@/components/dashboard/widgets/RecentSessionsWidget'
+import { VolumeBySession }                   from '@/components/charts/VolumeBySession'
 import { OverviewTab }                       from '@/components/client-profile/OverviewTab'
 import { TimelineTab }                       from '@/components/client-profile/TimelineTab'
 import { BaselineTab }                       from '@/components/client-profile/BaselineTab'
@@ -34,7 +35,7 @@ import {
   isBaselineIncomplete,
 } from '@/components/clients/utils'
 import {
-  useSelfClient, useClientSnapshots, useClientKpis,
+  useSelfClient, useClientSnapshots, useClientKpis, useVolumeHistory,
 } from '@/lib/queries/clients'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -104,6 +105,7 @@ export default function MyTrainingPage(): React.JSX.Element {
   const { data: client,    isLoading, error } = useSelfClient()
   const { data: snapshots }                   = useClientSnapshots(client?.id ?? null)
   const { data: kpis, isLoading: kpisLoading } = useClientKpis(client?.id)
+  const { data: volume }                       = useVolumeHistory(client?.id ?? null)
 
   if (isLoading) {
     return (
@@ -181,6 +183,13 @@ export default function MyTrainingPage(): React.JSX.Element {
         <div className="mb-5">
           <RecentSessionsWidget />
         </div>
+
+        {/* Volume trend — total volume per completed session */}
+        {volume && (
+          <div className="mb-5">
+            <VolumeBySession points={volume.points} />
+          </div>
+        )}
 
         {/* Tabs */}
         <div

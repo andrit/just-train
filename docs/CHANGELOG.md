@@ -7,6 +7,25 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### My Training — volume-per-session chart (first trend graph, 2026-10-19)
+- **The first of the planned training graphs: total volume per completed session**, on the My
+  Training landing below Recent Sessions. A compact bar chart — one bar per session (most recent 12,
+  oldest → newest), single Command-Blue hue (magnitude, so no legend; the title names it), bars
+  anchored to a baseline with rounded data-ends and a 2px gap. Hovering/focusing a bar updates a
+  readout (volume + date; latest by default); tapping a bar opens that session's history. Empty state
+  for a new athlete. Dependency-free inline HTML/SVG in the spirit of `Sparkline` / `MuscleMap`
+  (`components/charts/VolumeBySession.tsx`); built against the dataviz guidance (color last, text in
+  ink tokens, baseline + rounded ends, a hover layer).
+- **Backend:** new `GET /clients/:id/volume-history` (in `kpis.ts`, self-client scoped like the other
+  client-KPI routes) — the most recent 12 completed sessions with total volume each (sum of
+  weight×reps via the shared `setVolume`, per-side aware), returned chronological. All completed
+  sessions count, including zero-volume (cardio-only) ones. Shared `VolumeHistoryResponseSchema` +
+  `VolumeHistoryPoint`; frontend `useVolumeHistory` hook (`enabled: !!accessToken`). TDD tests (401 /
+  404-unowned / empty / computed-and-chronological) and the required ownership-matrix line (G3).
+- **Queued, not built:** a dynamic Home body figure (male/female, picked in Settings) heat-mapping
+  per-body-part training frequency over the past month, above the Train CTA, no-scroll —
+  `.workbench/designer/current/task-plan-home-body-heatmap.md`.
+
 ### My Training — headline KPI row (2026-10-19)
 - **The "are you moving forward?" answer no longer needs a swipe.** The KPI hero was a single
   carousel of all nine stats, so the three signals that actually answer the question — **Streak**,

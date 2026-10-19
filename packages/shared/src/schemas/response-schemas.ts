@@ -675,6 +675,23 @@ export const ExerciseProgressResponseSchema = z.object({
 export type ExerciseProgressResponse = z.infer<typeof ExerciseProgressResponseSchema>
 
 // ============================================================
+// VOLUME HISTORY — total volume per completed session, for the trend chart
+// ============================================================
+
+export const VolumeHistoryPointSchema = z.object({
+  sessionId: z.string().uuid(),
+  date:      z.string().describe('Session date (YYYY-MM-DD)'),
+  name:      z.string().nullable(),
+  volume:    z.number().describe('Total session volume (sum of weight×reps, per-side aware), rounded'),
+})
+export type VolumeHistoryPoint = z.infer<typeof VolumeHistoryPointSchema>
+
+export const VolumeHistoryResponseSchema = z.object({
+  points: z.array(VolumeHistoryPointSchema).describe('Completed sessions in chronological order (oldest → newest)'),
+})
+export type VolumeHistoryResponse = z.infer<typeof VolumeHistoryResponseSchema>
+
+// ============================================================
 // SNAPSHOT MEDIA (v2.12.0) — progress photos attached to snapshots
 // ============================================================
 

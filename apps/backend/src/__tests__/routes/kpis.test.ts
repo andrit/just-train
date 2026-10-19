@@ -149,3 +149,72 @@ describe('GET /clients/:id/personal-bests', () => {
     expect(res.json()).toEqual([])
   })
 })
+
+// ── GET /clients/:id/volume-history ───────────────────────────────────────────
+
+describe('GET /clients/:id/volume-history', () => {
+  let app: Awaited<ReturnType<typeof buildKpiTestApp>>
+  beforeAll(async () => { app = await buildKpiTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const SESSION_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+  const SESSION_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+
+  it('returns 401 without auth', async () => {
+    const res = await app.inject({ method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/volume-history` })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when client does not belong to trainer', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(undefined)
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/volume-history`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns empty points for an owned client with no sessions', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    // sessions.findMany defaults to [] → no points
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/volume-history`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ points: [] })
+  })
+
+  it('computes per-session volume and returns points oldest → newest', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    // Returned by the DB in desc date order (newest first); the route reverses.
+    vi.mocked(db.query.sessions.findMany).mockResolvedValueOnce([
+      {
+        id: SESSION_A, date: '2026-01-02', name: 'Day 2',
+        sessionExercises: [
+          { sets: [{ weight: 100, reps: 10, perSide: false, repsLeft: null, repsRight: null }] },
+        ],
+      },
+      {
+        id: SESSION_B, date: '2026-01-01', name: null,
+        sessionExercises: [
+          { sets: [{ weight: 50, reps: 10, perSide: false, repsLeft: null, repsRight: null }] },
+        ],
+      },
+    ] as never)
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/volume-history`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.points).toHaveLength(2)
+    // Chronological: oldest (Jan 1, 500) first, newest (Jan 2, 1000) last.
+    expect(body.points[0]).toMatchObject({ sessionId: SESSION_B, date: '2026-01-01', name: null, volume: 500 })
+    expect(body.points[1]).toMatchObject({ sessionId: SESSION_A, date: '2026-01-02', name: 'Day 2', volume: 1000 })
+  })
+})

@@ -18,6 +18,10 @@ At the start of each phase, review this list:
 
 Captured from the user's own training sessions. Small, concrete, not yet scheduled.
 
+### Explore light theme / dark theme (2026-10-19)
+When: a dedicated theming pass.
+What: The app is currently dark-only (`docs/COLOR_SYSTEM.md`, near-black ground; the body heat-map and `MuscleMap` even hardcode dark-surface fills — `BASE_FILL #3F444C`, `HOT_FILL #D91B1B` — rather than reading tokens). Explore a proper light/dark theme system: a user preference (follows `prefers-color-scheme` + explicit override), token-driven surfaces so components stop hardcoding colors, and a sweep of the `self-contained palette` spots (charts, `MuscleMap`/`BodyHeatMap`, any inline hex) onto semantic tokens. Scope the work and decide whether light is a launch goal or post-v3.
+
 ### Athlete progression phase — review labels, then consider deriving it from data (2026-10-18)
 When: a dedicated athlete-insights pass (the data-derived part is Insight-context work, akin to the KPI/stall-detection roadmap).
 What: Shipped 2026-10-18 — athletes now see `assessment/programming/maintenance` relabelled **Baseline / Building / Maintaining** (`progressionStateLabel(state, isAthlete)` in `components/clients/utils.ts`; trainer views unchanged). Two open directions the user flagged:

@@ -20,6 +20,7 @@ import { cn } from '@/lib/cn'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Spinner } from '@/components/ui/Spinner'
 import { useExercises } from '@/lib/queries/exercises'
+import { heatFill } from './heatRamp'
 import { MUSCLE_BODY_PART, MUSCLE_LABEL } from '@trainer-app/shared'
 import type { Muscle, BodyPart, MuscleFrequencyCount } from '@trainer-app/shared'
 
@@ -28,10 +29,6 @@ const GROUP_LABEL: Record<string, string> = {
   chest: 'Chest', back: 'Back', shoulders: 'Shoulders',
   arms: 'Arms', core: 'Core', legs: 'Legs', full_body: 'Full Body',
 }
-
-const HOT_FILL    = '#D91B1B'  // Ember Red — matches the heat-map
-const BASE_FILL    = '#3F444C'
-const MIN_OPACITY = 0.3
 
 interface BodyBreakdownSheetProps {
   open:    boolean
@@ -114,7 +111,6 @@ export function BodyBreakdownSheet({ open, onClose, counts }: BodyBreakdownSheet
               <p className="section-label">{GROUP_LABEL[bodyPart] ?? bodyPart}</p>
               <div className="mt-1">
                 {muscles.map(({ muscle, count }) => {
-                  const op     = count > 0 ? MIN_OPACITY + (count / max) * (1 - MIN_OPACITY) : 0
                   const isOpen = expanded === muscle
                   return (
                     <div key={muscle} className="border-b border-surface-border/40 last:border-0">
@@ -126,7 +122,7 @@ export function BodyBreakdownSheet({ open, onClose, counts }: BodyBreakdownSheet
                       >
                         <span
                           className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: op ? HOT_FILL : BASE_FILL, opacity: op || 1 }}
+                          style={{ backgroundColor: heatFill(count, max) }}
                           aria-hidden
                         />
                         <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-gray-200' : 'text-gray-500')}>

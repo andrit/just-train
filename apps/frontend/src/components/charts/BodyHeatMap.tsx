@@ -5,10 +5,14 @@
 // by how often it was trained in the last 30 days — a glanceable "what am I
 // actually hitting?" heat-map. Reuses MuscleMap's vendored region geometry
 // (muscleMapData) and the MUSCLE_TO_REGION mapping; only the coloring differs
-// (a single sequential Ember-Red ramp keyed to frequency, not primary/secondary
-// roles).
+// (a sequential frequency ramp, not primary/secondary roles).
 //
-// Intensity is NORMALIZED to the athlete's own busiest region, so something
+// Coloring is a single-hue sequential scale in DISCRETE buckets: untrained =
+// gray, then three Command-Blue tiers (low/med/high) that brighten with
+// frequency so the busiest region pops on the dark ground. Blue, not red — red
+// on a body reads as soreness/injury. Magnitude = one hue, never a rainbow.
+//
+// Tiers are NORMALIZED to the athlete's own busiest region, so the top tier
 // always lights up. A region's value is the MAX session-count among the muscles
 // that map to it (summing would double-count a session that hit two of them).
 //
@@ -19,16 +23,13 @@
 
 import { cn } from '@/lib/cn'
 import { MUSCLE_TO_REGION } from './MuscleMap'
+import { heatFill } from './heatRamp'
 import {
   ANTERIOR_REGIONS, POSTERIOR_REGIONS, MUSCLE_MAP_VIEWBOX, type BodyRegion,
 } from './muscleMapData'
 import type { MuscleFrequencyCount } from '@trainer-app/shared'
 
-// Self-contained palette (reads on the dark surface), aligned with MuscleMap.
-const BASE_FILL   = '#3F444C'  // untrained region
 const BASE_STROKE = '#2A2E34'
-const HOT_FILL    = '#D91B1B'  // Ember Red — "trained"
-const MIN_OPACITY = 0.3        // any trained region is clearly redder than base
 
 interface BodyHeatMapProps {
   counts:     MuscleFrequencyCount[]
@@ -45,28 +46,25 @@ export function BodyHeatMap({ counts, className }: BodyHeatMapProps): React.JSX.
   }
   const max = Math.max(1, ...regionValue.values())
 
-  // Normalized fill opacity for a region (0 → base gray, else floor..1 of red).
-  const opacityOf = (region: BodyRegion): number | null => {
-    const v = regionValue.get(region)
-    if (!v) return null
-    return MIN_OPACITY + (v / max) * (1 - MIN_OPACITY)
-  }
+  // Fill color for a region, bucketed from its frequency normalized to the
+  // busiest region (gray if untrained). Shared ramp — see heatRamp.ts.
+  const fillOf = (region: BodyRegion): string => heatFill(regionValue.get(region) ?? 0, max)
 
   return (
     <div className={cn('flex items-stretch justify-center gap-4 w-full', className)}>
-      <Figure label="Front" regions={ANTERIOR_REGIONS}  opacityOf={opacityOf} />
-      <Figure label="Back"  regions={POSTERIOR_REGIONS} opacityOf={opacityOf} />
+      <Figure label="Front" regions={ANTERIOR_REGIONS}  fillOf={fillOf} />
+      <Figure label="Back"  regions={POSTERIOR_REGIONS} fillOf={fillOf} />
     </div>
   )
 }
 
 interface FigureProps {
-  label:     string
-  regions:   Record<BodyRegion, string[]>
-  opacityOf: (region: BodyRegion) => number | null
+  label:   string
+  regions: Record<BodyRegion, string[]>
+  fillOf:  (region: BodyRegion) => string
 }
 
-function Figure({ label, regions, opacityOf }: FigureProps): React.JSX.Element {
+function Figure({ label, regions, fillOf }: FigureProps): React.JSX.Element {
   return (
     <div className="flex-1 min-h-0 min-w-0 flex flex-col items-center">
       {/* flex-1 svg → height-driven; preserveAspectRatio centers the body. */}
@@ -78,13 +76,12 @@ function Figure({ label, regions, opacityOf }: FigureProps): React.JSX.Element {
         aria-label={`${label} view — muscles shaded by how often trained in the last 30 days`}
       >
         {Object.entries(regions).map(([region, polygons]) => {
-          const op = opacityOf(region)
+          const fill = fillOf(region as BodyRegion)
           return polygons.map((points) => (
             <polygon
               key={points}
               points={points}
-              fill={op === null ? BASE_FILL : HOT_FILL}
-              fillOpacity={op ?? 1}
+              fill={fill}
               stroke={BASE_STROKE}
               strokeWidth={2}
             />

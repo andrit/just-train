@@ -33,7 +33,7 @@ Versions follow [Semantic Versioning](https://semver.org/).
   (Tibialis Ant., Soleus), so "the shin muscle" / "that forearm muscle" are reachable even though they
   never light up on the body. **Both ends shown:** a highlights strip (most-trained muscle + how many
   are untrained) and, within each group, muscles sorted busiest-first with untrained ones shown cold
-  (not hidden). Intensity dot reuses the heat-map's Ember-Red ramp.
+  (not hidden). Intensity dot reuses the heat-map's shared ramp (`heatRamp.ts`).
 - **Frontend-only — no backend.** It's fed the `muscle-frequency` counts Home already fetches; grouping
   and labels are existing shared data. Whole-figure tap (no per-polygon hot-spots); reuses `BottomSheet`
   (swipe/backdrop/Esc). Rows are display-only in v1. New `components/charts/BodyBreakdownSheet.tsx`;
@@ -66,10 +66,15 @@ Versions follow [Semantic Versioning](https://semver.org/).
   volume) — the literal widens to an enum then. TDD tests (401 / 404 / empty / distinct-session count)
   + the G3 ownership-matrix line.
 - **Frontend:** `BodyHeatMap.tsx` reuses `MuscleMap`'s vendored region geometry and its
-  `MUSCLE_TO_REGION` map (now exported) — only the coloring differs: a single **Ember-Red sequential**
-  ramp **normalized** to the athlete's busiest region (0.3 opacity floor so any trained region reads as
-  hot), untrained regions stay base-gray. Per the dataviz guidance (single-hue magnitude, color last,
-  text in ink tokens). Fed by the new `useMuscleFrequency` hook.
+  `MUSCLE_TO_REGION` map (now exported) — only the coloring differs: a single-hue **Command-Blue
+  sequential** ramp in **three discrete buckets** (low/med/high, brightening with frequency),
+  **normalized** to the athlete's busiest region so the top tier always lights up; untrained regions
+  stay base-gray. Per the dataviz guidance (single-hue magnitude, discrete buckets, color last, text in
+  ink tokens). **Blue, not red** — red on a body reads as soreness/injury, not "well-trained." Fed by
+  the new `useMuscleFrequency` hook.
+  - The ramp lives in one shared module, `components/charts/heatRamp.ts` (`heatFill(value, max)`), so
+    the figure and the Body breakdown sheet's per-muscle intensity dot (`BodyBreakdownSheet.tsx`) draw
+    from the same tiers and can't drift — the sheet had kept the old Ember-Red ramp until this.
 - **Decisions (asked):** fine muscle-region granularity (not the 7 body parts); sessions as the count
   unit with the noted toggle seam; normalized scale. **Deferred:** the male/female figure preference
   and a female silhouette asset (we only have one, neutral/male, silhouette — `muscleMapData.ts`), and

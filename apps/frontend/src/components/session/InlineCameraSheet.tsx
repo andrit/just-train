@@ -37,7 +37,11 @@ interface InlineCameraSheetProps {
   allowVideo?: boolean
 }
 
-type CameraState = 'loading' | 'ready' | 'recording' | 'preview' | 'fallback'
+// 'fallback' = getUserMedia unavailable/denied (no viewfinder possible).
+// 'blocked'  = getUserMedia resolved but the stream delivers no frames
+//              (installed-PWA permission scope differs, or the camera is
+//              held by another app) — a black viewfinder with a reason.
+type CameraState = 'loading' | 'ready' | 'recording' | 'preview' | 'fallback' | 'blocked'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -53,6 +57,7 @@ export function InlineCameraSheet({
   const streamRef    = useRef<MediaStream | null>(null)
   const chunksRef    = useRef<Blob[]>([])
   const timerRef     = useRef<ReturnType<typeof setInterval> | null>(null)
+  const frameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [state, setState]         = useState<CameraState>('loading')
@@ -66,7 +71,11 @@ export function InlineCameraSheet({
   // ── Start camera ────────────────────────────────────────────────────────
 
   const startCamera = useCallback(async (facingMode: 'environment' | 'user') => {
-    // Clean up existing stream
+    // Clean up existing stream + any pending frame watchdog
+    if (frameTimerRef.current) {
+      clearTimeout(frameTimerRef.current)
+      frameTimerRef.current = null
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop())
     }
@@ -80,7 +89,30 @@ export function InlineCameraSheet({
       if (videoRef.current) {
         videoRef.current.srcObject = stream
       }
+
+      // A resolved stream is not proof of frames. With no video track there
+      // is nothing to show at all — go straight to the blocked message.
+      if (stream.getVideoTracks().length === 0) {
+        stream.getTracks().forEach((t) => t.stop())
+        streamRef.current = null
+        setState('blocked')
+        return
+      }
+
       setState('ready')
+
+      // Watchdog: a healthy camera reports videoWidth > 0 well within 2s.
+      // If it's still 0, the stream is live-but-empty (black viewfinder) —
+      // stop it and tell the user why rather than leaving a black box.
+      frameTimerRef.current = setTimeout(() => {
+        frameTimerRef.current = null
+        const hasFrames = (videoRef.current?.videoWidth ?? 0) > 0
+        if (streamRef.current === stream && !hasFrames) {
+          stream.getTracks().forEach((t) => t.stop())
+          streamRef.current = null
+          setState('blocked')
+        }
+      }, 2000)
     } catch {
       // getUserMedia not supported or permission denied — use fallback
       setState('fallback')
@@ -107,6 +139,7 @@ export function InlineCameraSheet({
         recorderRef.current.stop()
       }
       if (timerRef.current) clearInterval(timerRef.current)
+      if (frameTimerRef.current) clearTimeout(frameTimerRef.current)
       if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only on open/facing
@@ -115,6 +148,8 @@ export function InlineCameraSheet({
   // ── Capture photo ─────────────────────────────────────────────────────────
 
   const capturePhoto = (): void => {
+    // We have frames — the blocked watchdog is moot now.
+    if (frameTimerRef.current) { clearTimeout(frameTimerRef.current); frameTimerRef.current = null }
     const video  = videoRef.current
     const canvas = canvasRef.current
     if (!video || !canvas) return
@@ -140,6 +175,8 @@ export function InlineCameraSheet({
   const startRecording = (): void => {
     if (!streamRef.current) return
 
+    // We have frames — the blocked watchdog is moot now.
+    if (frameTimerRef.current) { clearTimeout(frameTimerRef.current); frameTimerRef.current = null }
     chunksRef.current = []
     setRecordTime(0)
 
@@ -247,23 +284,40 @@ export function InlineCameraSheet({
     <BottomSheet open={open} onClose={resetAndClose} title="Capture" maxHeight="90vh">
       <div className="px-4 pb-6">
 
-        {/* Fallback mode */}
-        {state === 'fallback' && (
+        {/* Fallback (no camera API) and blocked (resolved but no frames) */}
+        {(state === 'fallback' || state === 'blocked') && (
           <div className="text-center py-8">
             <p className="text-sm text-gray-400 mb-4">
-              Camera access unavailable. Use your device camera instead.
+              {state === 'blocked'
+                ? 'Camera is blocked or in use. Allow camera access for this app in your device settings — an installed app asks separately from the browser — or pick a file instead.'
+                : 'Camera access unavailable. Use your device camera instead.'}
             </p>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className={cn(
-                'px-6 py-3 rounded-xl bg-command-blue text-white font-medium',
-                interactions.button.base,
-                interactions.button.press,
+            <div className="flex items-center justify-center gap-3">
+              {state === 'blocked' && (
+                <button
+                  type="button"
+                  onClick={() => { setState('loading'); startCamera(facing) }}
+                  className={cn(
+                    'px-6 py-3 rounded-xl border border-surface-border text-gray-300',
+                    'hover:bg-surface transition-colors',
+                    interactions.button.base,
+                  )}
+                >
+                  Try again
+                </button>
               )}
-            >
-              Open Camera
-            </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={cn(
+                  'px-6 py-3 rounded-xl bg-command-blue text-white font-medium',
+                  interactions.button.base,
+                  interactions.button.press,
+                )}
+              >
+                {state === 'blocked' ? 'Choose a file' : 'Open Camera'}
+              </button>
+            </div>
             <input
               ref={fileInputRef}
               type="file"

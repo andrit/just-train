@@ -125,9 +125,9 @@ Also small, separate: **clear `cloudinary-media` from Cache Storage on sign-out*
 
 ---
 
-### Camera sheet — say why the viewfinder is black
-When: next session-media UX pass, or the first support question about it.
-What: `InlineCameraSheet` falls back to the file picker when `getUserMedia` *rejects*, but when it resolves with a stream that renders nothing (installed Android PWA whose WebAPK permission differs from the browser's; camera held by another app) the user gets a silent black rectangle. Seen 2026-09-17 on the first launch from the new origin (`www.just-train.fit` is a new permission scope). Fix: detect a stream with no live video track / no frames after ~2 s and show "Camera blocked — allow it in the app's permissions, or pick a file", with the file-picker fallback offered right there.
+### Camera sheet — say why the viewfinder is black ✅ DONE (2026-10-19)
+`InlineCameraSheet` now has a `'blocked'` state, reached when `getUserMedia` resolves but the stream has no video track, or `videoRef.videoWidth` is still 0 after a 2 s watchdog — i.e. a live-but-empty stream (installed-PWA permission scope differs from the browser; camera held by another app). The watchdog stops the dead stream and shows "Camera is blocked or in use. Allow camera access for this app in your device settings … or pick a file", with **Try again** (re-runs `getUserMedia`, fixes the transient camera-in-use case) and **Choose a file** (the existing file-picker fallback) side by side. `'fallback'` (getUserMedia unavailable/denied) is unchanged. The watchdog is cleared on a real capture, on camera flip, and on close, so it can't flip a working viewfinder.
+Original note: falls back only when `getUserMedia` *rejects*; a resolved-but-empty stream gave a silent black rectangle. Seen 2026-09-17 on the first launch from `www.just-train.fit` (a new permission scope).
 
 ---
 

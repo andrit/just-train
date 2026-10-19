@@ -17,7 +17,8 @@
 //   Search
 // ------------------------------------------------------------
 
-import { useState, useDeferredValue }       from 'react'
+import { useState, useDeferredValue, useEffect } from 'react'
+import { useLocation, useNavigate }           from 'react-router-dom'
 import { cn }                                from '@/lib/cn'
 import { useExercises, useBodyParts }        from '@/lib/queries/exercises'
 import { BottomSheet }                       from '@/components/ui/BottomSheet'
@@ -55,6 +56,19 @@ export default function ExercisesPage(): React.JSX.Element {
   const [draftsOnly,       setDraftsOnly]       = useState(false)
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null)
   const [createOpen,       setCreateOpen]       = useState(false)
+
+  // Deep-link: the Home body breakdown (and anything else) can navigate here with
+  // { state: { openExerciseId } } to open a specific exercise's detail. Consume
+  // it once, then clear the router state so a remount doesn't reopen it.
+  const location = useLocation()
+  const navigate = useNavigate()
+  useEffect(() => {
+    const id = (location.state as { openExerciseId?: string } | null)?.openExerciseId
+    if (id) {
+      setActiveExerciseId(id)
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location.state, location.pathname, navigate])
 
   const search = useDeferredValue(rawSearch.trim())
 

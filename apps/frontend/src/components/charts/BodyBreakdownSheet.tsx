@@ -14,9 +14,12 @@
 // (needs the GET /exercises?muscle= seam). See task-plan-body-sheet.md.
 // ------------------------------------------------------------
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/cn'
 import { BottomSheet } from '@/components/ui/BottomSheet'
+import { Spinner } from '@/components/ui/Spinner'
+import { useExercises } from '@/lib/queries/exercises'
 import { MUSCLE_BODY_PART, MUSCLE_LABEL } from '@trainer-app/shared'
 import type { Muscle, BodyPart, MuscleFrequencyCount } from '@trainer-app/shared'
 
@@ -37,6 +40,16 @@ interface BodyBreakdownSheetProps {
 }
 
 export function BodyBreakdownSheet({ open, onClose, counts }: BodyBreakdownSheetProps): React.JSX.Element {
+  const navigate = useNavigate()
+  const [expanded, setExpanded] = useState<Muscle | null>(null)
+
+  // Tapping a suggested exercise opens its detail on the Exercises page (which
+  // carries the context-aware "Add to Workout" CTA), and closes this sheet.
+  const openExercise = (exerciseId: string): void => {
+    onClose()
+    navigate('/exercises', { state: { openExerciseId: exerciseId } })
+  }
+
   const { groups, max, topMuscle, neglectedCount } = useMemo(() => {
     const countOf = new Map<Muscle, number>()
     for (const c of counts) countOf.set(c.muscle, c.count)
@@ -101,20 +114,30 @@ export function BodyBreakdownSheet({ open, onClose, counts }: BodyBreakdownSheet
               <p className="section-label">{GROUP_LABEL[bodyPart] ?? bodyPart}</p>
               <div className="mt-1">
                 {muscles.map(({ muscle, count }) => {
-                  const op = count > 0 ? MIN_OPACITY + (count / max) * (1 - MIN_OPACITY) : 0
+                  const op     = count > 0 ? MIN_OPACITY + (count / max) * (1 - MIN_OPACITY) : 0
+                  const isOpen = expanded === muscle
                   return (
-                    <div key={muscle} className="flex items-center gap-3 py-1.5 border-b border-surface-border/40 last:border-0">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: op ? HOT_FILL : BASE_FILL, opacity: op || 1 }}
-                        aria-hidden
-                      />
-                      <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-gray-200' : 'text-gray-500')}>
-                        {MUSCLE_LABEL[muscle]}
-                      </span>
-                      <span className={cn('text-xs tabular-nums', count > 0 ? 'text-gray-400' : 'text-gray-600')}>
-                        {count > 0 ? `${count}×` : '—'}
-                      </span>
+                    <div key={muscle} className="border-b border-surface-border/40 last:border-0">
+                      <button
+                        type="button"
+                        onClick={() => setExpanded(isOpen ? null : muscle)}
+                        aria-expanded={isOpen}
+                        className="w-full flex items-center gap-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue rounded"
+                      >
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: op ? HOT_FILL : BASE_FILL, opacity: op || 1 }}
+                          aria-hidden
+                        />
+                        <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-gray-200' : 'text-gray-500')}>
+                          {MUSCLE_LABEL[muscle]}
+                        </span>
+                        <span className={cn('text-xs tabular-nums', count > 0 ? 'text-gray-400' : 'text-gray-600')}>
+                          {count > 0 ? `${count}×` : '—'}
+                        </span>
+                        <span className={cn('text-gray-600 text-xs transition-transform', isOpen && 'rotate-90')} aria-hidden>›</span>
+                      </button>
+                      {isOpen && <MuscleExercises muscle={muscle} onPick={openExercise} />}
                     </div>
                   )
                 })}
@@ -128,5 +151,45 @@ export function BodyBreakdownSheet({ open, onClose, counts }: BodyBreakdownSheet
         </p>
       </div>
     </BottomSheet>
+  )
+}
+
+// ── Exercises that target a muscle (loaded on expand) ──────────────────────────
+
+function MuscleExercises({ muscle, onPick }: {
+  muscle: Muscle
+  onPick: (exerciseId: string) => void
+}): React.JSX.Element {
+  const { data: exercises, isLoading } = useExercises({ muscle })
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-3">
+        <Spinner size="sm" className="text-gray-500" />
+      </div>
+    )
+  }
+
+  if (!exercises || exercises.length === 0) {
+    return <p className="text-xs text-gray-600 pb-3 pl-5">No library exercises target this muscle yet.</p>
+  }
+
+  return (
+    <div className="pb-2 pl-5 space-y-1">
+      {exercises.map((ex) => (
+        <button
+          key={ex.id}
+          type="button"
+          onClick={() => onPick(ex.id)}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-surface border border-surface-border hover:border-command-blue/30 text-left transition-colors"
+        >
+          <span className="text-sm text-gray-200 flex-1 truncate">{ex.name}</span>
+          <span className="text-[10px] uppercase tracking-wider text-gray-500 shrink-0">{ex.equipment}</span>
+          <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-gray-600 shrink-0" aria-hidden>
+            <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      ))}
+    </div>
   )
 }

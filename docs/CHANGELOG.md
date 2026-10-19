@@ -7,6 +7,23 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Body breakdown — tap a muscle → exercises that work it (Phase 2, 2026-10-19)
+- **The map becomes actionable.** In the body breakdown sheet, tapping a muscle row now expands it to
+  the **library exercises that target that muscle** (primary or secondary); tapping one opens its
+  detail on the Exercises page — where the existing context-aware "Add to Workout" CTA lives, so
+  add-to-session comes free. Turns a cold region straight into "here's how to work it."
+- **Backend seam — one `?muscle=<slug>` filter on `GET /exercises`** (`muscle: MuscleEnum.optional()`
+  added to the querystring). Implemented as a **two-step `inArray`** — resolve the exercise ids that
+  target the muscle from `exercise_muscles`, then filter the list by id — rather than a correlated
+  EXISTS subquery inside the relational `findMany` (whose root-table aliasing isn't guaranteed for raw
+  SQL). Simpler, no alias risk, trivial at library scale; no role ordering in v1 (name-ordered, either
+  role). No schema/shared change — `MuscleEnum` already existed. TDD: filters→matches, no-match→`[]`,
+  unknown muscle→`400`.
+- **Frontend:** `useExercises` gains a `muscle` filter; `BodyBreakdownSheet` rows are now expandable
+  (`MuscleExercises` loads on expand via the hook); a tapped suggestion routes to `/exercises` with
+  `state.openExerciseId`, and `ExercisesPage` consumes that once (then clears the router state) to open
+  the detail sheet. Deterministic, library-facts only — the LLM/KB tier stays a later initiative.
+
 ### Home — body breakdown sheet (tap the figure, Phase 1, 2026-10-19)
 - **The Home body figure is now tappable** → a "Body · last 30 days" bottom sheet that maps **every
   muscle**, grouped by body part, to how many sessions trained it. Phase 1 of the body-sheet plan: the

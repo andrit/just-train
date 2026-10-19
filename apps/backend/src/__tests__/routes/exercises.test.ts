@@ -219,6 +219,46 @@ describe('GET /api/v1/exercises', () => {
     expect(res.statusCode).toBe(200)
   })
 
+  it('filters by muscle — resolves ids then returns the matches', async () => {
+    const { db } = await import('../../db')
+    // The muscle filter first awaits db.select().from(exerciseMuscles).where(...)
+    // whose terminal in the mock is `_chain.where`.
+    ;(db as any)._chain.where.mockResolvedValueOnce([{ id: TEST_CLIENT_ID }])
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([makeExercise()])
+
+    const res = await app.inject({
+      method:  'GET',
+      url:     '/api/v1/exercises?muscle=obliques',
+      headers: { authorization: authHeader() },
+    })
+
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toHaveLength(1)
+  })
+
+  it('returns [] when no exercise targets the muscle', async () => {
+    const { db } = await import('../../db')
+    ;(db as any)._chain.where.mockResolvedValueOnce([])  // no exercise_muscles rows
+
+    const res = await app.inject({
+      method:  'GET',
+      url:     '/api/v1/exercises?muscle=obliques',
+      headers: { authorization: authHeader() },
+    })
+
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual([])
+  })
+
+  it('returns 400 for an unknown muscle', async () => {
+    const res = await app.inject({
+      method:  'GET',
+      url:     '/api/v1/exercises?muscle=nonsense',
+      headers: { authorization: authHeader() },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
   it('returns 400 for an invalid workoutType enum value', async () => {
     const res = await app.inject({
       method:  'GET',

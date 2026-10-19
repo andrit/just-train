@@ -47,6 +47,7 @@ export interface ExerciseFilters {
   workoutType?: string
   equipment?:  string
   isDraft?:    boolean
+  muscle?:     string
 }
 
 // ── Body Parts ────────────────────────────────────────────────────────────────
@@ -79,6 +80,7 @@ export function useExercises(filters?: ExerciseFilters): UseQueryResult<Exercise
   if (filters?.workoutType) params.set('workoutType', filters.workoutType)
   if (filters?.equipment)  params.set('equipment', filters.equipment)
   if (filters?.isDraft !== undefined) params.set('isDraft', String(filters.isDraft))
+  if (filters?.muscle)     params.set('muscle', filters.muscle)
 
   const qs = params.toString()
 

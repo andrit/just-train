@@ -22,7 +22,7 @@ import { routeLog } from '../lib/logger'
 import type { FastifyInstance } from 'fastify'
 import { authenticate } from '../middleware/authenticate'
 import { db, exercises, bodyParts, exerciseMedia, exerciseMuscles } from '../db'
-import { eq, and, ilike, or, isNull } from 'drizzle-orm'
+import { eq, and, ilike, or, isNull, inArray } from 'drizzle-orm'
 import { buildMuscleRows } from '../lib/exerciseMuscles'
 import {
   CreateExerciseSchema,
@@ -34,6 +34,7 @@ import {
   BodyPartListResponseSchema,
   ErrorResponseSchema,
   UuidParamSchema,
+  MuscleEnum,
 } from '@trainer-app/shared'
 import { z } from 'zod'
 
@@ -49,6 +50,8 @@ const ExerciseFilterSchema = z.object({
     .describe('Filter to draft exercises (true) or complete exercises (false)'),
   search: z.string().optional()
     .describe('Case-insensitive search on exercise name'),
+  muscle: MuscleEnum.optional()
+    .describe('Filter to exercises that target this muscle (primary or secondary)'),
 })
 
 export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
@@ -101,7 +104,7 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
       },
     },
   }, async (request, reply) => {
-    const { workoutType, bodyPartId, isDraft, search } =
+    const { workoutType, bodyPartId, isDraft, search, muscle } =
       request.query as z.infer<typeof ExerciseFilterSchema>
 
     try {
@@ -111,6 +114,20 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         isNull(exercises.trainerId),
       )
       const conditions = [ownerCondition]
+
+      // Muscle filter: resolve the exercise ids that target the muscle first,
+      // then filter by id. A two-step `inArray` (not a correlated subquery)
+      // keeps this inside the typed query builder — no raw-SQL aliasing risk —
+      // and the library is small enough that the extra round-trip is free.
+      if (muscle) {
+        const muscleRows = await db
+          .select({ id: exerciseMuscles.exerciseId })
+          .from(exerciseMuscles)
+          .where(eq(exerciseMuscles.muscle, muscle))
+        const ids = muscleRows.map((r) => r.id)
+        if (ids.length === 0) return reply.send([])
+        conditions.push(inArray(exercises.id, ids))
+      }
 
       if (workoutType) conditions.push(eq(exercises.workoutType, workoutType as never))
       if (bodyPartId)  conditions.push(eq(exercises.bodyPartId, bodyPartId))

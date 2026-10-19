@@ -23,9 +23,9 @@ _Resume pointer. Updated 2026-10-18. Full handover is in the `self:session-close
    client media); trainerMode default migration.
 
 ## Backlog (queued 2026-10-19 — after the current work)
-- **README is out of date — build phases incomplete.** Bring `README.md` current: the PWA SDLC /
-  version phases have moved well past what it lists (we're Phase 19 Go Live; versions through v2.14.x
-  + unreleased). Do after the in-flight queue is clear, or sooner if it slots in naturally.
+- ~~**README out of date**~~ ✅ DONE 2026-10-19 — Build Phases table rebuilt from PROJECT_STATE
+  (v1.0.0–v2.14.0 ✅, Unreleased section added), title → Just Train, CI/CD + verify gate + structure
+  + docs index refreshed.
 - ~~**Mode-variance**~~ ✅ COMPLETE 2026-10-19 (steps 1–6: registry + widget drift fix + vocabulary +
   nav + client-picker + route guard). Plan: `task-plan-mode-variance.md`. Only `nav` and `can` are the
   live registry consumers to extend when new mode-varying surfaces appear.

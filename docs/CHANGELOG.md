@@ -7,6 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Docs — README brought current (2026-10-19)
+- The root `README.md` had drifted badly: the Build Phases table marked v1.9.0 "🔨 Current" while
+  everything after it was ✅, and v2.12–v2.14 were mislabeled and wrong-status. Rebuilt the table from
+  `PROJECT_STATE.md` (all of v1.0.0–v2.14.0 ✅, v2.15.0 deferred, v3.0.0/v3.1.0 next), added an
+  **Unreleased (in flight)** section summarizing the untagged work, and a note that the PWA SDLC is at
+  **Phase 19, Go Live**. Also: renamed the title to **Just Train**; fixed the CI/CD section (lint is no
+  longer a no-op; added the G3 real-DB ownership-matrix lane) and the pre-commit `pnpm verify` gate;
+  refreshed the monorepo structure, terminology (Circuit/Snapshot/Challenge), and the docs index
+  (GESTURE_GUIDE, COLOR_SYSTEM, RAILWAY_ERRORS); dropped the drifting "109 exercises" count.
+
 ### Mode "theme" — athlete/trainer variance in one registry (v1: steps 1+2+4, 2026-10-19)
 - **The start of a single source for everything that differs by `trainerMode`.** An audit found mode
   variance was handled five different ways (nav arrays, a route guard, an inline dashboard list,

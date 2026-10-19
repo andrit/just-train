@@ -1,6 +1,8 @@
-# TrainerApp
+# Just Train
 
-A mobile-first PWA for fitness trainers and athletes to plan sessions, track performance, and build lives around consistent training.
+A mobile-first PWA for fitness trainers and athletes to plan sessions, track performance, and build lives around consistent training. _(Internal/repo name: `trainer-app`; the product name is **Just Train**, domain `just-train.fit`.)_
+
+**Current status:** release **v2.14.0** shipped; a large unreleased body of work is in flight (see Build Phases). Managed through the workbench PWA SDLC — currently **Phase 19, Go Live** (gated on launch assets: logo/icons, domain SSL cut-over, brand sign-off).
 
 ---
 
@@ -11,7 +13,7 @@ A mobile-first PWA for fitness trainers and athletes to plan sessions, track per
 | Frontend | React 18, Vite, TypeScript, Tailwind CSS |
 | State | TanStack Query (server), Zustand (client, persisted) |
 | PWA | vite-plugin-pwa, Workbox, offline write queue (localStorage → IndexedDB-ready) |
-| Backend | Fastify, TypeScript |
+| Backend | Fastify 5, TypeScript |
 | ORM | Drizzle + drizzle-kit |
 | Validation | Zod (shared between frontend + backend) |
 | Auth | JWT access tokens + argon2 + httpOnly cookies |
@@ -33,19 +35,20 @@ trainer-app/
 ├── apps/backend/
 │   └── src/
 │       ├── db/
-│       │   ├── schema/       # Drizzle table definitions
-│       │   └── seeds/        # Exercise library seed (109 exercises)
+│       │   ├── schema/       # Drizzle table definitions (one file per domain)
+│       │   └── seeds/        # Public exercise library + body parts + muscle-map data
 │       ├── middleware/       # authenticate, requireRole
-│       ├── queues/           # BullMQ workers + scheduler
-│       ├── routes/           # auth, clients, exercises, sessions, templates
-│       └── services/         # report.service, alert.service
+│       ├── queues/           # BullMQ workers + scheduler (reports, at-risk, purge, cleanup)
+│       ├── routes/           # auth, account, clients, exercises, sessions, templates,
+│       │                     #   challenges, reports, kpis, media, snapshots, telemetry
+│       └── services/         # report, alert, account, email, cloudinary, devices, lockout
 └── apps/frontend/
     └── src/
         ├── components/       # UI components by domain
-        ├── hooks/            # usePreferences, useRestTimer, useUXEvent
-        ├── lib/              # api.ts, queries/, interactions.ts
+        ├── hooks/            # usePreferences, useRestTimer, useUXEvent, useSignOut
+        ├── lib/              # api.ts, queries/, interactions.ts, mode.ts (mode theme), widgets.ts
         ├── pages/            # Route pages
-        └── store/            # authStore, sessionStore
+        └── store/            # authStore, sessionStore, overlayStore
 ```
 
 ---
@@ -60,6 +63,9 @@ trainer-app/
 | **Set** | One recorded effort — the atomic tracking unit |
 | **Planned session** | Built in advance, not yet executing |
 | **Active session** | Currently being executed in real time |
+| **Circuit** | A group of exercises performed round-major (interwoven) — members share a `circuit_id`, rounds = shared target sets |
+| **Snapshot** | A point-in-time measurement capture for a client/athlete |
+| **Challenge** | A measurable goal with a deadline |
 
 ---
 
@@ -91,9 +97,13 @@ cp apps/backend/.env.example apps/backend/.env
 # Always run from apps/backend/
 cd apps/backend
 
-pnpm db:push      # apply schema changes (dev)
-pnpm db:seed      # seed body parts + 109 public exercises
+pnpm db:push      # apply schema changes (dev only — never against production)
+pnpm db:seed      # seed body parts, the public exercise library, and muscle-map data
 pnpm db:studio    # open Drizzle Studio visual browser
+
+# Production schema changes use generated migrations, not db:push:
+npx drizzle-kit generate            # after any schema change — commit the migration file
+# DATABASE_URL="<prod>" npx drizzle-kit migrate   # apply pending migrations to prod
 ```
 
 ### Run
@@ -104,7 +114,14 @@ pnpm dev
 
 # Backend: http://localhost:3001
 # Frontend: http://localhost:5173
-# API Docs: http://localhost:3001/documentation
+# API Docs: http://localhost:3001/documentation  (dev only)
+```
+
+### Pre-commit gate
+
+```bash
+# From monorepo root — the single gate CI mirrors
+pnpm verify    # shared build → typecheck → all tests → lint (stops at first failure)
 ```
 
 ---
@@ -140,46 +157,71 @@ cd apps/backend && pnpm db:push && cd ../..
 
 GitHub Actions runs on every push to `main`:
 1. `pnpm typecheck` — TypeScript across all packages
-2. `pnpm lint` — ESLint (currently no-op, see DEFERRED_ITEMS)
-3. `pnpm --filter backend test` — Vitest unit tests
-4. `pnpm build` — full build verification
+2. `pnpm lint` — ESLint, `--max-warnings 0` (must be clean; shipped v2.6.0)
+3. `pnpm --filter backend test` — Vitest unit tests (mocked DB, no database needed)
+4. **Real-DB ownership matrix** — a `postgres:16` service + `drizzle-kit push`, then
+   `pnpm --filter backend test:db`: trainer B must get `404` (never `403`/`400`) on every
+   parameterised route addressing trainer A's rows, plus the account-purge order (gate G3)
+5. `pnpm build` — full build verification
 
 ---
 
 ## Build Phases
 
+Two tracks run in parallel. **Versions** are the record system (what shipped, when); the
+**PWA SDLC phase** is the navigation system (where the project is in its lifecycle — currently
+**Phase 19, Go Live**). The authoritative, always-current copy of both lives in
+[`docs/PROJECT_STATE.md`](./docs/PROJECT_STATE.md); this table mirrors it.
+
 | Version | Description | Status |
 |---|---|---|
 | v1.0.0 | Scaffold, DB schema, Swagger | ✅ |
 | v1.1.0 | Auth — JWT, argon2, refresh tokens | ✅ |
-| v1.1.1 | Unit tests — 120 tests | ✅ |
-| v1.2.0 | Exercise Library backend + Cloudinary | ✅ |
+| v1.1.1 | Unit tests (120) | ✅ |
+| v1.2.0 | Exercise library UI + Cloudinary | ✅ |
+| v1.2.1 | Storybook component library | ✅ |
 | v1.3.0 | Client goals, snapshots, self-training schema | ✅ |
-| v1.4.0 | Client management UI, onboarding, dashboard | ✅ |
-| v1.4.5 | Preferences screen | ✅ |
-| v1.5.0 | Session logging — launcher, live session, summary | ✅ |
+| v1.3.1 | Usage metrics, trainerMode, onboarding schema | ✅ |
+| v1.4.0 | Client management UI, onboarding screen | ✅ |
+| v1.4.1–1.4.5 | Preferences, dashboard widgets, UX event system | ✅ |
+| v1.5.0–1.5.1 | Session logging + history + client timeline | ✅ |
 | v1.6.0 | KPI dashboard | ✅ |
-| v1.7.0 | Monthly reports via Resend | ✅ |
-| v1.7.5 | BullMQ + Upstash Redis — scheduled reports + at-risk alerts | ✅ |
-| v1.8.0 | Live session: add blocks, exercises, set logging, session store | ✅ |
-| **v1.9.0** | **Exercise library UI** | 🔨 Current |
+| v1.7.0 | Monthly reports (Resend email) | ✅ |
+| v1.7.5 | Redis + BullMQ — scheduled reports + at-risk alerts | ✅ |
+| v1.8.0 | Live session: blocks, exercises, set logging, session store | ✅ |
+| v1.9.0 | Exercise library UI | ✅ |
 | v2.0.0 | SPA refactor — panels, overlays, persistent session | ✅ |
-| v2.1.0 | Session planning — "plan the day" workflow | ✅ |
+| v2.1.0 | Session planning — "plan the day" | ✅ |
 | v2.2.0 | Sessions view — history list | ✅ |
 | v2.3.0 | Nav event bus — debouncing, audit log, RxJS-ready | ✅ |
 | v2.4.0 | Offline sync — write queue, prefetch, banner | ✅ |
-| v2.5.0 | UI/UX polish — execution layout, PR system, gamification | ✅ |
+| v2.5.0 | UI/UX polish — execution layout, PR system, gamification foundations | ✅ |
 | v2.6.0 | ESLint + code quality | ✅ |
 | v2.7.0 | Template library — builder, fork, seeds, session integration | ✅ |
 | v2.8.0 | Auto-populate from history + drag reorder + post-session wrap-up | ✅ |
 | v2.9.0 | Hosting — Railway + Vercel production deploy | ✅ |
-| v2.10.0 | Template builder UX — workout type filter, delete/reorder blocks, exercise accordion + swipe | ✅ |
-| v2.11.0 | Session + exercise detail UX — slide-in, single scroll, hide empty media | ✅ |
-| v2.12.0 | Camera / video capture + coach challenges | 🔜 Next |
-| v2.13.0 | Leaderboards + weekly quests + social share | 🔜 |
-| v2.14.0 | Security hardening — CSP headers, service worker cache, rate limit review | 🔜 |
+| v2.10.0 | Template builder UX | ✅ |
+| v2.11.0 | Session + exercise detail UX | ✅ |
+| v2.12.0 | Camera / video capture + coach challenges | ✅ |
+| v2.13.0 | Security hardening — CSP, service-worker cache, rate limits | ✅ |
+| v2.14.0 | Color system — named palette, semantic tokens, component sweep | ✅ |
+| v2.15.0 | Leaderboards + weekly quests + social share | ⏸ Deferred (post-SaaS) |
 | v3.0.0 | SaaS — Stripe, subscription billing gates | 🔜 |
 | v3.1.0 | Observable navigation — full RxJS swap | 🔜 |
+
+### Unreleased (in flight since v2.14.0)
+
+A large block of work has landed on `main` but isn't tagged yet (full detail in
+[`docs/CHANGELOG.md`](./docs/CHANGELOG.md) → _Unreleased_):
+
+- **Training features:** exercise **muscle map** (34-muscle vocab + client-side SVG), **circuits**
+  (round-major interwoven exercises), **unilateral / per-side** set tracking, cardio multi-metric +
+  `min:sec` entry, per-exercise progress analytics, save-as-template, one-window end-session, delete session.
+- **Account & security:** change/reset password, device management, data export, deactivate + 30-day
+  purge, change email; security gates — **Fastify 4→5**, **Sentry 8→10**, **G3** real-DB ownership
+  matrix, **G16** signed client media, **G17** magic-byte upload typing, **C9** login lockout.
+- **Platform:** Sentry + first-party telemetry monitoring (Phase 18), the **Just Train** rebrand, the
+  **mode "theme"** refactor (athlete/trainer variance in one registry).
 
 ---
 
@@ -235,3 +277,6 @@ All project documentation lives in [`./docs`](./docs):
 | `DEFERRED_ITEMS.md` | Intentionally deferred features with context |
 | `DATA_FLOW.md` | Auth, session, and data flow diagrams |
 | `TESTING.md` | Test setup and patterns |
+| `GESTURE_GUIDE.md` | Plain-language map of every touch gesture + interaction animation |
+| `COLOR_SYSTEM.md` | Named palette, semantic tokens, usage rules (v2.14.0) |
+| `RAILWAY_ERRORS.md` | Railway deploy error log + resolutions (CJS/Zod/host-binding) |

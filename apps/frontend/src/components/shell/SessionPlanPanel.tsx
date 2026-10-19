@@ -18,7 +18,7 @@
 import { useState }                              from 'react'
 import { cn }                                    from '@/lib/cn'
 import { interactions }                          from '@/lib/interactions'
-import { usePreferences }                        from '@/hooks/usePreferences'
+import { useMode }                               from '@/lib/mode'
 import { useAuthStore }                          from '@/store/authStore'
 import { useSessionStore }                       from '@/store/sessionStore'
 import { useOverlayStore }                       from '@/store/overlayStore'
@@ -52,7 +52,7 @@ export function SessionPlanPanel({
   onClose,
 }: SessionPlanPanelProps): React.JSX.Element {
   const trainer        = useAuthStore((s) => s.trainer)
-  const { trainerMode }= usePreferences()
+  const mode           = useMode()
   const weightUnit     = trainer?.weightUnitPreference ?? 'lbs'
 
   const { data: selfClient }  = useSelfClient()
@@ -69,7 +69,7 @@ export function SessionPlanPanel({
 
   const [sessionId,        setSessionId]        = useState<string | null>(existingSessionId ?? null)
   const [selectedClientId, setSelectedClientId] = useState<string | null>(
-    initialClientId ?? (trainerMode === 'athlete' ? selfClient?.id ?? null : null)
+    initialClientId ?? (mode.hidesClientPicker ? selfClient?.id ?? null : null)
   )
   const [sessionName,   setSessionName]   = useState('')
   const [nameEditing,   setNameEditing]   = useState(false)
@@ -333,7 +333,7 @@ export function SessionPlanPanel({
         )}
 
         {/* Client selector — trainer mode, before session created */}
-        {!sessionId && trainerMode === 'trainer' && (
+        {!sessionId && !mode.hidesClientPicker && (
           <div className="flex gap-2 overflow-x-auto scrollbar-hidden mt-2">
             {allClients.map((client) => (
               <button

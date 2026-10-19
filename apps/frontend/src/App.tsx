@@ -30,7 +30,7 @@ import { lazy, Suspense }                  from 'react'
 import { Navigate, Routes, Route }         from 'react-router-dom'
 import { AuthProvider, ProtectedRoute }    from '@/components/auth/AuthProvider'
 import { useAuthStore }                    from '@/store/authStore'
-import { usePreferences }                  from '@/hooks/usePreferences'
+import { useMode }                         from '@/lib/mode'
 import Layout                              from '@/components/layout/Layout'
 import { AppShell }                        from '@/components/shell/AppShell'
 import { Spinner }                         from '@/components/ui/Spinner'
@@ -88,9 +88,9 @@ function OnboardingGate({ children }: { children: React.ReactNode }): React.JSX.
 // /clients/:id are redirected to / rather than seeing a 403 or trainer UI.
 
 function AthleteRouteGuard({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const { trainerMode } = usePreferences()
+  const mode = useMode()
 
-  if (trainerMode === 'athlete') {
+  if (!mode.can.viewRoster) {
     return <Navigate to="/" replace />
   }
 

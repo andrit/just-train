@@ -23,7 +23,6 @@ import { cn }                            from '@/lib/cn'
 import { interactions }                  from '@/lib/interactions'
 import { useMode }                       from '@/lib/mode'
 import { useNav }                        from '@/services/navService'
-import { usePreferences }                from '@/hooks/usePreferences'
 import { useSessionStore }               from '@/store/sessionStore'
 import { useOverlayStore }               from '@/store/overlayStore'
 import { useClients, useSelfClient }     from '@/lib/queries/clients'
@@ -265,7 +264,6 @@ function SessionCard({
 
 export default function SessionsPage(): React.JSX.Element {
   const nav                   = useNav()
-  const { trainerMode }       = usePreferences()
   const mode                  = useMode()
   const { activeSessions, removePlannedSession, startSession, endSession } = useSessionStore()
   const { expand, focusedClientId, hide }  = useOverlayStore()
@@ -339,7 +337,7 @@ export default function SessionsPage(): React.JSX.Element {
   }
 
   const allClients = [
-    ...(selfClient && trainerMode === 'trainer' ? [selfClient] : []),
+    ...(selfClient && mode.can.viewRoster ? [selfClient] : []),
     ...(clients ?? []).filter(c => !c.isSelf),
   ]
 
@@ -412,7 +410,7 @@ export default function SessionsPage(): React.JSX.Element {
           ))}
 
           {/* Client filter — trainer mode only */}
-          {trainerMode === 'trainer' && allClients.length > 0 && (
+          {mode.can.viewRoster && allClients.length > 0 && (
             <>
               <div className="w-px bg-surface-border shrink-0 mx-1" />
               {allClients.map((client) => (

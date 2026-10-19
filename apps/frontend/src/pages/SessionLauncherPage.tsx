@@ -13,6 +13,7 @@ import { useState, useEffect }          from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { cn }                            from '@/lib/cn'
 import { interactions }                  from '@/lib/interactions'
+import { useMode }                       from '@/lib/mode'
 import { usePreferences }                from '@/hooks/usePreferences'
 import { useUXEvent }                    from '@/hooks/useUXEvent'
 import { useAuthStore }                  from '@/store/authStore'
@@ -123,7 +124,8 @@ export default function SessionLauncherPage(): React.JSX.Element {
   const [searchParams] = useSearchParams()
   const isOnline       = useOnlineStatus()
   const _trainer        = useAuthStore((s) => s.trainer)
-  const { trainerMode, ctaLabel } = usePreferences()
+  const { ctaLabel } = usePreferences()
+  const mode         = useMode()
   const { fire } = useUXEvent()
   const { startSession: storeSession, getSession, hasSession } = useSessionStore()
   const { expand } = useOverlayStore()
@@ -140,16 +142,16 @@ export default function SessionLauncherPage(): React.JSX.Element {
 
   const [view,            setView]            = useState<View>('main')
   const [selectedClientId, setSelectedClientId] = useState<string | null>(
-    urlClientId ?? (trainerMode === 'athlete' ? null : null)
+    urlClientId ?? null
   )
   const [error, setError] = useState<string | null>(null)
 
-  // Athlete mode: auto-select self-client
+  // Athlete mode: auto-select self-client (no picker shown)
   useEffect(() => {
-    if (trainerMode === 'athlete' && selfClient && !selectedClientId) {
+    if (mode.hidesClientPicker && selfClient && !selectedClientId) {
       setSelectedClientId(selfClient.id)
     }
-  }, [trainerMode, selfClient, selectedClientId])
+  }, [mode.hidesClientPicker, selfClient, selectedClientId])
 
   const today = new Date().toISOString().split('T')[0] ?? ''
 
@@ -375,7 +377,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
       </div>
 
       {/* Trainer mode: show client selector */}
-      {trainerMode === 'trainer' && (
+      {!mode.hidesClientPicker && (
         <div className="card p-4 mb-6">
           <div className="flex items-center justify-between">
             <div>

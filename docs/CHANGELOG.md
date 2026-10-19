@@ -35,9 +35,13 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - **Step 3 (nav) — done same day.** The sidebar + mobile tab bar now read `useMode().nav`; `Layout`'s
   `TRAINER_NAV`/`athleteNav()` arrays and its local `NavItem` type are gone (moved into `mode.ts`). The
   gate test now also asserts a complete nav for both modes. Behaviour-preserving (same items/icons).
-- **Deferred to the follow-up (steps 5/6, queued in `TODO.md`):** the client-picker and route guard onto
-  `mode.hidesClientPicker` / `mode.can`. The page trees (MyTraining vs ClientProfile) stay separate by
-  design. Backend stays mode-agnostic (branches on `role`, never `trainerMode`).
+- **Steps 5 + 6 — done same day; mode-variance migration complete.** The client-picker (session launcher,
+  launcher sheet, plan panel) reads `mode.hidesClientPicker` (athlete → auto-selects the self-client, no
+  picker); the sessions roster filter reads `mode.can.viewRoster`; and `AthleteRouteGuard` redirects on
+  `!mode.can.viewRoster` instead of `trainerMode === 'athlete'`. Every ad-hoc `trainerMode === …` check in
+  these surfaces is gone — the six files now read the registry. (`usePreferences` dropped where it only
+  fed a mode check; kept where it still serves `ctaLabel`.) The page trees (MyTraining vs ClientProfile)
+  stay separate by design; the backend stays mode-agnostic (branches on `role`, never `trainerMode`).
 
 ### Dashboard "Log Snapshot" opens the capture sheet directly (2026-10-19)
 - **One tap instead of two.** The dashboard's "Log Snapshot" action navigated to My Training's Baseline tab and stopped at the "Take a Snapshot" button — the athlete still had to tap it. It now deep-links straight into the `SnapshotCaptureSheet`.

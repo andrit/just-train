@@ -12,6 +12,7 @@
 import { useState, useEffect }              from 'react'
 import { cn }                                from '@/lib/cn'
 import { interactions }                      from '@/lib/interactions'
+import { useMode }                           from '@/lib/mode'
 import { useUXEvent }                        from '@/hooks/useUXEvent'
 import { usePreferences }                    from '@/hooks/usePreferences'
 import { useAuthStore }                      from '@/store/authStore'
@@ -35,7 +36,8 @@ export function SessionLauncherSheet({
   onClose,
 }: SessionLauncherSheetProps): React.JSX.Element {
   const _trainer        = useAuthStore((s) => s.trainer)
-  const { trainerMode, ctaLabel } = usePreferences()
+  const { ctaLabel }   = usePreferences()
+  const mode           = useMode()
   const { fire }       = useUXEvent()
 
   const { startSession: storeSession, getSession, hasSession } = useSessionStore()
@@ -61,12 +63,12 @@ export function SessionLauncherSheet({
     }
   }, [open, initialClientId])
 
-  // Athlete auto-select
+  // Athlete auto-select (no picker shown)
   useEffect(() => {
-    if (trainerMode === 'athlete' && selfClient && !selectedClientId) {
+    if (mode.hidesClientPicker && selfClient && !selectedClientId) {
       setSelectedClientId(selfClient.id)
     }
-  }, [trainerMode, selfClient, selectedClientId])
+  }, [mode.hidesClientPicker, selfClient, selectedClientId])
 
   const today = new Date().toISOString().split('T')[0] ?? ''
 
@@ -127,7 +129,7 @@ export function SessionLauncherSheet({
         )}
 
         {/* Client selector — trainer mode only */}
-        {trainerMode === 'trainer' && (
+        {!mode.hidesClientPicker && (
           <div className="space-y-2">
             <p className="text-[10px] uppercase tracking-widest text-gray-500">Client</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">

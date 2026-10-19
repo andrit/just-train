@@ -7,6 +7,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Exercise library — core/ab additions (2026-10-19)
+- **Two new public exercises:** **Machine Crunch** (resistance / isolation / machine — seated weighted
+  crunch against a stack; rectus abdominis primary, obliques secondary) and **Russian Twist**
+  (resistance / isolation / dumbbell, bodyweight-optional — the rotational oblique move; obliques
+  primary, rectus + transverse abdominis secondary). Added to `exercises-library.json` (meta total
+  119 → 121). Calisthenics "Crunches" (feet-up, accordion) and "Sit ups" (feet-anchored full situp)
+  already existed in the seed — calisthenics already supports reps **or** timed via the existing
+  reps/time toggle, so no new logging behavior was needed.
+- **Prod:** `docs/sql/add-core-ab-exercises.sql` — idempotent, name-guarded insert of all four into the
+  public library plus their `exercise_muscles` rows (so the Home heat-map lights the core), dry-run by
+  default (`BEGIN…ROLLBACK`). The JSON only feeds local `db:seed`; prod's public library is separate,
+  so this SQL is what makes them appear in the live app. ⚠️ Name-guarded: if prod already holds a
+  crunch/sit-up under a different spelling, verify before committing to avoid a duplicate.
+
 ### Home — body heat-map above Train (v1, 2026-10-19)
 - **Home now leads with a body figure that shows what you've actually been training.** Anterior +
   posterior silhouettes with each muscle region shaded by how often it was trained in the last 30 days

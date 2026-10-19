@@ -1,6 +1,6 @@
 {
   "meta": {
-    "total": 119,
+    "total": 121,
     "note": "Add exercises by copying the structure. Upload back when ready.",
     "fields": {
       "name": "Display name",
@@ -827,6 +827,32 @@
         "instructions": "Stand inside a loaded diamond/trap bar and grip the neutral handles. With arms straight and a tall chest, elevate your shoulders straight up toward your ears, squeeze at the top, then lower under control.",
         "primaryMuscles": ["trapezius_upper"],
         "secondaryMuscles": []
+      },
+      {
+        "name": "Machine Crunch",
+        "bodyPart": "core",
+        "category": "isolation",
+        "equipment": "machine",
+        "difficulty": "beginner",
+        "demonstration": null,
+        "visualization": null,
+        "description": "Seated weighted crunch on an ab machine. Hooking the arms into the overhead pads loads trunk flexion against a stack — resistance a floor crunch can't add.",
+        "instructions": "Sit on the ab-crunch machine and set the weight. Hook your arms through the overhead pads or grip the handles so the resistance sits across your upper chest and shoulders. Crunch down by contracting your abs — curl your ribs toward your pelvis — then return under control without letting the stack rest between reps.",
+        "primaryMuscles": ["rectus_abdominis"],
+        "secondaryMuscles": ["obliques"]
+      },
+      {
+        "name": "Russian Twist",
+        "bodyPart": "core",
+        "category": "isolation",
+        "equipment": "dumbbell",
+        "difficulty": "intermediate",
+        "demonstration": null,
+        "visualization": null,
+        "description": "A seated rotational core exercise that targets the obliques. Done holding a weight for load, or with empty hands as a bodyweight movement.",
+        "instructions": "Sit with knees bent and heels on the floor (lift the feet for more difficulty). Lean your torso back to about 45 degrees with a tall spine. Holding a weight at your chest — or empty hands — rotate your torso to bring it toward the floor on one side, then the other. A twist to each side is one rep; move from the waist, not the arms.",
+        "primaryMuscles": ["obliques"],
+        "secondaryMuscles": ["rectus_abdominis", "transverse_abdominis"]
       }
     ]
   },

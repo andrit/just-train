@@ -39,6 +39,8 @@ vi.mock('../../db', () => {
     workouts:         {},
     sessionExercises: {},
     sets:             {},
+    exercises:        {},
+    exerciseMuscles:  {},
   }
 })
 

@@ -11,7 +11,7 @@ import { interactions }      from '@/lib/interactions'
 import { useLatestSnapshot, useClientSnapshots } from '@/lib/queries/clients'
 import { Spinner }           from '@/components/ui/Spinner'
 import { SnapshotCaptureSheet } from '@/components/client-profile/SnapshotCaptureSheet'
-import { progressionStateLabel } from '@/components/clients/utils'
+import { useMode } from '@/lib/mode'
 
 // ── Snapshot card ─────────────────────────────────────────────────────────────
 
@@ -90,17 +90,16 @@ function SnapshotCard({
 
 export function BaselineTab({
   clientId,
-  isAthlete = false,
   autoOpenSnapshot = false,
   onSnapshotAutoOpened,
 }: {
   clientId: string
-  isAthlete?: boolean
   /** Open the capture sheet immediately on mount (dashboard "Log Snapshot" deep-link). */
   autoOpenSnapshot?: boolean
   /** Called once after the auto-open fires, so the parent can clear its one-shot. */
   onSnapshotAutoOpened?: () => void
 }): React.JSX.Element {
+  const { labels } = useMode()
   const { data: latest,    isLoading: latestLoading    } = useLatestSnapshot(clientId)
   const { data: snapshots, isLoading: snapshotsLoading } = useClientSnapshots(clientId)
   const [sheetOpen, setSheetOpen] = useState(autoOpenSnapshot)
@@ -185,7 +184,7 @@ export function BaselineTab({
                 <p className="text-xs text-gray-600 mb-1">
                   {new Date(snap.capturedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   {' · '}
-                  <span>{progressionStateLabel(snap.progressionState, isAthlete)}</span>
+                  <span>{labels.progressionState[snap.progressionState] ?? snap.progressionState}</span>
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {snap.weightLbs      && <span>{snap.weightLbs} lbs</span>}

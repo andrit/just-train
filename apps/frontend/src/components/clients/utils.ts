@@ -21,10 +21,10 @@ export const PROGRESSION_STATE_LABEL_ATHLETE: Record<string, string> = {
   maintenance: 'Maintaining',
 }
 
-export function progressionStateLabel(state: string, isAthlete = false): string {
-  const map = isAthlete ? PROGRESSION_STATE_LABEL_ATHLETE : PROGRESSION_STATE_LABEL
-  return map[state] ?? state
-}
+// progressionStateLabel() was removed: the athlete/trainer phrasing now lives in
+// the mode theme (lib/mode.ts → labels.progressionState). Mode-aware surfaces read
+// useMode().labels.progressionState[state]; trainer-only surfaces keep importing
+// PROGRESSION_STATE_LABEL directly (athletes never reach them).
 
 export const PROGRESSION_STATE_COLOR: Record<string, string> = {
   assessment:  'bg-amber-500/15 text-amber-400 border-amber-500/20',

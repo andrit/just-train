@@ -21,7 +21,7 @@
 
 export const WIDGET_IDS = [
   'atRisk',          // At-risk client alert — trainer only
-  'selfTraining',    // Self-client quick-access tile — both modes
+  'selfTraining',    // Self-client quick-access tile — trainer only (athletes use the action hub)
   'recentSessions',  // Last N sessions — both modes
   'activeClients',   // Active client count callout — trainer only
   'goals',           // Active goals count — both modes
@@ -53,7 +53,10 @@ export const WIDGET_META: Record<WidgetId, WidgetMeta> = {
   selfTraining: {
     label:         'My Training',
     description:   'Quick access to your own training profile',
-    modes:         ['athlete', 'trainer'],
+    // Trainer only: for athletes this duplicates the dashboard action hub, so
+    // it's excluded here (single source of truth — the dashboard no longer
+    // re-filters it by mode). See CHANGELOG "removed the duplicate MY TRAINING card".
+    modes:         ['trainer'],
     availableFrom: 4,
   },
   recentSessions: {

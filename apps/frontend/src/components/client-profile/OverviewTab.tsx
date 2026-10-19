@@ -20,8 +20,8 @@ import { Spinner }          from '@/components/ui/Spinner'
 import { Button }           from '@/components/ui/Button'
 import { Input }            from '@/components/ui/Input'
 import { ConfirmDialog }    from '@/components/ui/ConfirmDialog'
+import { useMode }          from '@/lib/mode'
 import {
-  progressionStateLabel,
   PROGRESSION_STATE_COLOR,
   FOCUS_LABEL,
   FOCUS_ICON,
@@ -114,7 +114,6 @@ function GoalRow({
 
 interface OverviewTabProps {
   clientId:         string
-  isAthlete?:       boolean
   progressionState: string
   primaryFocus?:    string | null
   secondaryFocus?:  string | null
@@ -125,7 +124,6 @@ interface OverviewTabProps {
 
 export function OverviewTab({
   clientId,
-  isAthlete = false,
   progressionState,
   primaryFocus,
   secondaryFocus,
@@ -133,6 +131,7 @@ export function OverviewTab({
   lastActiveAt,
   progressPhotosOptedOut = false,
 }: OverviewTabProps): React.JSX.Element {
+  const { labels } = useMode()
   const { data: goals, isLoading } = useClientGoals(clientId)
   const [newGoal,      setNewGoal]     = useState('')
   const [addingGoal,   setAddingGoal]  = useState(false)
@@ -177,7 +176,7 @@ export function OverviewTab({
       <div className="grid grid-cols-3 gap-3">
         <StatCard
           label="State"
-          value={progressionStateLabel(progressionState, isAthlete)}
+          value={labels.progressionState[progressionState] ?? progressionState}
           colorClass={PROGRESSION_STATE_COLOR[progressionState]}
         />
         <StatCard

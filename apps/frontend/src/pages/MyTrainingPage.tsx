@@ -26,8 +26,8 @@ import { PersonalBestsTab }                  from '@/components/client-profile/P
 import { ChallengesTab }                     from '@/components/client-profile/ChallengesTab'
 import { SilhouetteAvatar }                  from '@/components/clients/SilhouetteAvatar'
 import { Spinner }                           from '@/components/ui/Spinner'
+import { useMode }                           from '@/lib/mode'
 import {
-  progressionStateLabel,
   PROGRESSION_STATE_COLOR,
   isOverviewIncomplete,
   isBaselineIncomplete,
@@ -96,6 +96,7 @@ export default function MyTrainingPage(): React.JSX.Element {
   const [autoOpenSnapshot, setAutoOpenSnapshot] = useState(!!navState?.openSnapshot)
 
   const { trainerMode }        = usePreferences()
+  const mode                   = useMode()
   const { hasSession }         = useSessionStore()
   const { openSessionLauncher } = useNav()
 
@@ -160,7 +161,7 @@ export default function MyTrainingPage(): React.JSX.Element {
                 'text-[10px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider',
                 PROGRESSION_STATE_COLOR[client.progressionState],
               )}>
-                {progressionStateLabel(client.progressionState, trainerMode === 'athlete')}
+                {mode.labels.progressionState[client.progressionState] ?? client.progressionState}
               </span>
             </div>
           </div>
@@ -202,7 +203,6 @@ export default function MyTrainingPage(): React.JSX.Element {
         {tab === 'overview' && (
           <OverviewTab
             clientId={client.id}
-            isAthlete={trainerMode === 'athlete'}
             progressionState={client.progressionState}
             primaryFocus={client.primaryFocus}
             secondaryFocus={client.secondaryFocus}
@@ -215,7 +215,6 @@ export default function MyTrainingPage(): React.JSX.Element {
         {tab === 'baseline'   && (
           <BaselineTab
             clientId={client.id}
-            isAthlete={trainerMode === 'athlete'}
             autoOpenSnapshot={autoOpenSnapshot}
             onSnapshotAutoOpened={() => setAutoOpenSnapshot(false)}
           />

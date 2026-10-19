@@ -19,6 +19,7 @@ import { usePreferences }               from '@/hooks/usePreferences'
 import { useClients, useSelfClient, useClientGoals } from '@/lib/queries/clients'
 import { useChallenges }                from '@/lib/queries/challenges'
 import { usePlannedSessions }           from '@/lib/queries/sessions'
+import { useMode }                      from '@/lib/mode'
 import { WidgetRenderer }               from '@/components/dashboard/WidgetRenderer'
 import { ChallengeProgressCard }        from '@/components/challenges/ChallengeProgressCard'
 import { ChallengeForm }                from '@/components/challenges/ChallengeForm'
@@ -247,6 +248,7 @@ export default function DashboardPage(): React.JSX.Element {
     widgetOrder, trainerMode,
   } = usePreferences()
   const { fire } = useUXEvent()
+  const mode     = useMode()
   const { openSessionLauncher, openSessionPlan, goToTab } = useNav()
   const navigate = useNavigate()
 
@@ -269,15 +271,15 @@ export default function DashboardPage(): React.JSX.Element {
   const isLoading = clientsLoading || selfLoading
 
   const visibleWidgets = useMemo(() => {
+    // widgetOrder is already filtered to the current mode's widgets by
+    // parseWidgetProgression (WIDGET_META.modes) — no mode check needed here.
     return widgetOrder.filter((id: WidgetId) => {
       if (id === 'atRisk' && !showAlert) return false
       // Phase 7 widgets have no renderer yet — exclude so they don't leave empty slots.
       if (['volume', 'streak', 'newClients'].includes(id)) return false
-      // 'selfTraining' (Start Training / Profile) duplicates the action hub for athletes.
-      if (trainerMode === 'athlete' && ['atRisk', 'activeClients', 'selfTraining'].includes(id)) return false
       return true
     })
-  }, [widgetOrder, showAlert, trainerMode])
+  }, [widgetOrder, showAlert])
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -304,7 +306,7 @@ export default function DashboardPage(): React.JSX.Element {
       <div className="mb-5 animate-slide-up">
         <p className="text-gray-500 text-sm mb-0.5">{greeting}</p>
         <h1 className="font-display text-3xl md:text-4xl uppercase tracking-wide text-white">
-          {trainerMode === 'athlete' ? 'Your Training' : 'Dashboard'}
+          {mode.labels.dashboardTitle}
         </h1>
       </div>
 

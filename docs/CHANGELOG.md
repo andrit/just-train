@@ -7,6 +7,36 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Mode "theme" — athlete/trainer variance in one registry (v1: steps 1+2+4, 2026-10-19)
+- **The start of a single source for everything that differs by `trainerMode`.** An audit found mode
+  variance was handled five different ways (nav arrays, a route guard, an inline dashboard list,
+  hand-threaded `isAthlete` label props, and the widget registry) — only one declarative — so a new
+  feature could silently leak trainer vocabulary (the ASSESSMENT-label relic was one instance). Audit +
+  full plan: `.workbench/designer/current/task-plan-mode-variance.md`.
+- **New `lib/mode.ts` + `useMode()`** — `MODE_CONFIG: Record<TrainerMode, ModeConfig>` holding, per mode:
+  `labels` (the mode-varying vocabulary in one place), a `can` capability set (`viewRoster`,
+  `manageClients`, `sendReports`, `viewBilling` — names reused by the v3 billing gates + the admin
+  bypass), `isAthlete`/`isTrainer`, and `hidesClientPicker`. `useMode()` returns the active config from
+  `trainerMode`. A unit test (`__tests__/unit/mode.test.ts`) asserts every label + capability exists for
+  **both** modes — a half-added variant fails CI instead of leaking at runtime (a check that can fail).
+- **Fixed a latent drift bug (step 2).** `WIDGET_META.selfTraining.modes` said `['athlete','trainer']`,
+  but `DashboardPage` separately hardcoded `['atRisk','activeClients','selfTraining']` as the
+  athlete-excluded widgets — two sources of truth. Set `selfTraining.modes → ['trainer']` (it duplicates
+  the athlete action hub) and **deleted the inline list**; `parseWidgetProgression` is now the single
+  mode filter. Also closes a latent vocab leak in `SelfTrainingWidget` (which always used the trainer
+  label). Behaviour unchanged for both modes (`DEFAULT_ATHLETE_WIDGET_ORDER` never contained it).
+- **Killed the vocabulary leak class (step 4).** The mode-varying strings now live in `mode.labels`:
+  dashboard title, the sessions self-client label, and the progression-state phrasing. The three
+  mode-aware surfaces (`OverviewTab`, `BaselineTab`, `MyTrainingPage`) read `useMode().labels` instead of
+  a hand-threaded `isAthlete` prop — the prop is **gone** from both tab components. The ambiguous
+  `progressionStateLabel(state, isAthlete)` helper was removed; the five trainer-only surfaces keep
+  importing `PROGRESSION_STATE_LABEL` directly (athletes never reach them). Behaviour-preserving
+  (`isAthlete` was always `trainerMode === 'athlete'` at every call site).
+- **Deferred to the follow-up (steps 3/5/6, queued in `TODO.md`):** migrating nav, the client-picker, and
+  the route guard onto `mode.nav` / `mode.hidesClientPicker` / `mode.can`. The page trees
+  (MyTraining vs ClientProfile) stay separate by design. Backend stays mode-agnostic (branches on `role`,
+  never `trainerMode`).
+
 ### Dashboard "Log Snapshot" opens the capture sheet directly (2026-10-19)
 - **One tap instead of two.** The dashboard's "Log Snapshot" action navigated to My Training's Baseline tab and stopped at the "Take a Snapshot" button — the athlete still had to tap it. It now deep-links straight into the `SnapshotCaptureSheet`.
 - **How:** the action passes `state: { tab: 'baseline', openSnapshot: true }`; `MyTrainingPage` reads `openSnapshot` as a **one-shot** and passes `autoOpenSnapshot` + `onSnapshotAutoOpened` to `BaselineTab`, which opens the sheet on mount and calls back so the parent clears the flag — switching away and back to Baseline doesn't re-open it. The two trainer call sites of the shared `BaselineTab` pass neither prop (both optional, default off), so viewing a client is unchanged.

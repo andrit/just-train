@@ -21,6 +21,7 @@
 import React, { useState, useDeferredValue } from 'react'
 import { cn }                            from '@/lib/cn'
 import { interactions }                  from '@/lib/interactions'
+import { useMode }                       from '@/lib/mode'
 import { useNav }                        from '@/services/navService'
 import { usePreferences }                from '@/hooks/usePreferences'
 import { useSessionStore }               from '@/store/sessionStore'
@@ -265,6 +266,7 @@ function SessionCard({
 export default function SessionsPage(): React.JSX.Element {
   const nav                   = useNav()
   const { trainerMode }       = usePreferences()
+  const mode                  = useMode()
   const { activeSessions, removePlannedSession, startSession, endSession } = useSessionStore()
   const { expand, focusedClientId, hide }  = useOverlayStore()
   const { data: clients }     = useClients()
@@ -288,7 +290,7 @@ export default function SessionsPage(): React.JSX.Element {
   })
 
   const getClientName = (clientId: string): string => {
-    if (selfClient?.id === clientId) return trainerMode === 'athlete' ? 'My Training' : 'Me'
+    if (selfClient?.id === clientId) return mode.labels.selfClientLabel
     return clients?.find(c => c.id === clientId)?.name ?? '—'
   }
 

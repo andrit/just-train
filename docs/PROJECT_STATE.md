@@ -212,13 +212,14 @@ Full CRUD exists for all. See Swagger at `http://localhost:3001/documentation`.
 |---|---|---|
 | `/login` | LoginPage | Public |
 | `/onboard` | OnboardingPage | Protected, pre-onboarding only |
-| `/` | DashboardPage | Widget stack, branches on trainerMode |
+| `/` | DashboardPage | **Home / launch surface** (2026-10-19 reframe): greeting + body heat-map (tap → body breakdown sheet) + Train card, single no-scroll screen. Feedback lives in My Training. |
+| `/my-training` | MyTrainingPage | **Athlete feedback dashboard**: KPI hero (fixed Streak/This-week/Last-session headline + carousel), Recent Sessions, Volume-per-session chart, then tabs (Overview/Timeline/Baseline/PRs/Challenges) |
 | `/clients` | ClientsPage | Roster + self-client tile |
 | `/clients/:id` | ClientProfilePage | 3 tabs: Overview, Timeline, Baseline |
 | `/session/new` | SessionLauncherPage | Blank start or template picker |
 | `/session/:id` | LiveSessionPage | Active workout, accordion sets, rest timer |
 | `/session/:id/summary` | SessionSummaryPage | Post-session stats + scores |
-| `/exercises` | ExercisesPage | Exercise library |
+| `/exercises` | ExercisesPage | Exercise library (honors `state.openExerciseId` to deep-open a detail) |
 | `/templates` | TemplatesPage | Template management |
 | `/preferences` | PreferencesPage | All trainer preferences |
 

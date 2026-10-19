@@ -32,6 +32,34 @@ Split into three public exercises by pulley height — **High** (high→low), **
 
 ---
 
+## Home insights / body-map — deferred from the 2026-10-19 UX work
+
+Shipped this session: Home reframed to a launch surface (greeting + body heat-map + Train, no-scroll);
+My Training grew into the feedback dashboard (headline KPI row, Recent Sessions, Volume-per-session
+chart); the body figure taps into a Body breakdown sheet mapping every muscle → counts → exercises
+that work it (Phase 1 + 2). Deferred follow-ons:
+
+- **Male/female figure + a female silhouette asset.** v1 ships one (neutral/male) silhouette — the only
+  geometry we have (`muscleMapData.ts`, vendored from react-body-highlighter, one model). A `bodyFigure`
+  preference + a female polygon set with the **same region slugs** are deferred until an asset exists
+  (source MIT/public-domain, or author). The pipeline is ready to drop a second figure in. Plan:
+  `.workbench/designer/current/task-plan-home-body-heatmap.md`.
+- **Heat-map / breakdown metric toggle.** Counts are **sessions** for v1; the `muscle-frequency`
+  response carries a `metric: 'sessions'` literal as the seam to add **sets / reps / volume** later
+  (widens to an enum; count computation branches in `kpis.ts`). User explicitly wanted this left open.
+- **Body-sheet suggestion refinements** (Phase 2 shipped deterministic, name-ordered, either-role):
+  primary-first ranking (needs role in the query — a `?muscleRole=` or join), a "you've done this
+  before" flag (history join), and friendlier equipment labels (`EQUIPMENT_LABEL`) on the suggestion
+  rows. Plan: `.workbench/designer/current/task-plan-body-sheet.md`.
+- **LLM / KB natural-language suggestion tier** — the "one day" vision: intent ("bigger arms, sore
+  elbows") → reasoned programming using training history + the exercise knowledgebase. A separate
+  initiative on top of the deterministic muscle→exercises UI; keep the factual-only bar for anything
+  that isn't the LLM tier.
+- **Next trend graphs** (user's list): *volume by body grouping* (reuses the `muscle-frequency` /
+  `exercise_muscles` aggregation — could share an endpoint) and *weight range over time per exercise*
+  (mostly built — exercise-progress endpoint + `Sparkline` power the exercise detail; could surface on
+  My Training).
+
 ## PWA — Phase 1 Scaffold Audit Findings
 
 Items surfaced during the Phase 1 Lighthouse audit (2026-06-19). All are non-blocking for Phase 1 sign-off but should be addressed in the phases noted.

@@ -41,6 +41,11 @@ Also still unstarted: **formalize-custom Slice B** (with #4), **athlete progress
   (tap muscle → exercises via new `?muscle=` filter on `GET /exercises`; tap one → detail via `state.openExerciseId`).
 - **Core exercises:** Machine Crunch + Russian Twist added (JSON + muscles); `docs/sql/add-core-ab-exercises.sql`
   **APPLIED to prod** (147 public exercises; Crunches/Sit ups also ensured). Supine Spinal Twist ≠ Russian Twist (kept both).
+- **Heat-map recolor (follow-on, committed green):** body heat-map moved OFF Ember-Red → single-hue
+  **Command-Blue** in **3 discrete buckets** (low/med/high, normalized to busiest; gray=untrained).
+  Extracted to one shared `components/charts/heatRamp.ts` (`heatFill`) so `BodyHeatMap` and the
+  `BodyBreakdownSheet` dot can't drift (the sheet had kept red). Red reads as soreness/injury; dataviz
+  rule = magnitude is one hue in buckets. CHANGELOG corrected. Also: light/dark-theme note → `DEFERRED_ITEMS`.
 
 ## Standing rules (this container)
 - Container can't run `pnpm verify` / vite / vitest / tsx / drizzle-kit / psql-to-prod — **user runs them**.
@@ -55,4 +60,6 @@ Also still unstarted: **formalize-custom Slice B** (with #4), **athlete progress
 - Owner `role='admin'` via one-off SQL (unblocks admin routes + formalize Slice B).
 - Launch gates (non-code): logo/favicon/PWA icons, USPTO, Sentry source-map vars, Lighthouse ≥ 90 + first install.
 - Gate rows: G10 (rotate PG pw + gitleaks), G18 (backups + pg_restore), G11, G9 (`curl /documentation` → 404).
-- Eyeball on device: Home no-scroll fit (`min-h-[calc(100dvh-6.5rem)]` is a first guess) + heat-map readability.
+- Eyeball on device: Home no-scroll fit (`min-h-[calc(100dvh-6.5rem)]` is a first guess) + heat-map
+  readability — now 3 Command-Blue tiers; confirm low/med/high are distinguishable at the region fill +
+  the ~10px breakdown-sheet dot (low tier `#335C9E` is the one to brighten if they blur).

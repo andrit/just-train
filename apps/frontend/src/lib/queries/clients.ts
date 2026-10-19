@@ -33,6 +33,7 @@ import type {
   ClientKpiResponse,
   ExerciseProgressResponse,
   VolumeHistoryResponse,
+  MuscleFrequencyResponse,
 } from '@trainer-app/shared'
 
 // ── Query key factory ─────────────────────────────────────────────────────────
@@ -347,6 +348,18 @@ export function useVolumeHistory(
   return useQuery({
     queryKey: ['volume-history', clientId],
     queryFn:  () => apiClient<VolumeHistoryResponse>(`/clients/${clientId}/volume-history`),
+    enabled:  !!accessToken && !!clientId,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useMuscleFrequency(
+  clientId: string | null,
+): UseQueryResult<MuscleFrequencyResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  return useQuery({
+    queryKey: ['muscle-frequency', clientId],
+    queryFn:  () => apiClient<MuscleFrequencyResponse>(`/clients/${clientId}/muscle-frequency`),
     enabled:  !!accessToken && !!clientId,
     staleTime: 1000 * 60 * 5,
   })

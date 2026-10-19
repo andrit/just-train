@@ -22,7 +22,7 @@ import {
 // approximations the render resolution can't separate (the three deltoid heads
 // share front/back-deltoids; the three traps share trapezius); some have no
 // region at all (tibialis_anterior) and are intentionally absent here.
-const MUSCLE_TO_REGION: Record<Muscle, BodyRegion[]> = {
+export const MUSCLE_TO_REGION: Record<Muscle, BodyRegion[]> = {
   deltoid_anterior:    ['front-deltoids'],
   deltoid_lateral:     ['front-deltoids'],
   deltoid_posterior:   ['back-deltoids'],

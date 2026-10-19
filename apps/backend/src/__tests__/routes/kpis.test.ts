@@ -218,3 +218,65 @@ describe('GET /clients/:id/volume-history', () => {
     expect(body.points[1]).toMatchObject({ sessionId: SESSION_A, date: '2026-01-02', name: 'Day 2', volume: 1000 })
   })
 })
+
+// ── GET /clients/:id/muscle-frequency ─────────────────────────────────────────
+
+describe('GET /clients/:id/muscle-frequency', () => {
+  let app: Awaited<ReturnType<typeof buildKpiTestApp>>
+  beforeAll(async () => { app = await buildKpiTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('returns 401 without auth', async () => {
+    const res = await app.inject({ method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-frequency` })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when client does not belong to trainer', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(undefined)
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-frequency`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns empty counts for an owned client with no trained muscles', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    // select chain .where defaults to [] → no rows → empty counts
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-frequency`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ period: 'month', metric: 'sessions', counts: [] })
+  })
+
+  it('counts distinct sessions per muscle (a muscle hit twice in one session counts once)', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    const rows = [
+      { sessionId: 's1', muscle: 'biceps_brachii' },
+      { sessionId: 's1', muscle: 'biceps_brachii' },  // same session+muscle → still 1
+      { sessionId: 's2', muscle: 'biceps_brachii' },
+      { sessionId: 's1', muscle: 'pectoralis_major' },
+    ]
+    // The join query ends on `.where(...)` as its awaited terminal.
+    const chain = (db.select as unknown as () => { where: { mockResolvedValueOnce: (v: unknown) => unknown } })()
+    chain.where.mockResolvedValueOnce(rows)
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-frequency`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.metric).toBe('sessions')
+    const byMuscle = Object.fromEntries(
+      body.counts.map((c: { muscle: string; count: number }) => [c.muscle, c.count]),
+    )
+    expect(byMuscle['biceps_brachii']).toBe(2)
+    expect(byMuscle['pectoralis_major']).toBe(1)
+  })
+})

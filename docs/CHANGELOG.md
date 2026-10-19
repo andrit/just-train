@@ -7,6 +7,30 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Home — body heat-map above Train (v1, 2026-10-19)
+- **Home now leads with a body figure that shows what you've actually been training.** Anterior +
+  posterior silhouettes with each muscle region shaded by how often it was trained in the last 30 days
+  — a glanceable "am I hitting everything?" picture, sitting between the greeting and the Train card.
+  Home stays a single no-scroll screen: greeting (top) · figure (fills the middle) · Train (just above
+  the nav).
+- **Backend:** `GET /clients/:id/muscle-frequency` (in `kpis.ts`, self-client scoped) — counts, per
+  muscle, the number of completed sessions in the last 30 days that trained it (primary **or**
+  secondary, once per session), via the `exercise_muscles` join. Shared `MuscleFrequencyResponseSchema`
+  carries a `metric: 'sessions'` literal as a deliberate **seam for a future toggle** (sets / reps /
+  volume) — the literal widens to an enum then. TDD tests (401 / 404 / empty / distinct-session count)
+  + the G3 ownership-matrix line.
+- **Frontend:** `BodyHeatMap.tsx` reuses `MuscleMap`'s vendored region geometry and its
+  `MUSCLE_TO_REGION` map (now exported) — only the coloring differs: a single **Ember-Red sequential**
+  ramp **normalized** to the athlete's busiest region (0.3 opacity floor so any trained region reads as
+  hot), untrained regions stay base-gray. Per the dataviz guidance (single-hue magnitude, color last,
+  text in ink tokens). Fed by the new `useMuscleFrequency` hook.
+- **Decisions (asked):** fine muscle-region granularity (not the 7 body parts); sessions as the count
+  unit with the noted toggle seam; normalized scale. **Deferred:** the male/female figure preference
+  and a female silhouette asset (we only have one, neutral/male, silhouette — `muscleMapData.ts`), and
+  the metric toggle. Plan + full decision record: `.workbench/designer/current/task-plan-home-body-heatmap.md`.
+- **On-device fit:** the no-scroll Home uses `min-h-[calc(100dvh-6.5rem)]`; the offset is a first guess
+  to verify/tune on small and notched phones.
+
 ### My Training — volume-per-session chart (first trend graph, 2026-10-19)
 - **The first of the planned training graphs: total volume per completed session**, on the My
   Training landing below Recent Sessions. A compact bar chart — one bar per session (most recent 12,

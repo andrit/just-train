@@ -14,9 +14,10 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate }                  from 'react-router-dom'
-import { useSelfClient }                from '@/lib/queries/clients'
+import { useSelfClient, useMuscleFrequency } from '@/lib/queries/clients'
 import { usePlannedSessions }           from '@/lib/queries/sessions'
 import { useMode }                      from '@/lib/mode'
+import { BodyHeatMap }                  from '@/components/charts/BodyHeatMap'
 import { Spinner }                      from '@/components/ui/Spinner'
 import { useAuthStore }                 from '@/store/authStore'
 import { useSessionStore }              from '@/store/sessionStore'
@@ -212,6 +213,7 @@ export default function DashboardPage(): React.JSX.Element {
   useEffect(() => { fire('page_enter') }, [fire])
 
   const { data: selfClient, isLoading } = useSelfClient()
+  const { data: muscleFreq }            = useMuscleFrequency(selfClient?.id ?? null)
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -230,23 +232,37 @@ export default function DashboardPage(): React.JSX.Element {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-2xl mx-auto">
+    // Home is a single no-scroll screen: greeting (top) · body figure (fills the
+    // middle) · Train (bottom, just above the nav). The min-height reserves the
+    // bottom tab-bar space on mobile (≈ nav-clear) and is the one value to tune
+    // on-device if anything scrolls; the sidebar layout (md) just uses the viewport.
+    <div className="flex flex-col px-4 max-w-2xl mx-auto min-h-[calc(100dvh-6.5rem)] md:min-h-screen md:px-6 md:py-6">
 
-      <EmailVerificationBanner />
+      <div className="shrink-0">
+        <EmailVerificationBanner />
 
-      {/* Greeting */}
-      <div className="mb-5 animate-slide-up">
-        <p className="text-gray-500 text-sm mb-0.5">{greeting}</p>
-        <h1 className="font-display text-3xl md:text-4xl uppercase tracking-wide text-white">
-          {mode.labels.dashboardTitle}
-        </h1>
+        {/* Greeting */}
+        <div className="mb-3 animate-slide-up">
+          <p className="text-gray-500 text-sm mb-0.5">{greeting}</p>
+          <h1 className="font-display text-3xl md:text-4xl uppercase tracking-wide text-white">
+            {mode.labels.dashboardTitle}
+          </h1>
+        </div>
       </div>
 
-      {/* ── Launch ──
-          Home is the starting point: greeting + Train, nothing else.
-          Feedback (stats, challenges, snapshots) lives in My Training,
-          one tap away on the nav bar. */}
-      <div className="animate-slide-up" style={{ animationDelay: '50ms' }}>
+      {/* Body heat-map — fills the space between greeting and Train. Shows the
+          figure (all-cold while loading / for a new athlete) and colors in as
+          the last-30-days frequency lands. */}
+      <div className="flex-1 min-h-0 flex flex-col py-2 animate-slide-up" style={{ animationDelay: '50ms' }}>
+        <BodyHeatMap counts={muscleFreq?.counts ?? []} className="flex-1 min-h-0" />
+        <p className="shrink-0 text-center text-[10px] uppercase tracking-widest text-gray-600 mt-2">
+          Trained · last 30 days
+        </p>
+      </div>
+
+      {/* ── Launch ── Train, pinned just above the nav. Planning + all feedback
+          live elsewhere (launcher / My Training). */}
+      <div className="shrink-0 pb-2 animate-slide-up" style={{ animationDelay: '100ms' }}>
         <TrainCard
           selfClientId={selfClient?.id}
           onStart={() => openSessionLauncher(selfClient?.id)}

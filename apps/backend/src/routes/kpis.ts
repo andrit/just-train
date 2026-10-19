@@ -25,18 +25,20 @@ import { routeLog } from '../lib/logger'
 
 import type { FastifyInstance }  from 'fastify'
 import { authenticate }          from '../middleware/authenticate'
-import { db, clients, sessions, sessionExercises, sets, exercises } from '../db'
-import { eq, and, desc }         from 'drizzle-orm'
+import { db, clients, sessions, sessionExercises, sets, exercises, exerciseMuscles } from '../db'
+import { eq, and, desc, gte }    from 'drizzle-orm'
 import { buildExerciseProgress } from '../lib/exerciseProgress'
 import { mostRecentSessionSets } from '../lib/exerciseHistory'
 import {
   ClientKpiResponseSchema,
   ExerciseProgressResponseSchema,
   VolumeHistoryResponseSchema,
+  MuscleFrequencyResponseSchema,
   UuidParamSchema,
   ErrorResponseSchema,
   setVolume,
 } from '@trainer-app/shared'
+import type { Muscle } from '@trainer-app/shared'
 import { z } from 'zod'
 import type { FocusKpi } from '@trainer-app/shared'
 
@@ -677,6 +679,82 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch volume history' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // GET /clients/:id/muscle-frequency
+  //
+  // How many times each muscle was trained in the last 30 days — the data
+  // behind the Home body heat-map. A muscle is "trained" by a session if any
+  // exercise in that session targets it (primary OR secondary); counted once
+  // per session (not per set). Self-client (athlete) scoped.
+  //
+  // metric is 'sessions' for v1. Future: a toggle for sets / reps / volume —
+  // the response's `metric` literal widens to an enum then, and the count
+  // computation branches here. (Intent noted; param deliberately not added yet.)
+  // ----------------------------------------------------------
+  app.get('/clients/:id/muscle-frequency', {
+    schema: {
+      tags:     ['Clients'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Per-muscle training frequency (last 30 days)',
+      description: 'Count of sessions in the last 30 days that trained each muscle (primary or secondary), once per session. Self-client scoped.',
+      params:   UuidParamSchema,
+      response: {
+        200: MuscleFrequencyResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: clientId } = request.params as z.infer<typeof UuidParamSchema>
+
+    try {
+      // Ownership — the client must belong to this trainer.
+      const client = await db.query.clients.findFirst({
+        where: and(eq(clients.id, clientId), eq(clients.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!client) return reply.status(404).send({ error: 'Client not found' })
+
+      // 30-day cutoff as a YYYY-MM-DD string (sessions.date is a date string).
+      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10)
+
+      // One row per (session, muscle) touched in the window.
+      const rows = await db
+        .select({
+          sessionId: sessions.id,
+          muscle:    exerciseMuscles.muscle,
+        })
+        .from(sessions)
+        .innerJoin(sessionExercises, eq(sessionExercises.sessionId, sessions.id))
+        .innerJoin(exerciseMuscles,  eq(exerciseMuscles.exerciseId, sessionExercises.exerciseId))
+        .where(and(
+          eq(sessions.clientId, clientId),
+          eq(sessions.status, 'completed'),
+          gte(sessions.date, cutoff),
+        ))
+
+      // Count distinct sessions per muscle (a muscle hit twice in one session
+      // still counts once).
+      const seen = new Map<Muscle, Set<string>>()
+      for (const r of rows) {
+        const set = seen.get(r.muscle) ?? new Set<string>()
+        set.add(r.sessionId)
+        seen.set(r.muscle, set)
+      }
+      const counts = [...seen.entries()].map(([muscle, sessionIds]) => ({
+        muscle,
+        count: sessionIds.size,
+      }))
+
+      return reply.send({ period: 'month', metric: 'sessions', counts })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to fetch muscle frequency' })
     }
   })
 }

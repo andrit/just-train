@@ -692,6 +692,25 @@ export const VolumeHistoryResponseSchema = z.object({
 export type VolumeHistoryResponse = z.infer<typeof VolumeHistoryResponseSchema>
 
 // ============================================================
+// MUSCLE FREQUENCY — how often each muscle was trained (Home body heat-map)
+// ============================================================
+
+export const MuscleFrequencyCountSchema = z.object({
+  muscle: MuscleEnum,
+  count:  z.number().int().describe('Number of sessions in the period that trained this muscle'),
+})
+export type MuscleFrequencyCount = z.infer<typeof MuscleFrequencyCountSchema>
+
+export const MuscleFrequencyResponseSchema = z.object({
+  period: z.literal('month').describe('Rolling 30-day window'),
+  // The unit of "how many times". Only 'sessions' for v1; a future toggle will
+  // add 'sets' / 'reps' / 'volume' — the literal widens to an enum then.
+  metric: z.literal('sessions'),
+  counts: z.array(MuscleFrequencyCountSchema).describe('One entry per trained muscle (untrained muscles omitted → treat as 0)'),
+})
+export type MuscleFrequencyResponse = z.infer<typeof MuscleFrequencyResponseSchema>
+
+// ============================================================
 // SNAPSHOT MEDIA (v2.12.0) — progress photos attached to snapshots
 // ============================================================
 

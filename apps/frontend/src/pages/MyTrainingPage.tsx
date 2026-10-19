@@ -19,6 +19,7 @@ import { usePreferences }                    from '@/hooks/usePreferences'
 import { useSessionStore }                   from '@/store/sessionStore'
 import { useNav }                            from '@/services/navService'
 import { KpiHero }                           from '@/components/kpi/KpiHero'
+import { RecentSessionsWidget }              from '@/components/dashboard/widgets/RecentSessionsWidget'
 import { OverviewTab }                       from '@/components/client-profile/OverviewTab'
 import { TimelineTab }                       from '@/components/client-profile/TimelineTab'
 import { BaselineTab }                       from '@/components/client-profile/BaselineTab'
@@ -174,6 +175,12 @@ export default function MyTrainingPage(): React.JSX.Element {
           isLoading={kpisLoading}
           isAthlete={true}
         />
+
+        {/* Recent sessions — the "moving forward" story, surfaced on the landing
+            (previously only reachable inside the Timeline tab). Self-contained. */}
+        <div className="mb-5">
+          <RecentSessionsWidget />
+        </div>
 
         {/* Tabs */}
         <div

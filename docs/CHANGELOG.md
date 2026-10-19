@@ -7,6 +7,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### My Training — recent sessions on the landing (2026-10-19)
+- **Developing My Training into the feedback dashboard** (the counterpart to the now-bare Home).
+  First step: the "Recent Sessions" widget (last 3 completed, tappable → session history) now sits on
+  the My Training landing, between the KPI hero and the tabs. It was the one old-dashboard signal with
+  no landing home — previously reachable only by tabbing into Timeline. The widget is self-contained
+  (fetches its own sessions), so this is a one-line mount plus an import. Frontend-only
+  (`MyTrainingPage.tsx`).
+
 ### Home is a launch surface — stripped to greeting + Train (2026-10-19)
 - **Reframe: the "dashboard" is Home, a starting point — not an analytics surface.** It was trying
   to be both: the Train card *and* a stack of feedback (the "Your stats" KPI widgets, Active

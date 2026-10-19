@@ -55,6 +55,10 @@ Blocks and exercises in the plan/template builder have a grip handle. Press and 
 
 ### Charts
 
+**Tap the body figure → open the body breakdown.**
+On Home, tapping the muscle figure opens a sheet mapping every muscle (grouped by body part) to how many sessions trained it in the last 30 days — including muscles the figure can't shade. The whole figure is the tap target; there are no per-muscle hot-spots.
+*Where:* Home · *Under the hood:* `BodyBreakdownSheet`
+
 **Hover or focus a volume bar → read it; tap it → open that session.**
 On the "Volume per session" chart in My Training, pointing at (or tabbing to) a bar updates the readout above it with that session's volume and date; the latest session shows by default. Tapping a bar opens that session's history.
 *Where:* My Training landing · *Under the hood:* `VolumeBySession`

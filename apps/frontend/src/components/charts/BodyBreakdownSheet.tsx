@@ -1,0 +1,132 @@
+// ------------------------------------------------------------
+// components/charts/BodyBreakdownSheet.tsx
+//
+// The tap-in companion to the Home BodyHeatMap: a bottom sheet that maps every
+// muscle (grouped by body part) to how many sessions trained it in the last 30
+// days. More granular than the figure on purpose — it lists muscles the SVG
+// can't paint (e.g. Tibialis Ant.), so any muscle is reachable here.
+//
+// Both ends are visible: a highlights strip (most-trained + how many neglected)
+// and, within each group, muscles sorted busiest-first with untrained ones shown
+// cold rather than hidden.
+//
+// v1 is display-only (the map). Tapping a muscle → its exercises is Phase 2
+// (needs the GET /exercises?muscle= seam). See task-plan-body-sheet.md.
+// ------------------------------------------------------------
+
+import { useMemo } from 'react'
+import { cn } from '@/lib/cn'
+import { BottomSheet } from '@/components/ui/BottomSheet'
+import { MUSCLE_BODY_PART, MUSCLE_LABEL } from '@trainer-app/shared'
+import type { Muscle, BodyPart, MuscleFrequencyCount } from '@trainer-app/shared'
+
+const GROUP_ORDER: BodyPart[] = ['chest', 'back', 'shoulders', 'arms', 'core', 'legs', 'full_body']
+const GROUP_LABEL: Record<string, string> = {
+  chest: 'Chest', back: 'Back', shoulders: 'Shoulders',
+  arms: 'Arms', core: 'Core', legs: 'Legs', full_body: 'Full Body',
+}
+
+const HOT_FILL    = '#D91B1B'  // Ember Red — matches the heat-map
+const BASE_FILL    = '#3F444C'
+const MIN_OPACITY = 0.3
+
+interface BodyBreakdownSheetProps {
+  open:    boolean
+  onClose: () => void
+  counts:  MuscleFrequencyCount[]
+}
+
+export function BodyBreakdownSheet({ open, onClose, counts }: BodyBreakdownSheetProps): React.JSX.Element {
+  const { groups, max, topMuscle, neglectedCount } = useMemo(() => {
+    const countOf = new Map<Muscle, number>()
+    for (const c of counts) countOf.set(c.muscle, c.count)
+
+    const allMuscles = Object.keys(MUSCLE_BODY_PART) as Muscle[]
+    const max = Math.max(1, ...allMuscles.map((m) => countOf.get(m) ?? 0))
+
+    const byGroup = new Map<BodyPart, { muscle: Muscle; count: number }[]>()
+    for (const m of allMuscles) {
+      const bp  = MUSCLE_BODY_PART[m]
+      const arr = byGroup.get(bp) ?? []
+      arr.push({ muscle: m, count: countOf.get(m) ?? 0 })
+      byGroup.set(bp, arr)
+    }
+
+    const groups = GROUP_ORDER
+      .filter((bp) => byGroup.has(bp))
+      .map((bp) => ({
+        bodyPart: bp,
+        muscles: (byGroup.get(bp) ?? []).sort(
+          (a, b) => b.count - a.count || MUSCLE_LABEL[a.muscle].localeCompare(MUSCLE_LABEL[b.muscle]),
+        ),
+      }))
+
+    const sorted   = allMuscles
+      .map((m) => ({ muscle: m, count: countOf.get(m) ?? 0 }))
+      .sort((a, b) => b.count - a.count)
+    const topMuscle      = sorted[0] && sorted[0].count > 0 ? sorted[0] : null
+    const neglectedCount = allMuscles.filter((m) => (countOf.get(m) ?? 0) === 0).length
+
+    return { groups, max, topMuscle, neglectedCount }
+  }, [counts])
+
+  return (
+    <BottomSheet open={open} onClose={onClose} title="Body · last 30 days" maxHeight="85vh">
+      <div className="px-4 pb-8 pt-1">
+
+        {/* Highlights — both ends at a glance */}
+        <div className="grid grid-cols-2 gap-2 mb-5">
+          <div className="rounded-lg border border-surface-border bg-surface px-3 py-2">
+            <p className="text-[10px] uppercase tracking-widest text-gray-500">Most trained</p>
+            {topMuscle ? (
+              <p className="text-sm text-white mt-0.5 truncate">
+                {MUSCLE_LABEL[topMuscle.muscle]} <span className="text-gray-500">· {topMuscle.count}×</span>
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600 mt-0.5">Nothing logged yet</p>
+            )}
+          </div>
+          <div className="rounded-lg border border-surface-border bg-surface px-3 py-2">
+            <p className="text-[10px] uppercase tracking-widest text-gray-500">Neglected</p>
+            <p className="text-sm text-white mt-0.5">
+              {neglectedCount} <span className="text-gray-500">muscle{neglectedCount === 1 ? '' : 's'} untrained</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Groups → every muscle */}
+        <div className="space-y-4">
+          {groups.map(({ bodyPart, muscles }) => (
+            <div key={bodyPart}>
+              <p className="section-label">{GROUP_LABEL[bodyPart] ?? bodyPart}</p>
+              <div className="mt-1">
+                {muscles.map(({ muscle, count }) => {
+                  const op = count > 0 ? MIN_OPACITY + (count / max) * (1 - MIN_OPACITY) : 0
+                  return (
+                    <div key={muscle} className="flex items-center gap-3 py-1.5 border-b border-surface-border/40 last:border-0">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: op ? HOT_FILL : BASE_FILL, opacity: op || 1 }}
+                        aria-hidden
+                      />
+                      <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-gray-200' : 'text-gray-500')}>
+                        {MUSCLE_LABEL[muscle]}
+                      </span>
+                      <span className={cn('text-xs tabular-nums', count > 0 ? 'text-gray-400' : 'text-gray-600')}>
+                        {count > 0 ? `${count}×` : '—'}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-[10px] text-gray-600 text-center mt-5">
+          Sessions that trained each muscle in the last 30 days.
+        </p>
+      </div>
+    </BottomSheet>
+  )
+}

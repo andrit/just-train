@@ -18,6 +18,7 @@ import { useSelfClient, useMuscleFrequency } from '@/lib/queries/clients'
 import { usePlannedSessions }           from '@/lib/queries/sessions'
 import { useMode }                      from '@/lib/mode'
 import { BodyHeatMap }                  from '@/components/charts/BodyHeatMap'
+import { BodyBreakdownSheet }           from '@/components/charts/BodyBreakdownSheet'
 import { Spinner }                      from '@/components/ui/Spinner'
 import { useAuthStore }                 from '@/store/authStore'
 import { useSessionStore }              from '@/store/sessionStore'
@@ -214,6 +215,7 @@ export default function DashboardPage(): React.JSX.Element {
 
   const { data: selfClient, isLoading } = useSelfClient()
   const { data: muscleFreq }            = useMuscleFrequency(selfClient?.id ?? null)
+  const [bodyOpen, setBodyOpen]         = useState(false)
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -253,12 +255,24 @@ export default function DashboardPage(): React.JSX.Element {
       {/* Body heat-map — fills the space between greeting and Train. Shows the
           figure (all-cold while loading / for a new athlete) and colors in as
           the last-30-days frequency lands. */}
-      <div className="flex-1 min-h-0 flex flex-col py-2 animate-slide-up" style={{ animationDelay: '50ms' }}>
+      <button
+        type="button"
+        onClick={() => setBodyOpen(true)}
+        aria-label="View body breakdown — muscles trained in the last 30 days"
+        className="flex-1 min-h-0 flex flex-col py-2 w-full rounded-lg animate-slide-up focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        style={{ animationDelay: '50ms' }}
+      >
         <BodyHeatMap counts={muscleFreq?.counts ?? []} className="flex-1 min-h-0" />
-        <p className="shrink-0 text-center text-[10px] uppercase tracking-widest text-gray-600 mt-2">
-          Trained · last 30 days
-        </p>
-      </div>
+        <span className="shrink-0 text-center text-[10px] uppercase tracking-widest text-gray-600 mt-2">
+          Trained · last 30 days&nbsp;›
+        </span>
+      </button>
+
+      <BodyBreakdownSheet
+        open={bodyOpen}
+        onClose={() => setBodyOpen(false)}
+        counts={muscleFreq?.counts ?? []}
+      />
 
       {/* ── Launch ── Train, pinned just above the nav. Planning + all feedback
           live elsewhere (launcher / My Training). */}

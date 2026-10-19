@@ -7,6 +7,21 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Home — body breakdown sheet (tap the figure, Phase 1, 2026-10-19)
+- **The Home body figure is now tappable** → a "Body · last 30 days" bottom sheet that maps **every
+  muscle**, grouped by body part, to how many sessions trained it. Phase 1 of the body-sheet plan: the
+  map itself, reliable on its own; exercise suggestions per muscle come in Phase 2.
+- **More granular than the figure, deliberately.** The sheet lists all 34 muscles from
+  `MUSCLE_BODY_PART` (6 groups) with `MUSCLE_LABEL` names — including ones the SVG can't shade
+  (Tibialis Ant., Soleus), so "the shin muscle" / "that forearm muscle" are reachable even though they
+  never light up on the body. **Both ends shown:** a highlights strip (most-trained muscle + how many
+  are untrained) and, within each group, muscles sorted busiest-first with untrained ones shown cold
+  (not hidden). Intensity dot reuses the heat-map's Ember-Red ramp.
+- **Frontend-only — no backend.** It's fed the `muscle-frequency` counts Home already fetches; grouping
+  and labels are existing shared data. Whole-figure tap (no per-polygon hot-spots); reuses `BottomSheet`
+  (swipe/backdrop/Esc). Rows are display-only in v1. New `components/charts/BodyBreakdownSheet.tsx`;
+  Home figure wrapped in a button. Plan + vet: `.workbench/designer/current/task-plan-body-sheet.md`.
+
 ### Exercise library — core/ab additions (2026-10-19)
 - **Two new public exercises:** **Machine Crunch** (resistance / isolation / machine — seated weighted
   crunch against a stack; rectus abdominis primary, obliques secondary) and **Russian Twist**

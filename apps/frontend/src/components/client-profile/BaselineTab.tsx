@@ -5,7 +5,7 @@
 // historical snapshot list, take snapshot CTA.
 // ------------------------------------------------------------
 
-import { useState }          from 'react'
+import { useState, useEffect } from 'react'
 import { cn }                from '@/lib/cn'
 import { interactions }      from '@/lib/interactions'
 import { useLatestSnapshot, useClientSnapshots } from '@/lib/queries/clients'
@@ -88,10 +88,30 @@ function SnapshotCard({
 
 // ── Baseline tab ──────────────────────────────────────────────────────────────
 
-export function BaselineTab({ clientId, isAthlete = false }: { clientId: string; isAthlete?: boolean }): React.JSX.Element {
+export function BaselineTab({
+  clientId,
+  isAthlete = false,
+  autoOpenSnapshot = false,
+  onSnapshotAutoOpened,
+}: {
+  clientId: string
+  isAthlete?: boolean
+  /** Open the capture sheet immediately on mount (dashboard "Log Snapshot" deep-link). */
+  autoOpenSnapshot?: boolean
+  /** Called once after the auto-open fires, so the parent can clear its one-shot. */
+  onSnapshotAutoOpened?: () => void
+}): React.JSX.Element {
   const { data: latest,    isLoading: latestLoading    } = useLatestSnapshot(clientId)
   const { data: snapshots, isLoading: snapshotsLoading } = useClientSnapshots(clientId)
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(autoOpenSnapshot)
+
+  // Clear the parent's one-shot after honouring the deep-link, so switching
+  // away and back to this tab doesn't re-open the sheet.
+  useEffect(() => {
+    if (autoOpenSnapshot) onSnapshotAutoOpened?.()
+    // Run once on mount for the deep-link flag only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const isLoading = latestLoading || snapshotsLoading
 

@@ -88,8 +88,12 @@ function TabButton({ id, label, active, incomplete, onClick }: {
 
 export default function MyTrainingPage(): React.JSX.Element {
   const location   = useLocation()
-  const defaultTab = (location.state as { tab?: Tab } | null)?.tab ?? 'overview'
+  const navState   = location.state as { tab?: Tab; openSnapshot?: boolean } | null
+  const defaultTab = navState?.tab ?? 'overview'
   const [tab, setTab] = useState<Tab>(defaultTab)
+  // One-shot: the dashboard "Log Snapshot" action deep-links with openSnapshot
+  // so the Baseline tab opens the capture sheet directly. Cleared once consumed.
+  const [autoOpenSnapshot, setAutoOpenSnapshot] = useState(!!navState?.openSnapshot)
 
   const { trainerMode }        = usePreferences()
   const { hasSession }         = useSessionStore()
@@ -208,7 +212,14 @@ export default function MyTrainingPage(): React.JSX.Element {
           />
         )}
         {tab === 'timeline'   && <TimelineTab clientId={client.id} clientName={client.name} />}
-        {tab === 'baseline'   && <BaselineTab clientId={client.id} isAthlete={trainerMode === 'athlete'} />}
+        {tab === 'baseline'   && (
+          <BaselineTab
+            clientId={client.id}
+            isAthlete={trainerMode === 'athlete'}
+            autoOpenSnapshot={autoOpenSnapshot}
+            onSnapshotAutoOpened={() => setAutoOpenSnapshot(false)}
+          />
+        )}
         {tab === 'prs'        && <PersonalBestsTab clientId={client.id} />}
         {tab === 'challenges' && <ChallengesTab clientId={client.id} clientName={client.name} isSelf={true} />}
       </div>

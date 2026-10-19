@@ -7,6 +7,10 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Dashboard "Log Snapshot" opens the capture sheet directly (2026-10-19)
+- **One tap instead of two.** The dashboard's "Log Snapshot" action navigated to My Training's Baseline tab and stopped at the "Take a Snapshot" button — the athlete still had to tap it. It now deep-links straight into the `SnapshotCaptureSheet`.
+- **How:** the action passes `state: { tab: 'baseline', openSnapshot: true }`; `MyTrainingPage` reads `openSnapshot` as a **one-shot** and passes `autoOpenSnapshot` + `onSnapshotAutoOpened` to `BaselineTab`, which opens the sheet on mount and calls back so the parent clears the flag — switching away and back to Baseline doesn't re-open it. The two trainer call sites of the shared `BaselineTab` pass neither prop (both optional, default off), so viewing a client is unchanged.
+
 ### Camera sheet now says why the viewfinder is black (2026-10-19)
 - **A camera that opens to a black rectangle now explains itself.** `InlineCameraSheet` previously fell back to the file picker only when `getUserMedia` *rejected*. When it *resolved* with a stream that delivers no frames — an installed PWA whose camera permission differs from the browser's (seen on the `www.just-train.fit` origin switch), or a camera held by another app — the user got a silent black box with no way forward.
 - **New `'blocked'` state.** Reached when the resolved stream has no video track, or when a **2 s watchdog** finds `videoRef.videoWidth` still 0 (a healthy camera reports frames well within 2 s). The watchdog stops the dead stream and shows: *"Camera is blocked or in use. Allow camera access for this app in your device settings — an installed app asks separately from the browser — or pick a file instead."* with **Try again** (re-runs `getUserMedia` — fixes the transient camera-in-use case) and **Choose a file** (the existing file-picker fallback).

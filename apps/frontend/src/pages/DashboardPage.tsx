@@ -392,7 +392,7 @@ export default function DashboardPage(): React.JSX.Element {
           {/* Log Snapshot — secondary action for measurements (UF-A-03) */}
           <button
             type="button"
-            onClick={() => navigate('/my-training', { state: { tab: 'baseline' } })}
+            onClick={() => navigate('/my-training', { state: { tab: 'baseline', openSnapshot: true } })}
             className="mt-4 w-full text-left rounded-lg border border-surface-border bg-surface-raised px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:border-gray-500 transition-colors active:scale-[0.98]"
           >
             <span className="font-display text-xs uppercase tracking-widest text-gray-400 block">Log Snapshot</span>

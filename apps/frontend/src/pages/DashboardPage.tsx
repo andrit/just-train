@@ -1,36 +1,28 @@
 // ------------------------------------------------------------
-// pages/DashboardPage.tsx — Action-hub dashboard (Phase 3)
+// pages/DashboardPage.tsx — Home / launch surface
 //
-// Primary content: TRAIN / PLAN / GOALS / HISTORY / BUILD action cards.
-// Secondary content: user-configured KPI widgets + active challenges.
+// Home is the starting point, not a dashboard: greeting + the TRAIN card.
+// All feedback (KPI stats, challenges, snapshots) lives in My Training,
+// one tap away on the nav bar — this keeps Home out of the way of the
+// "just train" path.
 //
 // TRAIN card has three states driven by session store + planned sessions API:
-//   1. "Start Training"  — no active or planned session
+//   1. "Train"           — no active or planned session (opens the launcher)
 //   2. "Begin: [name]"   — a planned session exists (API: status=planned)
 //   3. "Resume: [name]"  — an in-progress session is live (sessionStore)
-//
-// Trainer-specific widgets (atRisk, activeClients) appear in the widget
-// stack below the fold, gated by trainerMode.
 // ------------------------------------------------------------
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate }                  from 'react-router-dom'
-import { usePreferences }               from '@/hooks/usePreferences'
-import { useClients, useSelfClient, useClientGoals } from '@/lib/queries/clients'
-import { useChallenges }                from '@/lib/queries/challenges'
+import { useSelfClient }                from '@/lib/queries/clients'
 import { usePlannedSessions }           from '@/lib/queries/sessions'
 import { useMode }                      from '@/lib/mode'
-import { WidgetRenderer }               from '@/components/dashboard/WidgetRenderer'
-import { ChallengeProgressCard }        from '@/components/challenges/ChallengeProgressCard'
-import { ChallengeForm }                from '@/components/challenges/ChallengeForm'
 import { Spinner }                      from '@/components/ui/Spinner'
 import { useAuthStore }                 from '@/store/authStore'
 import { useSessionStore }              from '@/store/sessionStore'
 import { useUXEvent }                   from '@/hooks/useUXEvent'
 import { useNav }                       from '@/services/navService'
-import { apiClient }                   from '@/lib/api'
-import type { WidgetId }               from '@/lib/widgets'
-import type { ClientGoalResponse }     from '@trainer-app/shared'
+import { apiClient }                    from '@/lib/api'
 
 // ── Email verification banner ─────────────────────────────────────────────────
 
@@ -213,43 +205,13 @@ function TrainCard({ selfClientId, onStart }: TrainCardProps): React.JSX.Element
 
 export default function DashboardPage(): React.JSX.Element {
   const trainer = useAuthStore((s) => s.trainer)
-  const {
-    ctaLabel, alertsEnabled, alertColorScheme, alertTone,
-    widgetOrder, trainerMode,
-  } = usePreferences()
   const { fire } = useUXEvent()
   const mode     = useMode()
   const { openSessionLauncher } = useNav()
-  const navigate = useNavigate()
 
   useEffect(() => { fire('page_enter') }, [fire])
 
-  const [alertDismissed, setAlertDismissed] = useState(false)
-  const showAlert = alertsEnabled && !alertDismissed
-
-  const { data: clients,    isLoading: clientsLoading } = useClients()
-  const { data: selfClient, isLoading: selfLoading     } = useSelfClient()
-
-  const { data: selfGoals } = useClientGoals(selfClient?.id ?? null)
-  const selfActiveGoal = selfGoals?.find((g) => g.achievedAt === null) ?? null
-
-  const allGoals: ClientGoalResponse[] = []
-
-  const { data: selfChallenges } = useChallenges(selfClient?.id ?? null, 'active')
-  const [challengeFormOpen, setChallengeFormOpen] = useState(false)
-
-  const isLoading = clientsLoading || selfLoading
-
-  const visibleWidgets = useMemo(() => {
-    // widgetOrder is already filtered to the current mode's widgets by
-    // parseWidgetProgression (WIDGET_META.modes) — no mode check needed here.
-    return widgetOrder.filter((id: WidgetId) => {
-      if (id === 'atRisk' && !showAlert) return false
-      // Phase 7 widgets have no renderer yet — exclude so they don't leave empty slots.
-      if (['volume', 'streak', 'newClients'].includes(id)) return false
-      return true
-    })
-  }, [widgetOrder, showAlert])
+  const { data: selfClient, isLoading } = useSelfClient()
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -280,89 +242,16 @@ export default function DashboardPage(): React.JSX.Element {
         </h1>
       </div>
 
-      {/* ── Action hub ── */}
-      <div className="space-y-2 mb-6 animate-slide-up" style={{ animationDelay: '50ms' }}>
-
-        {/* TRAIN — primary card, full width. Planning lives inside the launcher;
-            Goals / History / Build are reachable from the nav bar. */}
+      {/* ── Launch ──
+          Home is the starting point: greeting + Train, nothing else.
+          Feedback (stats, challenges, snapshots) lives in My Training,
+          one tap away on the nav bar. */}
+      <div className="animate-slide-up" style={{ animationDelay: '50ms' }}>
         <TrainCard
           selfClientId={selfClient?.id}
           onStart={() => openSessionLauncher(selfClient?.id)}
         />
       </div>
-
-      {/* ── KPI widgets (below fold) ── */}
-      {visibleWidgets.length > 0 && (
-        <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
-          <div className="flex items-center gap-3 mb-4">
-            <span className="font-display text-xs uppercase tracking-widest text-gray-600">Your stats</span>
-            <div className="flex-1 border-t border-surface-border" />
-          </div>
-          <div className="space-y-4">
-            {visibleWidgets.map((id: WidgetId, i: number) => (
-              <div
-                key={id}
-                className="animate-slide-up"
-                style={{ animationDelay: `${100 + i * 50}ms` }}
-              >
-                <WidgetRenderer
-                  id={id}
-                  clients={clients ?? []}
-                  selfClient={selfClient ?? null}
-                  activeGoal={selfActiveGoal}
-                  goals={allGoals}
-                  ctaLabel={ctaLabel}
-                  alertColorScheme={alertColorScheme}
-                  alertTone={alertTone}
-                  onDismissAlert={() => setAlertDismissed(true)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Active challenges */}
-      {selfClient && (selfChallenges?.length ?? 0) > 0 && (
-        <div className="mt-6 space-y-3 animate-slide-up" style={{ animationDelay: `${150 + visibleWidgets.length * 50}ms` }}>
-          <h2 className="font-display text-lg uppercase tracking-wide text-white">
-            Active Challenges
-          </h2>
-          <div className="space-y-2">
-            {(selfChallenges ?? []).map((c) => (
-              <ChallengeProgressCard key={c.id} challenge={c} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {selfClient && trainerMode === 'athlete' && (
-        <>
-          {/* Log Snapshot — secondary action for measurements (UF-A-03) */}
-          <button
-            type="button"
-            onClick={() => navigate('/my-training', { state: { tab: 'baseline', openSnapshot: true } })}
-            className="mt-4 w-full text-left rounded-lg border border-surface-border bg-surface-raised px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:border-gray-500 transition-colors active:scale-[0.98]"
-          >
-            <span className="font-display text-xs uppercase tracking-widest text-gray-400 block">Log Snapshot</span>
-            <span className="text-xs text-gray-400">Record your measurements</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setChallengeFormOpen(true)}
-            className="mt-2 w-full text-center text-sm text-command-blue hover:text-command-blue/80 py-2"
-          >
-            + Set a challenge
-          </button>
-          <ChallengeForm
-            open={challengeFormOpen}
-            onClose={() => setChallengeFormOpen(false)}
-            clientId={selfClient.id}
-            contextLabel="Set a challenge"
-          />
-        </>
-      )}
 
     </div>
   )

@@ -7,6 +7,26 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Home is a launch surface — stripped to greeting + Train (2026-10-19)
+- **Reframe: the "dashboard" is Home, a starting point — not an analytics surface.** It was trying
+  to be both: the Train card *and* a stack of feedback (the "Your stats" KPI widgets, Active
+  Challenges, Log Snapshot, "+ Set a challenge") — all of which **My Training already carries** more
+  fully (KPI hero + Overview / Timeline / Baseline / PRs / Challenges tabs). The two surfaces
+  overlapped, with Home a lite, redundant copy.
+- **Home now renders only the greeting + the Train card** (with its live / planned / idle states
+  intact). Everything else was removed from `DashboardPage` — the widget stack (`WidgetRenderer`),
+  the Active Challenges list, the Log Snapshot button, the "+ Set a challenge" form. This keeps Home
+  out of the way of the "just train" path: you land, you train. The email-verification banner stays
+  (a conditional system notice, not feedback).
+- **Nothing is lost — feedback is one tap away on the nav bar.** Stats/PRs/goals/snapshots/challenges
+  all live in **My Training** (the next surface to develop into the real feedback dashboard).
+  Post-login landing stays Home by design.
+- Frontend-only, one file (`DashboardPage.tsx`); pruned every now-unused hook/import
+  (`usePreferences`, `useClients`, `useClientGoals`, `useChallenges`, `WidgetRenderer`,
+  `ChallengeProgressCard`, `ChallengeForm`). The `WidgetRenderer` / widget components and the
+  `widgetProgression` preference are untouched and still used by their own machinery; Home simply no
+  longer renders them.
+
 ### Dashboard debusy — one primary action, planning rehomed into the launcher (2026-10-19)
 - **The dashboard action hub was 75% duplicate nav.** Below the Train card sat a 2×2 grid of
   `ActionCard`s — **Goals** (→ `/my-training`), **History** (→ `/sessions`), **Build** (→ `/templates`)

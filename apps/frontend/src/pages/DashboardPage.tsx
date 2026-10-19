@@ -113,36 +113,6 @@ function EmailVerificationBanner(): React.JSX.Element | null {
   )
 }
 
-// ── Action card sub-components ────────────────────────────────────────────────
-
-interface ActionCardProps {
-  label:       string
-  description: string
-  accent?:     boolean
-  onClick:     () => void
-}
-
-function ActionCard({ label, description, accent = false, onClick }: ActionCardProps): React.JSX.Element {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        'w-full text-left rounded-lg border px-4 py-3 transition-colors active:scale-[0.98]',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black',
-        accent
-          ? 'bg-command-blue/10 border-command-blue/30 hover:bg-command-blue/15'
-          : 'bg-surface-raised border-surface-border hover:border-gray-500',
-      ].join(' ')}
-    >
-      <span className={`block font-display text-sm uppercase tracking-widest ${accent ? 'text-command-blue' : 'text-gray-200'}`}>
-        {label}
-      </span>
-      <span className="block text-xs text-gray-400 mt-0.5">{description}</span>
-    </button>
-  )
-}
-
 // ── TRAIN card — three states ─────────────────────────────────────────────────
 
 interface TrainCardProps {
@@ -249,7 +219,7 @@ export default function DashboardPage(): React.JSX.Element {
   } = usePreferences()
   const { fire } = useUXEvent()
   const mode     = useMode()
-  const { openSessionLauncher, openSessionPlan, goToTab } = useNav()
+  const { openSessionLauncher } = useNav()
   const navigate = useNavigate()
 
   useEffect(() => { fire('page_enter') }, [fire])
@@ -313,35 +283,12 @@ export default function DashboardPage(): React.JSX.Element {
       {/* ── Action hub ── */}
       <div className="space-y-2 mb-6 animate-slide-up" style={{ animationDelay: '50ms' }}>
 
-        {/* TRAIN — primary card, full width */}
+        {/* TRAIN — primary card, full width. Planning lives inside the launcher;
+            Goals / History / Build are reachable from the nav bar. */}
         <TrainCard
           selfClientId={selfClient?.id}
           onStart={() => openSessionLauncher(selfClient?.id)}
         />
-
-        {/* Secondary actions — 2 column grid */}
-        <div className="grid grid-cols-2 gap-2">
-          <ActionCard
-            label="Plan"
-            description="Schedule a future session"
-            onClick={() => openSessionPlan(undefined, selfClient?.id)}
-          />
-          <ActionCard
-            label="Goals"
-            description="View and set targets"
-            onClick={() => navigate('/my-training')}
-          />
-          <ActionCard
-            label="History"
-            description="Past sessions and PRs"
-            onClick={() => goToTab('/sessions')}
-          />
-          <ActionCard
-            label="Build"
-            description="Create a reusable template"
-            onClick={() => goToTab('/templates')}
-          />
-        </div>
       </div>
 
       {/* ── KPI widgets (below fold) ── */}

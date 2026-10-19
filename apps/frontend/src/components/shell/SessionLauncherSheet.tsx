@@ -13,6 +13,7 @@ import { useState, useEffect }              from 'react'
 import { cn }                                from '@/lib/cn'
 import { interactions }                      from '@/lib/interactions'
 import { useMode }                           from '@/lib/mode'
+import { useNav }                            from '@/services/navService'
 import { useUXEvent }                        from '@/hooks/useUXEvent'
 import { usePreferences }                    from '@/hooks/usePreferences'
 import { useAuthStore }                      from '@/store/authStore'
@@ -39,6 +40,7 @@ export function SessionLauncherSheet({
   const { ctaLabel }   = usePreferences()
   const mode           = useMode()
   const { fire }       = useUXEvent()
+  const { openSessionPlan } = useNav()
 
   const { startSession: storeSession, getSession, hasSession } = useSessionStore()
   const { expand }     = useOverlayStore()
@@ -225,6 +227,20 @@ export function SessionLauncherSheet({
               ))
             )}
           </div>
+        )}
+
+        {/* Plan a future session instead — rehomed from the dashboard action hub */}
+        {!sessionActive && selectedClientId && (
+          <button
+            type="button"
+            onClick={() => {
+              openSessionPlan(undefined, selectedClientId)
+              onClose()
+            }}
+            className="w-full text-center text-sm text-gray-500 hover:text-gray-300 py-2 transition-colors"
+          >
+            Or plan a future session →
+          </button>
         )}
       </div>
     </BottomSheet>

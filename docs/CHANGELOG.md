@@ -7,6 +7,23 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Dashboard debusy — one primary action, planning rehomed into the launcher (2026-10-19)
+- **The dashboard action hub was 75% duplicate nav.** Below the Train card sat a 2×2 grid of
+  `ActionCard`s — **Goals** (→ `/my-training`), **History** (→ `/sessions`), **Build** (→ `/templates`)
+  and **Plan** — but the first three are the exact destinations the nav bar already offers (My
+  Training / Sessions / Templates), so the grid mostly restated the nav. Removed the whole grid (and
+  the now-unused `ActionCard` component): the dashboard's action hub is now just the **Train** card —
+  one unambiguous way to start.
+- **Plan was the only grid card with no nav home, so it moved into the start-training drawer.**
+  `SessionLauncherSheet` gains a quiet secondary link — **"Or plan a future session →"** — shown once
+  a client is selected and no session is active; it closes the sheet and opens the plan panel
+  (`openSessionPlan`). Discovery of planning drops one level (open launcher → see it), which is right
+  for a less-frequent action; an *existing* planned session still surfaces directly on the Train card.
+- **Neither mode is stranded.** Athletes reach Goals/History/Build from the nav bar (My Training /
+  Sessions / Templates). Trainers — whose nav shows *Clients*, not *My Training* — still reach their
+  own training via the trainer-only Self-Training widget. Frontend-only, two files
+  (`DashboardPage.tsx`, `SessionLauncherSheet.tsx`).
+
 ### Docs — README brought current (2026-10-19)
 - The root `README.md` had drifted badly: the Build Phases table marked v1.9.0 "🔨 Current" while
   everything after it was ✅, and v2.12–v2.14 were mislabeled and wrong-status. Rebuilt the table from

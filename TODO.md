@@ -1,59 +1,43 @@
 # TODO — Trainer (Just Train) · Phase 19 Go Live
 
-_Resume pointer. Updated 2026-10-18. Full handover is in the `self:session-close` memory (read via `session_start`)._
-
-## NEXT QUEUE — do in order
-
-1. **PLAN the formalize-custom button** (plan only, don't build yet).
-   Turn the 3× hand-written SQL (corkscrew curls; cable crossover go up) into a feature: a
-   "formalize this custom exercise" action that inserts the public exercise (+ muscles),
-   repoints every FK (`session_exercises`, `template_exercises`, `challenges`, `exercise_media`
-   — all `ON DELETE RESTRICT`) onto it, then deletes the draft (snapshot per-set laterality so
-   old bilateral history stays bilateral). Also plan wiring into the draft-enrichment flow.
-   Pattern: `docs/sql/formalize-corkscrew-curls.sql`, `docs/sql/merge-casual-draft-exercises.sql`.
-2. **Camera-sheet "why black" fix** — `InlineCameraSheet`: detect a resolved stream with no live
-   video track / no frames after ~2s → show "Camera blocked — allow it in the app's permissions,
-   or pick a file" + the existing file-picker fallback. (Today it only falls back on *reject*.)
-3. **Deep-open the snapshot sheet** from the dashboard "Log Snapshot" action — pass an
-   `openSnapshot` flag via `location.state`; `BaselineTab` auto-opens `SnapshotCaptureSheet`
-   on mount when set (skip the tab-then-tap). (`DashboardPage` ~line 392.)
-4. **Maintenance upgrade plan→vet cycles** (one plan→vet each): drizzle 0.30→0.45 + drizzle-kit
-   0.31; argon2 0.45; `@sentry/react` 8→10; admin routes (`requireRole('admin')`); G16 leftovers
-   (sign-out cache-clear of `cloudinary-media`; guard so `getThumbnailUrl()` never rewrites
-   client media); trainerMode default migration.
-
-## Backlog (queued 2026-10-19 — after the current work)
-- ~~**README out of date**~~ ✅ DONE 2026-10-19 — Build Phases table rebuilt from PROJECT_STATE
-  (v1.0.0–v2.14.0 ✅, Unreleased section added), title → Just Train, CI/CD + verify gate + structure
-  + docs index refreshed.
-- ~~**Mode-variance**~~ ✅ COMPLETE 2026-10-19 (steps 1–6: registry + widget drift fix + vocabulary +
-  nav + client-picker + route guard). Plan: `task-plan-mode-variance.md`. Only `nav` and `can` are the
-  live registry consumers to extend when new mode-varying surfaces appear.
-- **Maintenance follow-ups** (plan: `task-plan-maintenance.md`): G16 leftovers; `@sentry/react` 8→10;
-  argon2 bump (check Railway prebuilt); **admin routes + owner `role='admin'`** (with formalize Slice B);
-  drizzle 0.30→0.45 **deferred, own plan, last**.
-- **Formalize-custom Slice B** (admin-only publish-to-shared + merge) — plan: `task-plan-formalize-custom.md`.
-
-## Last step (this session, 2026-10-18 — all committed, verify-green, confirmed in app)
-- Session-review bottom-spacing fix (`SessionHistoryPanel` → `pb-nav-clear`).
-- My Training **snapshot capture** — built the missing feature (`SnapshotCaptureSheet`, wired via
-  shared `BaselineTab`; omit-untouched subjective sliders; `ScoreSlider` extracted from `SessionCloseout`).
-- `progressionState` relabelled for athletes (Baseline/Building/Maintaining; trainer labels unchanged).
-- Deferred note: athlete progression review (personalize labels + derive phase from data / plateau crossings).
+_Resume pointer. Updated 2026-10-19. Full handover is in the `self:session-close` memory (read via `session_start`)._
 
 ## Load first on resume
 - `session_start` (Mode B — mandatory), then this file.
-- `docs/DEFERRED_ITEMS.md` — "User reports from live use" (queue items 1–3 are recorded there).
-- For queue #1: `docs/sql/formalize-corkscrew-curls.sql` + `docs/sql/merge-casual-draft-exercises.sql`,
-  and `apps/backend/src/routes/exercises.ts` (where the formalize route would live).
+- Plans in `.workbench/designer/current/`: `task-plan-maintenance.md`, `task-plan-formalize-custom.md`, `task-plan-mode-variance.md`.
+- `docs/DEFERRED_ITEMS.md` for the longer-tail items.
+
+## NEXT — maintenance queue, IN ORDER (plan: `task-plan-maintenance.md`)
+1. **G16 leftovers** *(CODE — build first, lowest risk)*
+   - `useSignOut.ts` → `caches.delete('cloudinary-media')` (feature-detect `'caches' in window` + try/catch).
+   - `getThumbnailUrl` (`components/exercises/utils.ts`) → return URL unchanged when it's a signed/authenticated
+     Cloudinary URL (`/authenticated/` or a `/s--…--/` segment). Defensive — today only public exercise media is
+     thumbnailed. One-line unit test (public rewritten / signed untouched).
+2. **`@sentry/react` 8→10** *(DEP — user runs)* — tiny surface (main.tsx + swErrorRelay + 1 test mock); mirror of the shipped node bump; vet `init()`.
+3. **argon2 0.31→latest** *(DEP — user runs)* — API stable, old hashes verify; RISK = native prebuilt on Railway Node 20; own commit.
+4. **Admin routes + formalize Slice B** *(CODE)* — `GET /auth/admin/deactivated` + `POST /auth/admin/trainers/:id/purge`;
+   formalize `POST /exercises/:id/formalize` (reuses `MusclePicker`). PREREQ: owner `role='admin'` via one-off SQL.
+   New `:id` route breaks the G3 matrix 404-convention → special-case admin; purge needs a confirm contract.
+5. **drizzle 0.30→0.45 / kit 0.21→0.31** *(DEP — DEFER, own plan, LAST)* — config + snapshot + CI push risk, no urgency.
+
+## Done this session (2026-10-19 — all committed, verify + CI green)
+- Queue #1 formalize-custom: **PLAN** (admin-only publish, exact merge match, promote-in-place vs merge; FK correction — only 2 of 4 are RESTRICT) + **Slice A built** (custom exercises get a muscle map: `MusclePicker`, muscles on POST/PATCH `/exercises`, `lib/exerciseMuscles.ts`).
+- Queue #2 camera "why black": `InlineCameraSheet` `blocked` state (no-frames 2s watchdog) + Try again + file fallback.
+- Queue #3 snapshot deep-open: dashboard "Log Snapshot" → `openSnapshot` one-shot → `BaselineTab` auto-opens the sheet.
+- Queue #4 maintenance: **PLAN** (`task-plan-maintenance.md`).
+- **Mode-variance COMPLETE** (all 6 steps): `lib/mode.ts` + `useMode()`; widget-drift fix; vocabulary + nav + client-picker + route guard migrated; `mode.test.ts` gate.
+- README brought current (title → Just Train; Build Phases rebuilt; CI + verify gate; structure/docs refreshed).
 
 ## Standing rules (this container)
 - Container can't run `pnpm verify` / vite / vitest / tsx / drizzle-kit / psql-to-prod — **user runs them**.
 - I stage **specific** files (never `git add -A`); **user commits + pushes**.
 - Prod SQL **before** push on column/table adds; prod-mutating **data** SQL defaults to a `BEGIN…ROLLBACK` dry-run.
-- A new `:id` route needs an ownership-matrix line.
+- A new `:id` route needs an ownership-matrix line (G3).
 
 ## Open on the user's side (ask on resume)
-- Did `UPSTASH_REDIS_URL` and the Resend keys (`RESEND_API_KEY`, `REPORT_FROM_EMAIL`) get set?
-  (Without them: purge / token-cleanup / reports / at-risk / cron + all transactional email are off.)
-- Launch gates (non-code): logo/favicon/PWA icons, USPTO, Sentry source-map vars, Lighthouse ≥90 + first install.
+- **Still not set (2026-10-19):** `UPSTASH_REDIS_URL` (queue: reports/at-risk/purge/cleanup/cron) and the Resend trio
+  `RESEND_API_KEY` + `REPORT_FROM_EMAIL=no-reply@just-train.fit` + `APP_URL=https://www.just-train.fit` (all transactional
+  email; needs `just-train.fit` verified in Resend = DNS at Cloudflare). Vars on the BACKEND service, staged until Deploy.
+- Owner `role='admin'` via one-off SQL (unblocks admin routes + formalize Slice B; stays full-access post-SaaS).
+- Launch gates (non-code): logo/favicon/PWA icons, USPTO, Sentry source-map vars, Lighthouse ≥ 90 + first install.
+- Gate rows: G10 (rotate PG pw + gitleaks), G18 (backups + pg_restore), G11, G9 (`curl /documentation` → 404).

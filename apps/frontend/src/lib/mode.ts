@@ -23,6 +23,15 @@ import { PROGRESSION_STATE_LABEL, PROGRESSION_STATE_LABEL_ATHLETE } from '@/comp
 
 export type Capability = 'viewRoster' | 'manageClients' | 'sendReports' | 'viewBilling'
 
+/** A primary-navigation entry (sidebar + mobile tab bar). */
+export interface NavItem {
+  path:  string
+  label: string
+  icon:  string
+  /** Exact-match the route (for the index "/" so it isn't active everywhere). */
+  end?:  boolean
+}
+
 export interface ModeLabels {
   /** Dashboard page header. */
   dashboardTitle:   string
@@ -38,6 +47,8 @@ export interface ModeConfig {
   /** Capability flags. Consumed by the route-guard / client-picker migration (steps 5/6) and the v3 billing gates. */
   can:       Record<Capability, boolean>
   labels:    ModeLabels
+  /** Primary navigation for this mode (sidebar + mobile tab bar). */
+  nav:       NavItem[]
   /** Athlete trains only themselves → the client picker is hidden and the self-client is auto-selected. */
   hidesClientPicker: boolean
 }
@@ -52,6 +63,13 @@ export const MODE_CONFIG: Record<TrainerMode, ModeConfig> = {
       selfClientLabel:  'My Training',
       progressionState: PROGRESSION_STATE_LABEL_ATHLETE,
     },
+    nav: [
+      { path: '/',            label: 'Dashboard',   icon: '⌂', end: true },
+      { path: '/sessions',    label: 'Sessions',    icon: '🏋️' },
+      { path: '/my-training', label: 'My Training', icon: '💪' },
+      { path: '/exercises',   label: 'Exercises',   icon: '🔬' },
+      { path: '/templates',   label: 'Templates',   icon: '📄' },
+    ],
     hidesClientPicker: true,
   },
   trainer: {
@@ -63,6 +81,13 @@ export const MODE_CONFIG: Record<TrainerMode, ModeConfig> = {
       selfClientLabel:  'Me',
       progressionState: PROGRESSION_STATE_LABEL,
     },
+    nav: [
+      { path: '/',          label: 'Dashboard', icon: '⌂', end: true },
+      { path: '/sessions',  label: 'Sessions',  icon: '🏋️' },
+      { path: '/clients',   label: 'Clients',   icon: '👥' },
+      { path: '/exercises', label: 'Exercises', icon: '💪' },
+      { path: '/templates', label: 'Templates', icon: '📄' },
+    ],
     hidesClientPicker: false,
   },
 }

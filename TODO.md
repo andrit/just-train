@@ -26,8 +26,8 @@ _Resume pointer. Updated 2026-10-18. Full handover is in the `self:session-close
 - **README is out of date — build phases incomplete.** Bring `README.md` current: the PWA SDLC /
   version phases have moved well past what it lists (we're Phase 19 Go Live; versions through v2.14.x
   + unreleased). Do after the in-flight queue is clear, or sooner if it slots in naturally.
-- **Mode-variance steps 3, 5, 6** (nav → `mode.nav`; client-picker → `mode.hidesClientPicker`/`can`;
-  route guard → capability). v1 is steps 1+2+4 (in progress). Plan: `task-plan-mode-variance.md`.
+- **Mode-variance steps 5, 6** (client-picker → `mode.hidesClientPicker`/`can`; route guard → capability).
+  Steps 1+2+4 + 3 (nav) done 2026-10-19. Plan: `task-plan-mode-variance.md`.
 - **Maintenance follow-ups** (plan: `task-plan-maintenance.md`): G16 leftovers; `@sentry/react` 8→10;
   argon2 bump (check Railway prebuilt); **admin routes + owner `role='admin'`** (with formalize Slice B);
   drizzle 0.30→0.45 **deferred, own plan, last**.

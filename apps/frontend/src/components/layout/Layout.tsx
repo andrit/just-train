@@ -9,43 +9,19 @@ import { useOverlayStore } from '@/store/overlayStore'
 import { useAuthStore }    from '@/store/authStore'
 import { useSignOut }      from '@/hooks/useSignOut'
 import { useSyncStatus }   from '@/hooks/useSyncStatus'
-import { usePreferences }  from '@/hooks/usePreferences'
+import { useMode }         from '@/lib/mode'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { OfflineBanner }   from '@/components/shell/OfflineBanner'
 import { ToastContainer }  from '@/components/ui/ToastContainer'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface NavItem {
-  path:  string
-  label: string
-  icon:  string
-  end?:  boolean
-}
-
 interface LayoutProps {
   children: React.ReactNode
 }
 
-// ── Nav items ─────────────────────────────────────────────────────────────────
-
-const TRAINER_NAV: NavItem[] = [
-  { path: '/',          label: 'Dashboard', icon: '⌂',  end: true },
-  { path: '/sessions',  label: 'Sessions',  icon: '🏋️' },
-  { path: '/clients',   label: 'Clients',   icon: '👥' },
-  { path: '/exercises', label: 'Exercises', icon: '💪' },
-  { path: '/templates', label: 'Templates', icon: '📄' },
-]
-
-function athleteNav(): NavItem[] {
-  return [
-    { path: '/',             label: 'Dashboard',   icon: '⌂', end: true },
-    { path: '/sessions',     label: 'Sessions',    icon: '🏋️' },
-    { path: '/my-training',  label: 'My Training', icon: '💪' },
-    { path: '/exercises',    label: 'Exercises',   icon: '🔬' },
-    { path: '/templates',    label: 'Templates',   icon: '📄' },
-  ]
-}
+// Nav items now live in the mode theme (lib/mode.ts → MODE_CONFIG[mode].nav),
+// so flipping trainerMode flips the nav with everything else.
 
 // ── Bicep logo (collapsed sidebar icon) ───────────────────────────────────────
 
@@ -208,7 +184,7 @@ function UserMenuButton({
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
   const { pending: pendingSyncCount } = useSyncStatus()
   const trainer          = useAuthStore((s) => s.trainer)
-  const { trainerMode }  = usePreferences()
+  const { nav: navItems } = useMode()
   const { showPassiveIcon, promptInstall } = useInstallPrompt()
   const {
     state: overlayState,
@@ -222,9 +198,6 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
   const sessionExpanded = overlayState === 'expanded'
   const sidebarCollapsed = sessionExpanded && !sidebarOpen
   const navHidden = sessionExpanded  // mobile bottom bar hides when session is full-screen
-
-  const isAthlete = trainerMode === 'athlete'
-  const navItems  = isAthlete ? athleteNav() : TRAINER_NAV
 
   const mobileNavItems = navItems
 

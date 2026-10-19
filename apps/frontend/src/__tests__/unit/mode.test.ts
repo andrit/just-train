@@ -31,6 +31,15 @@ describe('MODE_CONFIG', () => {
         expect(cfg.labels.selfClientLabel.length).toBeGreaterThan(0)
       })
 
+      it('has a non-empty nav where every item is complete', () => {
+        expect(cfg.nav.length).toBeGreaterThan(0)
+        for (const item of cfg.nav) {
+          expect(item.path.length).toBeGreaterThan(0)
+          expect(item.label.length).toBeGreaterThan(0)
+          expect(item.icon.length).toBeGreaterThan(0)
+        }
+      })
+
       it('labels every progression state', () => {
         for (const state of ProgressionStateEnum.options) {
           expect((cfg.labels.progressionState[state] ?? '').length).toBeGreaterThan(0)

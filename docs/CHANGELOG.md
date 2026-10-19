@@ -32,10 +32,12 @@ Versions follow [Semantic Versioning](https://semver.org/).
   `progressionStateLabel(state, isAthlete)` helper was removed; the five trainer-only surfaces keep
   importing `PROGRESSION_STATE_LABEL` directly (athletes never reach them). Behaviour-preserving
   (`isAthlete` was always `trainerMode === 'athlete'` at every call site).
-- **Deferred to the follow-up (steps 3/5/6, queued in `TODO.md`):** migrating nav, the client-picker, and
-  the route guard onto `mode.nav` / `mode.hidesClientPicker` / `mode.can`. The page trees
-  (MyTraining vs ClientProfile) stay separate by design. Backend stays mode-agnostic (branches on `role`,
-  never `trainerMode`).
+- **Step 3 (nav) — done same day.** The sidebar + mobile tab bar now read `useMode().nav`; `Layout`'s
+  `TRAINER_NAV`/`athleteNav()` arrays and its local `NavItem` type are gone (moved into `mode.ts`). The
+  gate test now also asserts a complete nav for both modes. Behaviour-preserving (same items/icons).
+- **Deferred to the follow-up (steps 5/6, queued in `TODO.md`):** the client-picker and route guard onto
+  `mode.hidesClientPicker` / `mode.can`. The page trees (MyTraining vs ClientProfile) stay separate by
+  design. Backend stays mode-agnostic (branches on `role`, never `trainerMode`).
 
 ### Dashboard "Log Snapshot" opens the capture sheet directly (2026-10-19)
 - **One tap instead of two.** The dashboard's "Log Snapshot" action navigated to My Training's Baseline tab and stopped at the "Take a Snapshot" button — the athlete still had to tap it. It now deep-links straight into the `SnapshotCaptureSheet`.

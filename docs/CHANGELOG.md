@@ -7,6 +7,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### My Training — headline KPI row (2026-10-19)
+- **The "are you moving forward?" answer no longer needs a swipe.** The KPI hero was a single
+  carousel of all nine stats, so the three signals that actually answer the question — **Streak**,
+  **This week** (x/target), **Last session** — competed equally with Avg stress and had to be swiped
+  to. They're now a **fixed 3-up row** at the top of the hero, always visible; the remaining six
+  (Consistency, Focus, Volume·month, All-time, Avg energy, Avg stress) stay in the carousel below.
+  Delivers the Phase-7 "answer it in 10 seconds" goal on the My Training landing.
+- Pure reorganization of `KpiHero` — same cards, same values, same highlight/empty logic, split into
+  `headlineCards` (rendered as `KpiCard`s in a grid) + `carouselCards` (unchanged `KpiCarousel`, now 6
+  cards / 2 pages). Loading shows a 3-up skeleton matching the carousel's. Applies on the trainer's
+  client profile too (shared component) — an improvement there as well. Frontend-only.
+
+### Launcher — "Or plan a future session" moved above "From Template" (2026-10-19)
+- Reordered the start-training drawer so the plan link sits directly under the primary Start button,
+  above the template list (was below it). One-block move in `SessionLauncherSheet`.
+
 ### My Training — recent sessions on the landing (2026-10-19)
 - **Developing My Training into the feedback dashboard** (the counterpart to the now-bare Home).
   First step: the "Recent Sessions" widget (last 3 completed, tappable → session history) now sits on

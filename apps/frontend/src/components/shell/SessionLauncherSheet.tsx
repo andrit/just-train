@@ -194,6 +194,20 @@ export function SessionLauncherSheet({
           ) : displayCta}
         </button>
 
+        {/* Plan a future session instead — rehomed from the dashboard action hub */}
+        {!sessionActive && selectedClientId && (
+          <button
+            type="button"
+            onClick={() => {
+              openSessionPlan(undefined, selectedClientId)
+              onClose()
+            }}
+            className="w-full text-center text-sm text-gray-500 hover:text-gray-300 py-2 transition-colors"
+          >
+            Or plan a future session →
+          </button>
+        )}
+
         {/* Templates */}
         {!sessionActive && (templates ?? []).length > 0 && (
           <div className="space-y-2">
@@ -227,20 +241,6 @@ export function SessionLauncherSheet({
               ))
             )}
           </div>
-        )}
-
-        {/* Plan a future session instead — rehomed from the dashboard action hub */}
-        {!sessionActive && selectedClientId && (
-          <button
-            type="button"
-            onClick={() => {
-              openSessionPlan(undefined, selectedClientId)
-              onClose()
-            }}
-            className="w-full text-center text-sm text-gray-500 hover:text-gray-300 py-2 transition-colors"
-          >
-            Or plan a future session →
-          </button>
         )}
       </div>
     </BottomSheet>

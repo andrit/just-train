@@ -2,8 +2,9 @@
 // components/kpi/KpiHero.tsx (v1.6.0)
 //
 // KPI hero section shown above the tabs on the client profile.
-// Translates the backend ClientKpiResponse into KpiCardData[]
-// and renders the carousel.
+// Translates the backend ClientKpiResponse into KpiCardData[] and renders a
+// fixed headline row (Streak / This week / Last session) above a carousel of
+// the remaining secondary stats.
 //
 // Also handles:
 //   - The 1RM tip nudge for athlete mode (shown once, tracked in localStorage)
@@ -14,6 +15,7 @@ import { useState } from 'react'
 import { Link }                  from 'react-router-dom'
 import { cn }                    from '@/lib/cn'
 import { KpiCarousel }           from './KpiCarousel'
+import { KpiCard }               from './KpiCard'
 import { TipIcon }               from '@/components/ui/TipIcon'
 import type { KpiCardData }      from './KpiCard'
 import type { ClientKpiResponse, ClientResponse } from '@trainer-app/shared'
@@ -99,24 +101,15 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
     && !tipDismissed
     && (kpis?.totalSessionsAllTime ?? 0) > 0
 
-  // Build the 8 cards
-  const cards: KpiCardData[] = kpis ? [
-    // Card 1 — Streak
+  // Headline — the three "are you moving forward?" signals, shown in a fixed
+  // 3-up row above the carousel so they never require a swipe to read.
+  const headlineCards: KpiCardData[] = kpis ? [
     {
       label:   'Streak',
       value:   `${kpis.currentStreakWeeks} wk${kpis.currentStreakWeeks !== 1 ? 's' : ''}`,
       context: kpis.bestStreakWeeks > 0 ? `best: ${kpis.bestStreakWeeks} wks` : undefined,
       isEmpty: kpis.totalSessionsAllTime === 0,
     },
-    // Card 1b — Consistency score
-    {
-      label:     'Consistency',
-      value:     `${kpis.consistencyScore}%`,
-      context:   '4-week rolling',
-      highlight: kpis.consistencyScore < 50 && kpis.totalSessionsAllTime > 0,
-      isEmpty:   kpis.totalSessionsAllTime === 0,
-    },
-    // Card 2 — This week
     {
       label:     'This week',
       value:     `${kpis.sessionsThisWeek}/${kpis.weeklySessionTarget}`,
@@ -124,7 +117,6 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
       highlight: kpis.sessionsThisWeek < kpis.weeklySessionTarget && (kpis.daysSinceLastSession ?? 0) > 6,
       isEmpty:   kpis.totalSessionsAllTime === 0,
     },
-    // Card 3 — Last session
     {
       label:     'Last session',
       value:     kpis.daysSinceLastSession != null
@@ -138,9 +130,25 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
       highlight: (kpis.daysSinceLastSession ?? 0) >= 14,
       isEmpty:   kpis.totalSessionsAllTime === 0,
     },
-    // Card 4 — Focus KPI
+  ] : [
+    { label: 'Streak',       value: '—', isEmpty: true },
+    { label: 'This week',    value: '—', isEmpty: true },
+    { label: 'Last session', value: '—', isEmpty: true },
+  ]
+
+  // Secondary — carousel below the headline.
+  const carouselCards: KpiCardData[] = kpis ? [
+    // Consistency score
+    {
+      label:     'Consistency',
+      value:     `${kpis.consistencyScore}%`,
+      context:   '4-week rolling',
+      highlight: kpis.consistencyScore < 50 && kpis.totalSessionsAllTime > 0,
+      isEmpty:   kpis.totalSessionsAllTime === 0,
+    },
+    // Focus KPI
     buildFocusCard(kpis.focusKpi),
-    // Card 5 — Volume this month
+    // Volume this month
     {
       label:   'Volume · month',
       value:   kpis.volumeThisMonthLbs != null
@@ -149,21 +157,21 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
       context: kpis.volumeThisMonthLbs != null ? 'lbs' : undefined,
       isEmpty: !kpis.volumeThisMonthLbs,
     },
-    // Card 6 — Total sessions
+    // Total sessions
     {
       label:   'All time',
       value:   String(kpis.totalSessionsAllTime),
       context: 'sessions',
       isEmpty: kpis.totalSessionsAllTime === 0,
     },
-    // Card 7 — Avg energy
+    // Avg energy
     {
       label:   'Avg energy',
       value:   kpis.avgEnergyThisMonth != null ? `${kpis.avgEnergyThisMonth}/10` : '—',
       context: 'this month',
       isEmpty: !kpis.avgEnergyThisMonth,
     },
-    // Card 8 — Avg stress
+    // Avg stress
     {
       label:   'Avg stress',
       value:   kpis.avgStressThisMonth != null ? `${kpis.avgStressThisMonth}/10` : '—',
@@ -171,12 +179,8 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
       highlight: (kpis.avgStressThisMonth ?? 0) >= 7,
       isEmpty: !kpis.avgStressThisMonth,
     },
-  ] : Array.from({ length: 8 }, (_, i) => ({
-    label: ['Streak', 'This week', 'Last session', 'Performance',
-            'Volume · month', 'All time', 'Avg energy', 'Avg stress'][i] ?? '',
-    value: '—',
-    isEmpty: true,
-  }))
+  ] : ['Consistency', 'Performance', 'Volume · month', 'All time', 'Avg energy', 'Avg stress']
+    .map((label) => ({ label, value: '—', isEmpty: true }))
 
   return (
     <div className="px-4 pt-4 pb-2">
@@ -205,8 +209,27 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
         </div>
       )}
 
-      {/* Carousel */}
-      <KpiCarousel cards={cards} isLoading={isLoading} />
+      {/* Headline — fixed 3-up, always visible (no swipe) */}
+      {isLoading ? (
+        <div className="grid grid-cols-3 gap-2 mb-3" aria-hidden>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="min-h-[100px] rounded-2xl bg-surface border border-surface-border animate-pulse"
+              style={{ opacity: 0.5 }}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {headlineCards.map((c) => (
+            <KpiCard key={c.label} data={c} />
+          ))}
+        </div>
+      )}
+
+      {/* Secondary stats — carousel */}
+      <KpiCarousel cards={carouselCards} isLoading={isLoading} />
     </div>
   )
 }

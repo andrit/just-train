@@ -7,6 +7,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Docs — Developer Manual + User/Athlete Manual (2026-10-21)
+- **`docs/DEVELOPER_MANUAL.md`** — the onboarding/operations map for developers: what the app is, repo
+  layout, local setup, the `pnpm verify` gate, the short-list conventions (with pointers to the detailed
+  docs), git/deploy workflow, and a **deploy troubleshooting runbook**. The runbook captures the Railway
+  "empty build logs = builder flake" case and the fix: when the failed deployment can't be redeployed
+  (it crashed before producing an image), **`railway up`** uploads local source and starts a fresh build
+  **without a commit** — the no-empty-commit trick — and why you must *not* redeploy the last successful
+  deployment (it re-ships older code). Plus the Zod-serializer, staged-env-var, SW-stale-bundle, and
+  CSS/PostCSS gotchas.
+- **`docs/USER_MANUAL.md`** — athlete-first guide to using Just Train: the two home surfaces (Home =
+  launch, My Training = dashboard), the body map, logging a session (all metric types, circuits,
+  per-side, PRs, rest timer, offline), exercises, templates, progress tracking, account/settings, and a
+  Trainer section. Both linked from the README docs index.
+
 ### Theme — token infrastructure down-payment for light/dark (2026-10-21)
 - **Groundwork for a future light theme, with zero visible change today.** The app is dark-only by
   construction (~1,000 raw `text-gray-*`/`text-white` across 116 files); a real light theme is a

@@ -267,6 +267,8 @@ All project documentation lives in [`./docs`](./docs):
 
 | File | Purpose |
 |---|---|
+| `DEVELOPER_MANUAL.md` | **Start here as a developer** — onboarding, local setup, verify gate, deploy runbook, docs map |
+| `USER_MANUAL.md` | **End-user guide** — how athletes (and trainers) use the app |
 | `CONTRIBUTING.md` | Column checklist, exercise join rules, hotfix/release workflow |
 | `STYLE_GUIDE.md` | Functional patterns, pre-commit checklist, React/backend conventions |
 | `Database-Management.md` | Common SQL for accounts, templates, sessions, exercises, PRs + maintenance/backup |

@@ -119,14 +119,18 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
       // then filter by id. A two-step `inArray` (not a correlated subquery)
       // keeps this inside the typed query builder — no raw-SQL aliasing risk —
       // and the library is small enough that the extra round-trip is free.
+      // We also carry the per-exercise ROLE (primary|secondary mover for THIS
+      // muscle) so the client can group "primary movers" vs "also works it".
+      // roleOf stays empty when no filter → muscleRole is null on every row.
+      const roleOf = new Map<string, 'primary' | 'secondary'>()
       if (muscle) {
         const muscleRows = await db
-          .select({ id: exerciseMuscles.exerciseId })
+          .select({ id: exerciseMuscles.exerciseId, role: exerciseMuscles.role })
           .from(exerciseMuscles)
           .where(eq(exerciseMuscles.muscle, muscle))
-        const ids = muscleRows.map((r) => r.id)
-        if (ids.length === 0) return reply.send([])
-        conditions.push(inArray(exercises.id, ids))
+        if (muscleRows.length === 0) return reply.send([])
+        for (const r of muscleRows) roleOf.set(r.id, r.role)
+        conditions.push(inArray(exercises.id, [...roleOf.keys()]))
       }
 
       if (workoutType) conditions.push(eq(exercises.workoutType, workoutType as never))
@@ -147,7 +151,15 @@ export async function exerciseRoutes(app: FastifyInstance): Promise<void> {
         orderBy: exercises.name,
       })
 
-      return reply.send(result)
+      // Attach the muscle role (null unless a ?muscle= filter was applied).
+      // Primary movers first, then name order (preserved from the query).
+      const withRole = result.map((ex) => ({ ...ex, muscleRole: roleOf.get(ex.id) ?? null }))
+      if (muscle) {
+        const rank = (r: string | null): number => (r === 'primary' ? 0 : 1)
+        withRole.sort((a, b) => rank(a.muscleRole) - rank(b.muscleRole))
+      }
+
+      return reply.send(withRole)
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch exercises' })

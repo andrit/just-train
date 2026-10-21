@@ -19,6 +19,7 @@ import { usePlannedSessions }           from '@/lib/queries/sessions'
 import { useMode }                      from '@/lib/mode'
 import { BodyHeatMap }                  from '@/components/charts/BodyHeatMap'
 import { BodyBreakdownSheet }           from '@/components/charts/BodyBreakdownSheet'
+import type { BodyRegion }              from '@/components/charts/muscleMapData'
 import { Spinner }                      from '@/components/ui/Spinner'
 import { useAuthStore }                 from '@/store/authStore'
 import { useSessionStore }              from '@/store/sessionStore'
@@ -216,6 +217,10 @@ export default function DashboardPage(): React.JSX.Element {
   const { data: selfClient, isLoading } = useSelfClient()
   const { data: muscleFreq }            = useMuscleFrequency(selfClient?.id ?? null)
   const [bodyOpen, setBodyOpen]         = useState(false)
+  const [bodyRegion, setBodyRegion]     = useState<BodyRegion | null>(null)
+
+  // Whole-figure tap → full map; a region tap → the sheet scoped to that region.
+  const openBody = (region: BodyRegion | null): void => { setBodyRegion(region); setBodyOpen(true) }
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -257,14 +262,18 @@ export default function DashboardPage(): React.JSX.Element {
           the last-30-days frequency lands. */}
       <button
         type="button"
-        onClick={() => setBodyOpen(true)}
-        aria-label="View body breakdown — muscles trained in the last 30 days"
+        onClick={() => openBody(null)}
+        aria-label="View full body breakdown — muscles trained in the last 30 days"
         className="flex-1 min-h-0 flex flex-col py-2 w-full rounded-lg animate-slide-up focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         style={{ animationDelay: '50ms' }}
       >
-        <BodyHeatMap counts={muscleFreq?.counts ?? []} className="flex-1 min-h-0" />
+        <BodyHeatMap
+          counts={muscleFreq?.counts ?? []}
+          className="flex-1 min-h-0"
+          onRegionTap={(region) => openBody(region)}
+        />
         <span className="shrink-0 text-center text-[10px] uppercase tracking-widest text-gray-600 mt-2">
-          Trained · last 30 days&nbsp;›
+          Tap a muscle · or all&nbsp;›
         </span>
       </button>
 
@@ -272,6 +281,7 @@ export default function DashboardPage(): React.JSX.Element {
         open={bodyOpen}
         onClose={() => setBodyOpen(false)}
         counts={muscleFreq?.counts ?? []}
+        scopeRegion={bodyRegion}
       />
 
       {/* ── Launch ── Train, pinned just above the nav. Planning + all feedback

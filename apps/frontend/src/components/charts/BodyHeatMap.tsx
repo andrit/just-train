@@ -22,7 +22,7 @@
 // ------------------------------------------------------------
 
 import { cn } from '@/lib/cn'
-import { MUSCLE_TO_REGION } from './MuscleMap'
+import { MUSCLE_TO_REGION, REGION_MUSCLES } from './MuscleMap'
 import { heatFill } from './heatRamp'
 import {
   ANTERIOR_REGIONS, POSTERIOR_REGIONS, MUSCLE_MAP_VIEWBOX, type BodyRegion,
@@ -31,12 +31,19 @@ import type { MuscleFrequencyCount } from '@trainer-app/shared'
 
 const BASE_STROKE = '#2A2E34'
 
+// A region is tappable only if it stands for at least one muscle (head/knees
+// don't, and are inert).
+const isTappable = (region: BodyRegion): boolean => (REGION_MUSCLES[region]?.length ?? 0) > 0
+
 interface BodyHeatMapProps {
-  counts:     MuscleFrequencyCount[]
-  className?: string
+  counts:       MuscleFrequencyCount[]
+  className?:   string
+  // When provided, tapping a muscle region calls back with it (Home scopes the
+  // breakdown sheet to that region). Omit for a non-interactive glance.
+  onRegionTap?: (region: BodyRegion) => void
 }
 
-export function BodyHeatMap({ counts, className }: BodyHeatMapProps): React.JSX.Element {
+export function BodyHeatMap({ counts, className, onRegionTap }: BodyHeatMapProps): React.JSX.Element {
   // Region value = max session-count among the muscles mapping to it.
   const regionValue = new Map<BodyRegion, number>()
   for (const { muscle, count } of counts) {
@@ -52,19 +59,20 @@ export function BodyHeatMap({ counts, className }: BodyHeatMapProps): React.JSX.
 
   return (
     <div className={cn('flex items-stretch justify-center gap-4 w-full', className)}>
-      <Figure label="Front" regions={ANTERIOR_REGIONS}  fillOf={fillOf} />
-      <Figure label="Back"  regions={POSTERIOR_REGIONS} fillOf={fillOf} />
+      <Figure label="Front" regions={ANTERIOR_REGIONS}  fillOf={fillOf} onRegionTap={onRegionTap} />
+      <Figure label="Back"  regions={POSTERIOR_REGIONS} fillOf={fillOf} onRegionTap={onRegionTap} />
     </div>
   )
 }
 
 interface FigureProps {
-  label:   string
-  regions: Record<BodyRegion, string[]>
-  fillOf:  (region: BodyRegion) => string
+  label:        string
+  regions:      Record<BodyRegion, string[]>
+  fillOf:       (region: BodyRegion) => string
+  onRegionTap?: (region: BodyRegion) => void
 }
 
-function Figure({ label, regions, fillOf }: FigureProps): React.JSX.Element {
+function Figure({ label, regions, fillOf, onRegionTap }: FigureProps): React.JSX.Element {
   return (
     <div className="flex-1 min-h-0 min-w-0 flex flex-col items-center">
       {/* flex-1 svg → height-driven; preserveAspectRatio centers the body. */}
@@ -76,7 +84,14 @@ function Figure({ label, regions, fillOf }: FigureProps): React.JSX.Element {
         aria-label={`${label} view — muscles shaded by how often trained in the last 30 days`}
       >
         {Object.entries(regions).map(([region, polygons]) => {
-          const fill = fillOf(region as BodyRegion)
+          const r = region as BodyRegion
+          const fill = fillOf(r)
+          const tappable = !!onRegionTap && isTappable(r)
+          // A tapped polygon stops propagation so the figure's outer "all
+          // muscles" button (on Home) doesn't also fire.
+          const onClick = tappable
+            ? (e: React.MouseEvent) => { e.stopPropagation(); onRegionTap?.(r) }
+            : undefined
           return polygons.map((points) => (
             <polygon
               key={points}
@@ -84,6 +99,8 @@ function Figure({ label, regions, fillOf }: FigureProps): React.JSX.Element {
               fill={fill}
               stroke={BASE_STROKE}
               strokeWidth={2}
+              onClick={onClick}
+              className={tappable ? 'cursor-pointer' : undefined}
             />
           ))
         })}

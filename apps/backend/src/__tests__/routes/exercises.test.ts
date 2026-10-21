@@ -219,12 +219,12 @@ describe('GET /api/v1/exercises', () => {
     expect(res.statusCode).toBe(200)
   })
 
-  it('filters by muscle — resolves ids then returns the matches', async () => {
+  it('filters by muscle — resolves ids then returns the matches with role', async () => {
     const { db } = await import('../../db')
     // The muscle filter first awaits db.select().from(exerciseMuscles).where(...)
-    // whose terminal in the mock is `_chain.where`.
-    ;(db as any)._chain.where.mockResolvedValueOnce([{ id: TEST_CLIENT_ID }])
-    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([makeExercise()])
+    // whose terminal in the mock is `_chain.where`. It now selects { id, role }.
+    ;(db as any)._chain.where.mockResolvedValueOnce([{ id: TEST_CLIENT_ID, role: 'primary' }])
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([makeExercise({ id: TEST_CLIENT_ID })])
 
     const res = await app.inject({
       method:  'GET',
@@ -234,6 +234,47 @@ describe('GET /api/v1/exercises', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.json()).toHaveLength(1)
+    // The per-exercise role for the filtered muscle is surfaced for grouping.
+    expect(res.json()[0].muscleRole).toBe('primary')
+  })
+
+  it('sorts muscle matches primary-movers before secondary', async () => {
+    const { db } = await import('../../db')
+    const PRIMARY_ID   = '11111111-1111-1111-1111-111111111111'
+    const SECONDARY_ID = '22222222-2222-2222-2222-222222222222'
+    ;(db as any)._chain.where.mockResolvedValueOnce([
+      { id: SECONDARY_ID, role: 'secondary' },
+      { id: PRIMARY_ID,   role: 'primary'   },
+    ])
+    // findMany returns name-ordered; the route re-sorts primary-first.
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([
+      makeExercise({ id: SECONDARY_ID, name: 'A Secondary Move' }),
+      makeExercise({ id: PRIMARY_ID,   name: 'Z Primary Move' }),
+    ])
+
+    const res = await app.inject({
+      method:  'GET',
+      url:     '/api/v1/exercises?muscle=obliques',
+      headers: { authorization: authHeader() },
+    })
+
+    expect(res.statusCode).toBe(200)
+    const rows = res.json()
+    expect(rows.map((r: { muscleRole: string }) => r.muscleRole)).toEqual(['primary', 'secondary'])
+  })
+
+  it('leaves muscleRole null on an unfiltered list', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.exercises.findMany).mockResolvedValueOnce([makeExercise()])
+
+    const res = await app.inject({
+      method:  'GET',
+      url:     '/api/v1/exercises',
+      headers: { authorization: authHeader() },
+    })
+
+    expect(res.statusCode).toBe(200)
+    expect(res.json()[0].muscleRole).toBeNull()
   })
 
   it('returns [] when no exercise targets the muscle', async () => {

@@ -59,6 +59,30 @@ export const MUSCLE_TO_REGION: Record<Muscle, BodyRegion[]> = {
   sternocleidomastoid: ['neck'],
 }
 
+// Inverse of MUSCLE_TO_REGION: which muscles a figure region stands for. Derived
+// at module load so the two can never drift (a new muscle→region edge appears
+// here automatically). Used to scope the breakdown sheet when a region is tapped.
+export const REGION_MUSCLES: Record<BodyRegion, Muscle[]> = (() => {
+  const out: Record<string, Muscle[]> = {}
+  for (const [muscle, regions] of Object.entries(MUSCLE_TO_REGION) as [Muscle, BodyRegion[]][]) {
+    for (const r of regions) (out[r] ??= []).push(muscle)
+  }
+  return out
+})()
+
+// Readable name for a tapped region (header on the scoped sheet). NOT a role
+// claim — just a label for the region grouping. Left/right soleus both read
+// "Soleus"; head/knees have no entry (they carry no muscle and are inert).
+export const REGION_LABEL: Record<string, string> = {
+  'front-deltoids': 'Front Delts', 'back-deltoids': 'Rear Delts',
+  chest: 'Chest', 'upper-back': 'Upper Back', trapezius: 'Traps',
+  'lower-back': 'Lower Back', biceps: 'Biceps', triceps: 'Triceps',
+  forearm: 'Forearms', abs: 'Abs', obliques: 'Obliques',
+  gluteal: 'Glutes', quadriceps: 'Quads', hamstring: 'Hamstrings',
+  adductor: 'Adductors', abductors: 'Abductors', calves: 'Calves',
+  'left-soleus': 'Soleus', 'right-soleus': 'Soleus', neck: 'Neck',
+}
+
 // Self-contained palette (reads on the dark detail surface, like a placard).
 const BASE_FILL      = '#3F444C'
 const BASE_STROKE    = '#2A2E34'

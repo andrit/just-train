@@ -26,6 +26,7 @@ import {
   DifficultyEnum,
   LateralityEnum,
   MuscleEnum,
+  MuscleRoleEnum,
   MediaTypeEnum,
   TrainerRoleEnum,
   ClientFocusEnum,
@@ -318,6 +319,8 @@ export const ExerciseSummaryResponseSchema = z.object({
   bodyPart:    BodyPartResponseSchema.nullable(),
   media:       z.array(ExerciseMediaResponseSchema).max(1)
     .describe('Primary thumbnail only. Use GET /exercises/:id for all media.'),
+  muscleRole:  MuscleRoleEnum.nullable().optional()
+    .describe('The role this exercise plays for the muscle in a ?muscle= filter (primary mover vs secondary). Null/absent on any unfiltered list.'),
 })
 export type ExerciseSummaryResponse = z.infer<typeof ExerciseSummaryResponseSchema>
 

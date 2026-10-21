@@ -14,16 +14,16 @@
 
 /* ── Theme tokens ──────────────────────────────────────────────────────────────
    Variable-backed color tokens consumed by tailwind.config (surface.*, ink.*).
-   Channels are "R G B" so they feed rgb(var(--x) / <alpha-value>).
+   Channels are space-separated R G B so they feed rgb(var(--x) / <alpha-value>).
 
    :root is the DARK default — values equal the former fixed hex, so the current
-   app is byte-identical. [data-theme="light"] is the opt-in light set
+   app is byte-identical. The data-theme=light block is the opt-in light set
    (PLACEHOLDER values pending the light-palette design pass — see
    task-plan-light-dark-theme.md). prefers-color-scheme is deliberately NOT wired
-   yet: the text sweep (raw text-gray-*/text-white → ink.*) isn't done, so
+   yet: the text sweep (raw text-gray / text-white into ink.*) is not done, so
    auto-flipping a system-light user would render unreadable light. Until the full
-   build, light applies only when data-theme="light" is explicitly set — no
-   shipped UI sets it yet (test via devtools: document.documentElement.dataset.theme='light'). */
+   build, light applies only when data-theme=light is explicitly set — no shipped
+   UI sets it yet (test in devtools by setting the root data-theme attribute). */
 :root {
   --surface:        30 30 30;    /* #1E1E1E — card surface */
   --surface-raised: 40 40 40;    /* #282828 — elevated card */

@@ -26,11 +26,22 @@ export default {
           accent:    '#111111',   // slightly lighter than primary — sidebar, panels
           // highlight removed — use ember-red, command-blue, or signal-yellow by intent
         },
-        // Functional shades used in the UI
+        // Functional shades used in the UI.
+        // Variable-backed so they flip by theme (see index.css :root blocks).
+        // Dark values equal the former fixed hex, so the dark app is unchanged.
         surface: {
-          DEFAULT: '#1E1E1E',     // dark card surface
-          raised:  '#282828',     // elevated card (hover, focused)
-          border:  '#404040',     // borders between surfaces
+          DEFAULT: 'rgb(var(--surface) / <alpha-value>)',        // card surface (#1E1E1E dark)
+          raised:  'rgb(var(--surface-raised) / <alpha-value>)', // elevated card (#282828 dark)
+          border:  'rgb(var(--surface-border) / <alpha-value>)', // borders between surfaces (#404040 dark)
+        },
+        // Semantic text ("ink") scale — the migration target for raw
+        // text-gray-* / text-white (see task-plan-light-dark-theme.md). Also
+        // variable-backed; unused until the theme sweep adopts them.
+        ink: {
+          DEFAULT: 'rgb(var(--ink) / <alpha-value>)',        // primary text
+          muted:   'rgb(var(--ink-muted) / <alpha-value>)',  // secondary text
+          subtle:  'rgb(var(--ink-subtle) / <alpha-value>)', // tertiary / captions
+          faint:   'rgb(var(--ink-faint) / <alpha-value>)',  // placeholder / disabled
         },
       },
 

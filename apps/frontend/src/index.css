@@ -12,6 +12,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme tokens ──────────────────────────────────────────────────────────────
+   Variable-backed color tokens consumed by tailwind.config (surface.*, ink.*).
+   Channels are "R G B" so they feed rgb(var(--x) / <alpha-value>).
+
+   :root is the DARK default — values equal the former fixed hex, so the current
+   app is byte-identical. [data-theme="light"] is the opt-in light set
+   (PLACEHOLDER values pending the light-palette design pass — see
+   task-plan-light-dark-theme.md). prefers-color-scheme is deliberately NOT wired
+   yet: the text sweep (raw text-gray-*/text-white → ink.*) isn't done, so
+   auto-flipping a system-light user would render unreadable light. Until the full
+   build, light applies only when data-theme="light" is explicitly set — no
+   shipped UI sets it yet (test via devtools: document.documentElement.dataset.theme='light'). */
+:root {
+  --surface:        30 30 30;    /* #1E1E1E — card surface */
+  --surface-raised: 40 40 40;    /* #282828 — elevated card */
+  --surface-border: 64 64 64;    /* #404040 — borders */
+  --ink:            243 244 246; /* gray-100 — primary text on dark */
+  --ink-muted:      156 163 175; /* gray-400 — secondary */
+  --ink-subtle:     107 114 128; /* gray-500 — tertiary */
+  --ink-faint:      75 85 99;    /* gray-600 — placeholder/disabled */
+}
+
+:root[data-theme="light"] {
+  /* PLACEHOLDER — real values come from the light-palette design pass. */
+  --surface:        255 255 255; /* white card */
+  --surface-raised: 248 250 252; /* slate-50 — elevated */
+  --surface-border: 226 232 240; /* slate-200 — borders */
+  --ink:            17 24 39;     /* gray-900 — primary text on light */
+  --ink-muted:      75 85 99;     /* gray-600 — secondary */
+  --ink-subtle:     107 114 128;  /* gray-500 — tertiary */
+  --ink-faint:      156 163 175;  /* gray-400 — placeholder/disabled */
+}
+
 /* ── Base resets ──────────────────────────────────────────────────────────── */
 
 @layer base {

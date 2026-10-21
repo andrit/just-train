@@ -7,6 +7,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Theme — token infrastructure down-payment for light/dark (2026-10-21)
+- **Groundwork for a future light theme, with zero visible change today.** The app is dark-only by
+  construction (~1,000 raw `text-gray-*`/`text-white` across 116 files); a real light theme is a
+  tokenization sweep, planned post-launch (`.workbench/designer/current/task-plan-light-dark-theme.md`).
+  This lays the seam so the sweep is smaller and new code stops adding dark-assuming debt.
+- **Variable-backed semantic tokens.** `surface.{DEFAULT,raised,border}` now resolve to
+  `rgb(var(--…) / <alpha-value>)` (dark values equal the former fixed hex — the dark app is
+  byte-identical), and a new `ink.{DEFAULT,muted,subtle,faint}` text scale is the migration target for
+  raw text colors. Variables live in `index.css`: `:root` = dark defaults, `:root[data-theme="light"]`
+  = an opt-in **placeholder** light set.
+- **Safe by construction:** default stays dark, light applies only when `data-theme="light"` is
+  explicitly set (no shipped UI sets it yet), and **`prefers-color-scheme` is deliberately NOT wired** —
+  auto-flipping a system-light user before the text sweep would render unreadable light. The 400+
+  existing `surface`/`surface-border` usages become theme-ready for free; new code should use `ink.*`.
+- `tailwind.config.js` + `src/index.css` only. Verified: config parses, `tsc` clean.
+
 ### My Training — volume by body part (where your work is going, 2026-10-21)
 - **The second trend graph: total lifting volume over the last 30 days, split by body part** — on the My Training landing, under the volume-per-session chart. Answers "am I balanced?" at a glance: horizontal bars (Legs / Back / Chest / …), single Command-Blue hue (magnitude — no legend, the title names it), sorted busiest-first, a direct value label per bar. Dependency-free HTML in the spirit of `VolumeBySession` (`components/charts/VolumeByBodyPart.tsx`); empty state for a new athlete. Built against the dataviz skill (one hue for magnitude, text in ink tokens, rounded bars, direct labels on a short list).
 - **Attribution = the exercise's own body part** (its library `bodyPartId` / `body_parts.name`), so the bars **sum to total lifting volume — no double-counting**. A bench set credits Chest in full; a muscle-group "emphasis" cut (via `exercise_muscles`, which would double-count across groups) is a deliberately separate later view (deferred).

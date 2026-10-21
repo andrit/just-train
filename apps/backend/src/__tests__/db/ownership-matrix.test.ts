@@ -45,6 +45,7 @@ const MATRIX: Case[] = [
   { route: 'GET /clients/:id/exercise-progress/:exerciseId',  url: (s) => `/clients/${s.a.client}/exercise-progress/${s.a.privateExercise}` },
   { route: 'GET /clients/:id/volume-history',                 url: (s) => `/clients/${s.a.client}/volume-history` },
   { route: 'GET /clients/:id/muscle-frequency',               url: (s) => `/clients/${s.a.client}/muscle-frequency` },
+  { route: 'GET /clients/:id/volume-by-body-part',            url: (s) => `/clients/${s.a.client}/volume-by-body-part` },
   { route: 'GET /clients/:id/report-preview',                 url: (s) => `/clients/${s.a.client}/report-preview` },
   { route: 'POST /clients/:id/report',                        url: (s) => `/clients/${s.a.client}/report`, body: () => ({}) },
 

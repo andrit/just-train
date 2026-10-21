@@ -713,6 +713,21 @@ export const MuscleFrequencyResponseSchema = z.object({
 })
 export type MuscleFrequencyResponse = z.infer<typeof MuscleFrequencyResponseSchema>
 
+export const VolumeByBodyPartEntrySchema = z.object({
+  bodyPart: BodyPartEnum,
+  volume:   z.number().describe('Total volume (sum of weight×reps, per-side aware) credited to this body part, rounded'),
+})
+export type VolumeByBodyPartEntry = z.infer<typeof VolumeByBodyPartEntrySchema>
+
+export const VolumeByBodyPartResponseSchema = z.object({
+  period:  z.literal('month').describe('Rolling 30-day window'),
+  // Volume is attributed to the exercise's own body part (its library
+  // classification), so entries sum to total lifting volume — no double-count.
+  // A later muscle-group "emphasis" view (via exercise_muscles) is a separate cut.
+  entries: z.array(VolumeByBodyPartEntrySchema).describe('One entry per body part with volume > 0 in the window (others omitted → treat as 0)'),
+})
+export type VolumeByBodyPartResponse = z.infer<typeof VolumeByBodyPartResponseSchema>
+
 // ============================================================
 // SNAPSHOT MEDIA (v2.12.0) — progress photos attached to snapshots
 // ============================================================

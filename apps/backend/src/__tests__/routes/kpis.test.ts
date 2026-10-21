@@ -221,6 +221,78 @@ describe('GET /clients/:id/volume-history', () => {
   })
 })
 
+// ── GET /clients/:id/volume-by-body-part ──────────────────────────────────────
+
+describe('GET /clients/:id/volume-by-body-part', () => {
+  let app: Awaited<ReturnType<typeof buildKpiTestApp>>
+  beforeAll(async () => { app = await buildKpiTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  it('returns 401 without auth', async () => {
+    const res = await app.inject({ method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/volume-by-body-part` })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when client does not belong to trainer', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(undefined)
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/volume-by-body-part`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns no entries for an owned client with no sessions', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/volume-by-body-part`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ period: 'month', entries: [] })
+  })
+
+  it('sums volume into each exercise body part, sorted desc, skips null body parts', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    vi.mocked(db.query.sessions.findMany).mockResolvedValueOnce([
+      {
+        id: 'sess-1',
+        sessionExercises: [
+          // Legs: 100×10 = 1000
+          {
+            sets: [{ weight: 100, reps: 10, perSide: false, repsLeft: null, repsRight: null }],
+            exercise: { bodyPart: { name: 'legs' } },
+          },
+          // Chest: 50×10 = 500
+          {
+            sets: [{ weight: 50, reps: 10, perSide: false, repsLeft: null, repsRight: null }],
+            exercise: { bodyPart: { name: 'chest' } },
+          },
+          // No body part → contributes nothing
+          {
+            sets: [{ weight: 80, reps: 5, perSide: false, repsLeft: null, repsRight: null }],
+            exercise: { bodyPart: null },
+          },
+        ],
+      },
+    ] as never)
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/volume-by-body-part`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.entries).toEqual([
+      { bodyPart: 'legs',  volume: 1000 },
+      { bodyPart: 'chest', volume: 500 },
+    ])
+  })
+})
+
 // ── GET /clients/:id/muscle-frequency ─────────────────────────────────────────
 
 describe('GET /clients/:id/muscle-frequency', () => {

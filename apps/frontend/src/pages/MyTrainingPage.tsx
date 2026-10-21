@@ -21,6 +21,7 @@ import { useNav }                            from '@/services/navService'
 import { KpiHero }                           from '@/components/kpi/KpiHero'
 import { RecentSessionsWidget }              from '@/components/dashboard/widgets/RecentSessionsWidget'
 import { VolumeBySession }                   from '@/components/charts/VolumeBySession'
+import { VolumeByBodyPart }                  from '@/components/charts/VolumeByBodyPart'
 import { OverviewTab }                       from '@/components/client-profile/OverviewTab'
 import { TimelineTab }                       from '@/components/client-profile/TimelineTab'
 import { BaselineTab }                       from '@/components/client-profile/BaselineTab'
@@ -35,7 +36,7 @@ import {
   isBaselineIncomplete,
 } from '@/components/clients/utils'
 import {
-  useSelfClient, useClientSnapshots, useClientKpis, useVolumeHistory,
+  useSelfClient, useClientSnapshots, useClientKpis, useVolumeHistory, useVolumeByBodyPart,
 } from '@/lib/queries/clients'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -106,6 +107,7 @@ export default function MyTrainingPage(): React.JSX.Element {
   const { data: snapshots }                   = useClientSnapshots(client?.id ?? null)
   const { data: kpis, isLoading: kpisLoading } = useClientKpis(client?.id)
   const { data: volume }                       = useVolumeHistory(client?.id ?? null)
+  const { data: volumeByPart }                 = useVolumeByBodyPart(client?.id ?? null)
 
   if (isLoading) {
     return (
@@ -188,6 +190,13 @@ export default function MyTrainingPage(): React.JSX.Element {
         {volume && (
           <div className="mb-5">
             <VolumeBySession points={volume.points} />
+          </div>
+        )}
+
+        {/* Volume distribution — where that volume went, by body part */}
+        {volumeByPart && (
+          <div className="mb-5">
+            <VolumeByBodyPart entries={volumeByPart.entries} />
           </div>
         )}
 

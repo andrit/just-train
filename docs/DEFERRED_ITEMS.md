@@ -69,10 +69,13 @@ that work it (Phase 1 + 2). Deferred follow-ons:
   elbows") → reasoned programming using training history + the exercise knowledgebase. A separate
   initiative on top of the deterministic muscle→exercises UI; keep the factual-only bar for anything
   that isn't the LLM tier.
-- **Next trend graphs** (user's list): *volume by body grouping* (reuses the `muscle-frequency` /
-  `exercise_muscles` aggregation — could share an endpoint) and *weight range over time per exercise*
-  (mostly built — exercise-progress endpoint + `Sparkline` power the exercise detail; could surface on
-  My Training).
+- **Next trend graphs** (user's list): ~~*volume by body grouping*~~ **shipped 2026-10-21** as
+  `GET /clients/:id/volume-by-body-part` + `VolumeByBodyPart` on My Training, attributed by the
+  exercise's own body part (sums to total, no double-count). Two follow-ons: a **muscle-group
+  "emphasis" cut** via `exercise_muscles` (richer — shows secondary-mover work; double-counts across
+  groups so it's read as emphasis, not total) and a **window/range toggle** (fixed at 30 days for v1).
+  Still open: *weight range over time per exercise* (mostly built — exercise-progress endpoint +
+  `Sparkline` power the exercise detail; could surface on My Training).
 
 ## PWA — Phase 1 Scaffold Audit Findings
 

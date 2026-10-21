@@ -34,11 +34,12 @@ import {
   ExerciseProgressResponseSchema,
   VolumeHistoryResponseSchema,
   MuscleFrequencyResponseSchema,
+  VolumeByBodyPartResponseSchema,
   UuidParamSchema,
   ErrorResponseSchema,
   setVolume,
 } from '@trainer-app/shared'
-import type { Muscle } from '@trainer-app/shared'
+import type { Muscle, BodyPart } from '@trainer-app/shared'
 import { z } from 'zod'
 import type { FocusKpi } from '@trainer-app/shared'
 
@@ -679,6 +680,85 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch volume history' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // GET /clients/:id/volume-by-body-part
+  //
+  // Total volume (sum of weight×reps, per-side aware) over the last 30 days,
+  // attributed to each exercise's own body part (its library classification).
+  // Entries therefore sum to total lifting volume — no double-counting. Self-
+  // client (athlete) scoped. Body parts with 0 volume (and exercises with no
+  // body part) are omitted.
+  // ----------------------------------------------------------
+  app.get('/clients/:id/volume-by-body-part', {
+    schema: {
+      tags:     ['Clients'],
+      security: [{ bearerAuth: [] }],
+      summary:  'Volume by body part (last 30 days)',
+      description: 'Total volume in the last 30 days credited to each exercise\'s body part. Sums to total lifting volume (single classification, no double-count). Self-client scoped.',
+      params:   UuidParamSchema,
+      response: {
+        200: VolumeByBodyPartResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: clientId } = request.params as z.infer<typeof UuidParamSchema>
+
+    try {
+      // Ownership — the client must belong to this trainer.
+      const client = await db.query.clients.findFirst({
+        where: and(eq(clients.id, clientId), eq(clients.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!client) return reply.status(404).send({ error: 'Client not found' })
+
+      // 30-day cutoff as a YYYY-MM-DD string (sessions.date is a date string).
+      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10)
+
+      const recent = await db.query.sessions.findMany({
+        where: and(
+          eq(sessions.clientId, clientId),
+          eq(sessions.status, 'completed'),
+          gte(sessions.date, cutoff),
+        ),
+        columns: { id: true },
+        with: {
+          sessionExercises: {
+            with: {
+              sets: true,
+              exercise: { with: { bodyPart: true } },
+            },
+          },
+        },
+      })
+
+      // Sum set volume into the exercise's body part. Exercises with no body
+      // part contribute nothing (can't attribute); cardio sets carry no weight
+      // so their volume is 0 regardless.
+      const byPart = new Map<BodyPart, number>()
+      for (const s of recent) {
+        for (const se of s.sessionExercises) {
+          const part = se.exercise?.bodyPart?.name
+          if (!part) continue
+          const vol = se.sets.reduce((c, set) => c + setVolume(set), 0)
+          if (vol > 0) byPart.set(part, (byPart.get(part) ?? 0) + vol)
+        }
+      }
+
+      const entries = [...byPart.entries()]
+        .map(([bodyPart, volume]) => ({ bodyPart, volume: Math.round(volume) }))
+        .sort((a, b) => b.volume - a.volume)
+
+      return reply.send({ period: 'month', entries })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to fetch volume by body part' })
     }
   })
 

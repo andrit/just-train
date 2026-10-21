@@ -17,16 +17,21 @@ TrainerApp is a mobile-first PWA for fitness trainers and athletes. Progress nar
 @./docs/STYLE_GUIDE.md
 @./docs/CONTRIBUTING.md
 
-## Reference docs — read when relevant
+## Reference docs — read on demand (NOT auto-loaded; grep/read when the task touches them)
 
-@./docs/CHANGELOG.md
-@./docs/DEFERRED_ITEMS.md
-@./docs/DEPLOYMENT.md
-@./docs/DATA_FLOW.md
+These are plain pointers, not `@` imports, so they do not consume context every session.
+Open them when the task actually needs them.
 
-## Before deploy changes
+- `docs/CHANGELOG.md` — per-change history + rationale + ⚠️ caveats. `grep` it for a feature
+  area before touching that area, so you don't undo a deliberate decision. Entries for v2.13.0
+  and earlier live in `docs/CHANGELOG-ARCHIVE.md`.
+- `docs/DEFERRED_ITEMS.md` — what's intentionally deferred and when to revisit.
+- `docs/DEPLOYMENT.md` — Railway/Vercel deploy procedure.
+- `docs/DATA_FLOW.md` — end-to-end data flow per operation.
 
-@./docs/RAILWAY_ERRORS.md
+## Before deploy changes — read on demand
+
+- `docs/RAILWAY_ERRORS.md`
 
 ## Tech stack
 

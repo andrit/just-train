@@ -143,6 +143,25 @@ function UserMenuButton({
             </span>
             Preferences
           </NavLink>
+
+          {/* Help — in-app user manual */}
+          <NavLink
+            to="/help"
+            onClick={() => { close(); onNavClick() }}
+            className={cn(
+              'flex items-center gap-3 px-4 py-3 rounded-xl',
+              'bg-brand-accent border border-surface-border',
+              'text-sm text-gray-300 hover:text-white transition-colors',
+              'animate-wheel-roll-up',
+            )}
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0" aria-hidden>
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M6.3 6.2a1.8 1.8 0 113.1 1.2c-.6.5-1.1.8-1.3 1.3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="8" cy="11.2" r="0.6" fill="currentColor" />
+            </svg>
+            Help
+          </NavLink>
         </div>
       )}
 
@@ -336,6 +355,33 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               />
               <span className="relative text-sm w-5 text-center" aria-hidden>⚙</span>
               <span className="relative">Preferences</span>
+            </NavLink>
+
+            <NavLink
+              to="/help"
+              onClick={handleNavClick}
+              className={({ isActive }: { isActive: boolean }) =>
+                cn(
+                  'group relative flex items-center gap-3 w-full px-5 py-3',
+                  'border-b border-surface-border',
+                  'text-xs font-medium transition-colors duration-100',
+                  'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
+                  isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200',
+                )
+              }
+            >
+              <span
+                className="absolute inset-x-2 inset-y-1 rounded-lg bg-command-blue/25 opacity-0 group-active:opacity-100 transition-opacity duration-300 pointer-events-none"
+                aria-hidden
+              />
+              <span className="relative w-5 flex items-center justify-center" aria-hidden>
+                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M6.3 6.2a1.8 1.8 0 113.1 1.2c-.6.5-1.1.8-1.3 1.3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <circle cx="8" cy="11.2" r="0.6" fill="currentColor" />
+                </svg>
+              </span>
+              <span className="relative">Help</span>
             </NavLink>
 
             {/* Install App — passive icon (P4); only when installable */}

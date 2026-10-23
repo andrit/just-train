@@ -222,6 +222,7 @@ Full CRUD exists for all. See Swagger at `http://localhost:3001/documentation`.
 | `/exercises` | ExercisesPage | Exercise library (honors `state.openExerciseId` to deep-open a detail) |
 | `/templates` | TemplatesPage | Template management |
 | `/preferences` | PreferencesPage | All trainer preferences |
+| `/help` | HelpPage | In-app user manual (mirrors `docs/USER_MANUAL.md`); jump-to chips, trainer section gated |
 
 ---
 

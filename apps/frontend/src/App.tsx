@@ -44,6 +44,7 @@ const ForgotPasswordPage  = lazy(() => import('@/pages/ForgotPasswordPage'))
 const ResetPasswordPage   = lazy(() => import('@/pages/ResetPasswordPage'))
 const PrivacyPage         = lazy(() => import('@/pages/PrivacyPage'))
 const TermsPage           = lazy(() => import('@/pages/TermsPage'))
+const HelpPage            = lazy(() => import('@/pages/HelpPage'))
 const DashboardPage       = lazy(() => import('@/pages/DashboardPage'))
 const ClientsPage         = lazy(() => import('@/pages/ClientsPage'))
 const ClientProfilePage   = lazy(() => import('@/pages/ClientProfilePage'))
@@ -143,6 +144,7 @@ export default function App(): React.JSX.Element {
                       <Route path="/session/:id/history"     element={<SessionHistoryPage />} />
                       <Route path="/templates"               element={<TemplatesPage />} />
                       <Route path="/preferences"             element={<PreferencesPage />} />
+                      <Route path="/help"                    element={<HelpPage />} />
                       <Route path="*"                        element={<NotFoundPage />} />
                     </Routes>
                   </AppShell>

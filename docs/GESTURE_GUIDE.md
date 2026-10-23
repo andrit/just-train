@@ -56,7 +56,7 @@ Blocks and exercises in the plan/template builder have a grip handle. Press and 
 ### Charts
 
 **Tap the body figure → open the body breakdown; tap a muscle → its exercises.**
-On Home, tapping the muscle figure opens a sheet mapping every muscle (grouped by body part) to how many sessions trained it in the last 30 days — including muscles the figure can't shade. The whole figure is the tap target; there are no per-muscle hot-spots. Inside the sheet, tapping a muscle row expands it to the library exercises that work it; tapping one of those opens its detail (where you can add it to a session).
+On Home, tapping the muscle figure opens a sheet mapping every muscle (grouped by body part) to how many sessions trained it in the last 30 days — including muscles the figure can't shade. Tapping a *region* of the figure (e.g. quads) scopes the sheet to that region's muscles, with an "All muscles" link back to the full view. Inside the sheet, tapping a muscle row expands it to the library exercises that work it; tapping one of those opens its detail (where you can add it to a session). The summary strip at the top has a **Neglected** tile — tap it to list the muscles untrained in the last 30 days, each expandable to the same exercise suggestions.
 *Where:* Home · *Under the hood:* `BodyBreakdownSheet`
 
 **Hover or focus a volume bar → read it; tap it → open that session.**

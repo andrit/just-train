@@ -50,6 +50,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
   const navigate = useNavigate()
   const [expanded, setExpanded] = useState<Muscle | null>(null)
   const [scope, setScope] = useState<BodyRegion | null>(scopeRegion ?? null)
+  const [neglected, setNeglected] = useState(false)
 
   // On (re)open or a new region tap, adopt the incoming scope. If that region is
   // a single muscle, auto-expand straight to its exercises — no extra tap.
@@ -57,6 +58,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
     if (!open) return
     const next = scopeRegion ?? null
     setScope(next)
+    setNeglected(false)
     const only = next ? REGION_MUSCLES[next] : undefined
     setExpanded(only && only.length === 1 ? only[0] : null)
   }, [open, scopeRegion])
@@ -74,7 +76,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
     return m
   }, [counts])
 
-  const { groups, max, topMuscle, neglectedCount } = useMemo(() => {
+  const { groups, max, topMuscle, neglectedCount, neglectedMuscles } = useMemo(() => {
     const allMuscles = Object.keys(MUSCLE_BODY_PART) as Muscle[]
     const max = Math.max(1, ...allMuscles.map((m) => countOf.get(m) ?? 0))
 
@@ -99,9 +101,14 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
       .map((m) => ({ muscle: m, count: countOf.get(m) ?? 0 }))
       .sort((a, b) => b.count - a.count)
     const topMuscle      = sorted[0] && sorted[0].count > 0 ? sorted[0] : null
-    const neglectedCount = allMuscles.filter((m) => (countOf.get(m) ?? 0) === 0).length
+    const untrained      = allMuscles.filter((m) => (countOf.get(m) ?? 0) === 0)
+    const neglectedCount = untrained.length
+    const neglectedMuscles = [...untrained].sort((a, b) =>
+      GROUP_ORDER.indexOf(MUSCLE_BODY_PART[a]) - GROUP_ORDER.indexOf(MUSCLE_BODY_PART[b])
+      || MUSCLE_LABEL[a].localeCompare(MUSCLE_LABEL[b]),
+    )
 
-    return { groups, max, topMuscle, neglectedCount }
+    return { groups, max, topMuscle, neglectedCount, neglectedMuscles }
   }, [countOf])
 
   // The region's muscles, busiest-first (name tiebreak). Primary-prevalence
@@ -113,7 +120,11 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
     )
   }, [scope, countOf])
 
-  const title = scope ? `${REGION_LABEL[scope] ?? scope} · last 30 days` : 'Body · last 30 days'
+  const title = scope
+    ? `${REGION_LABEL[scope] ?? scope} · last 30 days`
+    : neglected
+    ? 'Neglected · last 30 days'
+    : 'Body · last 30 days'
 
   const renderRow = (muscle: Muscle): React.JSX.Element => {
     const count  = countOf.get(muscle) ?? 0
@@ -160,6 +171,22 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
             </button>
             <div>{scopedMuscles.map(renderRow)}</div>
           </>
+        ) : neglected ? (
+          /* Neglected — the untrained muscles, each expandable to suggested exercises */
+          <>
+            <button
+              type="button"
+              onClick={() => { setNeglected(false); setExpanded(null) }}
+              className="text-xs text-command-blue mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue rounded"
+            >
+              ‹ All muscles
+            </button>
+            {neglectedMuscles.length === 0 ? (
+              <p className="text-sm text-gray-500 py-2">Every muscle has been trained in the last 30 days.</p>
+            ) : (
+              <div>{neglectedMuscles.map(renderRow)}</div>
+            )}
+          </>
         ) : (
           /* Full — highlights + every muscle grouped by body part */
           <>
@@ -174,12 +201,25 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
                   <p className="text-sm text-gray-600 mt-0.5">Nothing logged yet</p>
                 )}
               </div>
-              <div className="rounded-lg border border-surface-border bg-surface px-3 py-2">
+              <button
+                type="button"
+                onClick={() => { setNeglected(true); setExpanded(null) }}
+                disabled={neglectedCount === 0}
+                aria-label={neglectedCount > 0 ? `Show ${neglectedCount} neglected muscle${neglectedCount === 1 ? '' : 's'}` : undefined}
+                className={cn(
+                  'rounded-lg border border-surface-border bg-surface px-3 py-2 text-left',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+                  neglectedCount > 0 ? 'hover:border-command-blue/40 transition-colors' : 'cursor-default',
+                )}
+              >
                 <p className="text-[10px] uppercase tracking-widest text-gray-500">Neglected</p>
                 <p className="text-sm text-white mt-0.5">
                   {neglectedCount} <span className="text-gray-500">muscle{neglectedCount === 1 ? '' : 's'} untrained</span>
                 </p>
-              </div>
+                {neglectedCount > 0 && (
+                  <p className="text-[10px] text-command-blue mt-0.5">View ›</p>
+                )}
+              </button>
             </div>
 
             <div className="space-y-4">

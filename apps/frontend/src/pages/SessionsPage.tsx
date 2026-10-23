@@ -31,7 +31,7 @@ import {
   useExecuteSession,
   useUpdateSession,
 }                                        from '@/lib/queries/sessions'
-import { formatDate, formatDuration }    from '@/lib/formatters'
+import { formatDuration }                from '@/lib/formatters'
 import { Spinner }                       from '@/components/ui/Spinner'
 import { ErrorState }                   from '@/components/ui/ErrorState'
 import type { SessionSummaryResponse }   from '@trainer-app/shared'
@@ -42,15 +42,62 @@ type StatusTab = 'all' | 'planned' | 'in_progress' | 'completed'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function groupByDate(sessions: SessionSummaryResponse[]): Array<{ label: string; sessions: SessionSummaryResponse[] }> {
-  const map = new Map<string, SessionSummaryResponse[]>()
+// Sessions group into Monday-start weeks, newest first. The list shows a flat
+// week header per week ("This week" / "Last week" / "Week of Mar 10") and a month
+// divider wherever the month changes. A week is attributed to the month of its
+// Monday, so a week straddling a month boundary sits under its start month.
+
+function mondayOfDate(d0: Date): Date {
+  const d    = new Date(d0)
+  const back = (d.getDay() + 6) % 7   // getDay: 0=Sun..6=Sat → days since Monday
+  d.setDate(d.getDate() - back)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function mondayOf(dateStr: string): Date {
+  return mondayOfDate(new Date(dateStr + 'T00:00:00'))
+}
+
+interface WeekGroup {
+  key:      number
+  monday:   Date
+  sessions: SessionSummaryResponse[]
+}
+
+function groupByWeek(sessions: SessionSummaryResponse[]): WeekGroup[] {
+  const map = new Map<number, WeekGroup>()
   for (const s of sessions) {
-    const label = formatDate(s.date)
-    if (!map.has(label)) map.set(label, [])
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    map.get(label)!.push(s)
+    const monday = mondayOf(s.date)
+    const key    = monday.getTime()
+    const group  = map.get(key)
+    if (group) group.sessions.push(s)
+    else map.set(key, { key, monday, sessions: [s] })
   }
-  return Array.from(map.entries()).map(([label, sessions]) => ({ label, sessions }))
+  const groups = Array.from(map.values()).sort((a, b) => b.key - a.key)   // newest week first
+  for (const g of groups) {
+    g.sessions.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))   // newest day first
+  }
+  return groups
+}
+
+function weekLabel(monday: Date): string {
+  const thisMonday = mondayOfDate(new Date())
+  const weeksAgo   = Math.round((thisMonday.getTime() - monday.getTime()) / (7 * 86_400_000))
+  if (weeksAgo === 0) return 'This week'
+  if (weeksAgo === 1) return 'Last week'
+  return `Week of ${monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+}
+
+function monthKeyOf(monday: Date): string {
+  return `${monday.getFullYear()}-${monday.getMonth()}`
+}
+
+function monthLabel(monday: Date): string {
+  const sameYear = monday.getFullYear() === new Date().getFullYear()
+  return monday.toLocaleDateString('en-US', sameYear
+    ? { month: 'long' }
+    : { month: 'long', year: 'numeric' })
 }
 
 
@@ -300,7 +347,11 @@ export default function SessionsPage(): React.JSX.Element {
     return name.includes(search) || client.includes(search)
   })
 
-  const grouped = groupByDate(filtered)
+  const weekGroups = groupByWeek(filtered)
+  const decorated  = weekGroups.map((g, i) => ({
+    ...g,
+    showMonth: i === 0 || monthKeyOf(g.monday) !== monthKeyOf(weekGroups[i - 1].monday),
+  }))
 
   const handleExecute = async (session: SessionSummaryResponse): Promise<void> => {
     setExecutingId(session.id)
@@ -471,11 +522,20 @@ export default function SessionsPage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Grouped list */}
-        {!sessionsError && grouped.map(({ label, sessions: group }) => (
-          <div key={label}>
-            {/* Date label */}
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">{label}</p>
+        {/* Grouped list — flat week headers with month dividers */}
+        {!sessionsError && decorated.map(({ key, monday, sessions: group, showMonth }) => (
+          <div key={key}>
+            {showMonth && (
+              <div className="flex items-center gap-3 mb-3">
+                <span className="font-display text-sm uppercase tracking-widest text-gray-400">
+                  {monthLabel(monday)}
+                </span>
+                <span className="flex-1 h-px bg-surface-border" />
+              </div>
+            )}
+
+            {/* Week label */}
+            <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">{weekLabel(monday)}</p>
 
             <div className="space-y-2">
               {group.map((session) => (

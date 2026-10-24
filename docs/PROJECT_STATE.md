@@ -834,6 +834,8 @@ Full details in `DEFERRED_ITEMS.md`.
 | Playwright E2E tests | Phase 5+ (noted in CI yml) |
 | Database migration dry-run in CI | Phase 6 (noted in CI yml) |
 | Reconcile `exercises-library.json` to prod (seed drift after single-public-library refactor, 2026-07-27) | Before relying on local `db:seed` — see `DEFERRED_ITEMS.md` + `LOCAL_DEV_CATCHUP.md` |
+| Preferences-audit follow-ups (theme toggle = task #22; other recs done 2026-10-24) | `docs/preferences-audit.md` |
+| Paid-user account audit fixes — `COOKIE_SECRET` guard, Resend/email activation, consent capture, XFF/`trustProxy` + in-process-lockout confirms (task #23, 2026-10-24) | `docs/paid-user-account-audit.md` |
 
 ---
 

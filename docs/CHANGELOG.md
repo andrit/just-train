@@ -52,6 +52,12 @@ Versions follow [Semantic Versioning](https://semver.org/).
   bottom "Saving…" line. Refreshed the stale file header (was "v1.4.5 / 4 sections"). `PreferencesPage.tsx`
   only.
 
+### Preferences — Appearance theme stub (2026-10-24)
+- Added a disabled **Appearance → Theme** control (System / Light / Dark, Dark preselected) marked
+  "Coming soon". It is an intentional placeholder so the setting has a home — it does nothing until the
+  light/dark sweep lands and is labelled so it never reads as a live control. The real two-theme work is
+  tracked as its own task. `PreferencesPage.tsx` only.
+
 ### Preferences — section regroup (Lane C, cont.) (2026-10-24)
 - Split the oversized "Dashboard" catch-all into three focused sections: **Session** (layout, weekly
   target, 1RM, PR notifications, rest timer), **Reports** — *trainer-only* (auto-send monthly reports,

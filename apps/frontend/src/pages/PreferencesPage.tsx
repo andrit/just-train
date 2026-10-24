@@ -410,6 +410,41 @@ export default function PreferencesPage(): React.JSX.Element {
           </div>
         </Section>
 
+        {/* ── Appearance — STUB. Light/dark themes aren't built yet (the light
+            palette is pending; see task-plan-light-dark-theme.md). This is a
+            disabled placeholder so the setting has a home; it intentionally does
+            nothing and is labelled "Coming soon" so it never reads as a live
+            control. Wire it to the real theme store when the sweep lands. */}
+        <Section title="Appearance">
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm font-medium text-gray-200">Theme</p>
+              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-gray-600 uppercase tracking-wider">
+                Coming soon
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mb-3">
+              Light and dark themes are on the way. The app is dark for now.
+            </p>
+            <div className="flex gap-1 p-0.5 rounded-lg bg-brand-primary border border-surface-border opacity-50">
+              {(['System', 'Light', 'Dark'] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className={cn(
+                    'flex-1 px-3 py-1.5 rounded-md text-xs font-medium cursor-not-allowed',
+                    opt === 'Dark' ? 'bg-command-blue text-white' : 'text-gray-500',
+                  )}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Section>
+
         {/* ── Training Mode ─────────────────────────────────────────────────────
             Shown only to accounts already on trainer mode. The product ships
             athlete-only (see OFFER_TRAINER_MODE in OnboardingPage), so for an

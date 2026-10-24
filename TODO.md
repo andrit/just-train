@@ -32,6 +32,16 @@ _Resume pointer. Updated 2026-10-24. Full handover is in the `self:session-close
 3. **Quick prefs-audit win**: trainer-guard the **Alerts** section + **Auto-send monthly reports** for athletes
    (small, same pattern as the Training Mode guard). See `docs/preferences-audit.md`.
 
+## PROMPTED TASK — paid-user account audit (create the task when picked up; cost is no object)
+A dedicated **deep audit** of the paid-user account surface — be thorough, spare no effort, **subagents fine**. Scope:
+- **Security** — auth, JWT/refresh-token handling, device management, rate limits, data export & deactivate/restore,
+  and the billing gates once v3 lands (admin must bypass — see memory `trainer-owner-admin-full-access`).
+- **Agency** — how much real control/autonomy the user has over their own account and their data.
+- **Settings & auth controls** — change email/password, devices, reset, deactivate/purge; completeness + correctness.
+- **Product-story ↔ UX fidelity** — does the shipped experience match `docs/product-development/product-synthesis.md`,
+  and **where does it deviate?** Deviation is insight, not necessarily a defect — document it either way.
+Deliver as a findings doc (pairs with the `docs/preferences-audit.md` pattern). When starting, create the task formally.
+
 ## When the UX track pauses — maintenance queue, IN ORDER (`task-plan-maintenance.md`)
 _Unstarted; carried:_
 1. **G16 leftovers** — `useSignOut` → `caches.delete('cloudinary-media')` (feature-detect + try/catch);

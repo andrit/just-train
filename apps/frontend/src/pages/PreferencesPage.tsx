@@ -265,7 +265,7 @@ function WidgetRow({
       {/* Coming soon badge or availability indicator */}
       {isComingSoon && (
         <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-gray-600 uppercase tracking-wider">
-          Phase {meta.availableFrom}
+          Coming soon
         </span>
       )}
     </div>
@@ -641,7 +641,11 @@ export default function PreferencesPage(): React.JSX.Element {
             )}
           </div>
 
-          {/* Auto-send monthly reports */}
+          {/* Auto-send monthly reports + Timezone below — trainer-only; report & at-risk
+              scheduling (queues/scheduler.ts) are the only consumers, so an athlete has
+              nothing to send and no 08:00-local to send it at. */}
+          {trainerMode === 'trainer' && (
+          <>
           <div className="card p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -705,6 +709,8 @@ export default function PreferencesPage(): React.JSX.Element {
               ))}
             </select>
           </div>
+          </>
+          )}
 
           {/* Widget order */}
           <div className="card p-4">
@@ -747,6 +753,10 @@ export default function PreferencesPage(): React.JSX.Element {
         </Section>
 
         {/* ── Alerts ───────────────────────────────────────────────────────── */}
+        {/* At-risk alerts are a clients concept (workers.ts digest, 14-day cutoff).
+            An athlete has no clients, so guard the whole section to trainer mode —
+            same pattern as the Training Mode section above. */}
+        {trainerMode === 'trainer' && (
         <Section
           title="Alerts"
           description="Control how the at-risk client alert looks and sounds."
@@ -801,16 +811,22 @@ export default function PreferencesPage(): React.JSX.Element {
             </>
           )}
         </Section>
+        )}
 
         {/* ── Privacy ────────────────────────────────────────────────── */}
         <Section
           title="Privacy"
-          description="Controls what progress photos are eligible for sharing"
+          description="Your default for progress-photo sharing. Sharing isn't live yet — this saves your choice for when it launches."
         >
           <div className="card p-4">
-            <p className="text-sm font-medium text-gray-200 mb-1">Progress photo sharing</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm font-medium text-gray-200">Progress photo sharing</p>
+              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-gray-600 uppercase tracking-wider">
+                Not yet active
+              </span>
+            </div>
             <p className="text-xs text-gray-500 mb-3">
-              Controls which progress photos can be shared on social media (when that feature launches)
+              Choose which progress photos would be shareable. The sharing feature isn't available yet — your choice is saved for when it ships.
             </p>
             <div className="space-y-2">
               {([

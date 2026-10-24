@@ -72,3 +72,33 @@ The **"Dashboard" section is a catch-all** — it holds CTA label and widget ord
 | 8 | Regroup "Dashboard" into Training / Reports / Dashboard | Low |
 
 Items 1–2 are the highest-value: they remove settings that are actively confusing for the primary (athlete) user and are a small, low-risk guard — the exact pattern the Training Mode section already uses.
+
+---
+
+## 7. Preference → consumer inventory (added 2026-10-24)
+
+The sections above inventory what's *on the screen*. This traces each preference to **what actually reads it** — the evidence base for the guard/relabel decisions. Consumers found by grep across `apps/frontend/src` + `apps/backend/src` (excluding the preference plumbing itself, tests, mocks, and Storybook).
+
+| Preference | Consumer(s) | Live? | Serves | Verdict |
+|---|---|---|---|---|
+| `ctaLabel` | `SessionLauncherSheet.tsx`, `WidgetRenderer.tsx`, `SelfTrainingWidget.tsx` | ✅ | both | keep |
+| `weightUnitPreference` | session/set display + input default (pervasive) | ✅ | both | keep |
+| `sessionLayout` | `shell/LiveSessionContent.tsx` (horizontal/vertical) | ✅ | both | keep |
+| `restDurationSeconds` | `LiveSessionContent.tsx`, `session/WorkoutBlock.tsx`, `session/ExerciseBlock.tsx` | ✅ | both | keep |
+| `weeklySessionTarget` | `kpi/KpiHero.tsx` (consistency), `clients/ClientForm.tsx` | ✅ | both | keep |
+| `show1rmEstimate` | `kpi/KpiHero.tsx`, `clients/ClientForm.tsx` | ✅ | athlete (already UI-guarded) | keep |
+| `widgetProgression` / `widgetOrder` | dashboard widget order | ✅ | both | keep |
+| `alertsEnabled` + `alertColorScheme` + `alertTone` | at-risk alert UI + `queues/workers.ts` digest (14-day cutoff) | ✅ | **trainer-only** | **guarded (Lane A)** |
+| `autoReportEnabled` | `queues/scheduler.ts:132` master switch over client `autoReport` | ✅ | **trainer-only** | **guarded (Lane A)** |
+| `timezone` | `queues/scheduler.ts` — report dispatch **and** at-risk alerts (`localHour(tz)===8`) | ✅ | **trainer-only** | **guarded (Lane A)** |
+| `prNotifyType` | **none** — the live-session PR flash (`WorkoutBlock.tsx:72`) fires on `isLoadRecord \|\| isVolumeRecord`, ignoring this setting | ⚠️ setting saved, unread | both | **NEW FINDING — see A** |
+| `photoSharingPreference` | only `progress-photos/SnapshotPhotoCapture.tsx`, which **nothing imports**; the mounted capture path (`SnapshotCaptureSheet` in `BaselineTab.tsx`) does **not** read it | ⚠️ fully dormant | both | **relabelled "Not yet active" (Lane A)** — corrects §2.5/§3.1 |
+
+### New findings surfaced by the trace (not in the original rec list)
+
+**A. `prNotifyType` is a dead preference.** The UI presents three choices (1RM / Volume / Both) implying control over which PR type triggers the in-session flash, but no code reads the value — `WorkoutBlock.tsx` flashes on *either* record type unconditionally. The setting is honest-looking but inert. **Decision needed (backlog, not Lane A):** either wire `prNotifyType` into the flash gate in `WorkoutBlock`/`ExerciseBlock`, or remove the control. Recommend wiring it (the behaviour it promises is cheap and the UI already exists).
+
+**B. `photoSharingPreference` correction.** An earlier read suggested this gated live capture UI; the full trace shows its only reader is unmounted, so end-to-end it controls nothing today. The original audit's "no effect / hasn't shipped" read was correct. Lane A relabels the control as "Not yet active" rather than hiding it, so the saved preference survives for when sharing ships.
+
+### Lane A executed (2026-10-24)
+Guarded the **Alerts** section, **Auto-send monthly reports**, and **Timezone** to `trainerMode === 'trainer'` (same pattern as Training Mode); swapped the widget **"Phase N"** badge for **"Coming soon"**; relabelled **progress-photo sharing** as not-yet-active. Deferred: theme toggle (blocked on light/dark), toggle/save-feedback unification + header refresh, Dashboard regroup, and the two new findings above. `tsc --noEmit` + `eslint` clean.

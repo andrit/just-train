@@ -30,6 +30,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
   works offline. Linked from the mobile account roll-up and the desktop sidebar footer. Content lives in
   `lib/helpContent.ts`, mirroring `docs/USER_MANUAL.md` (the doc-of-record).
 
+### Preferences — athlete-relevance pass (Lane A of the audit) (2026-10-24)
+- Acted on the high-value findings of `docs/preferences-audit.md`. Mode-guarded three trainer-only
+  settings to `trainerMode === 'trainer'` (same pattern as the Training Mode section): the **Alerts**
+  section (at-risk clients), **Auto-send monthly reports**, and **Timezone** — all three are read only by
+  the report/at-risk schedulers (`queues/scheduler.ts`, `queues/workers.ts`), so they're inert for an
+  athlete. Swapped the dashboard widget **"Phase N"** availability badge for **"Coming soon"** (internal
+  roadmap vocabulary was leaking into the UI). Relabelled **progress-photo sharing** as **"Not yet active"**
+  — the trace found its only reader (`SnapshotPhotoCapture.tsx`) is unmounted, so the control is dormant
+  end-to-end; the saved preference survives for when sharing ships. `PreferencesPage.tsx` only.
+- Added §7 **preference → consumer inventory** to `docs/preferences-audit.md` (what reads each preference,
+  live?, who it serves). Two new findings surfaced: **`prNotifyType` is dead** (the PR flash fires on both
+  record types regardless of the setting) and **`photoSharingPreference` is fully dormant** — both logged
+  for the backlog, not changed in this pass.
+
 ### Docs — preferences audit (2026-10-24)
 - `docs/preferences-audit.md`: relevance & completeness review of the Preferences screen. Headline finding:
   the Alerts section and auto-send monthly reports are trainer-only concepts still shown to athletes and

@@ -69,6 +69,10 @@ On the "Volume per session" chart in My Training, pointing at (or tabbing to) a 
 Sets, reps, scores and the like use a drag-stepper: drag up to raise the value, down to lower it. Prefer buttons? The ▲ / ▼ do the same, and arrow keys work when it's focused.
 *Where:* target setup, subjective score sliders · *Under the hood:* `DragStepper`
 
+**Hold a + / − stepper → jump by 5.**
+On the number steppers for targets (sets, reps, weight when you add an exercise), a quick tap changes the value by one. Press and *hold* a + or − and, after a moment, it jumps by 5 at a steady pace — it never speeds up, and there's a brief pause between each jump so you can release on the number you want. Arrow keys still step by one.
+*Where:* add-exercise / circuit / target setup · *Under the hood:* `NumberField`
+
 **Tap a muscle chip → cycle it through primary / secondary / off.**
 When creating or editing an exercise, each muscle is a chip grouped by body part. Tap once to mark it a primary mover (filled red), tap again for secondary (red tint), tap a third time to clear it. The selection drives the muscle map on the exercise's detail view.
 *Where:* the exercise create/edit form · *Under the hood:* `MusclePicker`

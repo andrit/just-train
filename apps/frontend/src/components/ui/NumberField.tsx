@@ -15,6 +15,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/cn'
 
+// Hold-to-jump: press and hold a ▲/▼ to move in coarse ×5 jumps at a constant
+// cadence (never accelerating), with a brief buffer between each. A quick tap
+// still nudges by one `step`. Tune these three to change the feel.
+const HOLD_ARM_MS    = 500   // hold this long before coarse ×5 stepping begins
+const HOLD_REPEAT_MS = 600   // constant gap between ×5 jumps — never accelerates
+const HOLD_STEP      = 5     // coarse jump size on hold
+
 interface NumberFieldProps {
   value:        number | null
   onChange:     (value: number | null) => void
@@ -74,6 +81,51 @@ export function NumberField({
     onChange(next)
   }
 
+  // ── Hold-to-jump (coarse ×5 stepping) ──────────────────────────────────────
+  const liveValue   = useRef<number>(value ?? min ?? 0)
+  const holdTimer   = useRef<ReturnType<typeof setTimeout>  | null>(null)
+  const repeatTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const didHold     = useRef(false)
+  const suppressTap = useRef(false)
+
+  // Seeded on press and updated every jump, so each repeat adds to the latest
+  // value rather than a stale one captured when the hold began.
+  const jump = (dir: 1 | -1): void => {
+    const next = clamp(liveValue.current + dir * HOLD_STEP)
+    liveValue.current = next
+    setText(String(next))
+    onChange(next)
+  }
+
+  const startHold = (dir: 1 | -1) => (): void => {
+    didHold.current   = false
+    liveValue.current = parse(text) ?? value ?? min ?? 0
+    holdTimer.current = setTimeout(() => {
+      didHold.current = true
+      jump(dir)                                               // first coarse jump
+      repeatTimer.current = setInterval(() => jump(dir), HOLD_REPEAT_MS)
+    }, HOLD_ARM_MS)
+  }
+
+  const endHold = (): void => {
+    if (holdTimer.current)   { clearTimeout(holdTimer.current);   holdTimer.current = null }
+    if (repeatTimer.current) { clearInterval(repeatTimer.current); repeatTimer.current = null }
+    if (didHold.current) suppressTap.current = true            // swallow the release-click
+    didHold.current = false
+  }
+
+  // A quick tap nudges by one `step`; the click that trails a hold is suppressed.
+  const handleTap = (dir: 1 | -1) => (): void => {
+    if (suppressTap.current) { suppressTap.current = false; return }
+    nudge(dir)
+  }
+
+  // Clear any running timers if the field unmounts mid-hold.
+  useEffect(() => () => {
+    if (holdTimer.current)   clearTimeout(holdTimer.current)
+    if (repeatTimer.current) clearInterval(repeatTimer.current)
+  }, [])
+
   const handleBlur = (): void => {
     isFocused.current = false
     const n = parse(text)
@@ -94,8 +146,13 @@ export function NumberField({
         <button
           type="button"
           aria-label={`Decrease ${label ?? 'value'}`}
-          onClick={() => nudge(-1)}
-          className="w-9 rounded-xl border border-surface-border text-gray-400 hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
+          onPointerDown={startHold(-1)}
+          onPointerUp={endHold}
+          onPointerLeave={endHold}
+          onPointerCancel={endHold}
+          onContextMenu={(e) => e.preventDefault()}
+          onClick={handleTap(-1)}
+          className="w-9 select-none rounded-xl border border-surface-border text-gray-400 hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
         >
           <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none"><path d="M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
         </button>
@@ -121,8 +178,13 @@ export function NumberField({
         <button
           type="button"
           aria-label={`Increase ${label ?? 'value'}`}
-          onClick={() => nudge(1)}
-          className="w-9 rounded-xl border border-surface-border text-gray-400 hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
+          onPointerDown={startHold(1)}
+          onPointerUp={endHold}
+          onPointerLeave={endHold}
+          onPointerCancel={endHold}
+          onContextMenu={(e) => e.preventDefault()}
+          onClick={handleTap(1)}
+          className="w-9 select-none rounded-xl border border-surface-border text-gray-400 hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
         >
           <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
         </button>

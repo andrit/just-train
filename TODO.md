@@ -42,6 +42,18 @@ A dedicated **deep audit** of the paid-user account surface — be thorough, spa
   and **where does it deviate?** Deviation is insight, not necessarily a defect — document it either way.
 Deliver as a findings doc (pairs with the `docs/preferences-audit.md` pattern). When starting, create the task formally.
 
+## Backlog notes — UX / perf (new 2026-10-24)
+- **Initial-load performance.** 3–4s to clear the spinner on first app load, and again when first opening the new
+  **Help** section. Investigate: main-bundle size / TTI, the lazy-loaded Help chunk (it's code-split, so first open
+  fetches it — consider prefetch or a lighter route), AuthProvider init, and the `enabled: !!accessToken` query
+  gating. Do a perf pass (Lighthouse + bundle analysis). Overlaps the launch-gate "Lighthouse ≥ 90" item.
+- **Body-map drawer — persistent tabs on a muscle; first tab = your history.** Drilling a muscle (e.g. Quads) shows
+  Primary / Also-works-it movements (good). Turn that into a **persistent tab strip at the bottom of the drawer**,
+  where the **first tab is your exercise history with that muscle** (exercises you've actually done that hit it),
+  then Primary movers / Also works it. Needs a "sessions/sets by muscle" history source (backend). `BodyBreakdownSheet`.
+- **Timed-exercise interface (e.g. stationary bike).** Design a better UI for timed/duration cardio — the current
+  time/distance/intensity inputs don't suit a stationary-bike-style effort. **User will bring inspiration** before build.
+
 ## When the UX track pauses — maintenance queue, IN ORDER (`task-plan-maintenance.md`)
 _Unstarted; carried:_
 1. **G16 leftovers** — `useSignOut` → `caches.delete('cloudinary-media')` (feature-detect + try/catch);

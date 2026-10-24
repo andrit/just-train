@@ -7,6 +7,15 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Docs — paid-user account deep audit (2026-10-24)
+- `docs/paid-user-account-audit.md`: read-only audit of the account/auth surface (security, agency,
+  settings+auth controls, product-story↔UX fidelity) + email/billing forward-readiness. No reachable auth
+  bypass found; surface verified strong (argon2id, refresh rotation + reuse detection, per-email+per-IP
+  lockout, mass-assignment whitelist, complete data export). Definite findings: `COOKIE_SECRET` default
+  (prod-beta footgun), email recovery inert without Resend (password reset unavailable in beta), consent
+  not recorded at register. Confirm-first findings: `X-Forwarded-For`/`trustProxy`, in-process lockout
+  per-replica, iOS standalone export download. Fixes tracked as follow-up task #23; no code changed by the audit.
+
 ### Sessions — list grouped by week (2026-10-24)
 - The Sessions view now groups by **Monday-start week** (newest first) with flat week headers
   ("This week" / "Last week" / "Week of Mar 10") and a **month divider** wherever the month changes;

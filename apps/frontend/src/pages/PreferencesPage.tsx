@@ -1,16 +1,22 @@
 // ------------------------------------------------------------
-// pages/PreferencesPage.tsx — Trainer preferences (v1.4.5)
+// pages/PreferencesPage.tsx — athlete/trainer preferences
 //
-// Sections:
-//   Profile     — name, weight unit
-//   Training    — mode display
-//   Dashboard   — CTA label, widget order (draggable list)
-//   Alerts      — alertsEnabled toggle, color scheme, tone
+// Sections (trainer-only ones guarded on trainerMode === 'trainer'):
+//   Profile       — name, weight unit
+//   Training Mode — mode display (trainer-only)
+//   Dashboard     — CTA label, session layout, weekly target, 1RM,
+//                   PR notify, rest timer, auto-report*, timezone*, widgets
+//   Alerts*       — at-risk toggle, color scheme, tone
+//   Privacy       — progress-photo sharing default (not yet active)
+//   Account       — change email/password, devices, export
+//   Danger zone   — deactivate account
+//   (* = trainer-only; see the inline guards)
 //
 // Every preference saves immediately on change — no Save button.
-// Visual feedback via flash-success on each saved field.
-// Widget order updates via drag-to-reorder (hamburger handle)
-// and is synced to trainer.widgetProgression on drop.
+// Feedback convention: on/off toggles use the shared <Toggle> inside
+// <PrefRow> (inline spinner); multi-option controls (button groups,
+// selects) show a bottom "Saving…" line. Widget order updates via
+// drag-to-reorder (hamburger handle), synced to trainer.widgetProgression.
 // ------------------------------------------------------------
 
 import { useState, useRef, useCallback }  from 'react'
@@ -395,6 +401,11 @@ export default function PreferencesPage(): React.JSX.Element {
                 ))}
               </div>
             </div>
+            {saving.weightUnitPreference && (
+              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                <Spinner size="sm" /> Saving…
+              </p>
+            )}
           </div>
         </Section>
 
@@ -498,6 +509,11 @@ export default function PreferencesPage(): React.JSX.Element {
                 ))}
               </div>
             </div>
+            {saving.sessionLayout && (
+              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                <Spinner size="sm" /> Saving…
+              </p>
+            )}
           </div>
 
           {/* Weekly session target */}
@@ -525,37 +541,26 @@ export default function PreferencesPage(): React.JSX.Element {
                 >+</button>
               </div>
             </div>
+            {saving.weeklySessionTarget && (
+              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                <Spinner size="sm" /> Saving…
+              </p>
+            )}
           </div>
 
           {/* 1RM estimates — athlete mode only */}
           {(trainer?.trainerMode ?? 'trainer') === 'athlete' && (
-            <div className="card p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-200">1RM estimates</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Show Epley estimated max lift on KPI cards
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={trainer?.show1rmEstimate ?? false}
-                  onClick={() => save('show1rmEstimate', !(trainer?.show1rmEstimate ?? false))}
-                  className={cn(
-                    'relative w-10 h-5 rounded-full transition-colors duration-200',
-                    (trainer?.show1rmEstimate ?? false) ? 'bg-command-blue' : 'bg-surface-border',
-                    interactions.button.base,
-                    interactions.button.press,
-                  )}
-                >
-                  <span className={cn(
-                    'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200',
-                    (trainer?.show1rmEstimate ?? false) ? 'translate-x-5' : 'translate-x-0.5',
-                  )} />
-                </button>
-              </div>
-            </div>
+            <PrefRow
+              label="1RM estimates"
+              hint="Show Epley estimated max lift on KPI cards"
+              saving={saving.show1rmEstimate}
+            >
+              <Toggle
+                checked={trainer?.show1rmEstimate ?? false}
+                onChange={(v) => save('show1rmEstimate', v)}
+                label="Toggle 1RM estimates"
+              />
+            </PrefRow>
           )}
 
           {/* PR notification type */}
@@ -563,7 +568,7 @@ export default function PreferencesPage(): React.JSX.Element {
             <div className="mb-3">
               <p className="text-sm font-medium text-gray-200">Personal record notifications</p>
               <p className="text-xs text-gray-500 mt-0.5">
-                Which PR type triggers the flash and badge during a live session
+                Which PR type triggers the celebratory flash during a live session
               </p>
             </div>
             <div className="flex gap-2">
@@ -646,33 +651,17 @@ export default function PreferencesPage(): React.JSX.Element {
               nothing to send and no 08:00-local to send it at. */}
           {trainerMode === 'trainer' && (
           <>
-          <div className="card p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-200">Auto-send monthly reports</p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Sends on the 1st for clients with auto-report enabled
-                </p>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={trainer?.autoReportEnabled ?? true}
-                onClick={() => save('autoReportEnabled', !(trainer?.autoReportEnabled ?? true))}
-                className={cn(
-                  'relative w-10 h-5 rounded-full transition-colors duration-200',
-                  (trainer?.autoReportEnabled ?? true) ? 'bg-command-blue' : 'bg-surface-border',
-                  interactions.button.base,
-                  interactions.button.press,
-                )}
-              >
-                <span className={cn(
-                  'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200',
-                  (trainer?.autoReportEnabled ?? true) ? 'translate-x-5' : 'translate-x-0.5',
-                )} />
-              </button>
-            </div>
-          </div>
+          <PrefRow
+            label="Auto-send monthly reports"
+            hint="Sends on the 1st for clients with auto-report enabled"
+            saving={saving.autoReportEnabled}
+          >
+            <Toggle
+              checked={trainer?.autoReportEnabled ?? true}
+              onChange={(v) => save('autoReportEnabled', v)}
+              label="Toggle auto-send monthly reports"
+            />
+          </PrefRow>
 
           {/* Timezone */}
           <div className="card p-4">
@@ -708,6 +697,11 @@ export default function PreferencesPage(): React.JSX.Element {
                 <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>
               ))}
             </select>
+            {saving.timezone && (
+              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                <Spinner size="sm" /> Saving…
+              </p>
+            )}
           </div>
           </>
           )}

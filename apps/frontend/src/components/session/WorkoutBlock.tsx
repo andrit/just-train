@@ -22,6 +22,7 @@
 import { useState } from 'react'
 import { cn }                            from '@/lib/cn'
 import { interactions }                  from '@/lib/interactions'
+import { usePreferences }                from '@/hooks/usePreferences'
 import { formatSeconds }                 from '@/lib/formatters'
 import { WORKOUT_TYPE_LABEL, WORKOUT_TYPE_COLOR } from '@/lib/exerciseLabels'
 import { ExerciseBlock }                 from './ExerciseBlock'
@@ -51,6 +52,10 @@ export function WorkoutBlock({
   const [exerciseIndex,   setExerciseIndex]   = useState(0)
   const [addExerciseOpen, setAddExerciseOpen] = useState(false)
   const [prFlash,         setPrFlash]         = useState<{ label: string } | null>(null)
+  // Which PR type fires the celebratory flash. The persistent chip on the set
+  // row (ExerciseBlock) always reflects the real record — this gates only the
+  // in-session notification, per the Preferences "PR notifications" setting.
+  const { prNotifyType } = usePreferences()
 
   const totalEx      = exercises.length
   const clampedIdx   = Math.min(exerciseIndex, Math.max(0, totalEx - 1))
@@ -69,8 +74,12 @@ export function WorkoutBlock({
   // PR flash — shown for ~1.5s then fades, chip stays on set row
   const handleSetLoggedWithPR = (restSeconds = restDurationSeconds, pr?: { isLoadRecord: boolean; isVolumeRecord: boolean; weight?: number | null; reps?: number | null }): void => {
     onSetLogged(restSeconds)
-    if (pr?.isLoadRecord || pr?.isVolumeRecord) {
-      const label = pr.weight && pr.reps
+    const flashForPref =
+      prNotifyType === 'volume' ? !!pr?.isVolumeRecord
+      : prNotifyType === '1rm'  ? !!pr?.isLoadRecord
+      : !!(pr?.isLoadRecord || pr?.isVolumeRecord) // 'both'
+    if (flashForPref) {
+      const label = pr?.weight && pr?.reps
         ? `${pr.weight} × ${pr.reps}`
         : 'New best'
       setPrFlash({ label })

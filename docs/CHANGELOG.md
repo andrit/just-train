@@ -44,7 +44,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
   record types regardless of the setting) and **`photoSharingPreference` is fully dormant** — both logged
   for the backlog, not changed in this pass.
 
-### Docs — preferences audit (2026-10-24)
+### Preferences — toggle/feedback consistency pass (Lane C of the audit) (2026-10-24)
+- Converted the two hand-rolled switches (1RM estimates, auto-send reports) to the shared `PrefRow` +
+  `Toggle` so all on/off settings look and behave identically. Added the "Saving…" indicator to the four
+  multi-option cards that lacked it (weight unit, session layout, weekly target, timezone). Feedback
+  convention is now explicit: toggles show an inline spinner via `PrefRow`; multi-option controls show a
+  bottom "Saving…" line. Refreshed the stale file header (was "v1.4.5 / 4 sections"). `PreferencesPage.tsx`
+  only. Deferred from Lane C: the Dashboard-section regroup.
+
+### Live session — PR flash now honours the notification preference (2026-10-24)
+- The in-session **PR flash** now respects the Preferences "PR notifications" setting (`prNotifyType`):
+  `1rm` flashes on a load/1RM record, `volume` on a volume record, `both` on either. Previously the setting
+  was ignored and the flash fired on either type. The **persistent PR chip** on the set row is unchanged —
+  it still reflects the actual record regardless of this preference (it's a record, not a notification), and
+  the setting's copy was corrected from "flash and badge" to "celebratory flash" to match. `WorkoutBlock.tsx`.
+  Note: `prNotifyType` defaults to `1rm`, so by default volume-only PRs no longer flash — see the open
+  decision on whether the default should become `both`.
 - `docs/preferences-audit.md`: relevance & completeness review of the Preferences screen. Headline finding:
   the Alerts section and auto-send monthly reports are trainer-only concepts still shown to athletes and
   should be mode-guarded (as the Training Mode section already is).

@@ -50,7 +50,15 @@ Versions follow [Semantic Versioning](https://semver.org/).
   multi-option cards that lacked it (weight unit, session layout, weekly target, timezone). Feedback
   convention is now explicit: toggles show an inline spinner via `PrefRow`; multi-option controls show a
   bottom "Saving…" line. Refreshed the stale file header (was "v1.4.5 / 4 sections"). `PreferencesPage.tsx`
-  only. Deferred from Lane C: the Dashboard-section regroup.
+  only.
+
+### Preferences — section regroup (Lane C, cont.) (2026-10-24)
+- Split the oversized "Dashboard" catch-all into three focused sections: **Session** (layout, weekly
+  target, 1RM, PR notifications, rest timer), **Reports** — *trainer-only* (auto-send monthly reports,
+  timezone), and **Dashboard** (training-button label, widget order). The Reports section's mode guard
+  replaces the former inline guards on auto-report/timezone (the guarding folds into the section, as the
+  audit predicted). Athletes see Profile → Session → Dashboard → Privacy → Account; trainers also get
+  Training Mode, Reports, and Alerts. `PreferencesPage.tsx` only.
 
 ### Live session — PR flash now honours the notification preference (2026-10-24)
 - The in-session **PR flash** now respects the Preferences "PR notifications" setting (`prNotifyType`):

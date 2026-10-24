@@ -4,8 +4,9 @@
 // Sections (trainer-only ones guarded on trainerMode === 'trainer'):
 //   Profile       — name, weight unit
 //   Training Mode — mode display (trainer-only)
-//   Dashboard     — CTA label, session layout, weekly target, 1RM,
-//                   PR notify, rest timer, auto-report*, timezone*, widgets
+//   Session       — layout, weekly target, 1RM (athlete), PR notify, rest timer
+//   Reports*      — auto-send monthly reports, timezone
+//   Dashboard     — training-button label, widget order
 //   Alerts*       — at-risk toggle, color scheme, tone
 //   Privacy       — progress-photo sharing default (not yet active)
 //   Account       — change email/password, devices, export
@@ -441,44 +442,11 @@ export default function PreferencesPage(): React.JSX.Element {
         </Section>
         )}
 
-        {/* ── Dashboard ────────────────────────────────────────────────────── */}
+        {/* ── Session — how a live session runs and what it tracks ────────── */}
         <Section
-          title="Dashboard"
-          description="Personalize your training call-to-action and arrange which widgets appear on your dashboard."
+          title="Session"
+          description="How a live session is laid out and what it tracks."
         >
-          {/* CTA label */}
-          <div className="card p-4">
-            <p className="text-sm font-medium text-gray-200 mb-3">Training button label</p>
-            <div className="grid grid-cols-2 gap-2">
-              {CTA_LABEL_OPTIONS.map((label) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => save('ctaLabel', label)}
-                  aria-pressed={ctaLabel === label}
-                  className={cn(
-                    'px-3 py-2 rounded-xl border text-sm text-left transition-all duration-150',
-                    ctaLabel === label
-                      ? 'border-command-blue/50 bg-command-blue/10 text-white'
-                      : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
-                    interactions.button.base,
-                    interactions.button.press,
-                  )}
-                >
-                  {ctaLabel === label && (
-                    <span className="mr-1.5 text-command-blue" aria-hidden>✓</span>
-                  )}
-                  {label}
-                </button>
-              ))}
-            </div>
-            {saving.ctaLabel && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
-                <Spinner size="sm" /> Saving…
-              </p>
-            )}
-          </div>
-
           {/* Session layout */}
           <div className="card p-4">
             <div className="flex items-center justify-between">
@@ -646,11 +614,16 @@ export default function PreferencesPage(): React.JSX.Element {
             )}
           </div>
 
-          {/* Auto-send monthly reports + Timezone below — trainer-only; report & at-risk
-              scheduling (queues/scheduler.ts) are the only consumers, so an athlete has
-              nothing to send and no 08:00-local to send it at. */}
-          {trainerMode === 'trainer' && (
-          <>
+        </Section>
+
+        {/* ── Reports — trainer-only; report & at-risk scheduling (queues/scheduler.ts)
+            are the only consumers, so an athlete has nothing to send and no 08:00-local
+            to send it at. ── */}
+        {trainerMode === 'trainer' && (
+        <Section
+          title="Reports"
+          description="Monthly client reports and the local time they send."
+        >
           <PrefRow
             label="Auto-send monthly reports"
             hint="Sends on the 1st for clients with auto-report enabled"
@@ -703,8 +676,46 @@ export default function PreferencesPage(): React.JSX.Element {
               </p>
             )}
           </div>
-          </>
-          )}
+        </Section>
+        )}
+
+        {/* ── Dashboard — the home surface: training button + widgets ─────── */}
+        <Section
+          title="Dashboard"
+          description="Your training button label and the widgets on your home dashboard."
+        >
+          {/* Training button label */}
+          <div className="card p-4">
+            <p className="text-sm font-medium text-gray-200 mb-3">Training button label</p>
+            <div className="grid grid-cols-2 gap-2">
+              {CTA_LABEL_OPTIONS.map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => save('ctaLabel', label)}
+                  aria-pressed={ctaLabel === label}
+                  className={cn(
+                    'px-3 py-2 rounded-xl border text-sm text-left transition-all duration-150',
+                    ctaLabel === label
+                      ? 'border-command-blue/50 bg-command-blue/10 text-white'
+                      : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
+                    interactions.button.base,
+                    interactions.button.press,
+                  )}
+                >
+                  {ctaLabel === label && (
+                    <span className="mr-1.5 text-command-blue" aria-hidden>✓</span>
+                  )}
+                  {label}
+                </button>
+              ))}
+            </div>
+            {saving.ctaLabel && (
+              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                <Spinner size="sm" /> Saving…
+              </p>
+            )}
+          </div>
 
           {/* Widget order */}
           <div className="card p-4">

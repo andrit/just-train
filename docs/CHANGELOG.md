@@ -7,6 +7,34 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Sessions — list grouped by week (2026-10-24)
+- The Sessions view now groups by **Monday-start week** (newest first) with flat week headers
+  ("This week" / "Last week" / "Week of Mar 10") and a **month divider** wherever the month changes;
+  a week is attributed to the month of its Monday. Replaces the former per-day grouping. `SessionsPage.tsx` only.
+
+### Body map — drill into neglected muscles (2026-10-24)
+- The **Neglected** tile in the body-breakdown sheet is now tappable: it opens the list of muscles
+  untrained in the last 30 days, each expandable to the library exercises that work it (the existing
+  per-muscle suggestions), with an "All muscles" escape. Disabled when nothing is neglected. Reuses the
+  existing suggestion engine; `BodyBreakdownSheet.tsx` only.
+
+### Steppers — hold a + / − to jump by 5 (2026-10-24)
+- On the target steppers (sets, reps, weight when adding an exercise), **press-and-hold** a + / − arrow
+  to jump by 5 at a steady, non-accelerating cadence with a brief buffer between jumps; a quick tap still
+  steps by one. Shared `NumberField` (add-exercise / circuit / target surfaces; not live set logging).
+  `GESTURE_GUIDE.md` updated.
+
+### Help — native in-app user manual (2026-10-24)
+- New **Help** screen (`/help`): a single scrolling page with a sticky "jump to" chip row, rendering the
+  user manual as native sections (the "For Trainers" section shows only in trainer mode). Static, so it
+  works offline. Linked from the mobile account roll-up and the desktop sidebar footer. Content lives in
+  `lib/helpContent.ts`, mirroring `docs/USER_MANUAL.md` (the doc-of-record).
+
+### Docs — preferences audit (2026-10-24)
+- `docs/preferences-audit.md`: relevance & completeness review of the Preferences screen. Headline finding:
+  the Alerts section and auto-send monthly reports are trainer-only concepts still shown to athletes and
+  should be mode-guarded (as the Training Mode section already is).
+
 ### Docs — Developer Manual + User/Athlete Manual (2026-10-21)
 - **`docs/DEVELOPER_MANUAL.md`** — the onboarding/operations map for developers: what the app is, repo
   layout, local setup, the `pnpm verify` gate, the short-list conventions (with pointers to the detailed

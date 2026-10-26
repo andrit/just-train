@@ -26,7 +26,7 @@
 //   /templates          → Template list
 // ------------------------------------------------------------
 
-import { lazy, Suspense }                  from 'react'
+import { lazy, Suspense, useEffect }       from 'react'
 import { Navigate, Routes, Route }         from 'react-router-dom'
 import { AuthProvider, ProtectedRoute }    from '@/components/auth/AuthProvider'
 import { useAuthStore }                    from '@/store/authStore'
@@ -101,6 +101,10 @@ function AthleteRouteGuard({ children }: { children: React.ReactNode }): React.J
 // ── App ───────────────────────────────────────────────────────────────────────
 
 export default function App(): React.JSX.Element {
+  // Warm the Dashboard (landing route) chunk while AuthProvider resolves the
+  // session, so it isn't a serial fetch after the refresh completes. See #19.
+  useEffect(() => { void import('@/pages/DashboardPage') }, [])
+
   return (
     <AuthProvider>
       <Suspense fallback={<PageFallback />}>

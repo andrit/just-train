@@ -10,7 +10,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore }      from '@/store/authStore'
 import { attemptTokenRefresh } from '@/lib/api'
-import { Spinner }           from '@/components/ui/Spinner'
+import { AppInitSkeleton }   from '@/components/shell/AppInitSkeleton'
 import { OfflineAuthScreen } from './OfflineAuthScreen'
 
 // Refresh 3 minutes before the 15-minute token expiry
@@ -100,11 +100,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
   // Block children from mounting until auth is resolved.
   // This prevents query hooks from firing before the access token exists.
   if (isInitializing) {
-    return (
-      <div className="min-h-screen bg-brand-primary flex items-center justify-center">
-        <Spinner size="lg" className="text-command-blue" label="Initialising app" />
-      </div>
-    )
+    return <AppInitSkeleton />
   }
 
   // Offline on cold start — show a holding screen rather than the login form.

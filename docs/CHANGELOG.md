@@ -7,6 +7,15 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Performance — perceived-load pass: shell skeleton + Dashboard preload (2026-10-26)
+- After the bundle pass cleared Lighthouse ≥ 90 (FCP 1.8 s), the *perceived* cold-load was still ~3–4 s: the
+  "Initialising app" spinner is held while `AuthProvider` waits on `/auth/refresh` → the Dashboard chunk → its
+  data (TTI ≈ 3.5 s). The refresh is unavoidable (the access token is in-memory and lost on reload), so this
+  pass masks and shortens the wait rather than erasing it: `AuthProvider` now renders a static **shell skeleton**
+  (greeting · body-map · Train CTA · bottom nav) instead of a bare spinner, and `App` **prefetches the Dashboard
+  chunk** during the refresh so it isn't a serial fetch afterwards. `AppInitSkeleton.tsx` (new), `AuthProvider.tsx`,
+  `App.tsx`.
+
 ### Performance — lazy-load the interactive tree + defer startup off the critical path (2026-10-26)
 - The always-loaded entry chunk carried the **whole interactive component tree**: `AppShell` eagerly imported
   the session overlay/live-session tree, client-profile panels + tabs, plan/history panels, the launcher sheet,

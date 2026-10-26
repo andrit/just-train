@@ -7,11 +7,10 @@
 //   BrowserRouter must wrap everything that uses React Router
 // ------------------------------------------------------------
 
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import * as Sentry from '@sentry/react'
 import App from './App'
 import { ErrorBoundary } from './components/shell/ErrorBoundary'
@@ -23,6 +22,14 @@ import { registerSW }              from 'virtual:pwa-register'
 import { installSwErrorRelay }     from './lib/swErrorRelay'
 import { initTelemetry, track }    from './services/telemetry'
 import { SpeedInsights }           from '@vercel/speed-insights/react'
+
+// React Query devtools — DEV ONLY. Lazy + `import.meta.env.DEV` (statically
+// false in a prod build) means the ternary is `null` and the dynamic import is
+// never referenced, so Rollup tree-shakes the whole dependency out of the
+// production bundle — not just renders it null.
+const DevtoolsPanel = import.meta.env.DEV
+  ? lazy(() => import('@tanstack/react-query-devtools').then((m) => ({ default: m.ReactQueryDevtools })))
+  : null
 
 // Sentry error monitoring — no-ops when DSN is absent (dev + CI).
 // Add VITE_SENTRY_DSN to Vercel env vars to activate in production.
@@ -123,8 +130,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </ErrorBoundary>
       </BrowserRouter>
 
-      {/* DevTools panel — only visible in development, removed from production build */}
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* DevTools panel — dev only; tree-shaken from the prod bundle (see DevtoolsPanel above) */}
+      {DevtoolsPanel && (
+        <Suspense fallback={null}>
+          <DevtoolsPanel initialIsOpen={false} />
+        </Suspense>
+      )}
 
       {/* Real-user performance (Vercel Speed Insights, free tier: 10k events / 30 days
           shared across the team). No cookie, no PII — it reports Web Vitals per path.

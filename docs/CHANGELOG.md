@@ -7,6 +7,13 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Performance — devtools excluded from the production bundle (2026-10-26)
+- `ReactQueryDevtools` is now a **dev-only lazy import** (`import.meta.env.DEV`), so Rollup tree-shakes the
+  dependency out of the production bundle entirely instead of shipping it and rendering null. Trims main-entry
+  JS and mobile parse time. `main.tsx` only. First item of the #19 initial-load pass; the larger finding —
+  the first-load spinner is the `/auth/refresh` round-trip (service worker precaches all JS, so the spinner is
+  network, not bundle) — is pending a timing measurement.
+
 ### Docs — paid-user account deep audit (2026-10-24)
 - `docs/paid-user-account-audit.md`: read-only audit of the account/auth surface (security, agency,
   settings+auth controls, product-story↔UX fidelity) + email/billing forward-readiness. No reachable auth

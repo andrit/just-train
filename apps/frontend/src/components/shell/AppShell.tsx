@@ -26,20 +26,26 @@
 //   60 — toasts
 // ------------------------------------------------------------
 
-import { useEffect }                         from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { useLocation }                       from 'react-router-dom'
 import { cn }                                from '@/lib/cn'
 import { useNav }                            from '@/services/navService'
 import { useOverlayStore }                   from '@/store/overlayStore'
 import { useSessionStore }                   from '@/store/sessionStore'
 import { useInstallPrompt }                  from '@/hooks/useInstallPrompt'
-import { ActiveSessionOverlay }              from './ActiveSessionOverlay'
-import { ClientProfilePanel }                from './ClientProfilePanel'
-import { SessionLauncherSheet }              from './SessionLauncherSheet'
-import { SessionPlanPanel }                  from './SessionPlanPanel'
-import { SessionHistoryPanel }               from './SessionHistoryPanel'
-import { InstallPromptBanner }               from './InstallPromptBanner'
 import type { PanelState }                   from '@/services/navService'
+
+// Lazy-loaded — these only render when a panel opens, a session is active, or the
+// install banner shows; none at first paint. Static imports dragged the whole
+// session + client-profile tree (and dompurify via ReportPreviewModal) into the
+// always-loaded entry chunk. Lazy-loading moves them to on-demand chunks that the
+// service worker precaches (instant after first use). See the #19 initial-load plan.
+const ActiveSessionOverlay = lazy(() => import('./ActiveSessionOverlay').then((m) => ({ default: m.ActiveSessionOverlay })))
+const ClientProfilePanel   = lazy(() => import('./ClientProfilePanel').then((m) => ({ default: m.ClientProfilePanel })))
+const SessionLauncherSheet = lazy(() => import('./SessionLauncherSheet').then((m) => ({ default: m.SessionLauncherSheet })))
+const SessionPlanPanel     = lazy(() => import('./SessionPlanPanel').then((m) => ({ default: m.SessionPlanPanel })))
+const SessionHistoryPanel  = lazy(() => import('./SessionHistoryPanel').then((m) => ({ default: m.SessionHistoryPanel })))
+const InstallPromptBanner  = lazy(() => import('./InstallPromptBanner').then((m) => ({ default: m.InstallPromptBanner })))
 
 interface AppShellProps {
   children: React.ReactNode
@@ -54,6 +60,12 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
 
   // Read current panel from location state
   const currentPanel = (location.state as { panel?: PanelState } | null)?.panel ?? null
+
+  // Session launcher: mount on first open, then keep mounted so its open/close
+  // animation still plays. Keeps the lazy chunk out of the entry until first use.
+  const launcherOpen = currentPanel?.panel === 'sessionLauncher'
+  const [launcherMounted, setLauncherMounted] = useState(false)
+  useEffect(() => { if (launcherOpen) setLauncherMounted(true) }, [launcherOpen])
 
   // Hide nav when overlay is expanded
   const _navHidden = overlayState === 'expanded'
@@ -89,10 +101,12 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
         aria-hidden={currentPanel?.panel !== 'clientProfile'}
       >
         {currentPanel?.panel === 'clientProfile' && currentPanel.entityId && (
-          <ClientProfilePanel
-            clientId={currentPanel.entityId}
-            onClose={() => nav.closePanel()}
-          />
+          <Suspense fallback={null}>
+            <ClientProfilePanel
+              clientId={currentPanel.entityId}
+              onClose={() => nav.closePanel()}
+            />
+          </Suspense>
         )}
       </div>
 
@@ -108,11 +122,13 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
         aria-hidden={currentPanel?.panel !== 'sessionPlan'}
       >
         {currentPanel?.panel === 'sessionPlan' && (
-          <SessionPlanPanel
-            sessionId={currentPanel.entityId}
-            clientId={currentPanel.returnTab}
-            onClose={() => nav.closePanel()}
-          />
+          <Suspense fallback={null}>
+            <SessionPlanPanel
+              sessionId={currentPanel.entityId}
+              clientId={currentPanel.returnTab}
+              onClose={() => nav.closePanel()}
+            />
+          </Suspense>
         )}
       </div>
 
@@ -128,30 +144,42 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
         aria-hidden={currentPanel?.panel !== 'sessionHistory'}
       >
         {currentPanel?.panel === 'sessionHistory' && currentPanel.entityId && (
-          <SessionHistoryPanel
-            sessionId={currentPanel.entityId}
-            onClose={() => nav.closePanel()}
-          />
+          <Suspense fallback={null}>
+            <SessionHistoryPanel
+              sessionId={currentPanel.entityId}
+              onClose={() => nav.closePanel()}
+            />
+          </Suspense>
         )}
       </div>
 
-      {/* ── Session launcher sheet ────────────────────────────────────────── */}
-      <SessionLauncherSheet
-        open={currentPanel?.panel === 'sessionLauncher'}
-        clientId={currentPanel?.panel === 'sessionLauncher' ? currentPanel.entityId : undefined}
-        onClose={() => nav.closePanel()}
-      />
+      {/* ── Session launcher sheet (lazy; mounted on first open) ──────────── */}
+      {launcherMounted && (
+        <Suspense fallback={null}>
+          <SessionLauncherSheet
+            open={launcherOpen}
+            clientId={launcherOpen ? currentPanel?.entityId : undefined}
+            onClose={() => nav.closePanel()}
+          />
+        </Suspense>
+      )}
 
-      {/* ── Active session overlay ────────────────────────────────────────── */}
-      <ActiveSessionOverlay />
+      {/* ── Active session overlay (lazy; only mounted when a session exists) ─ */}
+      {sessionCount > 0 && (
+        <Suspense fallback={null}>
+          <ActiveSessionOverlay />
+        </Suspense>
+      )}
 
       {/* ── PWA install nudge (UF-S-03) ────────────────────────────────────── */}
       {bannerOpen && (
-        <InstallPromptBanner
-          isIOS={isIOS}
-          onInstall={promptInstall}
-          onDismiss={closeBanner}
-        />
+        <Suspense fallback={null}>
+          <InstallPromptBanner
+            isIOS={isIOS}
+            onInstall={promptInstall}
+            onDismiss={closeBanner}
+          />
+        </Suspense>
       )}
     </div>
   )

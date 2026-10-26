@@ -7,6 +7,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Performance — lazy-load the interactive tree + defer startup off the critical path (2026-10-26)
+- The always-loaded entry chunk carried the **whole interactive component tree**: `AppShell` eagerly imported
+  the session overlay/live-session tree, client-profile panels + tabs, plan/history panels, the launcher sheet,
+  and report preview (→ `dompurify`) — all shipped on every cold launch though none shows at first paint.
+  Measured: entry **484 KB / 132 KB gzip**; Lighthouse-Mobile (incognito) FCP **2.6 s** with TBT **10 ms** →
+  a **time-to-first-paint** problem (not execution or total weight), and **not** the backend (`/auth/refresh`
+  ~400 ms, no cold-start; Railway serverless off).
+- Fixes: `AppShell` panels/overlay/sheet are now **`React.lazy` + `Suspense`** (overlay gated on an active
+  session; launcher mounts on first open then stays for its animation); **Sentry**, service-worker registration,
+  offline-sync init, telemetry and the SW error relay moved to a **deferred post-paint bootstrap** via dynamic
+  import; `SpeedInsights` lazy-loaded (`installPrompt` kept static for its early `beforeinstallprompt` listener).
+  These move the session/client tree + Sentry out of the entry into on-demand, SW-precached chunks. `AppShell.tsx`,
+  `main.tsx`. Findings + measurements: the #19 plan and `discussions/lighthouse-reports/`.
+
 ### Performance — devtools excluded from the production bundle (2026-10-26)
 - `ReactQueryDevtools` is now a **dev-only lazy import** (`import.meta.env.DEV`), so Rollup tree-shakes the
   dependency out of the production bundle entirely instead of shipping it and rendering null. Trims main-entry

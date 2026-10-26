@@ -1,90 +1,34 @@
 // ------------------------------------------------------------
 // main.tsx — React application entry point
 //
-// This file bootstraps the entire frontend application.
-// The order of providers matters:
-//   QueryClientProvider must wrap everything that uses TanStack Query
-//   BrowserRouter must wrap everything that uses React Router
+// The critical path is kept lean: only the providers + <App/> render
+// synchronously. Everything non-visual — Sentry, service-worker registration,
+// offline sync, telemetry — is deferred to AFTER first paint via dynamic imports,
+// so none of it sits in the always-loaded entry chunk or blocks FCP.
+// (installPrompt stays static so its beforeinstallprompt listener registers early;
+// it's tiny.) See the #19 initial-load plan.
 // ------------------------------------------------------------
 
 import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as Sentry from '@sentry/react'
 import App from './App'
 import { ErrorBoundary } from './components/shell/ErrorBoundary'
 import './index.css'
-import { syncService, SYNC_COMPLETE_EVENT } from './services/syncService'
 import { ApiError } from './lib/api'
 import { recordFirstStandaloneLaunch } from './lib/installPrompt'
-import { registerSW }              from 'virtual:pwa-register'
-import { installSwErrorRelay }     from './lib/swErrorRelay'
-import { initTelemetry, track }    from './services/telemetry'
-import { SpeedInsights }           from '@vercel/speed-insights/react'
 
-// React Query devtools — DEV ONLY. Lazy + `import.meta.env.DEV` (statically
-// false in a prod build) means the ternary is `null` and the dynamic import is
-// never referenced, so Rollup tree-shakes the whole dependency out of the
-// production bundle — not just renders it null.
+// React Query devtools — DEV ONLY. Lazy + `import.meta.env.DEV` (statically false
+// in a prod build) means the ternary is `null` and the dynamic import is never
+// referenced, so Rollup tree-shakes the whole dependency out of production.
 const DevtoolsPanel = import.meta.env.DEV
   ? lazy(() => import('@tanstack/react-query-devtools').then((m) => ({ default: m.ReactQueryDevtools })))
   : null
 
-// Sentry error monitoring — no-ops when DSN is absent (dev + CI).
-// Add VITE_SENTRY_DSN to Vercel env vars to activate in production.
-if (import.meta.env.VITE_SENTRY_DSN) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN as string,
-    environment: import.meta.env.MODE,
-    tracesSampleRate: 0.05,
-    allowUrls: [window.location.origin],
-    // Auth errors are expected — not actionable noise in Sentry
-    ignoreErrors: ['Unauthorized', 'X-Device-ID header required'],
-    // What the privacy policy promises (PrivacyPage → Sentry): no IP, no PII,
-    // no replay. sendDefaultPii is the SDK default but is pinned here so a
-    // future upgrade cannot flip it silently. Query strings are stripped from
-    // every event URL — paths carry UUIDs only, but a query could carry a search
-    // term typed by the user.
-    sendDefaultPii: false,
-    beforeSend(event) {
-      if (event.request?.url) event.request.url = event.request.url.split('?')[0]
-      return event
-    },
-  })
-
-  // Install signal — Phase 18 advance criterion. Fired once per device on the
-  // first launch from the home screen (lib/installPrompt.ts), which covers iOS
-  // and does not depend on the browser's tab-scoped `appinstalled` event.
-  window.addEventListener('pwa:first-launch', () => {
-    Sentry.captureMessage('PWA installed to home screen', 'info')
-  })
-
-  // Service-worker errors have no SDK of their own — sw.ts posts them here.
-  installSwErrorRelay()
-}
-
-// Service worker registration — ours, not vite-plugin-pwa's injected one-liner,
-// so a rejected registration (seen on Android, 2026-09-14: bare "Rejected" from
-// registerSW.js with no handler) is reported with a real message and tag
-// instead of surfacing as an anonymous unhandled rejection. injectRegister is
-// null in vite.config.ts; this is the only registration call.
-registerSW({
-  onRegisterError(error) {
-    Sentry.captureException(error instanceof Error ? error : new Error(String(error)), {
-      tags: { source: 'sw-registration' },
-    })
-  },
-})
-
-// First-party usage counters (POST /telemetry) — aggregates, sent on an interval.
-initTelemetry()
-window.addEventListener('pwa:first-launch', () => track('pwa.installed'))
-
-// Now that both listeners exist: is this the first launch from the home screen?
-// (lib/installPrompt.ts registered its beforeinstallprompt/appinstalled listeners
-// as a module side effect when imported above.)
-recordFirstStandaloneLaunch()
+// Vercel Speed Insights — real-user Web Vitals per path (no cookie, no PII; a
+// no-op outside Vercel). Lazy so it's not in the entry chunk.
+const SpeedInsights = lazy(() => import('@vercel/speed-insights/react').then((m) => ({ default: m.SpeedInsights })))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -108,16 +52,6 @@ const queryClient = new QueryClient({
   },
 })
 
-// Initialise offline sync — registers online/offline listeners + prefetch
-syncService.init()
-
-// When the queue flushes successfully, invalidate all session queries
-// so the UI reflects the newly synced data
-window.addEventListener(SYNC_COMPLETE_EVENT, () => {
-  queryClient.invalidateQueries({ queryKey: ['sessions'] })
-  queryClient.invalidateQueries({ queryKey: ['clients'] })
-})
-
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -130,18 +64,96 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </ErrorBoundary>
       </BrowserRouter>
 
-      {/* DevTools panel — dev only; tree-shaken from the prod bundle (see DevtoolsPanel above) */}
+      {/* DevTools panel — dev only; tree-shaken from the prod bundle */}
       {DevtoolsPanel && (
         <Suspense fallback={null}>
           <DevtoolsPanel initialIsOpen={false} />
         </Suspense>
       )}
 
-      {/* Real-user performance (Vercel Speed Insights, free tier: 10k events / 30 days
-          shared across the team). No cookie, no PII — it reports Web Vitals per path.
-          Sampled so a single active athlete cannot burn the allocation; the script is
-          a no-op outside Vercel deployments. Raise the rate with Speed Insights Plus. */}
-      <SpeedInsights sampleRate={0.2} />
+      <Suspense fallback={null}>
+        <SpeedInsights sampleRate={0.2} />
+      </Suspense>
     </QueryClientProvider>
   </React.StrictMode>
 )
+
+// ── Deferred bootstrap ────────────────────────────────────────────────────────
+// Non-visual startup work that must not block first paint. Runs after render, on
+// idle, via dynamic imports (so it's a separate chunk, not the entry). Order:
+// Sentry first (so SW-registration errors can reach it), then SW, sync, telemetry,
+// and finally the first-launch check (after both pwa:first-launch listeners exist).
+function afterPaint(cb: () => void): void {
+  if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(cb)
+  else setTimeout(cb, 1)
+}
+
+async function bootstrap(): Promise<void> {
+  // Sentry — no-op without a DSN (dev + CI). Loaded first so the SW-registration
+  // error handler below can report through it. Best-effort: never block on it.
+  if (import.meta.env.VITE_SENTRY_DSN) {
+    try {
+      const Sentry = await import('@sentry/react')
+      Sentry.init({
+        dsn: import.meta.env.VITE_SENTRY_DSN as string,
+        environment: import.meta.env.MODE,
+        tracesSampleRate: 0.05,
+        allowUrls: [window.location.origin],
+        // Auth errors are expected — not actionable noise in Sentry
+        ignoreErrors: ['Unauthorized', 'X-Device-ID header required'],
+        // Privacy (PrivacyPage → Sentry): no IP, no PII, no replay. Pinned so a
+        // future upgrade can't flip it silently. Query strings stripped — a path
+        // carries UUIDs only, but a query could carry a user-typed search term.
+        sendDefaultPii: false,
+        beforeSend(event) {
+          if (event.request?.url) event.request.url = event.request.url.split('?')[0]
+          return event
+        },
+      })
+      window.addEventListener('pwa:first-launch', () => {
+        Sentry.captureMessage('PWA installed to home screen', 'info')
+      })
+      // Service-worker errors have no SDK of their own — sw.ts posts them here.
+      const { installSwErrorRelay } = await import('./lib/swErrorRelay')
+      installSwErrorRelay()
+    } catch { /* monitoring is best-effort */ }
+  }
+
+  // Service worker registration — ours, not vite-plugin-pwa's injected one-liner,
+  // so a rejected registration (Android 2026-09-14: bare "Rejected") is reported
+  // with a real message/tag. injectRegister is null in vite.config.ts.
+  try {
+    const { registerSW } = await import('virtual:pwa-register')
+    registerSW({
+      onRegisterError(error) {
+        if (!import.meta.env.VITE_SENTRY_DSN) return
+        void import('@sentry/react').then((S) =>
+          S.captureException(error instanceof Error ? error : new Error(String(error)), {
+            tags: { source: 'sw-registration' },
+          }),
+        )
+      },
+    })
+  } catch { /* SW unsupported — the app still works online */ }
+
+  // Offline sync — online/offline listeners + prefetch. Re-run session/client
+  // queries when the write queue flushes.
+  const { syncService, SYNC_COMPLETE_EVENT } = await import('./services/syncService')
+  syncService.init()
+  window.addEventListener(SYNC_COMPLETE_EVENT, () => {
+    queryClient.invalidateQueries({ queryKey: ['sessions'] })
+    queryClient.invalidateQueries({ queryKey: ['clients'] })
+  })
+
+  // First-party usage counters (POST /telemetry) — aggregates, sent on an interval.
+  const { initTelemetry, track } = await import('./services/telemetry')
+  initTelemetry()
+  window.addEventListener('pwa:first-launch', () => track('pwa.installed'))
+
+  // Now that both pwa:first-launch listeners exist: is this the first launch from
+  // the home screen? (installPrompt's beforeinstallprompt/appinstalled listeners
+  // already registered at import time above.)
+  recordFirstStandaloneLaunch()
+}
+
+afterPaint(() => { void bootstrap() })

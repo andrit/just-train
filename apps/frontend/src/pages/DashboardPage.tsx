@@ -20,7 +20,6 @@ import { useMode }                      from '@/lib/mode'
 import { BodyHeatMap }                  from '@/components/charts/BodyHeatMap'
 import { BodyBreakdownSheet }           from '@/components/charts/BodyBreakdownSheet'
 import type { BodyRegion }              from '@/components/charts/muscleMapData'
-import { Spinner }                      from '@/components/ui/Spinner'
 import { useAuthStore }                 from '@/store/authStore'
 import { useSessionStore }              from '@/store/sessionStore'
 import { useUXEvent }                   from '@/hooks/useUXEvent'
@@ -214,7 +213,7 @@ export default function DashboardPage(): React.JSX.Element {
 
   useEffect(() => { fire('page_enter') }, [fire])
 
-  const { data: selfClient, isLoading } = useSelfClient()
+  const { data: selfClient } = useSelfClient()
   const { data: muscleFreq }            = useMuscleFrequency(selfClient?.id ?? null)
   const [bodyOpen, setBodyOpen]         = useState(false)
   const [bodyRegion, setBodyRegion]     = useState<BodyRegion | null>(null)
@@ -230,14 +229,10 @@ export default function DashboardPage(): React.JSX.Element {
     return `Good evening${name ? `, ${name}` : ''}`
   }, [trainer?.name])
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <Spinner size="lg" className="text-command-blue" />
-      </div>
-    )
-  }
-
+  // No full-page spinner while data loads: Home renders its shell immediately
+  // (greeting from the auth store, the body figure all-cold, the Train card) and
+  // fills in as useSelfClient → useMuscleFrequency land. Progressive render — this
+  // kills the second spinner that used to follow the cold-load skeleton. See #19.
   return (
     // Home is a single no-scroll screen: greeting (top) · body figure (fills the
     // middle) · Train (bottom, just above the nav). The min-height reserves the

@@ -7,6 +7,13 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Performance — Home renders progressively, no second spinner (2026-10-26)
+- `DashboardPage` no longer blocks on a full-page spinner while `useSelfClient` loads. The home was already
+  built to render with empty data (greeting from the auth store, the body figure all-cold, the Train card's
+  default state), so it now paints its shell immediately and fills the heat-map + Train states as the queries
+  land. Removes the *second* spinner that used to follow the cold-load skeleton — the last progressive-render
+  (PRPL) lever. `DashboardPage.tsx`.
+
 ### Performance — perceived-load pass: shell skeleton + Dashboard preload (2026-10-26)
 - After the bundle pass cleared Lighthouse ≥ 90 (FCP 1.8 s), the *perceived* cold-load was still ~3–4 s: the
   "Initialising app" spinner is held while `AuthProvider` waits on `/auth/refresh` → the Dashboard chunk → its

@@ -277,6 +277,7 @@ export default function DashboardPage(): React.JSX.Element {
         onClose={() => setBodyOpen(false)}
         counts={muscleFreq?.counts ?? []}
         scopeRegion={bodyRegion}
+        clientId={selfClient?.id}
       />
 
       {/* ── Launch ── Train, pinned just above the nav. Planning + all feedback

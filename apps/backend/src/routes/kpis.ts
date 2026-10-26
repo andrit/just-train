@@ -34,6 +34,8 @@ import {
   ExerciseProgressResponseSchema,
   VolumeHistoryResponseSchema,
   MuscleFrequencyResponseSchema,
+  MuscleHistoryResponseSchema,
+  MuscleEnum,
   VolumeByBodyPartResponseSchema,
   UuidParamSchema,
   ErrorResponseSchema,
@@ -835,6 +837,116 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch muscle frequency' })
+    }
+  })
+
+  // ----------------------------------------------------------
+  // GET /clients/:id/muscle-history/:muscle
+  //
+  // The client's OWN exercises that train :muscle — the "Your history" tab of
+  // the Home body-breakdown drawer. One row per exercise the client has logged
+  // in a completed session (lifetime) that targets the muscle (primary OR
+  // secondary), newest-first by last performed, with a lifetime session count.
+  // Per-session sets + the trend live in the exercise detail (ExerciseProgress),
+  // one tap away — not duplicated here.
+  //
+  // ponytail: loads the client's completed sessions and filters to the muscle in
+  // JS. ceiling: a multi-year history. upgrade: filter by exercise_muscles.muscle
+  // in SQL (a join) when that's real.
+  // ----------------------------------------------------------
+  app.get('/clients/:id/muscle-history/:muscle', {
+    schema: {
+      tags:     ['Clients'],
+      security: [{ bearerAuth: [] }],
+      summary:  'My exercises that train a muscle (lifetime)',
+      description: 'Exercises the client has logged in completed sessions that target the muscle, newest-first by last performed, with a lifetime session count. Self-client scoped.',
+      params:   UuidParamSchema.extend({ muscle: MuscleEnum }),
+      response: {
+        200: MuscleHistoryResponseSchema,
+        400: ErrorResponseSchema,
+        404: ErrorResponseSchema,
+        500: ErrorResponseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    const { id: clientId, muscle } = request.params as { id: string; muscle: Muscle }
+
+    try {
+      // Ownership — the client must belong to this trainer.
+      const client = await db.query.clients.findFirst({
+        where: and(eq(clients.id, clientId), eq(clients.trainerId, request.trainer.trainerId)),
+        columns: { id: true },
+      })
+      if (!client) return reply.status(404).send({ error: 'Client not found' })
+
+      // Completed sessions with each exercise's muscle tags. Filtered to the
+      // requested muscle in JS (see ponytail above).
+      const rows = await db.query.sessions.findMany({
+        where: and(eq(sessions.clientId, clientId), eq(sessions.status, 'completed')),
+        columns: { id: true, date: true },
+        with: {
+          sessionExercises: {
+            columns: { workoutType: true },
+            with: {
+              exercise: {
+                columns: { id: true, name: true, equipment: true },
+                with: { muscles: { columns: { muscle: true, role: true } } },
+              },
+            },
+          },
+        },
+      })
+
+      type Acc = {
+        exerciseId:  string
+        name:        string
+        equipment:   (typeof exercises.$inferSelect)['equipment']
+        workoutType: (typeof sessionExercises.$inferSelect)['workoutType']
+        role:        (typeof exerciseMuscles.$inferSelect)['role']
+        sessionIds:  Set<string>
+        last:        string
+      }
+      const byExercise = new Map<string, Acc>()
+      for (const s of rows) {
+        for (const se of s.sessionExercises) {
+          const ex = se.exercise
+          if (!ex) continue
+          const hit = ex.muscles.find((m) => m.muscle === muscle)
+          if (!hit) continue
+          const acc = byExercise.get(ex.id)
+          if (acc) {
+            acc.sessionIds.add(s.id)
+            if (s.date > acc.last) acc.last = s.date
+          } else {
+            byExercise.set(ex.id, {
+              exerciseId:  ex.id,
+              name:        ex.name,
+              equipment:   ex.equipment,
+              workoutType: se.workoutType,
+              role:        hit.role,
+              sessionIds:  new Set([s.id]),
+              last:        s.date,
+            })
+          }
+        }
+      }
+
+      const exerciseList = [...byExercise.values()]
+        .map((a) => ({
+          exerciseId:    a.exerciseId,
+          name:          a.name,
+          equipment:     a.equipment,
+          workoutType:   a.workoutType,
+          role:          a.role,
+          totalSessions: a.sessionIds.size,
+          lastPerformed: a.last,
+        }))
+        .sort((a, b) => b.lastPerformed.localeCompare(a.lastPerformed) || a.name.localeCompare(b.name))
+
+      return reply.send({ muscle, exercises: exerciseList })
+    } catch (error) {
+      ;routeLog(app).error(error)
+      return reply.status(500).send({ error: 'Failed to fetch muscle history' })
     }
   })
 }

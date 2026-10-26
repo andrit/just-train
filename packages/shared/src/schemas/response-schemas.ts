@@ -713,6 +713,31 @@ export const MuscleFrequencyResponseSchema = z.object({
 })
 export type MuscleFrequencyResponse = z.infer<typeof MuscleFrequencyResponseSchema>
 
+// ============================================================
+// MUSCLE HISTORY — the client's OWN exercises that train a muscle
+// (the "Your history" tab of the Home body-breakdown drawer). Per-session
+// sets + the trend live in the exercise detail (ExerciseProgress), one tap
+// away — deliberately not duplicated here.
+// ============================================================
+
+export const MuscleHistoryExerciseSchema = z.object({
+  exerciseId:    z.string().uuid(),
+  name:          z.string(),
+  equipment:     EquipmentEnum,
+  workoutType:   WorkoutTypeEnum,
+  role:          MuscleRoleEnum.describe('The exercise role for the requested muscle (primary or secondary)'),
+  totalSessions: z.number().int().describe('Distinct completed sessions that included this exercise'),
+  lastPerformed: z.string().describe('Most recent session date (YYYY-MM-DD)'),
+})
+export type MuscleHistoryExercise = z.infer<typeof MuscleHistoryExerciseSchema>
+
+export const MuscleHistoryResponseSchema = z.object({
+  muscle:    MuscleEnum,
+  exercises: z.array(MuscleHistoryExerciseSchema)
+    .describe('Exercises the client has logged that train this muscle, newest-first by last performed'),
+})
+export type MuscleHistoryResponse = z.infer<typeof MuscleHistoryResponseSchema>
+
 export const VolumeByBodyPartEntrySchema = z.object({
   bodyPart: BodyPartEnum,
   volume:   z.number().describe('Total volume (sum of weight×reps, per-side aware) credited to this body part, rounded'),

@@ -7,6 +7,15 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Body map — "Your history" tab on a drilled muscle (2026-10-26)
+- Drilling a muscle in the Home body-breakdown drawer now shows a **tab strip**: **Your history** (default) ·
+  **Primary movers** · **Also works it**. "Your history" lists the exercises you've actually logged that train
+  that muscle (lifetime, newest-first, with a session count + last date); tapping one opens the exercise detail,
+  where the per-session sets and the trend sparkline already live. Primary / Also-works-it are the existing
+  library suggestions. New endpoint `GET /clients/:id/muscle-history/:muscle` (query-only — no migration) with a
+  TDD test; `useMuscleHistory` hook; `BodyBreakdownSheet` now takes the self-client id. Files: `routes/kpis.ts`,
+  `response-schemas.ts`, `components/charts/BodyBreakdownSheet.tsx`, `lib/queries/clients.ts`, `DashboardPage.tsx`.
+
 ### Performance — Home renders progressively, no second spinner (2026-10-26)
 - `DashboardPage` no longer blocks on a full-page spinner while `useSelfClient` loads. The home was already
   built to render with empty data (greeting from the auth store, the body figure all-cold, the Train card's

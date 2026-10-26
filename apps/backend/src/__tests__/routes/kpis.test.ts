@@ -354,3 +354,114 @@ describe('GET /clients/:id/muscle-frequency', () => {
     expect(byMuscle['pectoralis_major']).toBe(1)
   })
 })
+
+// ── GET /clients/:id/muscle-history/:muscle ───────────────────────────────────
+
+describe('GET /clients/:id/muscle-history/:muscle', () => {
+  let app: Awaited<ReturnType<typeof buildKpiTestApp>>
+  beforeAll(async () => { app = await buildKpiTestApp() })
+  afterAll(async ()  => { await app.close() })
+  beforeEach(()      => { vi.clearAllMocks() })
+
+  const EX_SQUAT  = '11111111-1111-1111-1111-111111111111'
+  const EX_LEGEXT = '22222222-2222-2222-2222-222222222222'
+  const S1 = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+  const S2 = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+
+  it('returns 401 without auth', async () => {
+    const res = await app.inject({ method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-history/quadriceps` })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 400 for an unknown muscle', async () => {
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-history/notamuscle`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 404 when the client does not belong to the trainer', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(undefined)
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-history/quadriceps`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns an empty list for an owned client with no sessions', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    // sessions.findMany defaults to [] → no exercises
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-history/quadriceps`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ muscle: 'quadriceps', exercises: [] })
+  })
+
+  it('aggregates the client\'s exercises for the muscle, newest-first with session counts', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    vi.mocked(db.query.sessions.findMany).mockResolvedValueOnce([
+      {
+        id: S1, date: '2026-03-10',
+        sessionExercises: [
+          { workoutType: 'resistance', exercise: {
+            id: EX_SQUAT, name: 'Back Squat', equipment: 'barbell',
+            muscles: [{ muscle: 'quadriceps', role: 'primary' }, { muscle: 'gluteus_maximus', role: 'secondary' }],
+          } },
+        ],
+      },
+      {
+        id: S2, date: '2026-03-03',
+        sessionExercises: [
+          { workoutType: 'resistance', exercise: {
+            id: EX_SQUAT, name: 'Back Squat', equipment: 'barbell',
+            muscles: [{ muscle: 'quadriceps', role: 'primary' }],
+          } },
+          { workoutType: 'resistance', exercise: {
+            id: EX_LEGEXT, name: 'Leg Extension', equipment: 'machine',
+            muscles: [{ muscle: 'quadriceps', role: 'primary' }],
+          } },
+        ],
+      },
+    ] as never)
+
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-history/quadriceps`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.muscle).toBe('quadriceps')
+    expect(body.exercises).toHaveLength(2)
+    // Newest-first by lastPerformed: Back Squat (Mar 10) then Leg Extension (Mar 3).
+    expect(body.exercises[0]).toMatchObject({
+      exerciseId: EX_SQUAT, name: 'Back Squat', role: 'primary', totalSessions: 2, lastPerformed: '2026-03-10',
+    })
+    expect(body.exercises[1]).toMatchObject({
+      exerciseId: EX_LEGEXT, name: 'Leg Extension', totalSessions: 1, lastPerformed: '2026-03-03',
+    })
+  })
+
+  it('excludes exercises that do not target the requested muscle', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.clients.findFirst).mockResolvedValueOnce(makeClient())
+    vi.mocked(db.query.sessions.findMany).mockResolvedValueOnce([
+      {
+        id: S1, date: '2026-03-10',
+        sessionExercises: [
+          { workoutType: 'resistance', exercise: {
+            id: EX_SQUAT, name: 'Bench Press', equipment: 'barbell',
+            muscles: [{ muscle: 'pectoralis_major', role: 'primary' }],
+          } },
+        ],
+      },
+    ] as never)
+    const res = await app.inject({
+      method: 'GET', url: `/api/v1/clients/${TEST_CLIENT_ID}/muscle-history/quadriceps`, headers: authHeader(),
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().exercises).toEqual([])
+  })
+})

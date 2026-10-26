@@ -34,7 +34,9 @@ import type {
   ExerciseProgressResponse,
   VolumeHistoryResponse,
   MuscleFrequencyResponse,
+  MuscleHistoryResponse,
   VolumeByBodyPartResponse,
+  Muscle,
 } from '@trainer-app/shared'
 
 // ── Query key factory ─────────────────────────────────────────────────────────
@@ -362,6 +364,21 @@ export function useMuscleFrequency(
     queryKey: ['muscle-frequency', clientId],
     queryFn:  () => apiClient<MuscleFrequencyResponse>(`/clients/${clientId}/muscle-frequency`),
     enabled:  !!accessToken && !!clientId,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+// The client's own exercises that train a given muscle (the body-map drawer's
+// "Your history" tab). Per-session sets + the trend live in the exercise detail.
+export function useMuscleHistory(
+  clientId: string | null,
+  muscle:   Muscle | null,
+): UseQueryResult<MuscleHistoryResponse> {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  return useQuery({
+    queryKey: ['muscle-history', clientId, muscle],
+    queryFn:  () => apiClient<MuscleHistoryResponse>(`/clients/${clientId}/muscle-history/${muscle}`),
+    enabled:  !!accessToken && !!clientId && !!muscle,
     staleTime: 1000 * 60 * 5,
   })
 }

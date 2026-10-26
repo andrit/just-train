@@ -24,6 +24,8 @@ import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Spinner } from '@/components/ui/Spinner'
 import { EQUIPMENT_LABEL } from '@/lib/exerciseLabels'
 import { useExercises } from '@/lib/queries/exercises'
+import { useMuscleHistory } from '@/lib/queries/clients'
+import { formatDate } from '@/lib/formatters'
 import { heatFill } from './heatRamp'
 import { REGION_MUSCLES, REGION_LABEL } from './MuscleMap'
 import type { BodyRegion } from './muscleMapData'
@@ -44,9 +46,12 @@ interface BodyBreakdownSheetProps {
   // muscles. Null/undefined = the full all-muscles map. The sheet keeps a local
   // copy so "All muscles" can clear the scope without closing.
   scopeRegion?: BodyRegion | null
+  // The self-client id — enables the "Your history" tab (the client's own logged
+  // exercises for a muscle). Omitted → that tab has nothing to load.
+  clientId?: string
 }
 
-export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyBreakdownSheetProps): React.JSX.Element {
+export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientId }: BodyBreakdownSheetProps): React.JSX.Element {
   const navigate = useNavigate()
   const [expanded, setExpanded] = useState<Muscle | null>(null)
   const [scope, setScope] = useState<BodyRegion | null>(scopeRegion ?? null)
@@ -150,7 +155,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
           </span>
           <span className={cn('text-gray-600 text-xs transition-transform', isOpen && 'rotate-90')} aria-hidden>›</span>
         </button>
-        {isOpen && <MuscleExercises muscle={muscle} onPick={openExercise} />}
+        {isOpen && <MuscleDrill muscle={muscle} clientId={clientId} onPick={openExercise} />}
       </div>
     )
   }
@@ -241,57 +246,129 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion }: BodyB
   )
 }
 
-// ── Exercises that target a muscle (loaded on expand) ──────────────────────────
+// ── Muscle drill — tabbed: Your history · Primary movers · Also works it ───────
 
-function MuscleExercises({ muscle, onPick }: {
-  muscle: Muscle
-  onPick: (exerciseId: string) => void
+type DrillTab = 'history' | 'primary' | 'also'
+
+function MuscleDrill({ muscle, clientId, onPick }: {
+  muscle:    Muscle
+  clientId?: string
+  onPick:    (exerciseId: string) => void
 }): React.JSX.Element {
-  const { data: exercises, isLoading } = useExercises({ muscle })
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-3">
-        <Spinner size="sm" className="text-gray-500" />
-      </div>
-    )
-  }
-
-  if (!exercises || exercises.length === 0) {
-    return <p className="text-xs text-gray-600 pb-3 pl-5">No library exercises target this muscle yet.</p>
-  }
-
-  // Group by the exercise→muscle role for this muscle (the backend sorts primary
-  // first, so these stay name-ordered within each group).
-  const primary   = exercises.filter((e) => e.muscleRole === 'primary')
-  const secondary = exercises.filter((e) => e.muscleRole !== 'primary')
-  const grouped   = primary.length > 0 && secondary.length > 0
-
+  const [tab, setTab] = useState<DrillTab>('history')
+  const tabs: [DrillTab, string][] = [
+    ['history', 'Your history'],
+    ['primary', 'Primary movers'],
+    ['also',    'Also works it'],
+  ]
   return (
-    <div className="pb-2 pl-5 space-y-1">
-      {grouped ? (
-        <>
-          <ExerciseGroup label="Primary movers" rows={primary} onPick={onPick} />
-          <ExerciseGroup label="Also works it"  rows={secondary} onPick={onPick} />
-        </>
+    <div className="pb-2 pl-5 pt-1 space-y-2">
+      <div className="flex gap-1" role="tablist">
+        {tabs.map(([k, label]) => (
+          <button
+            key={k}
+            type="button"
+            role="tab"
+            aria-selected={tab === k}
+            onClick={() => setTab(k)}
+            className={cn(
+              'px-2 py-1 rounded-md text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
+              tab === k ? 'bg-command-blue/15 text-command-blue' : 'text-gray-500 hover:text-gray-300',
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === 'history' ? (
+        <MuscleHistoryList muscle={muscle} clientId={clientId} onPick={onPick} onSeeMovers={() => setTab('primary')} />
       ) : (
-        exercises.map((ex) => <ExerciseRow key={ex.id} ex={ex} onPick={onPick} />)
+        <MuscleLibraryList muscle={muscle} role={tab === 'primary' ? 'primary' : 'secondary'} onPick={onPick} />
       )}
     </div>
   )
 }
 
-function ExerciseGroup({ label, rows, onPick }: {
-  label: string
-  rows:  ExerciseSummaryResponse[]
-  onPick: (exerciseId: string) => void
+// Your history — the exercises the client has actually logged for this muscle.
+// Tapping opens the exercise detail, where the per-session sets + trend live.
+function MuscleHistoryList({ muscle, clientId, onPick, onSeeMovers }: {
+  muscle:      Muscle
+  clientId?:   string
+  onPick:      (exerciseId: string) => void
+  onSeeMovers: () => void
 }): React.JSX.Element {
+  const { data, isLoading } = useMuscleHistory(clientId ?? null, muscle)
+
+  if (isLoading) {
+    return <div className="flex justify-center py-3"><Spinner size="sm" className="text-gray-500" /></div>
+  }
+
+  const list = data?.exercises ?? []
+  if (list.length === 0) {
+    return (
+      <p className="text-xs text-gray-500 py-2">
+        You haven&apos;t logged anything for {MUSCLE_LABEL[muscle]} yet —{' '}
+        <button
+          type="button"
+          onClick={onSeeMovers}
+          className="text-command-blue underline underline-offset-2 hover:text-command-blue/80"
+        >
+          see Primary movers ›
+        </button>
+      </p>
+    )
+  }
+
   return (
     <div className="space-y-1">
-      <p className="text-[10px] uppercase tracking-wider text-gray-600 pt-1">{label}</p>
-      {rows.map((ex) => <ExerciseRow key={ex.id} ex={ex} onPick={onPick} />)}
+      {list.map((ex) => (
+        <button
+          key={ex.exerciseId}
+          type="button"
+          onClick={() => onPick(ex.exerciseId)}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-surface border border-surface-border hover:border-command-blue/30 text-left transition-colors"
+        >
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-200 truncate">{ex.name}</p>
+            <p className="text-[10px] text-gray-500">
+              {ex.totalSessions} session{ex.totalSessions === 1 ? '' : 's'} · last {formatDate(ex.lastPerformed)}
+            </p>
+          </div>
+          {ex.role === 'primary' && (
+            <span className="text-[9px] uppercase tracking-wider text-command-blue/70 shrink-0">primary</span>
+          )}
+          <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-gray-600 shrink-0" aria-hidden>
+            <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      ))}
     </div>
   )
+}
+
+// Library suggestions — exercises that target this muscle, filtered to the tab's
+// role (primary movers vs. also-works-it). Same data source as before.
+function MuscleLibraryList({ muscle, role, onPick }: {
+  muscle: Muscle
+  role:   'primary' | 'secondary'
+  onPick: (exerciseId: string) => void
+}): React.JSX.Element {
+  const { data: exercises, isLoading } = useExercises({ muscle })
+
+  if (isLoading) {
+    return <div className="flex justify-center py-3"><Spinner size="sm" className="text-gray-500" /></div>
+  }
+
+  const rows = (exercises ?? []).filter((e) => (role === 'primary' ? e.muscleRole === 'primary' : e.muscleRole !== 'primary'))
+  if (rows.length === 0) {
+    return (
+      <p className="text-xs text-gray-600 py-2">
+        No library exercises {role === 'primary' ? 'primarily target' : 'also work'} this muscle yet.
+      </p>
+    )
+  }
+
+  return <div className="space-y-1">{rows.map((ex) => <ExerciseRow key={ex.id} ex={ex} onPick={onPick} />)}</div>
 }
 
 function ExerciseRow({ ex, onPick }: {

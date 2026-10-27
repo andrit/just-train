@@ -75,7 +75,7 @@ export function CircuitBlock({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border">
         <span className="text-[10px] uppercase tracking-widest font-medium text-command-blue">{label}</span>
-        <span className="text-[10px] text-gray-500">
+        <span className="text-[10px] text-ink-subtle">
           {isComplete ? 'Complete' : `Round ${currentRound} of ${rounds}`}
         </span>
       </div>
@@ -86,7 +86,7 @@ export function CircuitBlock({
           <div key={m.id} className="flex items-center gap-2">
             <span className={cn(
               'text-[11px] truncate flex-1',
-              mi === nextIndex && !isComplete ? 'text-white font-medium' : 'text-gray-500',
+              mi === nextIndex && !isComplete ? 'text-white font-medium' : 'text-ink-subtle',
             )}>
               {m.exercise?.name ?? 'Exercise'}
             </span>
@@ -122,7 +122,7 @@ export function CircuitBlock({
               </svg>
             </div>
             <p className="text-sm text-emerald-400">Circuit complete</p>
-            <p className="text-xs text-gray-600 mt-1">{rounds} rounds · {members.length} exercises</p>
+            <p className="text-xs text-ink-faint mt-1">{rounds} rounds · {members.length} exercises</p>
           </div>
         ) : (
           <ExerciseBlock
@@ -160,12 +160,12 @@ export function CircuitBlock({
               <path d="M8 5v3l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <span className="text-sm font-mono font-medium text-command-blue">{formatSeconds(restTimer?.remaining ?? 0)}</span>
-            <span className="text-xs text-gray-500">rest · next round</span>
+            <span className="text-xs text-ink-subtle">rest · next round</span>
           </div>
           <button
             type="button"
             onClick={() => restTimer?.skip()}
-            className="px-4 py-3 text-xs text-gray-500 hover:text-gray-300 border-l border-surface-border transition-colors"
+            className="px-4 py-3 text-xs text-ink-subtle hover:text-gray-300 border-l border-surface-border transition-colors"
           >
             Skip
           </button>

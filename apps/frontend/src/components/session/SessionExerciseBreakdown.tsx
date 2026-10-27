@@ -75,13 +75,13 @@ export function SessionExerciseBreakdown({
 
                   return (
                     <div key={set.id} className="flex items-center gap-3 text-xs font-mono">
-                      <span className="text-gray-600 w-5">{i + 1}</span>
+                      <span className="text-ink-faint w-5">{i + 1}</span>
                       <div className={cn(
                         'flex items-center gap-1 flex-1',
                         hit ? 'text-emerald-400' : 'text-amber-400',
                       )}>
                         {set.weight != null && <span>{set.weight}</span>}
-                        {set.weight != null && set.reps != null && <span className="text-gray-600">×</span>}
+                        {set.weight != null && set.reps != null && <span className="text-ink-faint">×</span>}
                         {set.reps != null && <span>{formatSetReps(set)}</span>}
                         {set.distance != null && <span>{set.distance}m</span>}
                         {set.durationSeconds != null && <span>{formatSeconds(set.durationSeconds)}</span>}
@@ -99,7 +99,7 @@ export function SessionExerciseBreakdown({
                           </span>
                         )}
                         {!set.isLoadRecord && !set.isVolumeRecord && (se.targetReps || se.targetWeight) && (
-                          <span className="text-gray-700 text-[10px]">
+                          <span className="text-ink-faint text-[10px]">
                             {se.targetWeight && `${se.targetWeight}×`}{se.targetReps}
                           </span>
                         )}
@@ -108,19 +108,19 @@ export function SessionExerciseBreakdown({
                   )
                 })}
               {se.sets.length === 0 && (
-                <p className="text-xs text-gray-600 italic">No sets logged</p>
+                <p className="text-xs text-ink-faint italic">No sets logged</p>
               )}
             </div>
 
             {showFooter && (
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-surface-border/60 text-[11px]">
-                <span className="text-gray-500">
+                <span className="text-ink-subtle">
                   {showEst1rm && est1rm != null && (
                     <>est. 1RM <span className="font-mono text-gray-300">{est1rm}</span></>
                   )}
                 </span>
                 {showVolumeTotals && vol > 0 && (
-                  <span className="text-gray-500">
+                  <span className="text-ink-subtle">
                     vol <span className="font-mono text-gray-300">{Math.round(vol).toLocaleString()}</span>
                   </span>
                 )}
@@ -144,7 +144,7 @@ export function SessionExerciseBreakdown({
               <span className="text-[10px] uppercase tracking-widest font-medium text-command-blue">
                 {g.label}
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-gray-500">
+              <span className="text-[10px] uppercase tracking-widest text-ink-subtle">
                 {g.rounds} rounds · interwoven
               </span>
             </div>
@@ -155,7 +155,7 @@ export function SessionExerciseBreakdown({
 
       {showVolumeTotals && grandTotalVolume > 0 && (
         <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-surface border border-surface-border">
-          <span className="text-[10px] uppercase tracking-widest text-gray-500">Total volume</span>
+          <span className="text-[10px] uppercase tracking-widest text-ink-subtle">Total volume</span>
           <span className="font-mono text-lg font-bold text-white">
             {Math.round(grandTotalVolume).toLocaleString()}
           </span>

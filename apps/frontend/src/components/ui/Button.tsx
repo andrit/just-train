@@ -42,7 +42,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary:
     'bg-surface-raised text-gray-200 border-surface-border hover:bg-surface-border shadow-pressable',
   ghost:
-    'bg-transparent text-gray-400 border-transparent hover:text-gray-100 hover:bg-surface-raised',
+    'bg-transparent text-ink-muted border-transparent hover:text-gray-100 hover:bg-surface-raised',
   danger:
     'bg-ember-red/15 text-ember-red border-ember-red/20 hover:bg-ember-red/25 shadow-pressable',
 }

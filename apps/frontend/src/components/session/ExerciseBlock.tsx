@@ -46,7 +46,7 @@ const OUTCOME_COLOR: Record<Outcome, string> = {
   surpassed: 'text-emerald-300',
   hit:       'text-emerald-400',
   missed:    'text-amber-400',
-  none:      'text-gray-400',
+  none:      'text-ink-muted',
 }
 
 // ── Input field ───────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ function BigInput({ label, value, onChange, placeholder, mode = 'decimal', onEnt
 }): React.JSX.Element {
   return (
     <div className="flex-1">
-      <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">{label}</p>
+      <p className="text-[10px] text-ink-subtle uppercase tracking-wider mb-1.5">{label}</p>
       <input
         type="number"
         inputMode={mode}
@@ -70,7 +70,7 @@ function BigInput({ label, value, onChange, placeholder, mode = 'decimal', onEnt
         placeholder={placeholder ?? '—'}
         className={cn(
           'w-full text-center text-3xl font-mono font-bold py-3 rounded-xl',
-          'bg-brand-primary border-2 border-surface-border text-white placeholder-gray-700',
+          'bg-brand-primary border-2 border-surface-border text-white placeholder-ink-faint',
           'focus:outline-none focus:border-command-blue transition-colors',
         )}
       />
@@ -101,7 +101,7 @@ type IntensityLevel = typeof INTENSITY_LEVELS[number]
 function IntensityPicker({ value, onChange }: { value: string; onChange: (v: string) => void }): React.JSX.Element {
   return (
     <div className="space-y-2">
-      <p className="text-[10px] text-gray-500 uppercase tracking-wider text-center">Intensity</p>
+      <p className="text-[10px] text-ink-subtle uppercase tracking-wider text-center">Intensity</p>
       <div className="flex gap-2">
         {INTENSITY_LEVELS.map((level) => (
           <button
@@ -112,7 +112,7 @@ function IntensityPicker({ value, onChange }: { value: string; onChange: (v: str
               'flex-1 py-3 rounded-xl text-sm font-medium capitalize border transition-all',
               value === level
                 ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-gray-500 hover:text-gray-300',
+                : 'border-surface-border text-ink-subtle hover:text-gray-300',
             )}
           >
             {level}
@@ -314,7 +314,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
                 onChange={setWeight}
                 placeholder={sessionExercise.targetWeight ? String(sessionExercise.targetWeight) : 'optional'}
               />
-              <span className="text-gray-600 font-display text-2xl pb-0.5">×</span>
+              <span className="text-ink-faint font-display text-2xl pb-0.5">×</span>
               {perSide && splitOpen ? (
                 <div className="flex-1 flex gap-2">
                   <BigInput label="Left" value={repsLeft} onChange={setRepsLeft} mode="numeric" placeholder="—" />
@@ -333,7 +333,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
             </div>
             {perSide && (
               <div className="flex items-center justify-between mt-2 px-1">
-                <span className="text-[10px] text-gray-600">
+                <span className="text-[10px] text-ink-faint">
                   {splitOpen ? 'Left / right logged separately' : '×2 · both sides counted'}
                 </span>
                 <button
@@ -408,7 +408,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
 
         {/* Last time context */}
         {lastSetSummary() && (
-          <p className="text-xs text-gray-600 text-center mb-3">
+          <p className="text-xs text-ink-faint text-center mb-3">
             Last: {lastSetSummary()}
           </p>
         )}
@@ -466,13 +466,13 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
           </svg>
         </div>
       </div>
-      <span className="text-xs text-gray-600 font-mono w-5 shrink-0">{setNumber}</span>
+      <span className="text-xs text-ink-faint font-mono w-5 shrink-0">{setNumber}</span>
 
       <div className="flex items-center gap-1.5 font-mono text-sm flex-1">
         {workoutType === 'resistance' && (
           <>
             {set.weight != null && <span className={cn(OUTCOME_COLOR[weightOk], 'font-medium')}>{set.weight}</span>}
-            {set.weight != null && set.reps != null && <span className="text-gray-600 text-xs">×</span>}
+            {set.weight != null && set.reps != null && <span className="text-ink-faint text-xs">×</span>}
             {set.reps   != null && <span className={cn(OUTCOME_COLOR[repsOk], 'font-medium')}>{formatSetReps(set)}</span>}
           </>
         )}
@@ -522,7 +522,7 @@ function FutureSetRow({ setNumber }: { setNumber: number }): React.JSX.Element {
       <div className="w-5 shrink-0 flex justify-center">
         <div className="w-3 h-3 rounded-full border border-surface-border" />
       </div>
-      <span className="text-xs text-gray-700 font-mono w-5">{setNumber}</span>
+      <span className="text-xs text-ink-faint font-mono w-5">{setNumber}</span>
       <div className="flex gap-1">
         {[0,1,2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-gray-700" />)}
       </div>
@@ -655,7 +655,7 @@ export function ExerciseBlock({
             type="button"
             onClick={() => setCameraOpen(true)}
             aria-label="Capture form check"
-            className="text-gray-600 hover:text-command-blue transition-colors p-1"
+            className="text-ink-faint hover:text-command-blue transition-colors p-1"
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
               <rect x="1" y="4" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
@@ -668,7 +668,7 @@ export function ExerciseBlock({
             type="button"
             onClick={() => deleteExercise.mutate({ sessionExerciseId: sessionExercise.id, sessionId })}
             aria-label="Remove exercise"
-            className="text-gray-600 hover:text-red-400 transition-colors p-1"
+            className="text-ink-faint hover:text-red-400 transition-colors p-1"
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
               <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -677,13 +677,13 @@ export function ExerciseBlock({
         </div>
       </div>
       {sessionExercise.notes && (
-        <p className="text-xs text-gray-600 mb-2 px-1">{sessionExercise.notes}</p>
+        <p className="text-xs text-ink-faint mb-2 px-1">{sessionExercise.notes}</p>
       )}
 
       {/* Per-side tracking toggle — unilateral exercises only */}
       {isUnilateral && (
         <div className="flex items-center gap-2 mb-3 px-1">
-          <span className="text-[10px] uppercase tracking-wider text-gray-600">Track</span>
+          <span className="text-[10px] uppercase tracking-wider text-ink-faint">Track</span>
           <div className="inline-flex rounded-lg border border-surface-border overflow-hidden">
             {([['Each side', true], ['Together', false]] as const).map(([label, value]) => (
               <button
@@ -695,7 +695,7 @@ export function ExerciseBlock({
                   'px-2.5 py-1 text-[11px] font-medium transition-colors',
                   !!sessionExercise.trackPerSide === value
                     ? 'bg-command-blue/15 text-command-blue'
-                    : 'text-gray-500 hover:text-gray-300',
+                    : 'text-ink-subtle hover:text-gray-300',
                 )}
               >
                 {label}
@@ -758,7 +758,7 @@ export function ExerciseBlock({
               type="button"
               onClick={() => setKeepGoing(true)}
               className={cn(
-                'text-xs text-gray-500 hover:text-command-blue px-2 py-1 rounded',
+                'text-xs text-ink-subtle hover:text-command-blue px-2 py-1 rounded',
                 'border border-dashed border-surface-border hover:border-command-blue/30',
                 'transition-colors',
                 interactions.button.base,

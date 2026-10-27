@@ -161,7 +161,7 @@ export function ExerciseAccordionRow({
             viewBox="0 0 16 16"
             fill="none"
             className={cn(
-              'w-3.5 h-3.5 text-gray-600 shrink-0 transition-transform duration-200',
+              'w-3.5 h-3.5 text-ink-faint shrink-0 transition-transform duration-200',
               expanded && 'rotate-90',
             )}
           >
@@ -173,14 +173,14 @@ export function ExerciseAccordionRow({
 
           {/* Tags */}
           {exercise.bodyPart && (
-            <span className="text-[10px] text-gray-500 capitalize shrink-0">
+            <span className="text-[10px] text-ink-subtle capitalize shrink-0">
               {exercise.bodyPart.name.replace('_', ' ')}
             </span>
           )}
           {exercise.difficulty && (
             <span className={cn(
               'text-[10px] px-1.5 py-0.5 rounded border shrink-0',
-              difficultyClasses || 'text-gray-400',
+              difficultyClasses || 'text-ink-muted',
             )}>
               {exercise.difficulty}
             </span>
@@ -203,40 +203,40 @@ export function ExerciseAccordionRow({
           <div className="px-3 pb-3 pt-0 border-t border-surface-border/50">
             {detailLoading ? (
               <div className="flex justify-center py-4">
-                <Spinner size="sm" className="text-gray-500" />
+                <Spinner size="sm" className="text-ink-subtle" />
               </div>
             ) : detail ? (
               <div className="space-y-2 pt-2.5">
                 {/* Description */}
                 {detail.description && (
-                  <p className="text-xs text-gray-400 leading-relaxed">{detail.description}</p>
+                  <p className="text-xs text-ink-muted leading-relaxed">{detail.description}</p>
                 )}
 
                 {/* Instructions */}
                 {detail.instructions && (
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-1">Instructions</p>
-                    <p className="text-xs text-gray-500 leading-relaxed whitespace-pre-line">{detail.instructions}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-ink-faint mb-1">Instructions</p>
+                    <p className="text-xs text-ink-subtle leading-relaxed whitespace-pre-line">{detail.instructions}</p>
                   </div>
                 )}
 
                 {/* No content fallback */}
                 {!detail.description && !detail.instructions && (
-                  <p className="text-xs text-gray-600 italic">No description yet</p>
+                  <p className="text-xs text-ink-faint italic">No description yet</p>
                 )}
 
                 {/* Tags row */}
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-accent text-gray-400 capitalize">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-accent text-ink-muted capitalize">
                     {WORKOUT_TYPE_LABEL[exercise.workoutType] ?? exercise.workoutType}
                   </span>
                   {exercise.bodyPart && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-accent text-gray-400 capitalize">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-accent text-ink-muted capitalize">
                       {exercise.bodyPart.name.replace('_', ' ')}
                     </span>
                   )}
                   {exercise.equipment && exercise.equipment !== 'none' && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-accent text-gray-400">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-accent text-ink-muted">
                       {EQUIPMENT_LABEL[exercise.equipment] ?? exercise.equipment}
                     </span>
                   )}
@@ -263,7 +263,7 @@ export function ExerciseAccordionRow({
                 ) : null}
               </div>
             ) : (
-              <p className="text-xs text-gray-600 py-2 italic">Failed to load details</p>
+              <p className="text-xs text-ink-faint py-2 italic">Failed to load details</p>
             )}
           </div>
         </div>

@@ -63,7 +63,7 @@ export const Default: Story = {
   args: {} as any,
   render: () => (
     <ModalDemo title="Create Exercise">
-      <p className="text-gray-400 text-sm">Modal content goes here.</p>
+      <p className="text-ink-muted text-sm">Modal content goes here.</p>
     </ModalDemo>
   ),
 }
@@ -72,7 +72,7 @@ export const Small: Story = {
   args: {} as any,
   render: () => (
     <ModalDemo title="Confirm Action" size="sm">
-      <p className="text-gray-400 text-sm text-center">
+      <p className="text-ink-muted text-sm text-center">
         Are you sure you want to do this?
       </p>
     </ModalDemo>
@@ -83,7 +83,7 @@ export const Large: Story = {
   args: {} as any,
   render: () => (
     <ModalDemo title="Exercise Details" size="lg">
-      <p className="text-gray-400 text-sm">
+      <p className="text-ink-muted text-sm">
         Larger modals are used for content-heavy forms or detail views.
       </p>
     </ModalDemo>
@@ -126,7 +126,7 @@ export const InteractionTest: Story = {
   args: {} as any,
   render: () => (
     <ModalDemo title="Interaction Test">
-      <p className="text-gray-400 text-sm" data-testid="modal-content">
+      <p className="text-ink-muted text-sm" data-testid="modal-content">
         Modal is open.
       </p>
     </ModalDemo>

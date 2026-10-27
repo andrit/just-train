@@ -24,7 +24,7 @@ import { MediaPlaybackModal }  from '@/components/session/MediaPlaybackModal'
 function ScoreRow({ label, value }: { label: string; value: number }): React.JSX.Element {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-gray-500 w-20 shrink-0">{label}</span>
+      <span className="text-xs text-ink-subtle w-20 shrink-0">{label}</span>
       <div className="flex-1 h-1.5 bg-surface-border rounded-full overflow-hidden">
         <div className="h-full bg-command-blue rounded-full" style={{ width: `${value * 10}%` }} />
       </div>
@@ -67,7 +67,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
 
     return (
       <div className="p-6 text-center pt-20 space-y-3">
-        <p className="text-gray-400">{message}</p>
+        <p className="text-ink-muted">{message}</p>
         {canRetry && (
           <button
             type="button"
@@ -99,7 +99,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
           type="button"
           onClick={onClose}
           className={cn(
-            'flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 mb-4',
+            'flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-4',
             interactions.button.base,
           )}
         >
@@ -111,13 +111,13 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
 
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">
+            <p className="text-xs text-ink-subtle uppercase tracking-wider mb-0.5">
               {session.client?.name ?? 'Session'}
             </p>
             <h1 className="font-display text-2xl uppercase tracking-wide text-white leading-tight">
               {session.name ?? 'Training Session'}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">{formatDate(session.date)}</p>
+            <p className="text-sm text-ink-subtle mt-1">{formatDate(session.date)}</p>
           </div>
 
           {/* Actions live here because this panel is where every route ends up —
@@ -138,19 +138,19 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
         {duration && (
           <div className="flex-1 text-center">
             <p className="font-display text-xl text-white">{duration}</p>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Duration</p>
+            <p className="text-[10px] text-ink-subtle uppercase tracking-wider mt-0.5">Duration</p>
           </div>
         )}
         <div className="flex-1 text-center">
           <p className="font-display text-xl text-white">{totalSets}</p>
-          <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Sets</p>
+          <p className="text-[10px] text-ink-subtle uppercase tracking-wider mt-0.5">Sets</p>
         </div>
         {totalVolume > 0 && (
           <div className="flex-1 text-center">
             <p className="font-display text-xl text-white">
               {formatTotalVolume(totalVolume)}
             </p>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Volume</p>
+            <p className="text-[10px] text-ink-subtle uppercase tracking-wider mt-0.5">Volume</p>
           </div>
         )}
       </div>
@@ -164,7 +164,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
             'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
             prFilterOn
               ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
-              : 'border-surface-border text-gray-500 hover:border-gray-500 hover:text-gray-300',
+              : 'border-surface-border text-ink-subtle hover:border-gray-500 hover:text-gray-300',
           )}
         >
           <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
@@ -193,7 +193,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
         {/* Subjective scores */}
         {(session.energyLevel || session.mobilityFeel || session.stressLevel) && (
           <div className="pt-2">
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-3">Session Scores</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-subtle mb-3">Session Scores</p>
             <div className="space-y-2">
               {session.energyLevel  != null && <ScoreRow label="Energy"   value={session.energyLevel} />}
               {session.mobilityFeel != null && <ScoreRow label="Mobility" value={session.mobilityFeel} />}
@@ -205,7 +205,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
         {/* Notes */}
         {session.sessionNotes && (
           <div className="pt-2">
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">Notes</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-subtle mb-2">Notes</p>
             <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
               {session.sessionNotes}
             </p>
@@ -257,7 +257,7 @@ function ExerciseMediaThumbs({
         </button>
       ))}
       {media.length > 3 && (
-        <span className="text-[10px] text-gray-600">+{media.length - 3}</span>
+        <span className="text-[10px] text-ink-faint">+{media.length - 3}</span>
       )}
     </div>
   )

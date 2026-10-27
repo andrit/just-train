@@ -96,7 +96,7 @@ function EmailVerificationBanner(): React.JSX.Element | null {
       <button
         type="button"
         onClick={() => setDismissed(true)}
-        className="text-gray-600 hover:text-gray-400 shrink-0"
+        className="text-ink-faint hover:text-ink-muted shrink-0"
         aria-label="Dismiss"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -173,7 +173,7 @@ function TrainCard({ selfClientId, onStart }: TrainCardProps): React.JSX.Element
           <button
             type="button"
             onClick={onStart}
-            className="rounded-md border border-surface-border text-gray-400 text-sm px-3 py-2 hover:bg-surface-raised transition-colors"
+            className="rounded-md border border-surface-border text-ink-muted text-sm px-3 py-2 hover:bg-surface-raised transition-colors"
             aria-label="Start blank instead"
           >
             ×
@@ -196,7 +196,7 @@ function TrainCard({ selfClientId, onStart }: TrainCardProps): React.JSX.Element
       <span className="block font-display text-base uppercase tracking-widest text-command-blue">
         Train
       </span>
-      <span className="block text-xs text-gray-500 mt-0.5">
+      <span className="block text-xs text-ink-subtle mt-0.5">
         Start a session — type inferred from exercises
       </span>
     </button>
@@ -245,7 +245,7 @@ export default function DashboardPage(): React.JSX.Element {
 
         {/* Greeting */}
         <div className="mb-3 animate-slide-up">
-          <p className="text-gray-500 text-sm mb-0.5">{greeting}</p>
+          <p className="text-ink-subtle text-sm mb-0.5">{greeting}</p>
           <h1 className="font-display text-3xl md:text-4xl uppercase tracking-wide text-white">
             {mode.labels.dashboardTitle}
           </h1>
@@ -267,7 +267,7 @@ export default function DashboardPage(): React.JSX.Element {
           className="flex-1 min-h-0"
           onRegionTap={(region) => openBody(region)}
         />
-        <span className="shrink-0 text-center text-[10px] uppercase tracking-widest text-gray-600 mt-2">
+        <span className="shrink-0 text-center text-[10px] uppercase tracking-widest text-ink-faint mt-2">
           Tap a muscle · or all&nbsp;›
         </span>
       </button>

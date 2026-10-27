@@ -38,7 +38,7 @@ export function ScoreSlider({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-200">{label}</p>
-          {hint && <p className="text-xs text-gray-600">{hint}</p>}
+          {hint && <p className="text-xs text-ink-faint">{hint}</p>}
         </div>
         <span className="font-mono text-2xl font-bold text-white w-8 text-right">{value}</span>
       </div>
@@ -60,7 +60,7 @@ export function ScoreSlider({
         aria-label={`${label}: ${value} out of 10`}
       />
       {(lowLabel || highLabel) && (
-        <div className="flex justify-between text-[10px] text-gray-700 uppercase tracking-wider">
+        <div className="flex justify-between text-[10px] text-ink-faint uppercase tracking-wider">
           <span>{lowLabel}</span>
           <span>{highLabel}</span>
         </div>

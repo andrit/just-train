@@ -156,7 +156,7 @@ export function BottomSheet({
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="text-gray-500 hover:text-gray-300 p-1"
+              className="text-ink-subtle hover:text-gray-300 p-1"
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

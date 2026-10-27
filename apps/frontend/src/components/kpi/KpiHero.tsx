@@ -191,7 +191,7 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
           'bg-command-blue/5 border border-command-blue/20',
         )}>
           <TipIcon size="sm" className="mt-0.5 shrink-0" />
-          <p className="text-xs text-gray-400 flex-1">
+          <p className="text-xs text-ink-muted flex-1">
             Enable 1RM estimates in{' '}
             <Link to="/preferences" className="text-command-blue hover:underline">
               Preferences
@@ -202,7 +202,7 @@ export function KpiHero({ client, kpis, isLoading, isAthlete }: KpiHeroProps): R
             type="button"
             onClick={dismissTip}
             aria-label="Dismiss tip"
-            className="text-gray-600 hover:text-gray-400 ml-1 text-sm leading-none"
+            className="text-ink-faint hover:text-ink-muted ml-1 text-sm leading-none"
           >
             ×
           </button>

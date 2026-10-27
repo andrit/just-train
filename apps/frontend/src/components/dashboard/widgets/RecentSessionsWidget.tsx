@@ -30,7 +30,7 @@ export function RecentSessionsWidget(): React.JSX.Element {
           ))}
         </div>
       ) : recent.length === 0 ? (
-        <p className="text-xs text-gray-600 text-center mt-1 py-6">
+        <p className="text-xs text-ink-faint text-center mt-1 py-6">
           No sessions yet — your completed sessions will show up here.
         </p>
       ) : (
@@ -44,9 +44,9 @@ export function RecentSessionsWidget(): React.JSX.Element {
             >
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-gray-200 font-medium truncate">{s.name ?? 'Session'}</p>
-                <p className="text-[11px] text-gray-500">{formatDate(s.date)}</p>
+                <p className="text-[11px] text-ink-subtle">{formatDate(s.date)}</p>
               </div>
-              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-600 shrink-0" aria-hidden>
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-faint shrink-0" aria-hidden>
                 <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>

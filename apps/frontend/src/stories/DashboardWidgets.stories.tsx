@@ -163,12 +163,12 @@ export const AtRisk_Empty: StoryObj = {
   decorators: [withRouter],
   render: () => (
     <div>
-      <p className="text-xs text-gray-500 mb-2">Widget renders nothing when no clients are at risk:</p>
+      <p className="text-xs text-ink-subtle mb-2">Widget renders nothing when no clients are at risk:</p>
       <AtRiskWidget
         clients={allClients.filter((c) => c.lastActiveAt && (Date.now() - new Date(c.lastActiveAt).getTime()) < 14 * 24 * 60 * 60 * 1000)}
         onDismiss={() => {}}
       />
-      <p className="text-xs text-gray-600 mt-2">(empty — widget correctly hidden)</p>
+      <p className="text-xs text-ink-faint mt-2">(empty — widget correctly hidden)</p>
     </div>
   ),
 }

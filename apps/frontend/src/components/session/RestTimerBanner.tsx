@@ -62,7 +62,7 @@ export function RestTimerBanner({ timer }: RestTimerBannerProps): React.JSX.Elem
 
       {/* Label */}
       <div className="flex items-center gap-2">
-        <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-400 shrink-0" aria-hidden>
+        <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-muted shrink-0" aria-hidden>
           <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
           <path d="M8 5v3.5l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
@@ -94,7 +94,7 @@ export function RestTimerBanner({ timer }: RestTimerBannerProps): React.JSX.Elem
           'transition-all duration-150',
           isVeryLow
             ? 'border-white/30 text-white hover:bg-white/10'
-            : 'border-surface-border text-gray-400 hover:text-gray-200 hover:border-gray-500',
+            : 'border-surface-border text-ink-muted hover:text-gray-200 hover:border-gray-500',
           interactions.button.base,
           interactions.button.press,
         )}

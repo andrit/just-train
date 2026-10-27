@@ -154,7 +154,7 @@ function Figure({ label, regions, intensityOf }: FigureProps): React.JSX.Element
           ))
         })}
       </svg>
-      <span className="text-[10px] uppercase tracking-widest text-gray-500">{label}</span>
+      <span className="text-[10px] uppercase tracking-widest text-ink-subtle">{label}</span>
     </div>
   )
 }

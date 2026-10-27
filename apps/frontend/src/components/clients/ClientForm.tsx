@@ -116,7 +116,7 @@ export function ClientForm({
 
       {/* Section: Identity */}
       <section>
-        <h3 className="text-[11px] uppercase tracking-widest text-gray-500 mb-3">Identity</h3>
+        <h3 className="text-[11px] uppercase tracking-widest text-ink-subtle mb-3">Identity</h3>
         <div className="space-y-3">
           <Input
             label="Full name"
@@ -146,7 +146,7 @@ export function ClientForm({
 
       {/* Section: Training */}
       <section>
-        <h3 className="text-[11px] uppercase tracking-widest text-gray-500 mb-3">Training Focus</h3>
+        <h3 className="text-[11px] uppercase tracking-widest text-ink-subtle mb-3">Training Focus</h3>
         <div className="space-y-3">
           <Select
             label="Primary focus"
@@ -179,7 +179,7 @@ export function ClientForm({
 
       {/* Section: Notes */}
       <section>
-        <h3 className="text-[11px] uppercase tracking-widest text-gray-500 mb-3">Notes</h3>
+        <h3 className="text-[11px] uppercase tracking-widest text-ink-subtle mb-3">Notes</h3>
         <TextArea
           label="Private trainer notes"
           value={notes}
@@ -192,26 +192,26 @@ export function ClientForm({
       {/* Section: KPI Preferences — only shown when editing */}
       {isEditing && (
         <section>
-          <h3 className="text-[11px] uppercase tracking-widest text-gray-500 mb-3">KPI Settings</h3>
+          <h3 className="text-[11px] uppercase tracking-widest text-ink-subtle mb-3">KPI Settings</h3>
 
           <div className="space-y-4">
             {/* Weekly session target */}
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-200">Weekly session target</p>
-                <p className="text-xs text-gray-500 mt-0.5">Used for the consistency score</p>
+                <p className="text-xs text-ink-subtle mt-0.5">Used for the consistency score</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setWeeklyTarget(Math.max(1, weeklyTarget - 1))}
-                  className="w-7 h-7 rounded-lg border border-surface-border text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                  className="w-7 h-7 rounded-lg border border-surface-border text-ink-muted hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
                 >−</button>
                 <span className="font-mono text-white w-4 text-center">{weeklyTarget}</span>
                 <button
                   type="button"
                   onClick={() => setWeeklyTarget(Math.min(14, weeklyTarget + 1))}
-                  className="w-7 h-7 rounded-lg border border-surface-border text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                  className="w-7 h-7 rounded-lg border border-surface-border text-ink-muted hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
                 >+</button>
               </div>
             </div>
@@ -220,7 +220,7 @@ export function ClientForm({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-200">Show 1RM estimates</p>
-                <p className="text-xs text-gray-500 mt-0.5">Epley formula — best guess from logged sets</p>
+                <p className="text-xs text-ink-subtle mt-0.5">Epley formula — best guess from logged sets</p>
               </div>
               <button
                 type="button"
@@ -243,7 +243,7 @@ export function ClientForm({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-200">Auto-send monthly report</p>
-                <p className="text-xs text-gray-500 mt-0.5">Sends on the 1st — requires client email</p>
+                <p className="text-xs text-ink-subtle mt-0.5">Sends on the 1st — requires client email</p>
               </div>
               <button
                 type="button"

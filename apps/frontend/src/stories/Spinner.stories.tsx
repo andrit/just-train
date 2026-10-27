@@ -30,7 +30,7 @@ export const InheritedColour: Story = {
       <span className="text-command-blue"><Spinner size="md" /></span>
       <span className="text-green-400"><Spinner size="md" /></span>
       <span className="text-amber-400"><Spinner size="md" /></span>
-      <span className="text-gray-400"><Spinner size="md" /></span>
+      <span className="text-ink-muted"><Spinner size="md" /></span>
     </div>
   ),
 }

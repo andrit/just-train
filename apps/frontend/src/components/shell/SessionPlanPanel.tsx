@@ -203,7 +203,7 @@ export function SessionPlanPanel({
         <div className="flex items-center justify-between mb-4">
           {showDiscardConfirm ? (
             <div className="flex items-center gap-2 w-full">
-              <span className="text-xs text-gray-400 flex-1">Discard this plan?</span>
+              <span className="text-xs text-ink-muted flex-1">Discard this plan?</span>
               <button
                 type="button"
                 onClick={handleDiscard}
@@ -215,7 +215,7 @@ export function SessionPlanPanel({
               <button
                 type="button"
                 onClick={() => setShowDiscardConfirm(false)}
-                className="text-xs text-gray-500 hover:text-gray-300"
+                className="text-xs text-ink-subtle hover:text-gray-300"
               >
                 Cancel
               </button>
@@ -225,7 +225,7 @@ export function SessionPlanPanel({
               <button
                 type="button"
                 onClick={onClose}
-                className={cn('flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300', interactions.button.base)}
+                className={cn('flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300', interactions.button.base)}
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
                   <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -238,7 +238,7 @@ export function SessionPlanPanel({
                 <button
                   type="button"
                   onClick={() => setShowDiscardConfirm(true)}
-                  className="text-xs text-gray-600 hover:text-red-400 transition-colors px-2 py-1"
+                  className="text-xs text-ink-faint hover:text-red-400 transition-colors px-2 py-1"
                 >
                   Discard
                 </button>
@@ -318,15 +318,15 @@ export function SessionPlanPanel({
           >
             <h1 className={cn(
               'font-display text-2xl uppercase tracking-wide leading-tight',
-              sessionName ? 'text-white' : 'text-gray-600',
+              sessionName ? 'text-white' : 'text-ink-faint',
             )}>
               {sessionName || 'Untitled Plan'}
             </h1>
-            <p className="text-xs text-gray-600 group-hover:text-gray-400 mt-0.5">
+            <p className="text-xs text-ink-faint group-hover:text-ink-muted mt-0.5">
               {clientName ?? 'Select a client'} · tap to rename
               {sessionId
                 ? <span className="text-emerald-600/70"> · saved</span>
-                : <span className="text-gray-700"> · not saved yet</span>
+                : <span className="text-ink-faint"> · not saved yet</span>
               }
             </p>
           </button>
@@ -344,7 +344,7 @@ export function SessionPlanPanel({
                   'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                   selectedClientId === client.id
                     ? 'bg-command-blue text-white border-command-blue'
-                    : 'border-surface-border text-gray-500 hover:border-gray-400 hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:border-gray-400 hover:text-gray-300',
                 )}
               >
                 {client.isSelf ? 'My Training' : client.name}
@@ -371,7 +371,7 @@ export function SessionPlanPanel({
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-3xl mb-4" aria-hidden>📋</p>
             <p className="text-gray-300 font-medium mb-1">Plan your session</p>
-            <p className="text-gray-600 text-sm mb-6">
+            <p className="text-ink-faint text-sm mb-6">
               Build from scratch or load a saved template.
             </p>
             <div className="flex flex-col gap-3 w-full max-w-xs">
@@ -385,7 +385,7 @@ export function SessionPlanPanel({
                   interactions.button.press,
                   selectedClientId
                     ? 'bg-command-blue text-white'
-                    : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
+                    : 'bg-surface border border-surface-border text-ink-faint cursor-not-allowed',
                 )}
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
@@ -411,7 +411,7 @@ export function SessionPlanPanel({
                   interactions.button.press,
                   selectedClientId
                     ? 'text-gray-300 hover:border-command-blue/40 hover:text-command-blue'
-                    : 'text-gray-600 cursor-not-allowed',
+                    : 'text-ink-faint cursor-not-allowed',
                 )}
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
@@ -433,7 +433,7 @@ export function SessionPlanPanel({
                   interactions.button.press,
                   selectedClientId
                     ? 'text-gray-300 hover:border-command-blue/40 hover:text-command-blue'
-                    : 'text-gray-600 cursor-not-allowed',
+                    : 'text-ink-faint cursor-not-allowed',
                 )}
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">

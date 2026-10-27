@@ -26,7 +26,7 @@ export function ErrorState({
 
       <h3 className="font-display text-lg text-gray-300 mb-2">{title}</h3>
 
-      <p className="text-sm text-gray-500 max-w-xs leading-relaxed mb-6">{message}</p>
+      <p className="text-sm text-ink-subtle max-w-xs leading-relaxed mb-6">{message}</p>
 
       {onRetry != null && (
         <button

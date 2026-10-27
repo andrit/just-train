@@ -45,7 +45,7 @@ export function InstallPromptBanner({
             Train anywhere, even without signal
           </p>
           {isIOS ? (
-            <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+            <p className="text-xs text-ink-muted mt-1 leading-relaxed">
               Tap the{' '}
               <svg viewBox="0 0 20 20" fill="none" className="w-3.5 h-3.5 inline-block text-command-blue mx-0.5" aria-label="Share" role="img">
                 <path d="M10 3v10M6 7l4-4 4 4M4 15h12" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
@@ -54,7 +54,7 @@ export function InstallPromptBanner({
               <strong className="text-white font-medium">Add to Home Screen</strong>
             </p>
           ) : (
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               Install for instant access — no App Store needed
             </p>
           )}
@@ -65,7 +65,7 @@ export function InstallPromptBanner({
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
-          className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue"
+          className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-ink-subtle hover:text-gray-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue"
         >
           ×
         </button>

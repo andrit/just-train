@@ -41,7 +41,7 @@ export function TemplatePickerSheet({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
+            className="text-ink-subtle hover:text-gray-300 text-sm transition-colors"
           >
             Cancel
           </button>
@@ -54,7 +54,7 @@ export function TemplatePickerSheet({
             placeholder="Search templates…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
           />
         </div>
 
@@ -65,7 +65,7 @@ export function TemplatePickerSheet({
               <Spinner size="md" className="text-command-blue" />
             </div>
           ) : filtered.length === 0 ? (
-            <p className="text-center text-gray-500 text-sm py-8">
+            <p className="text-center text-ink-subtle text-sm py-8">
               {search ? 'No templates match your search' : 'No templates yet'}
             </p>
           ) : (
@@ -106,7 +106,7 @@ function TemplateRow({ template, onSelect, loading }: {
     >
       <p className="text-sm font-medium text-gray-200">{template.name}</p>
       {template.description && (
-        <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{template.description}</p>
+        <p className="text-xs text-ink-subtle mt-0.5 line-clamp-1">{template.description}</p>
       )}
     </button>
   )

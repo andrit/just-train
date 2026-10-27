@@ -31,14 +31,14 @@ function AnimationDemo(): React.JSX.Element {
         <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
           UX Event → Animation
         </h2>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-ink-subtle">
           Click each button to fire the event and see the animation play on the target element.
           Animations are one-shot — the class is removed on <code className="text-command-blue">animationend</code>.
         </p>
       </div>
 
       {lastFired && (
-        <div className="text-xs text-gray-600 font-mono bg-surface border border-surface-border rounded px-3 py-2">
+        <div className="text-xs text-ink-faint font-mono bg-surface border border-surface-border rounded px-3 py-2">
           Last fired: <span className="text-command-blue">{lastFired}</span>
         </div>
       )}
@@ -95,7 +95,7 @@ function EventAnimationRow({
       </button>
 
       {/* Arrow */}
-      <svg className="w-4 h-4 text-gray-600 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <svg className="w-4 h-4 text-ink-faint shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
         <path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
 
@@ -104,7 +104,7 @@ function EventAnimationRow({
         ref={targetRef}
         className="flex-1 px-3 py-2 rounded-lg bg-surface border border-surface-border"
       >
-        <code className="text-xs text-gray-400">{animClass}</code>
+        <code className="text-xs text-ink-muted">{animClass}</code>
       </div>
     </div>
   )
@@ -138,7 +138,7 @@ function SideEffectDemo(): React.JSX.Element {
         <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
           Side Effect Registry
         </h2>
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-xs text-ink-subtle mb-4">
           A global handler is registered that logs every event. Fire events and watch the log below.
           In production, replace with audit logging, analytics, or contextual guidance.
         </p>
@@ -169,11 +169,11 @@ function SideEffectDemo(): React.JSX.Element {
       {/* Log output */}
       <div className="rounded-xl bg-brand-primary border border-surface-border p-3 font-mono text-xs min-h-32">
         {log.length === 0 ? (
-          <p className="text-gray-600">Fire an event to see it logged here…</p>
+          <p className="text-ink-faint">Fire an event to see it logged here…</p>
         ) : (
           log.map((entry, i) => (
             // eslint-disable-next-line react/no-array-index-key
-            <p key={i} className={cn('text-gray-400', i === 0 && 'text-emerald-400')}>
+            <p key={i} className={cn('text-ink-muted', i === 0 && 'text-emerald-400')}>
               {entry}
             </p>
           ))
@@ -200,7 +200,7 @@ function RefHelperDemo(): React.JSX.Element {
       <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
         useUXEventRef
       </h2>
-      <p className="text-xs text-gray-500 mb-4">
+      <p className="text-xs text-ink-subtle mb-4">
         The <code className="text-command-blue">useUXEventRef</code> helper binds a ref and
         fire function together. The animation plays on the button itself.
       </p>
@@ -267,7 +267,7 @@ export const EventTaxonomy: StoryObj = {
                   {anim.replace('animate-', '')}
                 </code>
               ) : (
-                <span className="text-[10px] text-gray-700">—</span>
+                <span className="text-[10px] text-ink-faint">—</span>
               )}
             </div>
           )

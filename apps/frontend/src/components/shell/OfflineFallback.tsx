@@ -47,18 +47,18 @@ export function OfflineFallback({
         {title}
       </h2>
 
-      <p className="text-sm text-gray-500 max-w-xs leading-relaxed mb-6">
+      <p className="text-sm text-ink-subtle max-w-xs leading-relaxed mb-6">
         {message}
       </p>
 
       {stillWorks && stillWorks.length > 0 && (
         <div className="mb-6 text-left w-full max-w-xs">
-          <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-2">
+          <p className="text-[10px] uppercase tracking-widest text-ink-faint mb-2">
             Still available
           </p>
           <ul className="space-y-1.5">
             {stillWorks.map((item) => (
-              <li key={item} className="flex items-center gap-2 text-xs text-gray-400">
+              <li key={item} className="flex items-center gap-2 text-xs text-ink-muted">
                 <span className="w-1 h-1 rounded-full bg-signal-yellow shrink-0" aria-hidden />
                 {item}
               </li>

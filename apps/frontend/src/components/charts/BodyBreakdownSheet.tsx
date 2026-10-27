@@ -147,13 +147,13 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
             style={{ backgroundColor: heatFill(count, max) }}
             aria-hidden
           />
-          <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-gray-200' : 'text-gray-500')}>
+          <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-gray-200' : 'text-ink-subtle')}>
             {MUSCLE_LABEL[muscle]}
           </span>
-          <span className={cn('text-xs tabular-nums', count > 0 ? 'text-gray-400' : 'text-gray-600')}>
+          <span className={cn('text-xs tabular-nums', count > 0 ? 'text-ink-muted' : 'text-ink-faint')}>
             {count > 0 ? `${count}×` : '—'}
           </span>
-          <span className={cn('text-gray-600 text-xs transition-transform', isOpen && 'rotate-90')} aria-hidden>›</span>
+          <span className={cn('text-ink-faint text-xs transition-transform', isOpen && 'rotate-90')} aria-hidden>›</span>
         </button>
         {isOpen && <MuscleDrill muscle={muscle} clientId={clientId} onPick={openExercise} />}
       </div>
@@ -187,7 +187,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
               ‹ All muscles
             </button>
             {neglectedMuscles.length === 0 ? (
-              <p className="text-sm text-gray-500 py-2">Every muscle has been trained in the last 30 days.</p>
+              <p className="text-sm text-ink-subtle py-2">Every muscle has been trained in the last 30 days.</p>
             ) : (
               <div>{neglectedMuscles.map(renderRow)}</div>
             )}
@@ -197,13 +197,13 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
           <>
             <div className="grid grid-cols-2 gap-2 mb-5">
               <div className="rounded-lg border border-surface-border bg-surface px-3 py-2">
-                <p className="text-[10px] uppercase tracking-widest text-gray-500">Most trained</p>
+                <p className="text-[10px] uppercase tracking-widest text-ink-subtle">Most trained</p>
                 {topMuscle ? (
                   <p className="text-sm text-white mt-0.5 truncate">
-                    {MUSCLE_LABEL[topMuscle.muscle]} <span className="text-gray-500">· {topMuscle.count}×</span>
+                    {MUSCLE_LABEL[topMuscle.muscle]} <span className="text-ink-subtle">· {topMuscle.count}×</span>
                   </p>
                 ) : (
-                  <p className="text-sm text-gray-600 mt-0.5">Nothing logged yet</p>
+                  <p className="text-sm text-ink-faint mt-0.5">Nothing logged yet</p>
                 )}
               </div>
               <button
@@ -217,9 +217,9 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
                   neglectedCount > 0 ? 'hover:border-command-blue/40 transition-colors' : 'cursor-default',
                 )}
               >
-                <p className="text-[10px] uppercase tracking-widest text-gray-500">Neglected</p>
+                <p className="text-[10px] uppercase tracking-widest text-ink-subtle">Neglected</p>
                 <p className="text-sm text-white mt-0.5">
-                  {neglectedCount} <span className="text-gray-500">muscle{neglectedCount === 1 ? '' : 's'} untrained</span>
+                  {neglectedCount} <span className="text-ink-subtle">muscle{neglectedCount === 1 ? '' : 's'} untrained</span>
                 </p>
                 {neglectedCount > 0 && (
                   <p className="text-[10px] text-command-blue mt-0.5">View ›</p>
@@ -238,7 +238,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
           </>
         )}
 
-        <p className="text-[10px] text-gray-600 text-center mt-5">
+        <p className="text-[10px] text-ink-faint text-center mt-5">
           Sessions that trained each muscle in the last 30 days.
         </p>
       </div>
@@ -273,7 +273,7 @@ function MuscleDrill({ muscle, clientId, onPick }: {
             onClick={() => setTab(k)}
             className={cn(
               'px-2 py-1 rounded-md text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
-              tab === k ? 'bg-command-blue/15 text-command-blue' : 'text-gray-500 hover:text-gray-300',
+              tab === k ? 'bg-command-blue/15 text-command-blue' : 'text-ink-subtle hover:text-gray-300',
             )}
           >
             {label}
@@ -300,13 +300,13 @@ function MuscleHistoryList({ muscle, clientId, onPick, onSeeMovers }: {
   const { data, isLoading } = useMuscleHistory(clientId ?? null, muscle)
 
   if (isLoading) {
-    return <div className="flex justify-center py-3"><Spinner size="sm" className="text-gray-500" /></div>
+    return <div className="flex justify-center py-3"><Spinner size="sm" className="text-ink-subtle" /></div>
   }
 
   const list = data?.exercises ?? []
   if (list.length === 0) {
     return (
-      <p className="text-xs text-gray-500 py-2">
+      <p className="text-xs text-ink-subtle py-2">
         You haven&apos;t logged anything for {MUSCLE_LABEL[muscle]} yet —{' '}
         <button
           type="button"
@@ -330,14 +330,14 @@ function MuscleHistoryList({ muscle, clientId, onPick, onSeeMovers }: {
         >
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-200 truncate">{ex.name}</p>
-            <p className="text-[10px] text-gray-500">
+            <p className="text-[10px] text-ink-subtle">
               {ex.totalSessions} session{ex.totalSessions === 1 ? '' : 's'} · last {formatDate(ex.lastPerformed)}
             </p>
           </div>
           {ex.role === 'primary' && (
             <span className="text-[9px] uppercase tracking-wider text-command-blue/70 shrink-0">primary</span>
           )}
-          <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-gray-600 shrink-0" aria-hidden>
+          <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-ink-faint shrink-0" aria-hidden>
             <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
@@ -356,13 +356,13 @@ function MuscleLibraryList({ muscle, role, onPick }: {
   const { data: exercises, isLoading } = useExercises({ muscle })
 
   if (isLoading) {
-    return <div className="flex justify-center py-3"><Spinner size="sm" className="text-gray-500" /></div>
+    return <div className="flex justify-center py-3"><Spinner size="sm" className="text-ink-subtle" /></div>
   }
 
   const rows = (exercises ?? []).filter((e) => (role === 'primary' ? e.muscleRole === 'primary' : e.muscleRole !== 'primary'))
   if (rows.length === 0) {
     return (
-      <p className="text-xs text-gray-600 py-2">
+      <p className="text-xs text-ink-faint py-2">
         No library exercises {role === 'primary' ? 'primarily target' : 'also work'} this muscle yet.
       </p>
     )
@@ -382,10 +382,10 @@ function ExerciseRow({ ex, onPick }: {
       className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-surface border border-surface-border hover:border-command-blue/30 text-left transition-colors"
     >
       <span className="text-sm text-gray-200 flex-1 truncate">{ex.name}</span>
-      <span className="text-[10px] uppercase tracking-wider text-gray-500 shrink-0">
+      <span className="text-[10px] uppercase tracking-wider text-ink-subtle shrink-0">
         {EQUIPMENT_LABEL[ex.equipment] ?? ex.equipment}
       </span>
-      <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-gray-600 shrink-0" aria-hidden>
+      <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-ink-faint shrink-0" aria-hidden>
         <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>

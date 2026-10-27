@@ -123,12 +123,12 @@ export default function ClientsPage(): React.JSX.Element {
                       {PROGRESSION_STATE_LABEL[selfClient.progressionState]}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-ink-subtle mt-0.5">
                     Track your own training and progress
                   </p>
                 </div>
 
-                <svg className="w-4 h-4 text-gray-600 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
+                <svg className="w-4 h-4 text-ink-faint shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
                   <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
@@ -142,7 +142,7 @@ export default function ClientsPage(): React.JSX.Element {
               {selfClient && (
                 <div className="flex items-center gap-3 py-1">
                   <div className="flex-1 h-px bg-surface-border" />
-                  <span className="text-[11px] uppercase tracking-widest text-gray-600">Clients</span>
+                  <span className="text-[11px] uppercase tracking-widest text-ink-faint">Clients</span>
                   <div className="flex-1 h-px bg-surface-border" />
                 </div>
               )}

@@ -88,16 +88,16 @@ export default function ExerciseCard({
 
         <div className="flex items-center gap-2 flex-wrap">
           {exercise.bodyPart != null && (
-            <span className="text-xs text-gray-400 capitalize">
+            <span className="text-xs text-ink-muted capitalize">
               {exercise.bodyPart.name.replace('_', ' ')}
             </span>
           )}
 
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-ink-subtle">
             {EQUIPMENT_LABEL[exercise.equipment] ?? exercise.equipment}
           </span>
 
-          <span className={cn('text-xs ml-auto', DIFFICULTY_TEXT_COLOR[exercise.difficulty] ?? 'text-gray-400')}>
+          <span className={cn('text-xs ml-auto', DIFFICULTY_TEXT_COLOR[exercise.difficulty] ?? 'text-ink-muted')}>
             {exercise.difficulty}
           </span>
         </div>

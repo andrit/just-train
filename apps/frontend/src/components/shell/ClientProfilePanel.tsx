@@ -53,7 +53,7 @@ function TabButton({ id: _id, label, active, incomplete, onClick }: {
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
         active
           ? 'text-white border-b-2 border-command-blue'
-          : 'text-gray-500 hover:text-gray-300 border-b-2 border-transparent',
+          : 'text-ink-subtle hover:text-gray-300 border-b-2 border-transparent',
       )}
     >
       {label}
@@ -105,7 +105,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
   if (error || !client) {
     return (
       <div className="p-6 text-center pt-20">
-        <p className="text-gray-400">Client not found.</p>
+        <p className="text-ink-muted">Client not found.</p>
         <button type="button" onClick={onClose} className="mt-4 text-sm text-command-blue hover:underline">
           Go back
         </button>
@@ -128,7 +128,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
           <button
             type="button"
             onClick={onClose}
-            className={cn('flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300', interactions.button.base)}
+            className={cn('flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300', interactions.button.base)}
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4" aria-hidden>
               <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -147,7 +147,7 @@ export function ClientProfilePanel({ clientId, onClose }: ClientProfilePanelProp
                 'bg-surface border border-surface-border',
                 (kpis?.sessionsThisMonth ?? 0) > 0
                   ? 'text-gray-300 hover:border-command-blue/40 hover:text-white'
-                  : 'text-gray-600 cursor-not-allowed opacity-50',
+                  : 'text-ink-faint cursor-not-allowed opacity-50',
                 interactions.button.base,
                 interactions.button.press,
               )}

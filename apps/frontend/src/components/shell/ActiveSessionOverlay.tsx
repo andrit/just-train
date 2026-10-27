@@ -81,10 +81,10 @@ function SessionPill({
 
       <div className="text-left">
         <p className="text-xs font-medium text-white leading-tight">{clientName}</p>
-        <p className="text-[10px] text-gray-500 leading-tight tabular-nums">{elapsed}</p>
+        <p className="text-[10px] text-ink-subtle leading-tight tabular-nums">{elapsed}</p>
       </div>
 
-      <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-gray-500 ml-1 shrink-0">
+      <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-ink-subtle ml-1 shrink-0">
         <path d="M4 10l4-4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>
@@ -186,7 +186,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
                 'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                 session.clientId === focusedSession.clientId
                   ? 'bg-command-blue text-white border-command-blue'
-                  : 'border-surface-border text-gray-500 hover:text-gray-300',
+                  : 'border-surface-border text-ink-subtle hover:text-gray-300',
               )}
             >
               {getClientName(session.clientId)}
@@ -200,14 +200,14 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
         <button
           type="button"
           onClick={minimise}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-ink-subtle hover:text-gray-300 transition-colors"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           Minimise
         </button>
-        <p className="text-xs text-gray-600">{getClientName(focusedSession.clientId)}</p>
+        <p className="text-xs text-ink-faint">{getClientName(focusedSession.clientId)}</p>
       </div>
 
       {/* Session content — wrapped so a crash minimises to pill rather than taking down the app */}

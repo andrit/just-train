@@ -31,8 +31,8 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
     return (
       <div className="text-center py-12">
         <p className="text-2xl mb-3" aria-hidden>🏋️</p>
-        <p className="text-gray-400 font-medium">No personal bests yet</p>
-        <p className="text-gray-600 text-sm mt-1">
+        <p className="text-ink-muted font-medium">No personal bests yet</p>
+        <p className="text-ink-faint text-sm mt-1">
           PRs are detected automatically when sets are logged
         </p>
       </div>
@@ -49,13 +49,13 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
     <div>
       {/* Column headers */}
       <div className="flex items-center gap-2 px-1 mb-2">
-        <p className="flex-1 text-[10px] uppercase tracking-widest text-gray-600">Exercise</p>
+        <p className="flex-1 text-[10px] uppercase tracking-widest text-ink-faint">Exercise</p>
         <div className="flex items-center gap-1 w-28 justify-end">
-          <p className="text-[10px] uppercase tracking-widest text-gray-600">1RM est.</p>
+          <p className="text-[10px] uppercase tracking-widest text-ink-faint">1RM est.</p>
           <HintPopover glyph="i" side="top" text="Estimated max single rep using the Epley formula: weight × (1 + reps ÷ 30). Swipe to dismiss." />
         </div>
         <div className="flex items-center gap-1 w-28 justify-end">
-          <p className="text-[10px] uppercase tracking-widest text-gray-600">Vol. PR</p>
+          <p className="text-[10px] uppercase tracking-widest text-ink-faint">Vol. PR</p>
           <HintPopover glyph="i" side="top" text="Highest single-set volume: weight × reps. e.g. 80kg × 10 = 800. Swipe to dismiss." />
         </div>
       </div>
@@ -79,7 +79,7 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
                 <p className="font-mono text-base font-medium text-amber-400">
                   {pr.best1rm} kg
                 </p>
-                <p className="text-[10px] text-gray-600 mt-0.5 font-mono">
+                <p className="text-[10px] text-ink-faint mt-0.5 font-mono">
                   {pr.best1rmWeight}×{pr.best1rmReps} · {formatDate(pr.best1rmDate)}
                 </p>
               </div>
@@ -90,7 +90,7 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
                 <p className="font-mono text-base font-medium text-command-blue">
                   {pr.bestVolume.toLocaleString()}
                 </p>
-                <p className="text-[10px] text-gray-600 mt-0.5 font-mono">
+                <p className="text-[10px] text-ink-faint mt-0.5 font-mono">
                   {pr.bestVolumeWeight}×{pr.bestVolumeReps} · {formatDate(pr.bestVolumeDate)}
                 </p>
               </div>
@@ -100,7 +100,7 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
       </div>
 
       {/* Footer note */}
-      <p className="text-[10px] text-gray-700 text-center mt-4">
+      <p className="text-[10px] text-ink-faint text-center mt-4">
         1RM estimates use the Epley formula · Volume = weight × reps
       </p>
     </div>

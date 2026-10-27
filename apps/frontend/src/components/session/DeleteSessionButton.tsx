@@ -49,7 +49,7 @@ export function DeleteSessionButton({
         <button
           type="button"
           onClick={() => setConfirming(false)}
-          className="px-2.5 py-1.5 rounded-lg text-xs text-gray-400 border border-surface-border hover:text-gray-200 transition-colors"
+          className="px-2.5 py-1.5 rounded-lg text-xs text-ink-muted border border-surface-border hover:text-gray-200 transition-colors"
         >
           Keep
         </button>
@@ -77,7 +77,7 @@ export function DeleteSessionButton({
       onClick={() => setConfirming(true)}
       aria-label="Delete session"
       title="Delete session"
-      className={cn('p-1.5 rounded-lg text-gray-600 hover:text-red-400 transition-colors', className)}
+      className={cn('p-1.5 rounded-lg text-ink-faint hover:text-red-400 transition-colors', className)}
     >
       <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
         <path d="M3 4h10M6.5 4V3h3v1M5 4l.5 8h5L11 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

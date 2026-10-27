@@ -99,7 +99,7 @@ export function PhotoComparisonSlider({
           type="button"
           onClick={onClose}
           aria-label="Close comparison"
-          className={cn('text-gray-400 hover:text-white p-1', interactions.button.base)}
+          className={cn('text-ink-muted hover:text-white p-1', interactions.button.base)}
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
             <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -110,7 +110,7 @@ export function PhotoComparisonSlider({
       {/* Date selectors */}
       <div className="flex items-center gap-4 px-4 py-2 bg-black/60 shrink-0">
         <div className="flex-1">
-          <label className="text-[10px] text-gray-600 uppercase tracking-wider block mb-0.5">Before</label>
+          <label className="text-[10px] text-ink-faint uppercase tracking-wider block mb-0.5">Before</label>
           <select
             value={beforeIdx}
             onChange={(e) => setBeforeIdx(Number(e.target.value))}
@@ -122,7 +122,7 @@ export function PhotoComparisonSlider({
           </select>
         </div>
         <div className="flex-1">
-          <label className="text-[10px] text-gray-600 uppercase tracking-wider block mb-0.5">After</label>
+          <label className="text-[10px] text-ink-faint uppercase tracking-wider block mb-0.5">After</label>
           <select
             value={afterIdx}
             onChange={(e) => setAfterIdx(Number(e.target.value))}
@@ -146,7 +146,7 @@ export function PhotoComparisonSlider({
               'px-3 py-1 rounded-full text-xs capitalize whitespace-nowrap transition-colors',
               poseFilter === pose
                 ? 'bg-command-blue text-white'
-                : 'bg-surface border border-surface-border text-gray-400 hover:text-gray-200',
+                : 'bg-surface border border-surface-border text-ink-muted hover:text-gray-200',
             )}
           >
             {pose.replace('_', ' ')}
@@ -202,7 +202,7 @@ export function PhotoComparisonSlider({
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+          <div className="flex items-center justify-center h-full text-ink-subtle text-sm">
             <p>No &quot;{poseFilter.replace('_', ' ')}&quot; photo in both selected snapshots</p>
           </div>
         )}

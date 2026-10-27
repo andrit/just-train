@@ -28,7 +28,7 @@ export function VolumeByBodyPart({ entries }: VolumeByBodyPartProps): React.JSX.
     return (
       <div className="card p-4">
         <p className="section-label">Volume by body part</p>
-        <p className="text-xs text-gray-600 text-center mt-1 py-6">
+        <p className="text-xs text-ink-faint text-center mt-1 py-6">
           No lifting volume in the last 30 days — log a session to see where your work is going.
         </p>
       </div>
@@ -41,7 +41,7 @@ export function VolumeByBodyPart({ entries }: VolumeByBodyPartProps): React.JSX.
     <div className="card p-4">
       <div className="flex items-baseline justify-between gap-3">
         <p className="section-label">Volume by body part</p>
-        <p className="text-[10px] uppercase tracking-widest text-gray-600">Last 30 days</p>
+        <p className="text-[10px] uppercase tracking-widest text-ink-faint">Last 30 days</p>
       </div>
 
       <div className="mt-3 space-y-2" role="group" aria-label="Total volume by body part, last 30 days">
@@ -49,7 +49,7 @@ export function VolumeByBodyPart({ entries }: VolumeByBodyPartProps): React.JSX.
           const w = Math.max((e.volume / max) * 100, 2)  // 2% floor so any logged part is visible
           return (
             <div key={e.bodyPart} className="flex items-center gap-3">
-              <span className="w-16 shrink-0 text-xs text-gray-400 truncate">
+              <span className="w-16 shrink-0 text-xs text-ink-muted truncate">
                 {BODY_PART_LABEL[e.bodyPart] ?? e.bodyPart}
               </span>
               <div className="flex-1 h-2.5 rounded-full bg-surface-border/40 overflow-hidden">
@@ -67,7 +67,7 @@ export function VolumeByBodyPart({ entries }: VolumeByBodyPartProps): React.JSX.
         })}
       </div>
 
-      <p className="text-[10px] text-gray-600 text-right mt-2">lbs · counted by each exercise's body part</p>
+      <p className="text-[10px] text-ink-faint text-right mt-2">lbs · counted by each exercise's body part</p>
     </div>
   )
 }

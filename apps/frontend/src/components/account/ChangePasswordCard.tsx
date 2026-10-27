@@ -46,7 +46,7 @@ export function ChangePasswordCard(): React.JSX.Element {
     <form onSubmit={handleSubmit} className="card p-4 space-y-3">
       <div>
         <p className="text-sm font-medium text-gray-200 mb-1">Change password</p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-ink-subtle">
           You stay signed in here. Every other device is signed out.
         </p>
       </div>

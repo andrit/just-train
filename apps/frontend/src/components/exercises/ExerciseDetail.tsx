@@ -111,7 +111,7 @@ export default function ExerciseDetail({
       <dl className="grid grid-cols-2 gap-3">
         {metaItems.map(({ label, value }) => (
           <div key={label} className="bg-brand-primary rounded-lg px-3 py-2.5">
-            <dt className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">
+            <dt className="text-xs text-ink-subtle uppercase tracking-wider mb-0.5">
               {label}
             </dt>
             <dd className="text-sm text-gray-200 capitalize">{value}</dd>

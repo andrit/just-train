@@ -63,7 +63,7 @@ export function WorkoutBlock({
   const prevEx       = exercises[clampedIdx - 1]
   const nextEx       = exercises[clampedIdx + 1]
 
-  const typeColor = WORKOUT_TYPE_COLOR[workoutType] ?? 'text-gray-400 border-gray-500/60'
+  const typeColor = WORKOUT_TYPE_COLOR[workoutType] ?? 'text-ink-muted border-gray-500/60'
   const typeLabel = WORKOUT_TYPE_LABEL[workoutType] ?? workoutType
 
   const handleExerciseAdded = (): void => {
@@ -104,13 +104,13 @@ export function WorkoutBlock({
               {typeLabel}
             </span>
             {totalEx > 0 && layout === 'horizontal' && (
-              <span className="text-[10px] text-gray-600">· {clampedIdx + 1}/{totalEx}</span>
+              <span className="text-[10px] text-ink-faint">· {clampedIdx + 1}/{totalEx}</span>
             )}
           </div>
 
           {/* Exercise count */}
           {totalEx > 0 && (
-            <span className="text-[10px] text-gray-600">{totalEx} exercise{totalEx !== 1 ? 's' : ''}</span>
+            <span className="text-[10px] text-ink-faint">{totalEx} exercise{totalEx !== 1 ? 's' : ''}</span>
           )}
         </div>
 
@@ -155,13 +155,13 @@ export function WorkoutBlock({
               >
                 {prevEx && (
                   <div className="px-1.5 py-2">
-                    <p className="text-[8px] text-gray-500 truncate leading-tight">
+                    <p className="text-[8px] text-ink-subtle truncate leading-tight">
                       {prevEx.exercise?.name ?? '—'}
                     </p>
                     {prevEx.sets.length > 0 && (() => {
                       const last = prevEx.sets[prevEx.sets.length - 1]
                       return (
-                        <p className="text-[9px] font-mono text-gray-400 mt-1 truncate">
+                        <p className="text-[9px] font-mono text-ink-muted mt-1 truncate">
                           {last.weight != null ? `${last.weight}×` : ''}{last.reps ?? (last.durationSeconds != null ? formatSeconds(last.durationSeconds) : '—')}
                         </p>
                       )
@@ -174,8 +174,8 @@ export function WorkoutBlock({
               <div className="flex-1 overflow-y-auto min-w-0 py-2">
                 {exercises.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-600 text-sm">No exercises yet</p>
-                    <p className="text-gray-700 text-xs mt-1">Tap + below to add one</p>
+                    <p className="text-ink-faint text-sm">No exercises yet</p>
+                    <p className="text-ink-faint text-xs mt-1">Tap + below to add one</p>
                   </div>
                 ) : currentEx ? (
                   <ExerciseBlock
@@ -205,11 +205,11 @@ export function WorkoutBlock({
               >
                 {nextEx && (
                   <div className="px-1.5 py-2">
-                    <p className="text-[8px] text-gray-500 truncate leading-tight">
+                    <p className="text-[8px] text-ink-subtle truncate leading-tight">
                       {nextEx.exercise?.name ?? '—'}
                     </p>
                     {(nextEx.targetSets || nextEx.targetReps) && (
-                      <p className="text-[9px] font-mono text-gray-500 mt-1 truncate">
+                      <p className="text-[9px] font-mono text-ink-subtle mt-1 truncate">
                         {nextEx.targetSets && `${nextEx.targetSets}×`}{nextEx.targetReps ?? nextEx.targetDurationSeconds ?? ''}
                       </p>
                     )}
@@ -223,8 +223,8 @@ export function WorkoutBlock({
           <div className="flex-1 p-4 space-y-3">
             {exercises.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-600 text-sm">No exercises yet</p>
-                <p className="text-gray-700 text-xs mt-1">Tap + below to add one</p>
+                <p className="text-ink-faint text-sm">No exercises yet</p>
+                <p className="text-ink-faint text-xs mt-1">Tap + below to add one</p>
               </div>
             ) : (
               exercises.map((ex) => (
@@ -233,7 +233,7 @@ export function WorkoutBlock({
                   className="flex items-center justify-between py-2.5 border-b border-surface-border/50 last:border-0"
                 >
                   <p className="text-sm text-gray-200 truncate flex-1">{ex.exercise?.name ?? 'Unknown'}</p>
-                  <p className="text-xs text-gray-500 font-mono ml-3 shrink-0">
+                  <p className="text-xs text-ink-subtle font-mono ml-3 shrink-0">
                     {ex.targetSets && `${ex.targetSets}×`}
                     {ex.targetReps ?? (ex.targetDurationSeconds ? `${ex.targetDurationSeconds}s` : null) ?? '—'}
                     {ex.targetWeight ? ` · ${ex.targetWeight}` : ''}
@@ -275,12 +275,12 @@ export function WorkoutBlock({
                 <span className="text-sm font-mono font-medium text-command-blue">
                   {formatSeconds(restTimer?.remaining ?? 0)}
                 </span>
-                <span className="text-xs text-gray-500">rest</span>
+                <span className="text-xs text-ink-subtle">rest</span>
               </div>
               <button
                 type="button"
                 onClick={() => restTimer?.skip()}
-                className="px-4 py-3 text-xs text-gray-500 hover:text-gray-300 border-l border-surface-border transition-colors"
+                className="px-4 py-3 text-xs text-ink-subtle hover:text-gray-300 border-l border-surface-border transition-colors"
               >
                 Skip
               </button>
@@ -293,7 +293,7 @@ export function WorkoutBlock({
                 onClick={() => setAddExerciseOpen(true)}
                 className={cn(
                   'flex-1 flex items-center justify-center gap-1.5 py-3 px-3',
-                  'text-xs font-medium text-gray-400 hover:text-gray-200',
+                  'text-xs font-medium text-ink-muted hover:text-gray-200',
                   'border-r border-surface-border',
                   'transition-colors duration-150',
                   interactions.button.base,
@@ -311,7 +311,7 @@ export function WorkoutBlock({
                   onClick={onAddBlock}
                   className={cn(
                     'flex-1 flex items-center justify-center gap-1.5 py-3 px-3',
-                    'text-xs text-gray-500 hover:text-gray-300',
+                    'text-xs text-ink-subtle hover:text-gray-300',
                     'transition-colors duration-150',
                     interactions.button.base,
                     interactions.button.press,

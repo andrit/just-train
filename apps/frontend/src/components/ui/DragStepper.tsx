@@ -102,7 +102,7 @@ export function DragStepper({
   return (
     <div className="flex flex-col items-center gap-1 select-none">
       {label && (
-        <p className="text-[10px] uppercase tracking-widest text-gray-500">{label}</p>
+        <p className="text-[10px] uppercase tracking-widest text-ink-subtle">{label}</p>
       )}
 
       {/* Up button */}
@@ -113,7 +113,7 @@ export function DragStepper({
         aria-label={`Increase ${label ?? 'value'}`}
         className={cn(
           'w-8 h-6 flex items-center justify-center rounded-lg',
-          'text-gray-400 hover:text-white hover:bg-surface',
+          'text-ink-muted hover:text-white hover:bg-surface',
           'transition-colors duration-100 active:scale-95',
           value >= max && 'opacity-30 cursor-not-allowed',
         )}
@@ -159,7 +159,7 @@ export function DragStepper({
         aria-label={`Decrease ${label ?? 'value'}`}
         className={cn(
           'w-8 h-6 flex items-center justify-center rounded-lg',
-          'text-gray-400 hover:text-white hover:bg-surface',
+          'text-ink-muted hover:text-white hover:bg-surface',
           'transition-colors duration-100 active:scale-95',
           value <= min && 'opacity-30 cursor-not-allowed',
         )}

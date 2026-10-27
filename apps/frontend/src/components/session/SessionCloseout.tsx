@@ -83,7 +83,7 @@ export function SessionCloseout({
     return (
       <Modal open={open} onClose={onCancel} title="No work logged">
         <div className="space-y-4 py-2">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-ink-muted">
             No sets were logged in this session. You can discard it (no record kept) or end it anyway.
           </p>
           <div className="flex gap-3">
@@ -126,27 +126,27 @@ export function SessionCloseout({
           <p className="text-4xl mb-2" aria-hidden>🏆</p>
           <h2 className="text-xl font-display font-bold text-white">Nice work</h2>
           {durationMin != null && (
-            <p className="text-sm text-gray-500 mt-1">{durationMin} minutes</p>
+            <p className="text-sm text-ink-subtle mt-1">{durationMin} minutes</p>
           )}
         </div>
 
         {/* Session name — first, so the results read as a summary of what you are naming */}
         <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider mb-1.5 block">
-            Session name <span className="text-gray-700 normal-case">(optional)</span>
+          <label className="text-xs text-ink-subtle uppercase tracking-wider mb-1.5 block">
+            Session name <span className="text-ink-faint normal-case">(optional)</span>
           </label>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="e.g. Push Day, Leg Day - {date}…"
-            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
           />
           {/* Always show what will be stored — including the date-stamped default
               for an empty field, so it is a visible choice rather than a surprise
               discovered later in history. */}
           <div className="relative mt-2 pr-5">
-            <p className="text-[11px] text-gray-500">
+            <p className="text-[11px] text-ink-subtle">
               Saves as{' '}
               <span className="text-gray-300 font-medium">
                 {name.trim() !== ''
@@ -234,10 +234,10 @@ export function SessionCloseout({
             <>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">
-                    How you felt <span className="normal-case tracking-normal text-gray-700">(optional)</span>
+                  <p className="text-xs text-ink-subtle uppercase tracking-wider">
+                    How you felt <span className="normal-case tracking-normal text-ink-faint">(optional)</span>
                   </p>
-                  <p className="text-[11px] text-gray-600 mt-0.5">
+                  <p className="text-[11px] text-ink-faint mt-0.5">
                     {recordFeel
                       ? 'Tracked over time, these tell the whole story.'
                       : 'Not recorded — move a slider to log how you felt.'}
@@ -247,7 +247,7 @@ export function SessionCloseout({
                   type="button"
                   onClick={() => setFeelDismissed(true)}
                   aria-label="Skip how you felt"
-                  className="shrink-0 w-7 h-7 rounded-full border border-surface-border text-gray-500 leading-none hover:text-gray-300 hover:border-gray-600 transition-colors"
+                  className="shrink-0 w-7 h-7 rounded-full border border-surface-border text-ink-subtle leading-none hover:text-gray-300 hover:border-gray-600 transition-colors"
                 >
                   ×
                 </button>
@@ -264,8 +264,8 @@ export function SessionCloseout({
           )}
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">
-              Session note <span className="text-gray-700">(optional)</span>
+            <label className="block text-xs text-ink-subtle mb-1.5">
+              Session note <span className="text-ink-faint">(optional)</span>
             </label>
             <textarea
               value={notes}
@@ -310,9 +310,9 @@ function StatCard({ label, value, unit, highlight }: {
     )}>
       <p className={cn('text-2xl font-bold font-mono', highlight ? 'text-amber-400' : 'text-white')}>
         {value}
-        {unit && <span className="text-sm font-normal text-gray-500 ml-1">{unit}</span>}
+        {unit && <span className="text-sm font-normal text-ink-subtle ml-1">{unit}</span>}
       </p>
-      <p className={cn('text-xs mt-0.5', highlight ? 'text-amber-500' : 'text-gray-500')}>{label}</p>
+      <p className={cn('text-xs mt-0.5', highlight ? 'text-amber-500' : 'text-ink-subtle')}>{label}</p>
     </div>
   )
 }

@@ -38,7 +38,7 @@ export default function LiveSessionPage(): React.JSX.Element {
   if (!id) {
     return (
       <div className="p-6 text-center">
-        <p className="text-gray-400">Invalid session.</p>
+        <p className="text-ink-muted">Invalid session.</p>
         <button type="button" onClick={() => navigate('/')} className="mt-4 text-sm text-command-blue hover:underline">
           Go home
         </button>

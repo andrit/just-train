@@ -52,7 +52,7 @@ export function SaveAsTemplateButton({ session, className }: SaveAsTemplateButto
         disabled={createFromSession.isPending}
         className={cn(
           'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium',
-          'border border-surface-border text-gray-400',
+          'border border-surface-border text-ink-muted',
           'hover:border-command-blue/40 hover:text-command-blue',
           interactions.button.base,
           interactions.button.press,

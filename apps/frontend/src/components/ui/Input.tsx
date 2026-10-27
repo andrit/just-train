@@ -67,7 +67,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {hasHint && (
-          <p id={hintId} className="mt-1.5 text-xs text-gray-500">
+          <p id={hintId} className="mt-1.5 text-xs text-ink-subtle">
             {hint}
           </p>
         )}

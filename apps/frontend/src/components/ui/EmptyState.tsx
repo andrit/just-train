@@ -54,7 +54,7 @@ export function EmptyState({
       </h3>
 
       {message != null && (
-        <p className="text-sm text-gray-500 max-w-xs leading-relaxed mb-6">
+        <p className="text-sm text-ink-subtle max-w-xs leading-relaxed mb-6">
           {message}
         </p>
       )}

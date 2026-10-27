@@ -287,7 +287,7 @@ export function InlineCameraSheet({
         {/* Fallback (no camera API) and blocked (resolved but no frames) */}
         {(state === 'fallback' || state === 'blocked') && (
           <div className="text-center py-8">
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-ink-muted mb-4">
               {state === 'blocked'
                 ? 'Camera is blocked or in use. Allow camera access for this app in your device settings — an installed app asks separately from the browser — or pick a file instead.'
                 : 'Camera access unavailable. Use your device camera instead.'}
@@ -355,7 +355,7 @@ export function InlineCameraSheet({
                 <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 rounded-full px-3 py-1">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
                   <span className="font-mono text-sm text-white">{formatTime(recordTime)}</span>
-                  <span className="text-xs text-gray-400">/ {formatTime(MAX_VIDEO_SECONDS)}</span>
+                  <span className="text-xs text-ink-muted">/ {formatTime(MAX_VIDEO_SECONDS)}</span>
                 </div>
               )}
 
@@ -415,7 +415,7 @@ export function InlineCameraSheet({
               )}
             </div>
 
-            <p className="text-xs text-gray-600 text-center">
+            <p className="text-xs text-ink-faint text-center">
               {allowVideo
                 ? 'White = photo · Red = video (30s max)'
                 : 'Tap to capture photo'}
@@ -444,7 +444,7 @@ export function InlineCameraSheet({
             </div>
 
             {previewDuration != null && (
-              <p className="text-xs text-gray-500 text-center font-mono">
+              <p className="text-xs text-ink-subtle text-center font-mono">
                 {formatTime(previewDuration)}
               </p>
             )}

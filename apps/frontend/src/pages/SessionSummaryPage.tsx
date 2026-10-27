@@ -19,7 +19,7 @@ function ScoreBar({ label, value }: { label: string; value: number }): React.JSX
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs">
-        <span className="text-gray-500">{label}</span>
+        <span className="text-ink-subtle">{label}</span>
         <span className="font-mono text-gray-300">{value}/10</span>
       </div>
       <div className="h-1.5 bg-surface-border rounded-full overflow-hidden">
@@ -53,7 +53,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
   if (!session) {
     return (
       <div className="p-6 text-center">
-        <p className="text-gray-400">Session not found.</p>
+        <p className="text-ink-muted">Session not found.</p>
         <button type="button" onClick={() => navigate('/')} className="mt-4 text-sm text-command-blue hover:underline">
           Go home
         </button>
@@ -84,7 +84,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
         <h1 className="font-display text-4xl uppercase tracking-wide text-white mb-2">
           Session Done
         </h1>
-        <p className="text-gray-500 text-sm">
+        <p className="text-ink-subtle text-sm">
           {session.client?.name ?? 'Session'} · {session.date}
         </p>
       </div>
@@ -98,14 +98,14 @@ export default function SessionSummaryPage(): React.JSX.Element {
         ].map(({ label, value }) => (
           <div key={label} className="card p-3 text-center">
             <p className="font-mono text-2xl font-bold text-white">{value}</p>
-            <p className="text-[10px] uppercase tracking-widest text-gray-600 mt-1">{label}</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-faint mt-1">{label}</p>
           </div>
         ))}
       </div>
 
       {durationMin != null && (
         <div className="card p-3 text-center mb-6">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-ink-muted">
             Duration: <span className="font-mono text-white">{durationMin} min</span>
           </p>
         </div>

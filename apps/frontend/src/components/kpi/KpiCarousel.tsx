@@ -95,7 +95,7 @@ export function KpiCarousel({ cards, isLoading }: KpiCarouselProps): React.JSX.E
             aria-label="Previous KPIs"
             className={cn(
               'hidden md:flex w-6 h-6 items-center justify-center rounded-full',
-              'border border-surface-border text-gray-500',
+              'border border-surface-border text-ink-subtle',
               'hover:text-gray-300 hover:border-gray-500',
               'disabled:opacity-30 disabled:cursor-not-allowed',
               'transition-all duration-150',
@@ -131,7 +131,7 @@ export function KpiCarousel({ cards, isLoading }: KpiCarouselProps): React.JSX.E
             aria-label="Next KPIs"
             className={cn(
               'hidden md:flex w-6 h-6 items-center justify-center rounded-full',
-              'border border-surface-border text-gray-500',
+              'border border-surface-border text-ink-subtle',
               'hover:text-gray-300 hover:border-gray-500',
               'disabled:opacity-30 disabled:cursor-not-allowed',
               'transition-all duration-150',

@@ -17,7 +17,7 @@ export interface KpiCardData {
 }
 
 function TrendArrow({ trend }: { trend: KpiTrend }): React.JSX.Element | null {
-  if (!trend || trend === 'flat') return trend === 'flat' ? <span className="text-gray-600 text-xs">—</span> : null
+  if (!trend || trend === 'flat') return trend === 'flat' ? <span className="text-ink-faint text-xs">—</span> : null
   return (
     <svg viewBox="0 0 12 12" fill="none" className={cn('w-3 h-3 shrink-0', trend === 'up' ? 'text-emerald-400' : 'text-amber-400')}>
       {trend === 'up'
@@ -34,17 +34,17 @@ export function KpiCard({ data }: { data: KpiCardData }): React.JSX.Element {
       'flex flex-col justify-between bg-surface rounded-2xl border p-4 min-h-[100px] w-full',
       highlight ? 'border-amber-500/30 bg-amber-500/5' : 'border-surface-border',
     )}>
-      <p className={cn('text-[10px] uppercase tracking-widest font-medium mb-2', highlight ? 'text-amber-400' : 'text-gray-500')}>
+      <p className={cn('text-[10px] uppercase tracking-widest font-medium mb-2', highlight ? 'text-amber-400' : 'text-ink-subtle')}>
         {label}
       </p>
       <div className="flex items-end gap-1.5 mt-auto">
-        <p className={cn('font-mono font-bold leading-none text-xl', isEmpty ? 'text-gray-700' : highlight ? 'text-amber-300' : 'text-white')}>
+        <p className={cn('font-mono font-bold leading-none text-xl', isEmpty ? 'text-ink-faint' : highlight ? 'text-amber-300' : 'text-white')}>
           {isEmpty ? '—' : value}
         </p>
         {!isEmpty && trend !== undefined && <TrendArrow trend={trend ?? null} />}
       </div>
-      {context && !isEmpty && <p className="text-[11px] text-gray-600 mt-1 leading-snug">{context}</p>}
-      {isEmpty && <p className="text-[11px] text-gray-700 mt-1">No sessions yet</p>}
+      {context && !isEmpty && <p className="text-[11px] text-ink-faint mt-1 leading-snug">{context}</p>}
+      {isEmpty && <p className="text-[11px] text-ink-faint mt-1">No sessions yet</p>}
     </div>
   )
 }

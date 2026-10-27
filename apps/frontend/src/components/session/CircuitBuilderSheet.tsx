@@ -103,7 +103,7 @@ export function CircuitBuilderSheet({
   return (
     <BottomSheet open={open} onClose={onClose} title={isTemplate ? 'New template circuit' : 'New circuit'} maxHeight="90vh">
       <div className="px-4 pb-6 space-y-5">
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-ink-faint">
           Pick the exercises for your box — you'll do one set of each per round, in this order.
         </p>
 
@@ -117,7 +117,7 @@ export function CircuitBuilderSheet({
 
           {/* Reps */}
           <div className="space-y-3">
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center">Reps</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-subtle text-center">Reps</p>
             <div className="flex justify-center">
               <NumberField value={reps} onChange={setReps} min={1} max={50} label="Reps / set" allowEmpty />
             </div>
@@ -126,7 +126,7 @@ export function CircuitBuilderSheet({
           {/* Weight — a shared starting weight + optional per-set ramp. Only the
               start and step are stored; each live set expands from the previous. */}
           <div className="space-y-3">
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center">Weight</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-subtle text-center">Weight</p>
             <div className="flex items-start justify-center gap-5">
               <NumberField
                 value={weight}
@@ -149,7 +149,7 @@ export function CircuitBuilderSheet({
               />
             </div>
             {weightStep !== 0 && weight != null && (
-              <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
+              <p className="text-center text-sm text-ink-muted font-mono tracking-wide">
                 {weightRampSequence(weight, weightStep, rounds ?? 1).join(' · ')} {weightUnit}
               </p>
             )}
@@ -189,7 +189,7 @@ export function CircuitBuilderSheet({
                 'h-full flex items-center gap-1.5 px-3 rounded-xl border text-xs font-medium transition-colors',
                 bodyPart
                   ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                  : 'border-surface-border text-gray-400 hover:text-gray-200',
+                  : 'border-surface-border text-ink-muted hover:text-gray-200',
               )}
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5" aria-hidden>
@@ -229,7 +229,7 @@ export function CircuitBuilderSheet({
           {isLoading ? (
             <div className="flex justify-center py-8"><Spinner className="text-command-blue" /></div>
           ) : list.length === 0 ? (
-            <p className="text-sm text-gray-600 text-center py-8">
+            <p className="text-sm text-ink-faint text-center py-8">
               {bodyPart ? `No ${niceBodyPart(bodyPart).toLowerCase()} resistance exercises found.` : 'No resistance exercises found.'}
             </p>
           ) : (
@@ -256,7 +256,7 @@ export function CircuitBuilderSheet({
                   </span>
                   <span className="flex-1 text-sm text-gray-200 truncate">{ex.name}</span>
                   {ex.bodyPart && (
-                    <span className="text-[10px] text-gray-600 capitalize shrink-0">{ex.bodyPart.name.replace('_', ' ')}</span>
+                    <span className="text-[10px] text-ink-faint capitalize shrink-0">{ex.bodyPart.name.replace('_', ' ')}</span>
                   )}
                 </button>
               )
@@ -277,7 +277,7 @@ export function CircuitBuilderSheet({
             'w-full py-4 rounded-xl font-display text-lg uppercase tracking-wide',
             interactions.button.base,
             interactions.button.press,
-            canCreate ? 'bg-command-blue text-white' : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
+            canCreate ? 'bg-command-blue text-white' : 'bg-surface border border-surface-border text-ink-faint cursor-not-allowed',
           )}
         >
           {pending

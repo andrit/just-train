@@ -51,7 +51,7 @@ function TemplateCard({
         {template.name}
       </p>
       {template.description && (
-        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{template.description}</p>
+        <p className="text-xs text-ink-subtle mt-1 line-clamp-2">{template.description}</p>
       )}
     </button>
   )
@@ -74,7 +74,7 @@ function ClientSelector({
     ...(clients ?? []),
   ]
 
-  if (isLoading) return <Spinner size="sm" className="text-gray-500" />
+  if (isLoading) return <Spinner size="sm" className="text-ink-subtle" />
 
   return (
     <div className="space-y-2">
@@ -94,7 +94,7 @@ function ClientSelector({
           )}
         >
           <div className="w-8 h-8 rounded-full bg-brand-accent flex items-center justify-center shrink-0">
-            <span className="text-xs font-bold text-gray-400">
+            <span className="text-xs font-bold text-ink-muted">
               {c.name.slice(0, 2).toUpperCase()}
             </span>
           </div>
@@ -102,7 +102,7 @@ function ClientSelector({
             <p className={cn('text-sm font-medium', selected === c.id ? 'text-white' : 'text-gray-300')}>
               {c.isSelf ? 'My Training' : c.name}
             </p>
-            <p className="text-xs text-gray-600">{c.progressionState}</p>
+            <p className="text-xs text-ink-faint">{c.progressionState}</p>
           </div>
           {selected === c.id && (
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-command-blue shrink-0">
@@ -232,7 +232,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => setView('main')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 mb-6"
+          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-6"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -263,7 +263,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => setView('main')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 mb-6"
+          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-6"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -288,8 +288,8 @@ export default function SessionLauncherPage(): React.JSX.Element {
         ) : !templates || templates.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-2xl mb-3">📄</p>
-            <p className="text-gray-400 text-sm">No templates yet.</p>
-            <p className="text-gray-600 text-xs mt-1">
+            <p className="text-ink-muted text-sm">No templates yet.</p>
+            <p className="text-ink-faint text-xs mt-1">
               Create templates in the Templates section to use them here.
             </p>
           </div>
@@ -332,7 +332,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 mb-4"
+          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-4"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -360,7 +360,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 mb-4"
+          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-4"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -372,7 +372,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
           {displayCta}
         </h1>
         {clientName && (
-          <p className="text-sm text-gray-500 mt-1">Training: {clientName}</p>
+          <p className="text-sm text-ink-subtle mt-1">Training: {clientName}</p>
         )}
       </div>
 
@@ -382,7 +382,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-200">Training</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-ink-subtle mt-0.5">
                 {selectedClientId ? (selectedClientId === selfClient?.id ? 'Myself' : 'A client') : 'Select who is training'}
               </p>
             </div>
@@ -392,7 +392,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
               className={cn(
                 'px-3 py-1.5 rounded-lg border text-sm transition-all duration-150',
                 selectedClientId
-                  ? 'border-surface-border text-gray-400 hover:text-gray-200'
+                  ? 'border-surface-border text-ink-muted hover:text-gray-200'
                   : 'border-command-blue/40 text-command-blue',
                 interactions.button.base,
                 interactions.button.press,
@@ -440,7 +440,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         {/* Divider */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-surface-border" />
-          <span className="text-xs uppercase tracking-widest text-gray-600">or</span>
+          <span className="text-xs uppercase tracking-widest text-ink-faint">or</span>
           <div className="flex-1 h-px bg-surface-border" />
         </div>
 

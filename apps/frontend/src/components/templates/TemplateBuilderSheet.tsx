@@ -118,7 +118,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-4 border-b border-surface-border shrink-0">
             <button type="button" onClick={handleClose}
-              className="text-gray-500 hover:text-gray-300 text-sm transition-colors">
+              className="text-ink-subtle hover:text-gray-300 text-sm transition-colors">
               {activeId ? 'Done' : 'Cancel'}
             </button>
             <h2 className="text-sm font-medium text-gray-200">
@@ -128,7 +128,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
               type="button"
               onClick={handleSave}
               disabled={!name.trim() || saving}
-              className={cn('text-sm font-medium transition-colors', name.trim() ? 'text-command-blue' : 'text-gray-600')}
+              className={cn('text-sm font-medium transition-colors', name.trim() ? 'text-command-blue' : 'text-ink-faint')}
             >
               {saving ? <Spinner size="sm" /> : (activeId ? 'Update' : 'Create')}
             </button>
@@ -141,27 +141,27 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
             <div className="flex-1 overflow-y-auto p-4 space-y-5">
               {/* Name */}
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider mb-1.5 block">Template name</label>
+                <label className="text-xs text-ink-subtle uppercase tracking-wider mb-1.5 block">Template name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. Push Day A, Full Body Strength…"
-                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
+                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider mb-1.5 block">
-                  Description <span className="text-gray-700 normal-case">(optional)</span>
+                <label className="text-xs text-ink-subtle uppercase tracking-wider mb-1.5 block">
+                  Description <span className="text-ink-faint normal-case">(optional)</span>
                 </label>
                 <textarea
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder="What's this template for?"
                   rows={2}
-                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50 resize-none"
+                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50 resize-none"
                 />
               </div>
 
@@ -169,7 +169,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
               {activeId ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Exercises</p>
+                    <p className="text-xs text-ink-subtle uppercase tracking-wider">Exercises</p>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
@@ -204,7 +204,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                   </div>
 
                   {exercises.length === 0 ? (
-                    <p className="text-center text-sm text-gray-600 py-6">
+                    <p className="text-center text-sm text-ink-faint py-6">
                       No exercises yet — tap "Add exercise" to start building.
                     </p>
                   ) : (
@@ -216,7 +216,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                 </div>
               ) : (
                 <div className="bg-brand-primary rounded-xl border border-surface-border p-3">
-                  <p className="text-xs text-gray-500 leading-relaxed">
+                  <p className="text-xs text-ink-subtle leading-relaxed">
                     Tap "Create" to save the name, then you can add exercises.
                   </p>
                 </div>
@@ -332,7 +332,7 @@ function SortableExerciseItem({ exercise, templateId }: {
   }
 
   const deleteExercise = useDeleteTemplateExercise()
-  const colorClass = WORKOUT_TYPE_COLOR[exercise.workoutType]?.split(' ')[0] ?? 'text-gray-400'
+  const colorClass = WORKOUT_TYPE_COLOR[exercise.workoutType]?.split(' ')[0] ?? 'text-ink-muted'
   const typeLabel  = WORKOUT_TYPE_LABEL[exercise.workoutType] ?? exercise.workoutType
 
   const handleDelete = (): void => {
@@ -353,7 +353,7 @@ function SortableExerciseItem({ exercise, templateId }: {
         {...listeners}
         className={cn(
           'flex items-center justify-center w-6 h-10 rounded-lg shrink-0',
-          'text-gray-600 hover:text-gray-300 cursor-grab active:cursor-grabbing',
+          'text-ink-faint hover:text-gray-300 cursor-grab active:cursor-grabbing',
           'touch-none select-none',
         )}
         aria-label="Drag to reorder"
@@ -377,7 +377,7 @@ function SortableExerciseItem({ exercise, templateId }: {
               {typeLabel}
             </span>
             {(exercise.targetSets || exercise.targetReps || exercise.targetDurationSeconds) && (
-              <span className="text-xs text-gray-600 font-mono">
+              <span className="text-xs text-ink-faint font-mono">
                 {exercise.targetSets ? `${exercise.targetSets}×` : ''}
                 {exercise.targetReps
                   ? exercise.targetReps
@@ -397,7 +397,7 @@ function SortableExerciseItem({ exercise, templateId }: {
           disabled={deleteExercise.isPending}
           className={cn(
             'flex items-center justify-center w-7 h-7 rounded-lg shrink-0',
-            'text-gray-600 hover:text-red-400 hover:bg-red-500/10',
+            'text-ink-faint hover:text-red-400 hover:bg-red-500/10',
             'transition-colors',
             interactions.button.base,
             deleteExercise.isPending && 'opacity-50 pointer-events-none',

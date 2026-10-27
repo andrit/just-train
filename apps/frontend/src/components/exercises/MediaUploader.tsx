@@ -162,16 +162,16 @@ export default function MediaUploader({
         {uploadMutation.isPending ? (
           <div className="flex flex-col items-center gap-2">
             <Spinner size="md" className="text-command-blue" />
-            <p className="text-sm text-gray-400">Uploading…</p>
+            <p className="text-sm text-ink-muted">Uploading…</p>
           </div>
         ) : (
           <>
             <p className="text-2xl mb-2 opacity-40" aria-hidden>📎</p>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-ink-muted">
               Drop a file or{' '}
               <span className="text-command-blue">click to upload</span>
             </p>
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-ink-faint mt-1">
               Images (JPEG, PNG, WebP — 10 MB) · Videos (MP4, WebM — 100 MB)
             </p>
           </>

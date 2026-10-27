@@ -73,7 +73,7 @@ export function ProgressPhotoModal({
           <p className="text-sm text-white font-medium">
             {POSE_LABEL[current.pose] ?? current.pose}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-ink-subtle">
             {new Date(current.createdAt).toLocaleDateString('en-US', {
               month: 'short', day: 'numeric', year: 'numeric',
             })}
@@ -83,7 +83,7 @@ export function ProgressPhotoModal({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className={cn('text-gray-400 hover:text-white p-1', interactions.button.base)}
+          className={cn('text-ink-muted hover:text-white p-1', interactions.button.base)}
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
             <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -131,7 +131,7 @@ export function ProgressPhotoModal({
         {current.caption && (
           <p className="text-sm text-gray-300 mb-1">{current.caption}</p>
         )}
-        <p className="text-xs text-gray-600 text-center">
+        <p className="text-xs text-ink-faint text-center">
           {index + 1} / {allPhotos.length}
         </p>
       </div>

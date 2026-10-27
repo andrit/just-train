@@ -62,7 +62,7 @@ export function SilhouetteAvatar({
         className,
       )}
     >
-      <SilhouetteSVG className={cn(iconSizeClass, 'text-gray-500 mb-0.5')} />
+      <SilhouetteSVG className={cn(iconSizeClass, 'text-ink-subtle mb-0.5')} />
     </div>
   )
 }

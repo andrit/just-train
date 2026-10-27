@@ -75,8 +75,8 @@ export function SnapshotPhotoCapture({
   if (optedOut) {
     return (
       <div className="card p-4 text-center">
-        <p className="text-sm text-gray-500">Photos disabled at client&apos;s request</p>
-        <p className="text-xs text-gray-600 mt-1">Toggle in client settings to enable</p>
+        <p className="text-sm text-ink-subtle">Photos disabled at client&apos;s request</p>
+        <p className="text-xs text-ink-faint mt-1">Toggle in client settings to enable</p>
       </div>
     )
   }
@@ -156,7 +156,7 @@ export function SnapshotPhotoCapture({
                 </div>
 
                 {/* Pose label */}
-                <p className="text-[10px] text-gray-500 text-center mt-1 uppercase tracking-wider">
+                <p className="text-[10px] text-ink-subtle text-center mt-1 uppercase tracking-wider">
                   {pose.label}
                 </p>
 
@@ -172,7 +172,7 @@ export function SnapshotPhotoCapture({
                       'transition-all duration-150',
                       existing.shareable
                         ? 'bg-emerald-500 text-white'
-                        : 'bg-black/50 text-gray-400 hover:text-white',
+                        : 'bg-black/50 text-ink-muted hover:text-white',
                     )}
                   >
                     {existing.shareable ? '👁' : '👁‍🗨'}
@@ -223,12 +223,12 @@ export function SnapshotPhotoCapture({
                   <Spinner size="sm" className="text-command-blue" />
                 ) : (
                   <>
-                    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-gray-600" aria-hidden>
+                    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-ink-faint" aria-hidden>
                       <rect x="2" y="6" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
                       <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="1.5" />
                       <path d="M8 6V5a1 1 0 011-1h6a1 1 0 011 1v1" stroke="currentColor" strokeWidth="1.5" />
                     </svg>
-                    <span className="text-[10px] text-gray-600 uppercase tracking-wider">{pose.label}</span>
+                    <span className="text-[10px] text-ink-faint uppercase tracking-wider">{pose.label}</span>
                   </>
                 )}
               </button>
@@ -238,7 +238,7 @@ export function SnapshotPhotoCapture({
       </div>
 
       {photoSharingPreference === 'share_all' && photos.length > 0 && (
-        <p className="text-xs text-gray-600">All photos are shareable (change in Preferences → Privacy)</p>
+        <p className="text-xs text-ink-faint">All photos are shareable (change in Preferences → Privacy)</p>
       )}
 
       {/* Hidden file input — uses device camera */}

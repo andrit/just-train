@@ -141,7 +141,7 @@ export function NumberField({
 
   return (
     <div className="flex flex-col items-center gap-1.5">
-      {label && <p className="text-[10px] uppercase tracking-widest text-gray-500">{label}</p>}
+      {label && <p className="text-[10px] uppercase tracking-widest text-ink-subtle">{label}</p>}
       <div className="flex items-stretch gap-2">
         <button
           type="button"
@@ -152,7 +152,7 @@ export function NumberField({
           onPointerCancel={endHold}
           onContextMenu={(e) => e.preventDefault()}
           onClick={handleTap(-1)}
-          className="w-9 select-none rounded-xl border border-surface-border text-gray-400 hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
+          className="w-9 select-none rounded-xl border border-surface-border text-ink-muted hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
         >
           <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none"><path d="M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
         </button>
@@ -169,7 +169,7 @@ export function NumberField({
             className={cn('field w-24 text-center text-2xl font-mono font-bold', suffix && 'pr-8', inputClassName)}
           />
           {suffix && (
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-600 pointer-events-none">
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-ink-faint pointer-events-none">
               {suffix}
             </span>
           )}
@@ -184,7 +184,7 @@ export function NumberField({
           onPointerCancel={endHold}
           onContextMenu={(e) => e.preventDefault()}
           onClick={handleTap(1)}
-          className="w-9 select-none rounded-xl border border-surface-border text-gray-400 hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
+          className="w-9 select-none rounded-xl border border-surface-border text-ink-muted hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
         >
           <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
         </button>

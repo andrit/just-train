@@ -96,7 +96,7 @@ export function ReportPreviewModal({
 
         {/* Period + destination */}
         {preview && (
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-ink-subtle">
             Covering: <span className="text-gray-300">{preview.periodLabel}</span>
             {' · '}
             <span className="text-gray-300">{preview.sessionCount} sessions</span>
@@ -108,9 +108,9 @@ export function ReportPreviewModal({
 
         {/* Trainer note — live, no refetch */}
         <div>
-          <label className="block text-xs text-gray-400 mb-1.5">
+          <label className="block text-xs text-ink-muted mb-1.5">
             Add a personal note{' '}
-            <span className="text-gray-600">(optional — appears in the report)</span>
+            <span className="text-ink-faint">(optional — appears in the report)</span>
           </label>
           <textarea
             value={note}
@@ -170,7 +170,7 @@ export function ReportPreviewModal({
           </div>
         )}
         {preview && preview.sessionCount === 0 && (
-          <div className="rounded-lg bg-surface border border-surface-border px-4 py-3 text-sm text-gray-400">
+          <div className="rounded-lg bg-surface border border-surface-border px-4 py-3 text-sm text-ink-muted">
             No sessions found in {preview.periodLabel}. The report cannot be sent.
           </div>
         )}

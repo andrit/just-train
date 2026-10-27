@@ -143,7 +143,7 @@ function ChoiceCard({
           'mb-6 w-28 h-28 md:w-36 md:h-36 flex items-center justify-center rounded-2xl transition-colors duration-300',
           selected
             ? 'text-command-blue bg-command-blue/10'
-            : 'text-gray-400 bg-brand-accent/30',
+            : 'text-ink-muted bg-brand-accent/30',
         )}
       >
         {isLoading
@@ -167,7 +167,7 @@ function ChoiceCard({
         {title}
       </h2>
 
-      <p className="text-sm text-gray-400 mb-6 leading-relaxed max-w-xs">
+      <p className="text-sm text-ink-muted mb-6 leading-relaxed max-w-xs">
         {subtitle}
       </p>
 
@@ -178,7 +178,7 @@ function ChoiceCard({
             <span
               className={cn(
                 'mt-0.5 w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-colors duration-300',
-                selected ? 'bg-command-blue/20 text-command-blue' : 'bg-surface-border text-gray-500',
+                selected ? 'bg-command-blue/20 text-command-blue' : 'bg-surface-border text-ink-subtle',
               )}
               aria-hidden
             >
@@ -186,7 +186,7 @@ function ChoiceCard({
                 <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               </svg>
             </span>
-            <span className={selected ? 'text-gray-300' : 'text-gray-500'}>
+            <span className={selected ? 'text-gray-300' : 'text-ink-subtle'}>
               {point}
             </span>
           </li>
@@ -257,7 +257,7 @@ export default function OnboardingPage(): React.JSX.Element {
                   How will you use
                   <span className="text-command-blue block">Just Train?</span>
                 </h1>
-                <p className="text-gray-400 text-sm">
+                <p className="text-ink-muted text-sm">
                   Choose your path — you can always change this in settings later.
                 </p>
               </>
@@ -267,7 +267,7 @@ export default function OnboardingPage(): React.JSX.Element {
                   Welcome to
                   <span className="text-command-blue block">Just Train</span>
                 </h1>
-                <p className="text-gray-400 text-sm">
+                <p className="text-ink-muted text-sm">
                   Your training, tracked — sessions, progress, and personal records.
                 </p>
               </>
@@ -326,8 +326,8 @@ export default function OnboardingPage(): React.JSX.Element {
 
           {/* Footer note */}
           {OFFER_TRAINER_MODE && (
-            <p className="text-center text-xs text-gray-600 mt-8">
-              Selecting <span className="text-gray-500">Trainer</span> gives you a personal training section too — your own progress is always tracked.
+            <p className="text-center text-xs text-ink-faint mt-8">
+              Selecting <span className="text-ink-subtle">Trainer</span> gives you a personal training section too — your own progress is always tracked.
             </p>
           )}
 

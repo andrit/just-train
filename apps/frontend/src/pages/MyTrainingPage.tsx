@@ -73,7 +73,7 @@ function TabButton({ id, label, active, incomplete, onClick }: {
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
         active
           ? 'text-white border-b-2 border-command-blue'
-          : 'text-gray-500 hover:text-gray-300 border-b-2 border-transparent',
+          : 'text-ink-subtle hover:text-gray-300 border-b-2 border-transparent',
       )}
     >
       {label}
@@ -120,7 +120,7 @@ export default function MyTrainingPage(): React.JSX.Element {
   if (error || !client) {
     return (
       <div className="p-6 text-center">
-        <p className="text-gray-400">Your training profile could not be found.</p>
+        <p className="text-ink-muted">Your training profile could not be found.</p>
       </div>
     )
   }

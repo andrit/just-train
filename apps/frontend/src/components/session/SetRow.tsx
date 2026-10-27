@@ -36,7 +36,7 @@ const OUTCOME_CLASSES: Record<SetOutcome, string> = {
   hit:       'text-emerald-400',
   surpassed: 'text-emerald-300',
   missed:    'text-amber-400',
-  none:      'text-gray-400',
+  none:      'text-ink-muted',
 }
 
 // ── Past set (closed) ─────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ function PastSetRow({
             <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </span>
-        <span className="text-xs text-gray-600 font-mono">{setNumber}</span>
+        <span className="text-xs text-ink-faint font-mono">{setNumber}</span>
       </div>
 
       {/* Actual values */}
@@ -91,7 +91,7 @@ function PastSetRow({
           </span>
         )}
         {set.weight != null && set.reps != null && (
-          <span className="text-gray-600">×</span>
+          <span className="text-ink-faint">×</span>
         )}
         {set.reps != null && (
           <span className={cn(OUTCOME_CLASSES[repsOutcome], 'font-medium')}>
@@ -105,7 +105,7 @@ function PastSetRow({
 
       {/* Target */}
       {(targetReps != null || targetWeight != null) && (
-        <div className="text-xs text-gray-600 font-mono shrink-0">
+        <div className="text-xs text-ink-faint font-mono shrink-0">
           {targetWeight != null && <span>{targetWeight}</span>}
           {targetWeight != null && targetReps != null && <span>×</span>}
           {targetReps != null && <span>{targetReps}</span>}
@@ -168,7 +168,7 @@ function ActiveSetRow({
       {/* Inputs — large for easy mobile tapping */}
       <div className="flex gap-3 mb-4">
         <div className="flex-1">
-          <label className="block text-[10px] uppercase tracking-widest text-gray-500 mb-1.5">
+          <label className="block text-[10px] uppercase tracking-widest text-ink-subtle mb-1.5">
             Weight ({weightUnit})
           </label>
           <input
@@ -180,17 +180,17 @@ function ActiveSetRow({
             className={cn(
               'w-full text-center text-3xl font-mono font-bold',
               'bg-brand-primary border-2 border-surface-border rounded-xl py-3',
-              'text-white placeholder-gray-700',
+              'text-white placeholder-ink-faint',
               'focus:outline-none focus:border-command-blue',
               'transition-colors duration-150',
             )}
           />
         </div>
 
-        <div className="flex items-end pb-3 text-gray-600 font-display text-2xl">×</div>
+        <div className="flex items-end pb-3 text-ink-faint font-display text-2xl">×</div>
 
         <div className="flex-1">
-          <label className="block text-[10px] uppercase tracking-widest text-gray-500 mb-1.5">
+          <label className="block text-[10px] uppercase tracking-widest text-ink-subtle mb-1.5">
             Reps
           </label>
           <input
@@ -204,7 +204,7 @@ function ActiveSetRow({
             className={cn(
               'w-full text-center text-3xl font-mono font-bold',
               'bg-brand-primary border-2 border-surface-border rounded-xl py-3',
-              'text-white placeholder-gray-700',
+              'text-white placeholder-ink-faint',
               'focus:outline-none focus:border-command-blue',
               'transition-colors duration-150',
             )}
@@ -214,7 +214,7 @@ function ActiveSetRow({
 
       {/* Last time context */}
       {lastSet && (
-        <p className="text-xs text-gray-600 text-center mb-4">
+        <p className="text-xs text-ink-faint text-center mb-4">
           Last time: {lastSet.weight != null ? `${lastSet.weight}×` : ''}{lastSet.reps} reps
           {lastSet.rpe != null && ` · RPE ${lastSet.rpe}`}
         </p>
@@ -257,15 +257,15 @@ function FutureSetRow({
     <div className="flex items-center gap-3 px-3 py-2 opacity-30">
       <div className="flex items-center gap-2 shrink-0 w-14">
         <div className="w-5 h-5 rounded-full border border-surface-border shrink-0" />
-        <span className="text-xs text-gray-700 font-mono">{setNumber}</span>
+        <span className="text-xs text-ink-faint font-mono">{setNumber}</span>
       </div>
-      <div className="flex gap-1 text-xs text-gray-700 font-mono">
+      <div className="flex gap-1 text-xs text-ink-faint font-mono">
         {[0, 1, 2].map((i) => (
           <div key={i} className="w-1.5 h-1.5 rounded-full bg-gray-700" />
         ))}
       </div>
       {(targetReps != null || targetWeight != null) && (
-        <div className="text-xs text-gray-700 font-mono ml-auto">
+        <div className="text-xs text-ink-faint font-mono ml-auto">
           {targetWeight != null && <span>{targetWeight}×</span>}
           {targetReps != null && <span>{targetReps}</span>}
         </div>

@@ -55,7 +55,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
         {state === 'loading' && (
           <div>
             <div className="w-8 h-8 border-2 border-command-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-400 text-sm">Verifying your email…</p>
+            <p className="text-ink-muted text-sm">Verifying your email…</p>
           </div>
         )}
 
@@ -69,7 +69,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
             <h1 className="font-display text-xl uppercase tracking-widest text-white mb-2">
               Email verified
             </h1>
-            <p className="text-gray-400 text-sm mb-8">
+            <p className="text-ink-muted text-sm mb-8">
               {/* A change-email link reports the new sign-in address; a plain one just confirms. */}
               {message || 'Your email address has been confirmed.'}
             </p>
@@ -93,7 +93,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
             <h1 className="font-display text-xl uppercase tracking-widest text-white mb-2">
               Link invalid
             </h1>
-            <p className="text-gray-400 text-sm mb-8">
+            <p className="text-ink-muted text-sm mb-8">
               {message || 'This verification link is expired or has already been used.'}
             </p>
             <button
@@ -103,7 +103,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
             >
               Back to Login
             </button>
-            <p className="text-gray-600 text-xs mt-4">
+            <p className="text-ink-faint text-xs mt-4">
               Log in, then request a new link from your dashboard.
             </p>
           </div>

@@ -153,7 +153,7 @@ export function ChallengeForm({
 
         {/* Description (optional) */}
         <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider block mb-1">Description (optional)</label>
+          <label className="text-xs text-ink-subtle uppercase tracking-wider block mb-1">Description (optional)</label>
           <Input
             placeholder="Context, instructions, motivation..."
             value={description}
@@ -163,7 +163,7 @@ export function ChallengeForm({
 
         {/* Metric type */}
         <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider block mb-2">How is progress measured?</label>
+          <label className="text-xs text-ink-subtle uppercase tracking-wider block mb-2">How is progress measured?</label>
           <div className="grid grid-cols-2 gap-1.5">
             {METRIC_OPTIONS.map((opt) => (
               <button
@@ -174,7 +174,7 @@ export function ChallengeForm({
                   'px-3 py-2 rounded-lg text-xs text-left border transition-colors',
                   metricType === opt.value
                     ? 'border-command-blue/40 bg-command-blue/5 text-white'
-                    : 'border-surface-border text-gray-400 hover:text-gray-200 hover:border-gray-500',
+                    : 'border-surface-border text-ink-muted hover:text-gray-200 hover:border-gray-500',
                   interactions.button.base,
                 )}
               >
@@ -189,7 +189,7 @@ export function ChallengeForm({
           <div>
             <label
               htmlFor={`${uid}-exercise`}
-              className="text-xs text-gray-500 uppercase tracking-wider block mb-1"
+              className="text-xs text-ink-subtle uppercase tracking-wider block mb-1"
             >
               Exercise <span className="text-ember-red" aria-hidden>*</span>
             </label>
@@ -234,7 +234,7 @@ export function ChallengeForm({
           </div>
           {metricType !== 'qualitative' && (
             <div className="w-28">
-              <label className="text-xs text-gray-500 uppercase tracking-wider block mb-1">Unit</label>
+              <label className="text-xs text-ink-subtle uppercase tracking-wider block mb-1">Unit</label>
               <select
                 value={targetUnit}
                 onChange={(e) => setTargetUnit(e.target.value)}
@@ -264,7 +264,7 @@ export function ChallengeForm({
         <div>
           <label
             htmlFor={`${uid}-deadline`}
-            className="text-xs text-gray-500 uppercase tracking-wider block mb-1"
+            className="text-xs text-ink-subtle uppercase tracking-wider block mb-1"
           >
             Deadline <span className="text-ember-red" aria-hidden>*</span>
           </label>

@@ -27,7 +27,7 @@ export function GoalsWidget({
           <span className="font-display text-5xl text-white leading-none">
             {activeGoalCount}
           </span>
-          <p className="text-xs text-gray-500 mt-1">active</p>
+          <p className="text-xs text-ink-subtle mt-1">active</p>
         </div>
 
         {achievedThisMonth > 0 && (
@@ -41,7 +41,7 @@ export function GoalsWidget({
       </div>
 
       {activeGoalCount === 0 && (
-        <p className="text-xs text-gray-600 mt-3">
+        <p className="text-xs text-ink-faint mt-3">
           No active goals — add goals from client profiles.
         </p>
       )}

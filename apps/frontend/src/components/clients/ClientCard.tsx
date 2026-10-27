@@ -76,7 +76,7 @@ export function ClientCard({ client }: ClientCardProps): React.JSX.Element {
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-gray-500">
+          <div className="flex items-center gap-3 text-xs text-ink-subtle">
             {/* Focus tag */}
             {client.primaryFocus && (
               <span className="flex items-center gap-1">
@@ -98,7 +98,7 @@ export function ClientCard({ client }: ClientCardProps): React.JSX.Element {
 
         {/* Chevron */}
         <svg
-          className="w-4 h-4 text-gray-600 shrink-0"
+          className="w-4 h-4 text-ink-faint shrink-0"
           viewBox="0 0 16 16"
           fill="none"
           aria-hidden
@@ -109,7 +109,7 @@ export function ClientCard({ client }: ClientCardProps): React.JSX.Element {
 
       {/* No activity hint */}
       {noActivity && (
-        <p className="mt-2 text-[11px] text-gray-600 pl-[60px]">
+        <p className="mt-2 text-[11px] text-ink-faint pl-[60px]">
           No sessions logged yet
         </p>
       )}

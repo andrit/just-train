@@ -107,7 +107,7 @@ function ScoreDot({ value, label }: { value: number | null; label: string }): Re
   if (!value) return null
   const color = value >= 7 ? 'bg-emerald-400' : value >= 4 ? 'bg-amber-400' : 'bg-red-400'
   return (
-    <span className="flex items-center gap-1 text-[10px] text-gray-500">
+    <span className="flex items-center gap-1 text-[10px] text-ink-subtle">
       <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', color)} />
       {label} {value}
     </span>
@@ -165,7 +165,7 @@ function SessionCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             {/* Client name */}
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-0.5">
+            <p className="text-[10px] uppercase tracking-wider text-ink-subtle mb-0.5">
               {clientName}
             </p>
 
@@ -184,7 +184,7 @@ function SessionCard({
               )}
 
               {duration && (
-                <span className="text-xs text-gray-500">{duration}</span>
+                <span className="text-xs text-ink-subtle">{duration}</span>
               )}
 
               {isCompleted && session.energyLevel && (
@@ -207,7 +207,7 @@ function SessionCard({
                   type="button"
                   onClick={onTap}
                   className={cn(
-                    'px-2.5 py-1.5 rounded-lg text-xs text-gray-400 border border-surface-border',
+                    'px-2.5 py-1.5 rounded-lg text-xs text-ink-muted border border-surface-border',
                     'hover:text-gray-200 hover:border-gray-500 transition-colors',
                     interactions.button.base,
                   )}
@@ -245,7 +245,7 @@ function SessionCard({
                     <button
                       type="button"
                       onClick={() => setConfirmCancel(false)}
-                      className="px-2.5 py-1.5 rounded-lg text-xs text-gray-400 border border-surface-border hover:text-gray-200 transition-colors"
+                      className="px-2.5 py-1.5 rounded-lg text-xs text-ink-muted border border-surface-border hover:text-gray-200 transition-colors"
                     >
                       Keep
                     </button>
@@ -269,7 +269,7 @@ function SessionCard({
                     <button
                       type="button"
                       onClick={() => setConfirmCancel(true)}
-                      className="px-2 py-1.5 rounded-lg text-xs text-gray-500 hover:text-red-400 transition-colors"
+                      className="px-2 py-1.5 rounded-lg text-xs text-ink-subtle hover:text-red-400 transition-colors"
                       title="Cancel session"
                     >
                       <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
@@ -296,7 +296,7 @@ function SessionCard({
             {/* No delete here — a list row is for choosing, not for destroying.
                 Deleting lives in the session view you land on after tapping in. */}
             {isCompleted && (
-              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-600">
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-faint">
                 <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
@@ -428,7 +428,7 @@ export default function SessionsPage(): React.JSX.Element {
         {/* Search */}
         <div className="px-4 md:px-6 pb-3">
           <div className="relative">
-            <svg viewBox="0 0 16 16" fill="none" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none">
+            <svg viewBox="0 0 16 16" fill="none" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle pointer-events-none">
               <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" strokeWidth="1.5" />
               <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
@@ -502,7 +502,7 @@ export default function SessionsPage(): React.JSX.Element {
             <p className="text-3xl mb-3" aria-hidden>
               {tab === 'planned' ? '📋' : tab === 'in_progress' ? '🏋️' : '📅'}
             </p>
-            <p className="text-gray-400 font-medium">
+            <p className="text-ink-muted font-medium">
               {search
                 ? 'No sessions match'
                 : tab === 'all'       ? 'No sessions yet'
@@ -527,7 +527,7 @@ export default function SessionsPage(): React.JSX.Element {
           <div key={key}>
             {showMonth && (
               <div className="flex items-center gap-3 mb-3">
-                <span className="font-display text-sm uppercase tracking-widest text-gray-400">
+                <span className="font-display text-sm uppercase tracking-widest text-ink-muted">
                   {monthLabel(monday)}
                 </span>
                 <span className="flex-1 h-px bg-surface-border" />
@@ -535,7 +535,7 @@ export default function SessionsPage(): React.JSX.Element {
             )}
 
             {/* Week label */}
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">{weekLabel(monday)}</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-subtle mb-2">{weekLabel(monday)}</p>
 
             <div className="space-y-2">
               {group.map((session) => (

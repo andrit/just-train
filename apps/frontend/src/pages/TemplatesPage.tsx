@@ -77,7 +77,7 @@ export default function TemplatesPage(): React.JSX.Element {
       <div className="flex items-center justify-between px-4 py-4 border-b border-surface-border shrink-0">
         <div>
           <h1 className="text-lg font-display font-medium text-white">Templates</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Reusable workout programs</p>
+          <p className="text-xs text-ink-subtle mt-0.5">Reusable workout programs</p>
         </div>
         <button
           type="button"
@@ -103,7 +103,7 @@ export default function TemplatesPage(): React.JSX.Element {
       {/* Search */}
       <div className="px-4 pt-3 pb-2 border-b border-surface-border shrink-0">
         <div className="relative">
-          <svg viewBox="0 0 16 16" fill="none" className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 pointer-events-none">
+          <svg viewBox="0 0 16 16" fill="none" className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-faint pointer-events-none">
             <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" strokeWidth="1.5" />
             <path d="M11 11l2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
@@ -112,13 +112,13 @@ export default function TemplatesPage(): React.JSX.Element {
             placeholder="Search by name, description, or muscle group…"
             value={inputValue}
             onChange={e => handleSearchChange(e.target.value)}
-            className="w-full bg-brand-primary border border-surface-border rounded-xl pl-8 pr-8 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-command-blue/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl pl-8 pr-8 py-2 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
           />
           {inputValue && (
             <button
               type="button"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-faint hover:text-gray-300 transition-colors"
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -130,7 +130,7 @@ export default function TemplatesPage(): React.JSX.Element {
         {/* Active search breadcrumb chip */}
         {search && (
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-[10px] text-gray-600 uppercase tracking-wider">Searching for</span>
+            <span className="text-[10px] text-ink-faint uppercase tracking-wider">Searching for</span>
             <button
               type="button"
               onClick={clearSearch}
@@ -142,7 +142,7 @@ export default function TemplatesPage(): React.JSX.Element {
               </svg>
             </button>
             {!isLoading && (
-              <span className="text-[10px] text-gray-600">
+              <span className="text-[10px] text-ink-faint">
                 {(templates ?? []).length} result{(templates ?? []).length !== 1 ? 's' : ''}
               </span>
             )}
@@ -161,7 +161,7 @@ export default function TemplatesPage(): React.JSX.Element {
         ) : (templates ?? []).length === 0 ? (
           <div className="text-center py-12">
             <p className="text-2xl mb-3" aria-hidden>📋</p>
-            <p className="text-gray-400 font-medium">
+            <p className="text-ink-muted font-medium">
               {search ? `No templates found for "${search}"` : 'No templates yet'}
             </p>
             {search ? (
@@ -169,7 +169,7 @@ export default function TemplatesPage(): React.JSX.Element {
                 Clear search
               </button>
             ) : (
-              <p className="text-gray-600 text-sm mt-1">Tap "+ New template" to get started</p>
+              <p className="text-ink-faint text-sm mt-1">Tap "+ New template" to get started</p>
             )}
           </div>
         ) : (
@@ -226,14 +226,14 @@ function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
         <div className="flex-1 min-w-0">
           <p className="font-medium text-gray-100 truncate">{template.name}</p>
           {template.description && (
-            <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{template.description}</p>
+            <p className="text-xs text-ink-subtle mt-0.5 line-clamp-2">{template.description}</p>
           )}
         </div>
         <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-1.5 rounded-lg text-gray-600 hover:text-gray-300 hover:bg-surface-border/30 transition-colors"
+            className="p-1.5 rounded-lg text-ink-faint hover:text-gray-300 hover:bg-surface-border/30 transition-colors"
           >
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
               <circle cx="8" cy="3" r="1.2" />
@@ -273,7 +273,7 @@ function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
                   Delete
                 </button>
                 {!isOnline && (
-                  <p className="px-4 py-2 text-[10px] text-gray-600 border-t border-surface-border">
+                  <p className="px-4 py-2 text-[10px] text-ink-faint border-t border-surface-border">
                     Connect to make changes
                   </p>
                 )}
@@ -282,7 +282,7 @@ function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
           )}
         </div>
       </div>
-      <p className="text-[10px] text-gray-700 mt-3">
+      <p className="text-[10px] text-ink-faint mt-3">
         Created {new Date(template.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
       </p>
     </div>

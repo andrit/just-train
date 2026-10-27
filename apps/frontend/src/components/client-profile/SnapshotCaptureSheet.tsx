@@ -108,7 +108,7 @@ export function SnapshotCaptureSheet({
   return (
     <BottomSheet open={open} onClose={onClose} title="Take a Snapshot" maxHeight="88vh">
       <div className="space-y-6 pb-2">
-        <p className="text-xs text-gray-500 -mt-1">
+        <p className="text-xs text-ink-subtle -mt-1">
           {isFirst
             ? 'Capture your starting baseline. Fill in whatever you have — everything is optional.'
             : 'Record where you are now. Fill in whatever you have — everything is optional.'}
@@ -136,7 +136,7 @@ export function SnapshotCaptureSheet({
         <section className="space-y-5">
           <div>
             <p className="section-label">How you feel</p>
-            <p className="text-[11px] text-gray-600 mt-0.5">
+            <p className="text-[11px] text-ink-faint mt-0.5">
               Move a slider to record it — untouched ones aren&apos;t saved.
             </p>
           </div>
@@ -149,8 +149,8 @@ export function SnapshotCaptureSheet({
 
         {/* Notes */}
         <div>
-          <label className="block text-xs text-gray-500 mb-1.5">
-            Notes <span className="text-gray-700">(optional)</span>
+          <label className="block text-xs text-ink-subtle mb-1.5">
+            Notes <span className="text-ink-faint">(optional)</span>
           </label>
           <textarea
             value={notes}
@@ -206,7 +206,7 @@ function NumberRow({ label, unit, value, onChange, placeholder }: {
           placeholder={placeholder}
           className="field w-24 text-right text-sm"
         />
-        <span className="text-xs text-gray-600 w-8">{unit}</span>
+        <span className="text-xs text-ink-faint w-8">{unit}</span>
       </div>
     </div>
   )

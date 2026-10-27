@@ -49,10 +49,10 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
 
   if (events.length === 0) {
     return (
-      <div className="text-center py-16 text-gray-500 text-sm" role="tabpanel" id="panel-timeline" aria-labelledby="tab-timeline">
+      <div className="text-center py-16 text-ink-subtle text-sm" role="tabpanel" id="panel-timeline" aria-labelledby="tab-timeline">
         <p className="text-2xl mb-3" aria-hidden>📅</p>
         <p>No timeline events yet.</p>
-        <p className="text-xs text-gray-600 mt-1">Sessions, goals and snapshots will appear here.</p>
+        <p className="text-xs text-ink-faint mt-1">Sessions, goals and snapshots will appear here.</p>
       </div>
     )
   }
@@ -106,7 +106,7 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
             </div>
 
             {/* Date */}
-            <p className="text-[10px] text-gray-600 mb-0.5 uppercase tracking-wider">
+            <p className="text-[10px] text-ink-faint mb-0.5 uppercase tracking-wider">
               {event.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
 
@@ -126,7 +126,7 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
                   <p className="text-xs text-command-blue uppercase tracking-wider mb-1">
                     {event.session.status === 'completed' ? 'Session' : event.session.status}
                   </p>
-                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-gray-600">
+                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-ink-faint">
                     <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
@@ -134,7 +134,7 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
                   {event.session.name ?? 'Training Session'}
                 </p>
                 {event.session.energyLevel != null && (
-                  <p className="text-xs text-gray-500 mt-1">Energy {event.session.energyLevel}/10</p>
+                  <p className="text-xs text-ink-subtle mt-1">Energy {event.session.energyLevel}/10</p>
                 )}
               </button>
             ) : event.type === 'goal' ? (
@@ -147,7 +147,7 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
             ) : (
               <div className="card p-3">
                 <p className="text-xs text-sky-400 uppercase tracking-wider mb-1">Snapshot</p>
-                <div className="flex gap-4 text-sm text-gray-400">
+                <div className="flex gap-4 text-sm text-ink-muted">
                   {event.snapshot.weightLbs     && <span>{event.snapshot.weightLbs} lbs</span>}
                   {event.snapshot.energyLevel   && <span>Energy {event.snapshot.energyLevel}/10</span>}
                   {event.snapshot.selfImageScore && <span>Self-image {event.snapshot.selfImageScore}/10</span>}

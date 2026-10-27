@@ -132,7 +132,7 @@ export function AtRiskWidget({
           aria-label="Dismiss alert"
           className={cn(
             'shrink-0 p-1 rounded-lg',
-            'text-gray-600 hover:text-gray-400',
+            'text-ink-faint hover:text-ink-muted',
             interactions.icon.base,
             interactions.icon.hover,
             interactions.icon.press,
@@ -163,7 +163,7 @@ export function AtRiskWidget({
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-gray-300 truncate">{client.name}</p>
-                <p className="text-xs text-gray-600">{lastSessionLabel(client)}</p>
+                <p className="text-xs text-ink-faint">{lastSessionLabel(client)}</p>
               </div>
               <span className={cn('text-[10px] px-1.5 py-0.5 rounded font-medium', colors.badge)}>
                 {hasNoActivity(client) ? 'No sessions' : 'Inactive'}
@@ -176,7 +176,7 @@ export function AtRiskWidget({
           <li>
             <Link
               to="/clients"
-              className="block text-xs text-center text-gray-600 hover:text-gray-400 py-1 transition-colors"
+              className="block text-xs text-center text-ink-faint hover:text-ink-muted py-1 transition-colors"
             >
               +{atRiskClients.length - 3} more — view all clients
             </Link>

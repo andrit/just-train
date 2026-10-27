@@ -23,7 +23,7 @@ function Demo({
     <div className="flex items-start gap-4">
       <div className="w-36 shrink-0">
         <p className="text-xs font-medium text-gray-300">{label}</p>
-        {note && <p className="text-[10px] text-gray-600 mt-0.5">{note}</p>}
+        {note && <p className="text-[10px] text-ink-faint mt-0.5">{note}</p>}
       </div>
       <div className={className}>
         {children}
@@ -41,7 +41,7 @@ export const ButtonInteractions: StoryObj = {
       <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
         Button Interactions
       </h2>
-      <p className="text-xs text-gray-500 mb-6">
+      <p className="text-xs text-ink-subtle mb-6">
         All values come from <code className="text-command-blue">src/lib/interactions.ts</code>.
         Edit that file to change durations, scales, and pulse behavior globally.
       </p>
@@ -114,7 +114,7 @@ export const ButtonInteractions: StoryObj = {
 
         <Demo label="icon button" note="rounded-full, scale on hover">
           <button className={cn(
-            'p-2 text-gray-400',
+            'p-2 text-ink-muted',
             interactions.icon.base,
             interactions.icon.hover,
             interactions.icon.press,
@@ -138,7 +138,7 @@ export const Animations: StoryObj = {
       <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
         Animation Keyframes
       </h2>
-      <p className="text-xs text-gray-500 mb-6">
+      <p className="text-xs text-ink-subtle mb-6">
         All keyframes defined in <code className="text-command-blue">tailwind.config.js</code>.
         Re-trigger by switching away from this story and back.
       </p>
@@ -172,7 +172,7 @@ export const StaggeredList: StoryObj = {
   name: 'Animations / Staggered list entry',
   render: () => (
     <div className="p-6 max-w-xs space-y-3">
-      <p className="text-xs text-gray-500 mb-4">
+      <p className="text-xs text-ink-subtle mb-4">
         Used on dashboard widget stack and client list. Each item delays by 50ms.
       </p>
       {['AtRisk alert', 'Self training', 'Active clients', 'Goals', 'Recent sessions'].map((label, i) => (

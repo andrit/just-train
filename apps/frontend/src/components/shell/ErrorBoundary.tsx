@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <h1 className="font-display text-2xl uppercase tracking-wide text-white mb-2">
           Something went wrong
         </h1>
-        <p className="text-sm text-gray-400 mb-6 max-w-xs">
+        <p className="text-sm text-ink-muted mb-6 max-w-xs">
           An unexpected error occurred. Your data is safe — refresh the page to continue.
         </p>
         {import.meta.env.DEV && this.state.error && (
@@ -123,7 +123,7 @@ export class SessionErrorBoundary extends Component<SessionErrorBoundaryProps, E
         <h2 className="font-display text-xl uppercase tracking-wide text-white mb-2">
           Session error
         </h2>
-        <p className="text-sm text-gray-400 mb-5 max-w-xs">
+        <p className="text-sm text-ink-muted mb-5 max-w-xs">
           The session UI crashed. Your logged sets are safe on the server.
           Try re-opening the session.
         </p>

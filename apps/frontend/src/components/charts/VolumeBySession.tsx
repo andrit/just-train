@@ -26,7 +26,7 @@ export function VolumeBySession({ points }: VolumeBySessionProps): React.JSX.Ele
     return (
       <div className="card p-4">
         <p className="section-label">Volume per session</p>
-        <p className="text-xs text-gray-600 text-center mt-1 py-6">
+        <p className="text-xs text-ink-faint text-center mt-1 py-6">
           No volume logged yet — complete a session to see your trend.
         </p>
       </div>
@@ -43,9 +43,9 @@ export function VolumeBySession({ points }: VolumeBySessionProps): React.JSX.Ele
       <div className="flex items-baseline justify-between gap-3">
         <p className="section-label">Volume per session</p>
         {sel && (
-          <p className="text-xs text-gray-400 tabular-nums">
+          <p className="text-xs text-ink-muted tabular-nums">
             <span className="text-gray-200 font-medium">{sel.volume.toLocaleString()}</span>
-            <span className="text-gray-600"> lbs · </span>
+            <span className="text-ink-faint"> lbs · </span>
             {formatDate(sel.date)}
           </p>
         )}
@@ -86,7 +86,7 @@ export function VolumeBySession({ points }: VolumeBySessionProps): React.JSX.Ele
 
       {/* Time axis — just the ends, recessive */}
       {points.length > 1 && (
-        <div className="flex justify-between mt-1.5 text-[10px] text-gray-600 tabular-nums">
+        <div className="flex justify-between mt-1.5 text-[10px] text-ink-faint tabular-nums">
           <span>{formatDate(points[0].date)}</span>
           <span>{formatDate(points[points.length - 1].date)}</span>
         </div>

@@ -14,7 +14,7 @@ export default function TermsPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="text-xs text-gray-500 hover:text-gray-300 uppercase tracking-widest mb-8 flex items-center gap-2 transition-colors"
+          className="text-xs text-ink-subtle hover:text-gray-300 uppercase tracking-widest mb-8 flex items-center gap-2 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -25,13 +25,13 @@ export default function TermsPage(): React.JSX.Element {
         <h1 className="font-display text-3xl uppercase tracking-wide text-white mb-2">
           Terms of Service
         </h1>
-        <p className="text-xs text-gray-500 mb-10">Last updated: [DATE — PLACEHOLDER]</p>
+        <p className="text-xs text-ink-subtle mb-10">Last updated: [DATE — PLACEHOLDER]</p>
 
         <div className="space-y-10 text-sm leading-relaxed">
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">1. Acceptance</h2>
-            <p className="text-gray-400">
+            <p className="text-ink-muted">
               By creating an account and using this service, you agree to these Terms of Service
               and our Privacy Policy. If you do not agree, do not use the service.
             </p>
@@ -39,7 +39,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">2. Description of service</h2>
-            <p className="text-gray-400">
+            <p className="text-ink-muted">
               This app is a training log and coaching management tool for athletes and personal
               trainers. It allows you to record training sessions, track progress over time,
               manage client relationships, and generate training reports. The service is provided
@@ -49,7 +49,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">3. Your account</h2>
-            <ul className="list-disc list-inside space-y-1.5 text-gray-400">
+            <ul className="list-disc list-inside space-y-1.5 text-ink-muted">
               <li>You are responsible for maintaining the security of your account credentials.</li>
               <li>You must be at least 16 years old to create an account.</li>
               <li>You may not share your account with others or create accounts on behalf of others without their consent.</li>
@@ -59,8 +59,8 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">4. Acceptable use</h2>
-            <p className="mb-3 text-gray-400">You agree not to:</p>
-            <ul className="list-disc list-inside space-y-1.5 text-gray-400">
+            <p className="mb-3 text-ink-muted">You agree not to:</p>
+            <ul className="list-disc list-inside space-y-1.5 text-ink-muted">
               <li>Use the service for any unlawful purpose.</li>
               <li>Attempt to gain unauthorised access to any part of the service or its infrastructure.</li>
               <li>Upload content that infringes intellectual property rights or contains malware.</li>
@@ -70,7 +70,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">5. Client data (Trainer accounts)</h2>
-            <p className="text-gray-400">
+            <p className="text-ink-muted">
               If you use the service to manage client training data, you are responsible for
               obtaining appropriate consent from those clients to collect and process their
               personal information. You act as a data controller for your clients' data.
@@ -81,7 +81,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">6. Subscription and billing</h2>
-            <p className="text-gray-400 italic">
+            <p className="text-ink-muted italic">
               [PLACEHOLDER — complete before SaaS launch. Include: free tier limits, paid tier
               pricing, billing cycle, what happens on non-payment, refund policy, cancellation
               terms, how active client count is calculated for Trainer billing.]
@@ -90,7 +90,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">7. Service availability</h2>
-            <p className="text-gray-400">
+            <p className="text-ink-muted">
               We aim to keep the service available but do not guarantee uninterrupted access.
               We may perform maintenance, updates, or experience downtime outside our control.
               The service is provided "as is" without warranty of any kind.
@@ -99,7 +99,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">8. Your data</h2>
-            <p className="text-gray-400">
+            <p className="text-ink-muted">
               You own the training data you create. We do not claim ownership of your content.
               You grant us a limited licence to store and process your data solely to provide
               the service. See our Privacy Policy for full details on how your data is handled.
@@ -108,7 +108,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">9. Termination</h2>
-            <p className="text-gray-400">
+            <p className="text-ink-muted">
               You may delete your account at any time. We may suspend or terminate accounts
               that violate these terms. On termination, your data will be deleted in accordance
               with our Privacy Policy retention schedule.
@@ -117,7 +117,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">10. Limitation of liability</h2>
-            <p className="text-gray-400 italic">
+            <p className="text-ink-muted italic">
               [PLACEHOLDER — add limitation of liability and disclaimer clauses before launch.
               Have these reviewed by a lawyer, especially if operating across multiple jurisdictions.]
             </p>
@@ -125,7 +125,7 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">11. Changes to these terms</h2>
-            <p className="text-gray-400">
+            <p className="text-ink-muted">
               We may update these terms from time to time. We will notify you of material
               changes by email or by a notice in the app. Continued use after the effective
               date of changes constitutes acceptance.
@@ -134,14 +134,14 @@ export default function TermsPage(): React.JSX.Element {
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">12. Governing law</h2>
-            <p className="text-gray-400 italic">
+            <p className="text-ink-muted italic">
               [PLACEHOLDER — specify jurisdiction before launch.]
             </p>
           </section>
 
           <section>
             <h2 className="font-display text-xs uppercase tracking-widest text-command-blue mb-3">13. Contact</h2>
-            <p className="text-gray-400 italic">
+            <p className="text-ink-muted italic">
               [PLACEHOLDER — add contact details before launch.]
             </p>
           </section>

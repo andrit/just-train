@@ -72,7 +72,7 @@ export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: 
 
   const boxClass = cn(
     'text-center font-mono font-bold rounded-xl',
-    'bg-brand-primary border-2 border-surface-border text-white placeholder-gray-700',
+    'bg-brand-primary border-2 border-surface-border text-white placeholder-ink-faint',
     'focus:outline-none focus:border-command-blue transition-colors',
     size === 'lg' ? 'text-3xl py-3 w-24' : 'text-2xl py-2 w-20',
   )
@@ -80,7 +80,7 @@ export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: 
   return (
     <div className="flex flex-col items-center gap-1.5">
       {label && (
-        <p className="text-[10px] uppercase tracking-widest text-gray-500">{label}</p>
+        <p className="text-[10px] uppercase tracking-widest text-ink-subtle">{label}</p>
       )}
       <div className="flex items-end gap-2">
         <div className="flex flex-col items-center gap-1">
@@ -93,9 +93,9 @@ export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: 
             aria-label="Minutes"
             className={boxClass}
           />
-          <span className="text-[9px] uppercase tracking-wider text-gray-600">min</span>
+          <span className="text-[9px] uppercase tracking-wider text-ink-faint">min</span>
         </div>
-        <span className="font-mono font-bold text-gray-500 pb-5 text-2xl">:</span>
+        <span className="font-mono font-bold text-ink-subtle pb-5 text-2xl">:</span>
         <div className="flex flex-col items-center gap-1">
           <input
             type="text"
@@ -107,7 +107,7 @@ export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: 
             aria-label="Seconds"
             className={boxClass}
           />
-          <span className="text-[9px] uppercase tracking-wider text-gray-600">sec</span>
+          <span className="text-[9px] uppercase tracking-wider text-ink-faint">sec</span>
         </div>
       </div>
     </div>

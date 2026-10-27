@@ -44,7 +44,7 @@ export const Default: Story = {
   args: {} as any,
   render: () => (
     <DrawerDemo title="Exercise Detail">
-      <p className="text-gray-400 text-sm">Drawer content goes here.</p>
+      <p className="text-ink-muted text-sm">Drawer content goes here.</p>
     </DrawerDemo>
   ),
 }
@@ -75,7 +75,7 @@ export const ExerciseDetailContent: Story = {
             { label: 'Added',      value: 'Jan 15, 2025' },
           ].map(({ label, value }) => (
             <div key={label} className="bg-brand-primary rounded-lg px-3 py-2.5">
-              <div className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">
+              <div className="text-xs text-ink-subtle uppercase tracking-wider mb-0.5">
                 {label}
               </div>
               <div className="text-sm text-gray-200 capitalize">{value}</div>
@@ -106,7 +106,7 @@ export const InteractionTest: Story = {
   args: {} as any,
   render: () => (
     <DrawerDemo title="Test Drawer">
-      <p data-testid="drawer-content" className="text-gray-400 text-sm">
+      <p data-testid="drawer-content" className="text-ink-muted text-sm">
         Drawer is open.
       </p>
     </DrawerDemo>

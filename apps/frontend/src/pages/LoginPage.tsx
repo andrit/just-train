@@ -131,7 +131,7 @@ export default function LoginPage(): React.JSX.Element {
           <h1 className="font-display text-4xl tracking-wider uppercase">
             <span className="text-white">Just Train</span>
           </h1>
-          <p className="text-gray-500 mt-2 text-sm">
+          <p className="text-ink-subtle mt-2 text-sm">
             {mode === 'login' ? 'Sign in to your account' : 'Create your account'}
           </p>
         </div>
@@ -220,16 +220,16 @@ export default function LoginPage(): React.JSX.Element {
 
           {mode === 'login' && (
             <p className="text-xs text-center mt-3">
-              <Link to="/forgot-password" className="text-gray-400 hover:text-gray-200 underline underline-offset-2">Forgot your password?</Link>
+              <Link to="/forgot-password" className="text-ink-muted hover:text-gray-200 underline underline-offset-2">Forgot your password?</Link>
             </p>
           )}
 
           {mode === 'register' && (
-            <p className="text-xs text-gray-600 text-center mt-3">
+            <p className="text-xs text-ink-faint text-center mt-3">
               By creating an account you agree to our{' '}
-              <Link to="/terms" className="text-gray-400 hover:text-gray-200 underline underline-offset-2">Terms of Service</Link>
+              <Link to="/terms" className="text-ink-muted hover:text-gray-200 underline underline-offset-2">Terms of Service</Link>
               {' '}and{' '}
-              <Link to="/privacy" className="text-gray-400 hover:text-gray-200 underline underline-offset-2">Privacy Policy</Link>.
+              <Link to="/privacy" className="text-ink-muted hover:text-gray-200 underline underline-offset-2">Privacy Policy</Link>.
             </p>
           )}
         </form>

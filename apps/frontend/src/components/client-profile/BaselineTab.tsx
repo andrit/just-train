@@ -48,15 +48,15 @@ function SnapshotCard({
   ].filter((r) => r.value !== null)
 
   if (rows.length === 0) {
-    return <p className="text-sm text-gray-600">No measurements recorded in this snapshot.</p>
+    return <p className="text-sm text-ink-faint">No measurements recorded in this snapshot.</p>
   }
 
   return (
     <div className="card overflow-hidden">
       <div className="px-3 py-2 bg-brand-accent/30 border-b border-surface-border">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-ink-subtle">
           {new Date(snapshot.capturedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-          {compareSnapshot && <span className="ml-2 text-gray-600">· vs. baseline</span>}
+          {compareSnapshot && <span className="ml-2 text-ink-faint">· vs. baseline</span>}
         </p>
       </div>
       <div className="divide-y divide-surface-border">
@@ -64,7 +64,7 @@ function SnapshotCard({
           const d = delta(row.value, row.baseline)
           return (
             <div key={row.label} className="flex items-center justify-between px-4 py-2.5">
-              <span className="text-sm text-gray-400">{row.label}</span>
+              <span className="text-sm text-ink-muted">{row.label}</span>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-200 font-mono">
                   {row.value}{row.unit}
@@ -150,7 +150,7 @@ export function BaselineTab({
           </div>
           <div>
             <p className="font-medium text-sm text-white">Take a Snapshot</p>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-ink-subtle mt-0.5">
               {snapshots?.length === 0 ? 'Capture the initial baseline' : 'Record current measurements'}
             </p>
           </div>
@@ -159,10 +159,10 @@ export function BaselineTab({
 
       {/* No snapshots yet */}
       {!latest && (
-        <div className="text-center py-8 text-gray-500 text-sm">
+        <div className="text-center py-8 text-ink-subtle text-sm">
           <p className="text-2xl mb-3" aria-hidden>📏</p>
           <p>No baseline data yet.</p>
-          <p className="text-xs text-gray-600 mt-1">Take the first snapshot to start tracking progress.</p>
+          <p className="text-xs text-ink-faint mt-1">Take the first snapshot to start tracking progress.</p>
         </div>
       )}
 
@@ -180,8 +180,8 @@ export function BaselineTab({
           <h3 className="section-label">History</h3>
           <div className="space-y-2">
             {snapshots.slice(1).map((snap) => (
-              <div key={snap.id} className="card p-3 text-sm text-gray-400">
-                <p className="text-xs text-gray-600 mb-1">
+              <div key={snap.id} className="card p-3 text-sm text-ink-muted">
+                <p className="text-xs text-ink-faint mb-1">
                   {new Date(snap.capturedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   {' · '}
                   <span>{labels.progressionState[snap.progressionState] ?? snap.progressionState}</span>

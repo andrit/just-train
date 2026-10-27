@@ -64,7 +64,7 @@ function RepsModeToggle({ mode, onMode }: { mode: RepsMode; onMode: (v: RepsMode
             'flex-1 py-1.5 rounded-xl text-xs font-medium border transition-all',
             mode === m
               ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-              : 'border-surface-border text-gray-500 hover:text-gray-300',
+              : 'border-surface-border text-ink-subtle hover:text-gray-300',
           )}
         >
           {REPS_MODE_LABEL[m]}
@@ -93,7 +93,7 @@ function RampInputs({ start, step, sets, onStart, onStep }: {
         <NumberField value={start} onChange={(v) => onStart(v ?? 1)} min={1} max={100} label="Start" />
         <NumberField value={step} onChange={(v) => onStep(v ?? 0)} min={-50} max={50} label="Step / set" />
       </div>
-      <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
+      <p className="text-center text-sm text-ink-muted font-mono tracking-wide">
         {rampSequence(start, step, sets).join(' · ')}
       </p>
     </div>
@@ -109,7 +109,7 @@ function PerSetRepsInputs({ repsPerSet, onChange }: {
       {repsPerSet.map((r, i) => (
         // eslint-disable-next-line react/no-array-index-key
         <div key={i} className="flex items-center gap-3">
-          <span className="text-xs text-gray-600 font-mono w-10 shrink-0 text-right">
+          <span className="text-xs text-ink-faint font-mono w-10 shrink-0 text-right">
             Set {i + 1}
           </span>
           <input
@@ -126,7 +126,7 @@ function PerSetRepsInputs({ repsPerSet, onChange }: {
             }}
             className="field text-center text-lg font-mono font-bold flex-1"
           />
-          <span className="text-xs text-gray-600 w-8 shrink-0">reps</span>
+          <span className="text-xs text-ink-faint w-8 shrink-0">reps</span>
         </div>
       ))}
     </div>
@@ -138,7 +138,7 @@ function UseLastTimeToggle({ on, onToggle }: { on: boolean; onToggle: (v: boolea
     <label className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-surface-border bg-surface/40 cursor-pointer">
       <div>
         <p className="text-sm text-gray-300">Use last time&rsquo;s weights</p>
-        <p className="text-[11px] text-gray-600">Prefill each set from your last session for this exercise</p>
+        <p className="text-[11px] text-ink-faint">Prefill each set from your last session for this exercise</p>
       </div>
       <button
         type="button"
@@ -187,7 +187,7 @@ function ResistanceTargets({
 
       {/* Reps section */}
       <div className="space-y-3">
-        <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center">Reps</p>
+        <p className="text-[10px] uppercase tracking-widest text-ink-subtle text-center">Reps</p>
         <RepsModeToggle mode={repsMode} onMode={onRepsMode} />
         {repsMode === 'uniform' ? (
           <div className="flex justify-center">
@@ -207,13 +207,13 @@ function ResistanceTargets({
       {useLastWeight ? (
         lastWeights.length > 0 ? (
           <div className="space-y-1">
-            <p className="text-center text-[10px] uppercase tracking-widest text-gray-500">Last time</p>
-            <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
+            <p className="text-center text-[10px] uppercase tracking-widest text-ink-subtle">Last time</p>
+            <p className="text-center text-sm text-ink-muted font-mono tracking-wide">
               {lastWeights.join(' · ')} {weightUnit}
             </p>
           </div>
         ) : (
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-xs text-ink-subtle">
             Weights will prefill from your last session for this exercise.
           </p>
         )
@@ -241,7 +241,7 @@ function ResistanceTargets({
             />
           </div>
           {weightStep !== 0 && weight != null && (
-            <p className="text-center text-sm text-gray-400 font-mono tracking-wide">
+            <p className="text-center text-sm text-ink-muted font-mono tracking-wide">
               {weightRampSequence(weight, weightStep, sets).join(' · ')} {weightUnit}
             </p>
           )}
@@ -270,7 +270,7 @@ function CardioTargets({
 
       {/* Metric picker — multi-select, any combination */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center mb-3">
+        <p className="text-[10px] uppercase tracking-widest text-ink-subtle text-center mb-3">
           Measure by — pick any
         </p>
         <div className="flex gap-2">
@@ -284,7 +284,7 @@ function CardioTargets({
                 'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
                 metrics.has(m)
                   ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                  : 'border-surface-border text-gray-500 hover:text-gray-300',
+                  : 'border-surface-border text-ink-subtle hover:text-gray-300',
               )}
             >
               {m === 'distance' ? '📏 Distance' : m === 'time' ? '⏱ Time' : '🔥 Intensity'}
@@ -296,7 +296,7 @@ function CardioTargets({
       {/* Metric inputs — one per enabled metric */}
       {metrics.has('distance') && (
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center mb-2">Distance (m)</p>
+          <p className="text-[10px] uppercase tracking-widest text-ink-subtle text-center mb-2">Distance (m)</p>
           <input
             type="number"
             inputMode="decimal"
@@ -305,7 +305,7 @@ function CardioTargets({
             placeholder="e.g. 400"
             className="field text-center text-2xl font-mono font-bold w-full"
           />
-          <p className="text-[10px] text-gray-600 text-center mt-1">metres per round</p>
+          <p className="text-[10px] text-ink-faint text-center mt-1">metres per round</p>
         </div>
       )}
 
@@ -317,7 +317,7 @@ function CardioTargets({
 
       {metrics.has('intensity') && (
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center mb-3">Intensity level</p>
+          <p className="text-[10px] uppercase tracking-widest text-ink-subtle text-center mb-3">Intensity level</p>
           <div className="flex gap-2">
             {INTENSITY_OPTIONS.map((level) => (
               <button
@@ -328,7 +328,7 @@ function CardioTargets({
                   'flex-1 py-2.5 rounded-xl text-xs font-medium border capitalize transition-all',
                   intensity === level
                     ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                    : 'border-surface-border text-gray-500 hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:text-gray-300',
                 )}
               >
                 {level}
@@ -370,7 +370,7 @@ function CalisthenicsTargets({
               'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
               mode === m
                 ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-gray-500 hover:text-gray-300',
+                : 'border-surface-border text-ink-subtle hover:text-gray-300',
             )}
           >
             {m === 'reps' ? 'By Reps' : 'By Time'}
@@ -385,7 +385,7 @@ function CalisthenicsTargets({
 
       {mode === 'reps' ? (
         <div className="space-y-3">
-          <p className="text-[10px] uppercase tracking-widest text-gray-500 text-center">Reps</p>
+          <p className="text-[10px] uppercase tracking-widest text-ink-subtle text-center">Reps</p>
           <RepsModeToggle mode={repsMode} onMode={onRepsMode} />
           {repsMode === 'uniform' ? (
             <div className="flex justify-center">
@@ -415,7 +415,7 @@ function StretchTargets({
   return (
     <div className="flex justify-around items-start">
       <DragStepper value={sets} onChange={onSets} min={1} max={6} label="Sets" />
-      <div className="text-2xl text-gray-700 pt-8">×</div>
+      <div className="text-2xl text-ink-faint pt-8">×</div>
       <DragStepper value={duration} onChange={onDuration} min={10} max={120} label="Seconds" />
     </div>
   )
@@ -696,7 +696,7 @@ export function AddExerciseSheet({
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search exercises…"
               autoFocus
-              className="w-full field text-sm placeholder-gray-600"
+              className="w-full field text-sm placeholder-ink-faint"
             />
             {/* Type filter — shows which type is active, tap All to expand */}
             <div className="flex gap-2 mt-2">
@@ -707,7 +707,7 @@ export function AddExerciseSheet({
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize',
                   !showAllTypes
                     ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                    : 'border-surface-border text-gray-500 hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:text-gray-300',
                 )}
               >
                 {workoutType}
@@ -719,7 +719,7 @@ export function AddExerciseSheet({
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all',
                   showAllTypes
                     ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                    : 'border-surface-border text-gray-500 hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:text-gray-300',
                 )}
               >
                 All types
@@ -730,7 +730,7 @@ export function AddExerciseSheet({
           <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-1">
             {isLoading && (
               <div className="flex justify-center py-8">
-                <Spinner size="sm" className="text-gray-500" />
+                <Spinner size="sm" className="text-ink-subtle" />
               </div>
             )}
 
@@ -765,7 +765,7 @@ export function AddExerciseSheet({
                       disabled={isPending}
                       className={cn(
                         'flex-1 py-2 rounded-lg text-xs font-medium',
-                        'text-gray-400 border border-surface-border',
+                        'text-ink-muted border border-surface-border',
                         'hover:text-gray-200 hover:border-gray-500 transition-colors',
                         interactions.button.base,
                         isPending && 'opacity-50 pointer-events-none',
@@ -798,13 +798,13 @@ export function AddExerciseSheet({
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-command-blue">Create "{search.trim()}"</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Added as a draft — fill in details after your session</p>
+                  <p className="text-xs text-ink-subtle mt-0.5">Added as a draft — fill in details after your session</p>
                 </div>
               </button>
             )}
 
             {!isLoading && filtered.length === 0 && !showQuickAdd && (
-              <p className="text-center text-sm text-gray-600 py-8">No exercises found</p>
+              <p className="text-center text-sm text-ink-faint py-8">No exercises found</p>
             )}
           </div>
         </div>
@@ -815,7 +815,7 @@ export function AddExerciseSheet({
           <div className="text-center">
             <p className="font-display text-xl uppercase tracking-wide text-white">{selected?.name}</p>
             {selected?.bodyPart && (
-              <p className="text-sm text-gray-500 mt-1">{selected.bodyPart.name}</p>
+              <p className="text-sm text-ink-subtle mt-1">{selected.bodyPart.name}</p>
             )}
           </div>
 
@@ -859,12 +859,12 @@ export function AddExerciseSheet({
           {!['resistance','cardio','calisthenics','stretching','cooldown'].includes(effectiveType) && (
             <div className="flex justify-around items-start">
               <DragStepper value={targetSets} onChange={setTargetSets} min={1} max={10} label="Sets" />
-              <div className="text-2xl text-gray-700 pt-8">×</div>
+              <div className="text-2xl text-ink-faint pt-8">×</div>
               <DragStepper value={targetReps} onChange={setTargetReps} min={1} max={30} label="Reps" />
             </div>
           )}
 
-          <p className="text-center text-xs text-gray-600">
+          <p className="text-center text-xs text-ink-faint">
             Type a value, or use the − / + steppers
           </p>
 
@@ -886,7 +886,7 @@ export function AddExerciseSheet({
           <button
             type="button"
             onClick={() => setIsConfirming(false)}
-            className="w-full py-2 text-sm text-gray-500 hover:text-gray-300"
+            className="w-full py-2 text-sm text-ink-subtle hover:text-gray-300"
           >
             ← Back to search
           </button>

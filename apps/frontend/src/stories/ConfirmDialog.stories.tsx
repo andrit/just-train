@@ -53,7 +53,7 @@ function ConfirmDemo(props: {
       </Button>
 
       {result !== 'idle' && (
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-ink-muted">
           Result: <span className="text-gray-200 font-medium">{result}</span>
         </p>
       )}

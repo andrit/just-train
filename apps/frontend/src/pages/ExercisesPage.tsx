@@ -38,7 +38,7 @@ const WORKOUT_TYPES = [
   { value: 'cardio',       label: 'Cardio',       color: 'text-sky-400   border-sky-500/60' },
   { value: 'calisthenics', label: 'Calisthenics', color: 'text-emerald-400 border-emerald-500/60' },
   { value: 'stretching',   label: 'Stretching',   color: 'text-violet-400 border-violet-500/60' },
-  { value: 'cooldown',     label: 'Cooldown',     color: 'text-gray-400  border-gray-500/60' },
+  { value: 'cooldown',     label: 'Cooldown',     color: 'text-ink-muted  border-gray-500/60' },
 ] as const
 
 const CATEGORY_CHIPS = [
@@ -112,7 +112,7 @@ export default function ExercisesPage(): React.JSX.Element {
         {/* Search */}
         <div className="px-4 md:px-6 pb-3">
           <div className="relative">
-            <svg viewBox="0 0 16 16" fill="none" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none">
+            <svg viewBox="0 0 16 16" fill="none" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle pointer-events-none">
               <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" strokeWidth="1.5" />
               <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
@@ -225,7 +225,7 @@ export default function ExercisesPage(): React.JSX.Element {
         {/* Result count */}
         {!isLoading && !error && filtered.length > 0 && hasFilters && (
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-ink-subtle">
               {filtered.length} exercise{filtered.length !== 1 ? 's' : ''}
             </p>
             <button
@@ -237,7 +237,7 @@ export default function ExercisesPage(): React.JSX.Element {
                 setCategory('')
                 setDraftsOnly(false)
               }}
-              className="text-xs text-gray-600 hover:text-gray-300"
+              className="text-xs text-ink-faint hover:text-gray-300"
             >
               Clear filters
             </button>
@@ -250,8 +250,8 @@ export default function ExercisesPage(): React.JSX.Element {
             {hasFilters ? (
               <>
                 <p className="text-2xl mb-3" aria-hidden>🔍</p>
-                <p className="text-gray-400 font-medium">No exercises match</p>
-                <p className="text-gray-600 text-sm mt-1">Try adjusting your filters</p>
+                <p className="text-ink-muted font-medium">No exercises match</p>
+                <p className="text-ink-faint text-sm mt-1">Try adjusting your filters</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -269,8 +269,8 @@ export default function ExercisesPage(): React.JSX.Element {
             ) : (
               <>
                 <p className="text-2xl mb-3" aria-hidden>💪</p>
-                <p className="text-gray-400 font-medium">Library is loading</p>
-                <p className="text-gray-600 text-sm mt-1">Run pnpm db:seed to populate the public library</p>
+                <p className="text-ink-muted font-medium">Library is loading</p>
+                <p className="text-ink-faint text-sm mt-1">Run pnpm db:seed to populate the public library</p>
               </>
             )}
           </div>

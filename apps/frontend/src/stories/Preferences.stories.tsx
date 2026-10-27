@@ -42,7 +42,7 @@ export const ToggleSwitch: StoryObj = {
       return (
         <div className="p-6 flex items-center gap-4">
           <Toggle checked={on} onChange={setOn} label="Demo toggle" />
-          <span className="text-sm text-gray-400">{on ? 'On' : 'Off'}</span>
+          <span className="text-sm text-ink-muted">{on ? 'On' : 'Off'}</span>
         </div>
       )
     }
@@ -66,7 +66,7 @@ export const ColorSchemePicker: StoryObj = {
       const [scheme, setScheme] = useState('amber')
       return (
         <div className="p-6 space-y-3">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-ink-subtle">
             Selected: <span className="text-command-blue">{scheme}</span>
           </p>
           <div className="flex gap-2">
@@ -125,7 +125,7 @@ export const TonePicker: StoryObj = {
               <span className={cn('text-sm font-medium', tone === opt.value ? 'text-white' : 'text-gray-300')}>
                 {opt.label}
               </span>
-              <span className="text-xs text-gray-500 font-mono">{opt.example}</span>
+              <span className="text-xs text-ink-subtle font-mono">{opt.example}</span>
             </button>
           ))}
         </div>
@@ -144,7 +144,7 @@ export const CTALabelPicker: StoryObj = {
       const [cta, setCta] = useState('Start Training')
       return (
         <div className="p-6 max-w-xs space-y-3">
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-ink-subtle mb-4">
             Selected: <span className="text-command-blue font-medium">{cta}</span>
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -157,7 +157,7 @@ export const CTALabelPicker: StoryObj = {
                   'px-3 py-2 rounded-xl border text-sm text-left transition-all duration-150',
                   cta === label
                     ? 'border-command-blue/50 bg-command-blue/10 text-white'
-                    : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
+                    : 'border-surface-border bg-surface text-ink-muted hover:border-gray-500 hover:text-gray-300',
                   interactions.button.base, interactions.button.press,
                 )}
               >
@@ -197,23 +197,23 @@ export const WidgetRow: StoryObj = {
           )}
         >
           {/* Hamburger handle */}
-          <div className="flex flex-col gap-[3px] p-1.5 rounded-lg text-gray-600 cursor-grab">
+          <div className="flex flex-col gap-[3px] p-1.5 rounded-lg text-ink-faint cursor-grab">
             {[0, 1, 2].map((i) => (
               <div key={i} className="w-3.5 h-px bg-current rounded-full" />
             ))}
           </div>
           <div className="flex-1 min-w-0">
-            <p className={cn('text-sm font-medium', enabled ? 'text-gray-200' : 'text-gray-500')}>{label}</p>
-            <p className="text-xs text-gray-600 truncate">{desc}</p>
+            <p className={cn('text-sm font-medium', enabled ? 'text-gray-200' : 'text-ink-subtle')}>{label}</p>
+            <p className="text-xs text-ink-faint truncate">{desc}</p>
           </div>
           {!enabled && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-gray-600 uppercase tracking-wider">
+            <span className="text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-ink-faint uppercase tracking-wider">
               Phase 7
             </span>
           )}
         </div>
       ))}
-      <p className="text-xs text-gray-600 text-center pt-1">
+      <p className="text-xs text-ink-faint text-center pt-1">
         Middle row shown in dragging state
       </p>
     </div>

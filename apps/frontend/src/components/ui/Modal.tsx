@@ -118,7 +118,7 @@ export function Modal({
               aria-label="Close dialog"
               className={cn(
                 'w-8 h-8 flex items-center justify-center rounded-lg',
-                'text-gray-500 hover:text-gray-300 hover:bg-surface-raised',
+                'text-ink-subtle hover:text-gray-300 hover:bg-surface-raised',
                 'transition-colors focus-visible:outline-none',
                 'focus-visible:ring-2 focus-visible:ring-command-blue',
               )}

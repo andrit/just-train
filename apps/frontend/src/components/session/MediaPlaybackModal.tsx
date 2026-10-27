@@ -57,14 +57,14 @@ export function MediaPlaybackModal({
             {current.mediaType === 'video' ? 'Video Clip' : 'Photo'}
           </p>
           {current.durationSeconds != null && (
-            <p className="text-xs text-gray-500">{current.durationSeconds}s</p>
+            <p className="text-xs text-ink-subtle">{current.durationSeconds}s</p>
           )}
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className={cn('text-gray-400 hover:text-white p-1', interactions.button.base)}
+          className={cn('text-ink-muted hover:text-white p-1', interactions.button.base)}
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
             <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -123,7 +123,7 @@ export function MediaPlaybackModal({
         {current.caption && (
           <p className="text-sm text-gray-300 mb-1">{current.caption}</p>
         )}
-        <p className="text-xs text-gray-600 text-center">
+        <p className="text-xs text-ink-faint text-center">
           {index + 1} / {media.length}
         </p>
       </div>

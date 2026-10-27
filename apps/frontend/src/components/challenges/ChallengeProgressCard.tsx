@@ -25,7 +25,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   active:    { label: 'Active',    color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
   completed: { label: 'Completed', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
   expired:   { label: 'Expired',   color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-  cancelled: { label: 'Cancelled', color: 'text-gray-500 bg-gray-500/10 border-gray-500/20' },
+  cancelled: { label: 'Cancelled', color: 'text-ink-subtle bg-gray-500/10 border-gray-500/20' },
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export function ChallengeProgressCard({
         <div className="min-w-0 flex-1">
           <p className="font-medium text-sm text-white truncate">{challenge.title}</p>
           {challenge.exercise && (
-            <p className="text-xs text-gray-500 mt-0.5 truncate">
+            <p className="text-xs text-ink-subtle mt-0.5 truncate">
               {challenge.exercise.name}
             </p>
           )}
@@ -103,7 +103,7 @@ export function ChallengeProgressCard({
 
       {/* Stats row */}
       <div className="flex items-center justify-between text-xs">
-        <span className="text-gray-400">
+        <span className="text-ink-muted">
           <span className="font-mono text-gray-200">{challenge.currentValue}</span>
           {' / '}
           <span className="font-mono">{challenge.targetValue}</span>
@@ -111,7 +111,7 @@ export function ChallengeProgressCard({
         </span>
 
         <div className="flex items-center gap-2">
-          <span className="text-gray-600">
+          <span className="text-ink-faint">
             {METRIC_LABEL[challenge.metricType] ?? challenge.metricType}
           </span>
           {challenge.status === 'active' && (
@@ -121,7 +121,7 @@ export function ChallengeProgressCard({
                 ? 'text-red-400'
                 : isUrgent
                   ? 'text-amber-400'
-                  : 'text-gray-500',
+                  : 'text-ink-subtle',
             )}>
               {daysRemaining <= 0 ? 'Due today' : `${daysRemaining}d left`}
             </span>

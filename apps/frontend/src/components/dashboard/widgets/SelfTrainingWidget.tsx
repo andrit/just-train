@@ -72,7 +72,7 @@ export function SelfTrainingWidget({
             )}>
               {PROGRESSION_STATE_LABEL[selfClient.progressionState]}
             </span>
-            <span className="text-xs text-gray-600">
+            <span className="text-xs text-ink-faint">
               {lastSessionLabel(selfClient)}
             </span>
           </div>
@@ -82,7 +82,7 @@ export function SelfTrainingWidget({
       {/* Active goal */}
       {activeGoal && (
         <div className="px-4 py-2.5 border-b border-surface-border">
-          <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-1">
+          <p className="text-[10px] uppercase tracking-widest text-ink-faint mb-1">
             Current Goal
           </p>
           <p className="text-sm text-gray-300 leading-snug">{activeGoal.goal}</p>

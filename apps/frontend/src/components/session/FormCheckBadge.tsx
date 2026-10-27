@@ -20,7 +20,7 @@ export function FormCheckBadge({ count, className }: FormCheckBadgeProps): React
     <span
       className={cn(
         'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full',
-        'text-[10px] font-medium bg-brand-accent/50 border border-surface-border text-gray-400',
+        'text-[10px] font-medium bg-brand-accent/50 border border-surface-border text-ink-muted',
         className,
       )}
       title={`${count} form check ${count === 1 ? 'clip' : 'clips'}`}

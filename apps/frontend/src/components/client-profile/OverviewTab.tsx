@@ -43,7 +43,7 @@ function StatCard({
 }): React.JSX.Element {
   return (
     <div className="card p-3 text-center">
-      <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">{label}</p>
+      <p className="text-[10px] uppercase tracking-widest text-ink-subtle mb-1">{label}</p>
       <p className={cn(
         'text-sm font-medium leading-tight',
         colorClass ? colorClass.split(' ').find((c) => c.startsWith('text-')) : '',
@@ -96,7 +96,7 @@ function GoalRow({
         aria-label="Delete goal"
         className={cn(
           'opacity-0 group-hover:opacity-100 transition-opacity',
-          'text-gray-600 hover:text-red-400',
+          'text-ink-faint hover:text-red-400',
           interactions.icon.base,
           interactions.icon.hover,
           'p-0.5',
@@ -199,14 +199,14 @@ export function OverviewTab({
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-surface-border text-sm text-gray-300">
                 <span aria-hidden>{FOCUS_ICON[primaryFocus]}</span>
                 {FOCUS_LABEL[primaryFocus]}
-                <span className="text-xs text-gray-600 ml-1">Primary</span>
+                <span className="text-xs text-ink-faint ml-1">Primary</span>
               </span>
             )}
             {secondaryFocus && (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-surface-border text-sm text-gray-400">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-surface-border text-sm text-ink-muted">
                 <span aria-hidden>{FOCUS_ICON[secondaryFocus]}</span>
                 {FOCUS_LABEL[secondaryFocus]}
-                <span className="text-xs text-gray-600 ml-1">Secondary</span>
+                <span className="text-xs text-ink-faint ml-1">Secondary</span>
               </span>
             )}
           </div>
@@ -224,7 +224,7 @@ export function OverviewTab({
         <h3 className="section-label">Goals</h3>
 
         {isLoading ? (
-          <Spinner size="sm" className="text-gray-500" />
+          <Spinner size="sm" className="text-ink-subtle" />
         ) : (
           <div className="space-y-2">
             {activeGoals.map((goal) => (
@@ -257,7 +257,7 @@ export function OverviewTab({
                 type="button"
                 onClick={() => setAddingGoal(true)}
                 className={cn(
-                  'flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300 py-1',
+                  'flex items-center gap-2 text-sm text-ink-subtle hover:text-gray-300 py-1',
                   interactions.button.base,
                   'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-command-blue rounded',
                 )}
@@ -269,7 +269,7 @@ export function OverviewTab({
 
             {achievedGoals.length > 0 && (
               <details className="group mt-1">
-                <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-400 list-none flex items-center gap-1 py-1">
+                <summary className="text-xs text-ink-faint cursor-pointer hover:text-ink-muted list-none flex items-center gap-1 py-1">
                   <svg className="w-3 h-3 transition-transform group-open:rotate-90" viewBox="0 0 12 12" fill="none" aria-hidden>
                     <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -277,7 +277,7 @@ export function OverviewTab({
                 </summary>
                 <div className="mt-2 space-y-1.5 pl-2 border-l border-surface-border">
                   {achievedGoals.map((goal) => (
-                    <div key={goal.id} className="flex items-start gap-2 text-sm text-gray-600">
+                    <div key={goal.id} className="flex items-start gap-2 text-sm text-ink-faint">
                       <span className="text-emerald-600 mt-0.5 shrink-0" aria-hidden>✓</span>
                       <span className="line-through">{goal.goal}</span>
                     </div>

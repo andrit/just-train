@@ -25,7 +25,7 @@ export default function ForgotPasswordPage(): React.JSX.Element {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="font-display text-2xl uppercase tracking-widest text-white">Reset password</h1>
-          <p className="text-gray-500 mt-2 text-sm">
+          <p className="text-ink-subtle mt-2 text-sm">
             {sent ? 'Check your inbox' : "Enter your email and we'll send a link"}
           </p>
         </div>
@@ -36,8 +36,8 @@ export default function ForgotPasswordPage(): React.JSX.Element {
               If an account exists for <span className="text-white">{email.trim()}</span>, a reset link is on its way.
               It works for one hour.
             </p>
-            <p className="text-xs text-gray-500">Nothing arrived? Check spam, or try again in a minute.</p>
-            <Link to="/login" className="inline-block text-sm text-gray-400 hover:text-gray-200 underline underline-offset-2">Back to sign in</Link>
+            <p className="text-xs text-ink-subtle">Nothing arrived? Check spam, or try again in a minute.</p>
+            <Link to="/login" className="inline-block text-sm text-ink-muted hover:text-gray-200 underline underline-offset-2">Back to sign in</Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,7 +53,7 @@ export default function ForgotPasswordPage(): React.JSX.Element {
               Send reset link
             </Button>
             <p className="text-xs text-center">
-              <Link to="/login" className="text-gray-400 hover:text-gray-200 underline underline-offset-2">Back to sign in</Link>
+              <Link to="/login" className="text-ink-muted hover:text-gray-200 underline underline-offset-2">Back to sign in</Link>
             </p>
           </form>
         )}

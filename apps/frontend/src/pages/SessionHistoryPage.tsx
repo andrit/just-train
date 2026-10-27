@@ -32,7 +32,7 @@ import { SaveAsTemplateButton }                from '@/components/session/SaveAs
 function ScoreRow({ label, value }: { label: string; value: number }): React.JSX.Element {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-gray-500 w-16 shrink-0">{label}</span>
+      <span className="text-xs text-ink-subtle w-16 shrink-0">{label}</span>
       <div className="flex-1 h-1.5 bg-surface-border rounded-full overflow-hidden">
         <div
           className="h-full bg-command-blue rounded-full"
@@ -89,7 +89,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
   if (!session) {
     return (
       <div className="p-6 text-center">
-        <p className="text-gray-400">Session not found.</p>
+        <p className="text-ink-muted">Session not found.</p>
         <button type="button" onClick={handleBack} className="mt-4 text-sm text-command-blue hover:underline">
           Go back
         </button>
@@ -121,7 +121,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
           <button
             type="button"
             onClick={handleBack}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 transition-colors"
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
               <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -133,13 +133,13 @@ export default function SessionHistoryPage(): React.JSX.Element {
         {/* Session identity */}
         <div className="py-5 border-b border-surface-border flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs text-gray-600 uppercase tracking-wider mb-1">
+            <p className="text-xs text-ink-faint uppercase tracking-wider mb-1">
               {workoutTypeLabels}
             </p>
             <h1 className="font-display text-2xl uppercase tracking-wide text-white">
               {session.name ?? 'Training Session'}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">{formatDateLong(session.date)}</p>
+            <p className="text-sm text-ink-subtle mt-1">{formatDateLong(session.date)}</p>
           </div>
 
           {/* This page is still reached from the client timeline and from the
@@ -159,17 +159,17 @@ export default function SessionHistoryPage(): React.JSX.Element {
         <div className="grid grid-cols-3 gap-3 py-4 border-b border-surface-border">
           <div className="text-center">
             <p className="font-mono text-2xl font-bold text-white">{totalSets}</p>
-            <p className="text-[10px] uppercase tracking-widest text-gray-600 mt-0.5">sets</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-faint mt-0.5">sets</p>
           </div>
           <div className="text-center">
             <p className="font-mono text-2xl font-bold text-white">
               {totalVolume > 0 ? Math.round(totalVolume).toLocaleString() : '—'}
             </p>
-            <p className="text-[10px] uppercase tracking-widest text-gray-600 mt-0.5">lbs</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-faint mt-0.5">lbs</p>
           </div>
           <div className="text-center">
             <p className="font-mono text-2xl font-bold text-white">{duration ?? '—'}</p>
-            <p className="text-[10px] uppercase tracking-widest text-gray-600 mt-0.5">duration</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-faint mt-0.5">duration</p>
           </div>
         </div>
 
@@ -187,7 +187,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
                     <div className="flex items-baseline justify-between mb-2">
                       <p className="text-sm font-medium text-gray-200">{name}</p>
                       {(se.targetSets || se.targetReps || se.targetWeight) && (
-                        <p className="text-xs text-gray-600 font-mono">
+                        <p className="text-xs text-ink-faint font-mono">
                           target{se.targetSets ? ` ${se.targetSets}×` : ''}{se.targetReps ?? ''}{se.targetWeight ? ` @ ${se.targetWeight}` : ''}
                         </p>
                       )}
@@ -195,7 +195,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
 
                     {/* Set rows */}
                     {se.sets.length === 0 ? (
-                      <p className="text-xs text-gray-700 italic pl-1">no sets logged</p>
+                      <p className="text-xs text-ink-faint italic pl-1">no sets logged</p>
                     ) : (
                       <div className="space-y-1.5">
                         {se.sets.map((s, i) => {
@@ -228,7 +228,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
                               </div>
 
                               {/* Set number */}
-                              <span className="text-xs text-gray-600 font-mono w-4 shrink-0">
+                              <span className="text-xs text-ink-faint font-mono w-4 shrink-0">
                                 {i + 1}
                               </span>
 
@@ -250,7 +250,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
 
                               {/* Target */}
                               {(se.targetReps != null || se.targetWeight != null) && (
-                                <span className="text-xs text-gray-700 font-mono ml-auto">
+                                <span className="text-xs text-ink-faint font-mono ml-auto">
                                   /{[
                                     se.targetWeight != null ? `${se.targetWeight}` : null,
                                     se.targetReps   != null ? `${se.targetReps}` : null,
@@ -260,7 +260,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
 
                               {/* RPE */}
                               {s.rpe != null && (
-                                <span className="text-xs text-gray-700">RPE {s.rpe}</span>
+                                <span className="text-xs text-ink-faint">RPE {s.rpe}</span>
                               )}
                             </div>
                           )

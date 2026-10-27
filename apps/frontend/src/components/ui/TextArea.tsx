@@ -67,7 +67,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         )}
 
         {hasHint && (
-          <p id={hintId} className="mt-1.5 text-xs text-gray-500">
+          <p id={hintId} className="mt-1.5 text-xs text-ink-subtle">
             {hint}
           </p>
         )}

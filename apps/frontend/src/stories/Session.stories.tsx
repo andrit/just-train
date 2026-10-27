@@ -164,7 +164,7 @@ export const FullAccordion: StoryObj = {
   name: 'SetRow / Full accordion — 2 past, 1 active, 2 future',
   render: () => (
     <div className="max-w-sm p-4 space-y-2">
-      <p className="text-xs text-gray-500 mb-4">Squat — Resistance · 5 sets</p>
+      <p className="text-xs text-ink-subtle mb-4">Squat — Resistance · 5 sets</p>
       <PastSetRow  setNumber={1} set={makeSet({ reps: 5, weight: 225 })} targetReps={5} targetWeight={225} />
       <PastSetRow  setNumber={2} set={makeSet({ reps: 5, weight: 225, setNumber: 2 })} targetReps={5} targetWeight={225} />
       <ActiveSetRow
@@ -207,7 +207,7 @@ function LiveTimerDemo({ initialSeconds }: { initialSeconds: number }): React.JS
     <div className="relative h-32 bg-brand-primary rounded-xl overflow-hidden">
       <RestTimerBanner timer={mockTimer} />
       <div className="flex items-center justify-center h-full pt-12">
-        <p className="text-gray-600 text-sm">Content below the banner</p>
+        <p className="text-ink-faint text-sm">Content below the banner</p>
       </div>
     </div>
   )
@@ -234,9 +234,9 @@ export const RestTimer_Hidden: StoryObj = {
     const mockTimer = { isRunning: false, remaining: 0, total: 0, start: () => {}, skip: () => {}, progressPct: 0 }
     return (
       <div className="p-4">
-        <p className="text-xs text-gray-500 mb-2">Timer not running — banner is null (hidden):</p>
+        <p className="text-xs text-ink-subtle mb-2">Timer not running — banner is null (hidden):</p>
         <RestTimerBanner timer={mockTimer} />
-        <p className="text-xs text-gray-700">(nothing rendered above)</p>
+        <p className="text-xs text-ink-faint">(nothing rendered above)</p>
       </div>
     )
   },

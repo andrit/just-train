@@ -127,13 +127,13 @@ export function SessionLauncherSheet({
 
         {/* Client name subheading */}
         {clientName && (
-          <p className="text-sm text-gray-500">Training: {clientName}</p>
+          <p className="text-sm text-ink-subtle">Training: {clientName}</p>
         )}
 
         {/* Client selector — trainer mode only */}
         {!mode.hidesClientPicker && (
           <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-widest text-gray-500">Client</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-subtle">Client</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
               {allClients.map((client) => (
                 <button
@@ -182,7 +182,7 @@ export function SessionLauncherSheet({
               ? sessionActive
                 ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
                 : 'bg-command-blue text-white'
-              : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
+              : 'bg-surface border border-surface-border text-ink-faint cursor-not-allowed',
             isLoading && 'opacity-50',
           )}
         >
@@ -202,7 +202,7 @@ export function SessionLauncherSheet({
               openSessionPlan(undefined, selectedClientId)
               onClose()
             }}
-            className="w-full text-center text-sm text-gray-500 hover:text-gray-300 py-2 transition-colors"
+            className="w-full text-center text-sm text-ink-subtle hover:text-gray-300 py-2 transition-colors"
           >
             Or plan a future session →
           </button>
@@ -211,10 +211,10 @@ export function SessionLauncherSheet({
         {/* Templates */}
         {!sessionActive && (templates ?? []).length > 0 && (
           <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-widest text-gray-500">From Template</p>
+            <p className="text-[10px] uppercase tracking-widest text-ink-subtle">From Template</p>
             {templsLoading ? (
               <div className="flex justify-center py-4">
-                <Spinner size="sm" className="text-gray-500" />
+                <Spinner size="sm" className="text-ink-subtle" />
               </div>
             ) : (
               (templates ?? []).map((template) => (
@@ -234,7 +234,7 @@ export function SessionLauncherSheet({
                   )}
                 >
                   <span className="text-sm font-medium text-gray-200 truncate">{template.name}</span>
-                  <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-600 ml-auto shrink-0">
+                  <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-faint ml-auto shrink-0">
                     <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>

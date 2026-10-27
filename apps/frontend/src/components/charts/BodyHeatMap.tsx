@@ -105,7 +105,7 @@ function Figure({ label, regions, fillOf, onRegionTap }: FigureProps): React.JSX
           ))
         })}
       </svg>
-      <span className="shrink-0 text-[10px] uppercase tracking-widest text-gray-500 mt-1">{label}</span>
+      <span className="shrink-0 text-[10px] uppercase tracking-widest text-ink-subtle mt-1">{label}</span>
     </div>
   )
 }

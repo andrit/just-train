@@ -73,7 +73,7 @@ export function ChallengesTab({
             <p className="font-medium text-sm text-white">
               {isSelf ? 'Set a Challenge' : 'New Challenge'}
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-ink-subtle mt-0.5">
               {isSelf ? 'Give yourself a goal with a deadline' : 'Set a measurable goal with a deadline'}
             </p>
           </div>
@@ -94,10 +94,10 @@ export function ChallengesTab({
 
       {/* Empty state */}
       {!isLoading && challenges?.length === 0 && (
-        <div className="text-center py-8 text-gray-500 text-sm">
+        <div className="text-center py-8 text-ink-subtle text-sm">
           <p className="text-2xl mb-3" aria-hidden>🎯</p>
           <p>No challenges yet.</p>
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs text-ink-faint mt-1">
             {isSelf
               ? 'Set your first challenge to track a specific goal.'
               : 'Create a challenge to give this client something concrete to chase.'}
@@ -109,7 +109,7 @@ export function ChallengesTab({
       {completed.length > 0 && (
         <section>
           <details className="group">
-            <summary className="section-label cursor-pointer hover:text-gray-400 list-none flex items-center gap-1">
+            <summary className="section-label cursor-pointer hover:text-ink-muted list-none flex items-center gap-1">
               <svg className="w-3 h-3 transition-transform group-open:rotate-90" viewBox="0 0 12 12" fill="none" aria-hidden>
                 <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -128,7 +128,7 @@ export function ChallengesTab({
       {other.length > 0 && (
         <section>
           <details className="group">
-            <summary className="section-label cursor-pointer hover:text-gray-400 list-none flex items-center gap-1">
+            <summary className="section-label cursor-pointer hover:text-ink-muted list-none flex items-center gap-1">
               <svg className="w-3 h-3 transition-transform group-open:rotate-90" viewBox="0 0 12 12" fill="none" aria-hidden>
                 <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

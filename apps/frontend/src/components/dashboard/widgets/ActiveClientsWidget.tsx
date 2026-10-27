@@ -44,7 +44,7 @@ export function ActiveClientsWidget({ clients }: ActiveClientsWidgetProps): Reac
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <p className="section-label mb-0">Clients</p>
-        <svg className="w-3.5 h-3.5 text-gray-600" viewBox="0 0 16 16" fill="none" aria-hidden>
+        <svg className="w-3.5 h-3.5 text-ink-faint" viewBox="0 0 16 16" fill="none" aria-hidden>
           <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
@@ -52,7 +52,7 @@ export function ActiveClientsWidget({ clients }: ActiveClientsWidgetProps): Reac
       {/* Big number */}
       <div className="flex items-end gap-2 mb-4">
         <span className="font-display text-5xl text-white leading-none">{total}</span>
-        <span className="text-sm text-gray-500 mb-1">
+        <span className="text-sm text-ink-subtle mb-1">
           {activeThisMonth} active this month
         </span>
       </div>

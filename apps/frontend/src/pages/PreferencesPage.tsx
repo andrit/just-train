@@ -57,9 +57,9 @@ function Section({
   return (
     <section className="space-y-4">
       <div>
-        <h2 className="font-display text-xl uppercase tracking-wide text-white">{title}</h2>
+        <h2 className="font-display text-xl uppercase tracking-wide text-ink">{title}</h2>
         {description && (
-          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{description}</p>
+          <p className="text-xs text-ink-subtle mt-0.5 leading-relaxed">{description}</p>
         )}
       </div>
       {children}
@@ -84,11 +84,11 @@ function PrefRow({
     <div className="card p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-200">{label}</p>
-          {hint && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{hint}</p>}
+          <p className="text-sm font-medium text-ink">{label}</p>
+          {hint && <p className="text-xs text-ink-subtle mt-0.5 leading-relaxed">{hint}</p>}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {saving && <Spinner size="sm" className="text-gray-600" />}
+          {saving && <Spinner size="sm" className="text-ink-faint" />}
           {children}
         </div>
       </div>
@@ -208,10 +208,10 @@ function TonePicker({
             interactions.button.press,
           )}
         >
-          <span className={cn('text-sm font-medium', value === opt.value ? 'text-white' : 'text-gray-300')}>
+          <span className={cn('text-sm font-medium', value === opt.value ? 'text-ink' : 'text-ink')}>
             {opt.label}
           </span>
-          <span className="text-xs text-gray-500 font-mono">{opt.example}</span>
+          <span className="text-xs text-ink-subtle font-mono">{opt.example}</span>
         </button>
       ))}
     </div>
@@ -251,7 +251,7 @@ function WidgetRow({
         {...dragHandleProps}
         className={cn(
           'flex flex-col gap-[3px] p-1.5 rounded-lg shrink-0',
-          'text-gray-600 hover:text-gray-400 hover:bg-surface-raised',
+          'text-ink-faint hover:text-ink-muted hover:bg-surface-raised',
           'transition-colors duration-150',
           'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-command-blue',
         )}
@@ -263,15 +263,15 @@ function WidgetRow({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={cn('text-sm font-medium', enabled ? 'text-gray-200' : 'text-gray-500')}>
+        <p className={cn('text-sm font-medium', enabled ? 'text-ink' : 'text-ink-subtle')}>
           {meta.label}
         </p>
-        <p className="text-xs text-gray-600 truncate">{meta.description}</p>
+        <p className="text-xs text-ink-faint truncate">{meta.description}</p>
       </div>
 
       {/* Coming soon badge or availability indicator */}
       {isComingSoon && (
-        <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-gray-600 uppercase tracking-wider">
+        <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-ink-faint uppercase tracking-wider">
           Coming soon
         </span>
       )}
@@ -348,10 +348,10 @@ export default function PreferencesPage(): React.JSX.Element {
 
       {/* Header */}
       <div className="mb-8 animate-slide-up">
-        <h1 className="font-display text-3xl uppercase tracking-wide text-white">
+        <h1 className="font-display text-3xl uppercase tracking-wide text-ink">
           Preferences
         </h1>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-ink-subtle mt-1">
           Changes save automatically
         </p>
       </div>
@@ -371,7 +371,7 @@ export default function PreferencesPage(): React.JSX.Element {
                 onKeyDown={(e) => { if (e.key === 'Enter') nameRef.current?.blur() }}
               />
               {nameSaving && (
-                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <p className="text-xs text-ink-subtle mt-1 flex items-center gap-1">
                   <Spinner size="sm" /> Saving…
                 </p>
               )}
@@ -379,8 +379,8 @@ export default function PreferencesPage(): React.JSX.Element {
 
             <div className="flex items-center justify-between pt-2 border-t border-surface-border">
               <div>
-                <p className="text-sm font-medium text-gray-200">Weight unit</p>
-                <p className="text-xs text-gray-500">Used as default across all sessions</p>
+                <p className="text-sm font-medium text-ink">Weight unit</p>
+                <p className="text-xs text-ink-subtle">Used as default across all sessions</p>
               </div>
               <div className="flex gap-1 p-0.5 rounded-lg bg-brand-primary border border-surface-border">
                 {(['lbs', 'kg'] as const).map((unit) => (
@@ -392,7 +392,7 @@ export default function PreferencesPage(): React.JSX.Element {
                       'px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150',
                       trainer?.weightUnitPreference === unit
                         ? 'bg-command-blue text-white'
-                        : 'text-gray-500 hover:text-gray-300',
+                        : 'text-ink-subtle hover:text-ink',
                       interactions.button.base,
                       interactions.button.press,
                     )}
@@ -403,7 +403,7 @@ export default function PreferencesPage(): React.JSX.Element {
               </div>
             </div>
             {saving.weightUnitPreference && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                 <Spinner size="sm" /> Saving…
               </p>
             )}
@@ -418,12 +418,12 @@ export default function PreferencesPage(): React.JSX.Element {
         <Section title="Appearance">
           <div className="card p-4">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-medium text-gray-200">Theme</p>
-              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-gray-600 uppercase tracking-wider">
+              <p className="text-sm font-medium text-ink">Theme</p>
+              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-ink-faint uppercase tracking-wider">
                 Coming soon
               </span>
             </div>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-ink-subtle mb-3">
               Light and dark themes are on the way. The app is dark for now.
             </p>
             <div className="flex gap-1 p-0.5 rounded-lg bg-brand-primary border border-surface-border opacity-50">
@@ -435,7 +435,7 @@ export default function PreferencesPage(): React.JSX.Element {
                   aria-disabled="true"
                   className={cn(
                     'flex-1 px-3 py-1.5 rounded-md text-xs font-medium cursor-not-allowed',
-                    opt === 'Dark' ? 'bg-command-blue text-white' : 'text-gray-500',
+                    opt === 'Dark' ? 'bg-command-blue text-white' : 'text-ink-subtle',
                   )}
                 >
                   {opt}
@@ -461,8 +461,8 @@ export default function PreferencesPage(): React.JSX.Element {
               <div>
                 {/* Narrowed to trainer by the guard above, so the athlete
                     variants of this copy and styling are unreachable. */}
-                <p className="text-sm font-medium text-gray-200">Trainer Mode</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-sm font-medium text-ink">Trainer Mode</p>
+                <p className="text-xs text-ink-subtle mt-0.5">
                   Client management + personal training
                 </p>
               </div>
@@ -470,7 +470,7 @@ export default function PreferencesPage(): React.JSX.Element {
                 trainer
               </span>
             </div>
-            <p className="text-xs text-gray-600 mt-3">
+            <p className="text-xs text-ink-faint mt-3">
               New accounts are athlete-only. Your trainer features are unaffected.
             </p>
           </div>
@@ -486,8 +486,8 @@ export default function PreferencesPage(): React.JSX.Element {
           <div className="card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-200">Session layout</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-sm font-medium text-ink">Session layout</p>
+                <p className="text-xs text-ink-subtle mt-0.5">
                   How workout blocks are arranged during a live session
                 </p>
               </div>
@@ -502,7 +502,7 @@ export default function PreferencesPage(): React.JSX.Element {
                       'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 capitalize',
                       (trainer?.sessionLayout ?? 'horizontal') === layout
                         ? 'bg-command-blue text-white'
-                        : 'text-gray-500 hover:text-gray-300',
+                        : 'text-ink-subtle hover:text-ink',
                       interactions.button.base,
                       interactions.button.press,
                     )}
@@ -513,7 +513,7 @@ export default function PreferencesPage(): React.JSX.Element {
               </div>
             </div>
             {saving.sessionLayout && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                 <Spinner size="sm" /> Saving…
               </p>
             )}
@@ -523,8 +523,8 @@ export default function PreferencesPage(): React.JSX.Element {
           <div className="card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-200">Weekly session target</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-sm font-medium text-ink">Weekly session target</p>
+                <p className="text-xs text-ink-subtle mt-0.5">
                   Used for your consistency score
                 </p>
               </div>
@@ -532,20 +532,20 @@ export default function PreferencesPage(): React.JSX.Element {
                 <button
                   type="button"
                   onClick={() => save('weeklySessionTarget', Math.max(1, (trainer?.weeklySessionTarget ?? 3) - 1))}
-                  className="w-7 h-7 rounded-lg border border-surface-border text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                  className="w-7 h-7 rounded-lg border border-surface-border text-ink-muted hover:text-ink hover:border-gray-500 transition-colors flex items-center justify-center"
                 >−</button>
-                <span className="font-mono text-white w-4 text-center">
+                <span className="font-mono text-ink w-4 text-center">
                   {trainer?.weeklySessionTarget ?? 3}
                 </span>
                 <button
                   type="button"
                   onClick={() => save('weeklySessionTarget', Math.min(14, (trainer?.weeklySessionTarget ?? 3) + 1))}
-                  className="w-7 h-7 rounded-lg border border-surface-border text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                  className="w-7 h-7 rounded-lg border border-surface-border text-ink-muted hover:text-ink hover:border-gray-500 transition-colors flex items-center justify-center"
                 >+</button>
               </div>
             </div>
             {saving.weeklySessionTarget && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                 <Spinner size="sm" /> Saving…
               </p>
             )}
@@ -569,8 +569,8 @@ export default function PreferencesPage(): React.JSX.Element {
           {/* PR notification type */}
           <div className="card p-4">
             <div className="mb-3">
-              <p className="text-sm font-medium text-gray-200">Personal record notifications</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-sm font-medium text-ink">Personal record notifications</p>
+              <p className="text-xs text-ink-subtle mt-0.5">
                 Which PR type triggers the celebratory flash during a live session
               </p>
             </div>
@@ -595,16 +595,16 @@ export default function PreferencesPage(): React.JSX.Element {
                       interactions.button.press,
                     )}
                   >
-                    <p className={cn('text-xs font-medium', current === value ? 'text-command-blue' : 'text-gray-300')}>
+                    <p className={cn('text-xs font-medium', current === value ? 'text-command-blue' : 'text-ink')}>
                       {current === value && <span className="mr-1">✓</span>}{label}
                     </p>
-                    <p className="text-[10px] text-gray-600 mt-0.5">{desc}</p>
+                    <p className="text-[10px] text-ink-faint mt-0.5">{desc}</p>
                   </button>
                 )
               })}
             </div>
             {saving.prNotifyType && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                 <Spinner size="sm" /> Saving…
               </p>
             )}
@@ -613,8 +613,8 @@ export default function PreferencesPage(): React.JSX.Element {
           {/* Rest timer duration */}
           <div className="card p-4">
             <div className="mb-3">
-              <p className="text-sm font-medium text-gray-200">Rest timer duration</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-sm font-medium text-ink">Rest timer duration</p>
+              <p className="text-xs text-ink-subtle mt-0.5">
                 How long the rest timer runs after logging a set
               </p>
             </div>
@@ -631,7 +631,7 @@ export default function PreferencesPage(): React.JSX.Element {
                       'flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all duration-150',
                       current === seconds
                         ? 'border-command-blue/50 bg-command-blue/10 text-command-blue'
-                        : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
+                        : 'border-surface-border bg-surface text-ink-muted hover:border-gray-500 hover:text-ink',
                       interactions.button.base,
                       interactions.button.press,
                     )}
@@ -643,7 +643,7 @@ export default function PreferencesPage(): React.JSX.Element {
               })}
             </div>
             {saving.restDurationSeconds && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                 <Spinner size="sm" /> Saving…
               </p>
             )}
@@ -673,8 +673,8 @@ export default function PreferencesPage(): React.JSX.Element {
 
           {/* Timezone */}
           <div className="card p-4">
-            <p className="text-sm font-medium text-gray-200 mb-1">Timezone</p>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-sm font-medium text-ink mb-1">Timezone</p>
+            <p className="text-xs text-ink-subtle mb-3">
               Reports and alerts send at 08:00 in your local time
             </p>
             <select
@@ -706,7 +706,7 @@ export default function PreferencesPage(): React.JSX.Element {
               ))}
             </select>
             {saving.timezone && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                 <Spinner size="sm" /> Saving…
               </p>
             )}
@@ -721,7 +721,7 @@ export default function PreferencesPage(): React.JSX.Element {
         >
           {/* Training button label */}
           <div className="card p-4">
-            <p className="text-sm font-medium text-gray-200 mb-3">Training button label</p>
+            <p className="text-sm font-medium text-ink mb-3">Training button label</p>
             <div className="grid grid-cols-2 gap-2">
               {CTA_LABEL_OPTIONS.map((label) => (
                 <button
@@ -732,8 +732,8 @@ export default function PreferencesPage(): React.JSX.Element {
                   className={cn(
                     'px-3 py-2 rounded-xl border text-sm text-left transition-all duration-150',
                     ctaLabel === label
-                      ? 'border-command-blue/50 bg-command-blue/10 text-white'
-                      : 'border-surface-border bg-surface text-gray-400 hover:border-gray-500 hover:text-gray-300',
+                      ? 'border-command-blue/50 bg-command-blue/10 text-ink'
+                      : 'border-surface-border bg-surface text-ink-muted hover:border-gray-500 hover:text-ink',
                     interactions.button.base,
                     interactions.button.press,
                   )}
@@ -746,7 +746,7 @@ export default function PreferencesPage(): React.JSX.Element {
               ))}
             </div>
             {saving.ctaLabel && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                 <Spinner size="sm" /> Saving…
               </p>
             )}
@@ -755,8 +755,8 @@ export default function PreferencesPage(): React.JSX.Element {
           {/* Widget order */}
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium text-gray-200">Widget order</p>
-              <p className="text-xs text-gray-600">Drag to reorder</p>
+              <p className="text-sm font-medium text-ink">Widget order</p>
+              <p className="text-xs text-ink-faint">Drag to reorder</p>
             </div>
 
             <div className="space-y-2" role="list" aria-label="Dashboard widgets">
@@ -786,7 +786,7 @@ export default function PreferencesPage(): React.JSX.Element {
                 ))}
             </div>
 
-            <p className="text-xs text-gray-700 mt-3">
+            <p className="text-xs text-ink-faint mt-3">
               Greyed-out widgets aren't in your current order. They'll become available in future updates.
             </p>
           </div>
@@ -816,9 +816,9 @@ export default function PreferencesPage(): React.JSX.Element {
           {alertsEnabled && (
             <>
               <div className="card p-4">
-                <p className="text-sm font-medium text-gray-200 mb-3">Alert color</p>
+                <p className="text-sm font-medium text-ink mb-3">Alert color</p>
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-ink-subtle">
                     {alertColorScheme.charAt(0).toUpperCase() + alertColorScheme.slice(1)}
                   </p>
                   <ColorSchemePicker
@@ -827,15 +827,15 @@ export default function PreferencesPage(): React.JSX.Element {
                   />
                 </div>
                 {saving.alertColorScheme && (
-                  <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                  <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                     <Spinner size="sm" /> Saving…
                   </p>
                 )}
               </div>
 
               <div className="card p-4">
-                <p className="text-sm font-medium text-gray-200 mb-1">Message tone</p>
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="text-sm font-medium text-ink mb-1">Message tone</p>
+                <p className="text-xs text-ink-subtle mb-3">
                   How the at-risk alert reads to you
                 </p>
                 <TonePicker
@@ -843,7 +843,7 @@ export default function PreferencesPage(): React.JSX.Element {
                   onChange={(v) => save('alertTone', v)}
                 />
                 {saving.alertTone && (
-                  <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                  <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                     <Spinner size="sm" /> Saving…
                   </p>
                 )}
@@ -860,12 +860,12 @@ export default function PreferencesPage(): React.JSX.Element {
         >
           <div className="card p-4">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-medium text-gray-200">Progress photo sharing</p>
-              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-gray-600 uppercase tracking-wider">
+              <p className="text-sm font-medium text-ink">Progress photo sharing</p>
+              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-ink-faint uppercase tracking-wider">
                 Not yet active
               </span>
             </div>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-ink-subtle mb-3">
               Choose which progress photos would be shareable. The sharing feature isn't available yet — your choice is saved for when it ships.
             </p>
             <div className="space-y-2">
@@ -892,14 +892,14 @@ export default function PreferencesPage(): React.JSX.Element {
                     className="mt-0.5 accent-command-blue"
                   />
                   <div>
-                    <p className="text-sm text-gray-200">{opt.label}</p>
-                    <p className="text-xs text-gray-500">{opt.desc}</p>
+                    <p className="text-sm text-ink">{opt.label}</p>
+                    <p className="text-xs text-ink-subtle">{opt.desc}</p>
                   </div>
                 </label>
               ))}
             </div>
             {saving.photoSharingPreference && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-faint mt-2 flex items-center gap-1">
                 <Spinner size="sm" /> Saving…
               </p>
             )}

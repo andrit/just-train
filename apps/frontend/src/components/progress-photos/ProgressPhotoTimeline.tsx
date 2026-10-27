@@ -43,7 +43,7 @@ export function ProgressPhotoTimeline({
       <section>
         <h3 className="section-label">Progress Photos</h3>
         <div className="flex justify-center py-6">
-          <Spinner size="sm" className="text-gray-500" />
+          <Spinner size="sm" className="text-ink-subtle" />
         </div>
       </section>
     )
@@ -76,7 +76,7 @@ export function ProgressPhotoTimeline({
 
         {/* Latest snapshot photos */}
         <div className="space-y-1">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-ink-faint">
             {new Date(latest.capturedAt).toLocaleDateString('en-US', {
               month: 'short', day: 'numeric', year: 'numeric',
             })}
@@ -107,7 +107,7 @@ export function ProgressPhotoTimeline({
         {/* Older snapshot thumbnails */}
         {groups.length > 1 && (
           <details className="group">
-            <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-400 list-none flex items-center gap-1 py-1">
+            <summary className="text-xs text-ink-faint cursor-pointer hover:text-ink-muted list-none flex items-center gap-1 py-1">
               <svg className="w-3 h-3 transition-transform group-open:rotate-90" viewBox="0 0 12 12" fill="none" aria-hidden>
                 <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -116,7 +116,7 @@ export function ProgressPhotoTimeline({
             <div className="mt-2 space-y-3 pl-2 border-l border-surface-border">
               {groups.slice(1).map((group) => (
                 <div key={group.snapshotId}>
-                  <p className="text-xs text-gray-600 mb-1">
+                  <p className="text-xs text-ink-faint mb-1">
                     {new Date(group.capturedAt).toLocaleDateString('en-US', {
                       month: 'short', day: 'numeric', year: 'numeric',
                     })}

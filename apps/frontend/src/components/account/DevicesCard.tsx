@@ -48,10 +48,10 @@ export function DevicesCard(): React.JSX.Element {
     <div className="card p-4 space-y-3">
       <div>
         <p className="text-sm font-medium text-gray-200 mb-1">Devices</p>
-        <p className="text-xs text-gray-500">Where you're signed in. Sign out anything you don't recognise.</p>
+        <p className="text-xs text-ink-subtle">Where you're signed in. Sign out anything you don't recognise.</p>
       </div>
 
-      {isLoading && <p className="text-xs text-gray-600 flex items-center gap-1"><Spinner size="sm" /> Loading…</p>}
+      {isLoading && <p className="text-xs text-ink-faint flex items-center gap-1"><Spinner size="sm" /> Loading…</p>}
       {isError   && <p className="text-sm text-red-400">Couldn't load devices.</p>}
 
       {devices && (
@@ -63,13 +63,13 @@ export function DevicesCard(): React.JSX.Element {
                   {describeUserAgent(d.deviceName)}
                   {d.current && <span className="ml-2 text-[10px] uppercase tracking-wider text-command-blue">this device</span>}
                 </p>
-                <p className="text-xs text-gray-500">Active {formatLastActive(d.lastActiveAt)}</p>
+                <p className="text-xs text-ink-subtle">Active {formatLastActive(d.lastActiveAt)}</p>
               </div>
               <button
                 type="button"
                 onClick={() => handleRevoke(d.deviceId, d.current)}
                 disabled={revoke.isPending}
-                className={cn('shrink-0 text-xs px-2.5 py-1.5 rounded-lg border border-surface-border text-gray-400',
+                className={cn('shrink-0 text-xs px-2.5 py-1.5 rounded-lg border border-surface-border text-ink-muted',
                   'hover:text-red-400 hover:border-red-500/40 transition-colors')}
               >
                 Sign out
@@ -81,7 +81,7 @@ export function DevicesCard(): React.JSX.Element {
 
       {confirmAll ? (
         <div className="flex items-center gap-2">
-          <p className="text-xs text-gray-400 flex-1">Every device, including this one, will need to sign in again.</p>
+          <p className="text-xs text-ink-muted flex-1">Every device, including this one, will need to sign in again.</p>
           <Button variant="secondary" size="sm" onClick={() => setConfirmAll(false)}>Keep</Button>
           <Button variant="danger" size="sm" onClick={() => signOut({ everywhere: true })}>Sign out everywhere</Button>
         </div>

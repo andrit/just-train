@@ -7,6 +7,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Theme — Step 2 sweep: Preferences + muted-grey bulk pass (2026-10-27)
+- The light/dark text sweep is underway. **Preferences** is fully migrated (both tiers). The **muted-grey tier**
+  (`text-gray-400/500/600/700`, `placeholder-gray-*`) is now migrated to the `ink.*` scale **across all ~115
+  remaining files in one vetted bulk pass** — those greys are never solid-accent labels, so the mapping is
+  deterministic (400/500/600 are byte-identical in dark). **Still pending** — the context-sensitive bright tier
+  (`text-white` / `text-gray-100/200/300`), handled per-screen because some are white labels on solid accents
+  that must stay white. Dark unchanged throughout; `tsc` + `eslint` clean.
+
 ### Theme — light palette + global tokenization (Step 0 of light/dark) (2026-10-27)
 - The light theme's palette is designed and locked, and the global `index.css` foundation is tokenized
   (**dark unchanged** — every light-variable's dark value equals the former hex). `signal-yellow` is now

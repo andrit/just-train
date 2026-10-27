@@ -53,7 +53,7 @@ export function AddClientCard({ onClick }: AddClientCardProps): React.JSX.Elemen
           <div className="w-full h-full rounded-full bg-brand-accent/50 border border-dashed border-surface-border flex items-end justify-center overflow-hidden">
             {/* Silhouette */}
             <svg
-              className="w-7 h-7 text-gray-600 mb-0.5"
+              className="w-7 h-7 text-ink-faint mb-0.5"
               viewBox="0 0 24 28"
               fill="currentColor"
               aria-hidden
@@ -84,10 +84,10 @@ export function AddClientCard({ onClick }: AddClientCardProps): React.JSX.Elemen
 
         {/* Text */}
         <div>
-          <p className="font-display text-lg uppercase tracking-wide text-gray-400">
+          <p className="font-display text-lg uppercase tracking-wide text-ink-muted">
             Add Client
           </p>
-          <p className="text-xs text-gray-600 mt-0.5">
+          <p className="text-xs text-ink-faint mt-0.5">
             Start tracking a new client's progress
           </p>
         </div>

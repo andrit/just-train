@@ -91,12 +91,12 @@ function ExerciseHero({
         {/* Placeholder when one type is selected but not available */}
         {mode === 'visualization' && !visualization && (
           <div className="w-full h-full flex items-center justify-center">
-            <p className="text-sm text-gray-600">Diagram coming soon</p>
+            <p className="text-sm text-ink-faint">Diagram coming soon</p>
           </div>
         )}
         {mode === 'demonstration' && !demonstration && (
           <div className="w-full h-full flex items-center justify-center">
-            <p className="text-sm text-gray-600">Video coming soon</p>
+            <p className="text-sm text-ink-faint">Video coming soon</p>
           </div>
         )}
       </div>
@@ -111,7 +111,7 @@ function ExerciseHero({
               'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
               mode === 'visualization'
                 ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-gray-500 hover:text-gray-300',
+                : 'border-surface-border text-ink-subtle hover:text-gray-300',
             )}
           >
             📊 Muscles
@@ -123,7 +123,7 @@ function ExerciseHero({
               'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
               mode === 'demonstration'
                 ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-gray-500 hover:text-gray-300',
+                : 'border-surface-border text-ink-subtle hover:text-gray-300',
             )}
           >
             ▶ Demo
@@ -167,9 +167,9 @@ function SessionPickerSheet({
             <div className="w-2 h-2 rounded-full bg-command-blue shrink-0 animate-pulse" />
             <div>
               <p className="text-sm font-medium text-gray-200">{session.clientName}</p>
-              <p className="text-xs text-gray-500 mt-0.5">Active session</p>
+              <p className="text-xs text-ink-subtle mt-0.5">Active session</p>
             </div>
-            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-gray-600 ml-auto">
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-faint ml-auto">
               <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
@@ -217,7 +217,7 @@ function AddToWorkoutSheet({
         <p className="text-center font-display text-xl uppercase tracking-wide text-white mb-1">
           {exerciseName}
         </p>
-        <p className="text-center text-xs text-gray-500 mb-6">
+        <p className="text-center text-xs text-ink-subtle mb-6">
           {session?.clientName ?? 'Session'} · Active now
         </p>
 
@@ -230,7 +230,7 @@ function AddToWorkoutSheet({
             max={10}
             label="Sets"
           />
-          <div className="text-2xl text-gray-700 pt-8">×</div>
+          <div className="text-2xl text-ink-faint pt-8">×</div>
           <DragStepper
             value={targetReps}
             onChange={setTargetReps}
@@ -240,7 +240,7 @@ function AddToWorkoutSheet({
           />
         </div>
 
-        <p className="text-center text-xs text-gray-600 mb-6">
+        <p className="text-center text-xs text-ink-faint mb-6">
           You'll be taken to the live session to pick the workout block
         </p>
 
@@ -400,7 +400,7 @@ export default function ExerciseDetailPanel({
               {exercise.workoutType}
             </Badge>
             {exercise.category && (
-              <span className="text-[10px] uppercase tracking-wider text-gray-500 border border-surface-border px-2 py-0.5 rounded-full">
+              <span className="text-[10px] uppercase tracking-wider text-ink-subtle border border-surface-border px-2 py-0.5 rounded-full">
                 {exercise.category}
               </span>
             )}
@@ -413,21 +413,21 @@ export default function ExerciseDetailPanel({
         {/* Meta chips */}
         <div className="flex flex-wrap gap-2">
           {exercise.bodyPart && (
-            <span className="text-xs px-3 py-1.5 rounded-full border border-surface-border text-gray-400 capitalize">
+            <span className="text-xs px-3 py-1.5 rounded-full border border-surface-border text-ink-muted capitalize">
               {exercise.bodyPart.name.replace('_', ' ')}
             </span>
           )}
-          <span className="text-xs px-3 py-1.5 rounded-full border border-surface-border text-gray-400">
+          <span className="text-xs px-3 py-1.5 rounded-full border border-surface-border text-ink-muted">
             {EQUIPMENT_LABEL[exercise.equipment] ?? exercise.equipment}
           </span>
           <span className={cn(
             'text-xs px-3 py-1.5 rounded-full border capitalize',
-            DIFFICULTY_COLOR[exercise.difficulty] ?? 'text-gray-400 border-surface-border',
+            DIFFICULTY_COLOR[exercise.difficulty] ?? 'text-ink-muted border-surface-border',
           )}>
             {exercise.difficulty}
           </span>
           {isPublicLibrary && (
-            <span className="text-xs px-3 py-1.5 rounded-full border border-surface-border text-gray-600">
+            <span className="text-xs px-3 py-1.5 rounded-full border border-surface-border text-ink-faint">
               Public library
             </span>
           )}
@@ -437,7 +437,7 @@ export default function ExerciseDetailPanel({
             e.g. cardio/stretching/cooldown or an un-enriched draft) */}
         {(exercise.muscles.primary.length > 0 || exercise.muscles.secondary.length > 0) && (
           <section>
-            <h3 className="text-[10px] uppercase tracking-widest text-gray-500 mb-3">Muscles Worked</h3>
+            <h3 className="text-[10px] uppercase tracking-widest text-ink-subtle mb-3">Muscles Worked</h3>
             <MuscleMap primary={exercise.muscles.primary} secondary={exercise.muscles.secondary} />
             <div className="mt-3 flex flex-wrap gap-1.5">
               {exercise.muscles.primary.map((m) => (
@@ -446,7 +446,7 @@ export default function ExerciseDetailPanel({
                 </span>
               ))}
               {exercise.muscles.secondary.map((m) => (
-                <span key={m} className="text-[11px] px-2 py-0.5 rounded-full border border-surface-border text-gray-400">
+                <span key={m} className="text-[11px] px-2 py-0.5 rounded-full border border-surface-border text-ink-muted">
                   {muscleLabel(m)}
                 </span>
               ))}
@@ -457,7 +457,7 @@ export default function ExerciseDetailPanel({
         {/* Description */}
         {exercise.description && (
           <section>
-            <h3 className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">Description</h3>
+            <h3 className="text-[10px] uppercase tracking-widest text-ink-subtle mb-2">Description</h3>
             <p className="text-sm text-gray-300 leading-relaxed">{exercise.description}</p>
           </section>
         )}
@@ -465,7 +465,7 @@ export default function ExerciseDetailPanel({
         {/* Instructions */}
         {exercise.instructions && (
           <section>
-            <h3 className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">Form Instructions</h3>
+            <h3 className="text-[10px] uppercase tracking-widest text-ink-subtle mb-2">Form Instructions</h3>
             <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{exercise.instructions}</p>
           </section>
         )}
@@ -516,7 +516,7 @@ export default function ExerciseDetailPanel({
               interactions.button.press,
               sessionCount > 0
                 ? 'bg-command-blue text-white'
-                : 'bg-surface border border-surface-border text-gray-600 cursor-not-allowed',
+                : 'bg-surface border border-surface-border text-ink-faint cursor-not-allowed',
             )}
           >
             {sessionCount === 0
@@ -527,7 +527,7 @@ export default function ExerciseDetailPanel({
             }
           </button>
           {sessionCount === 0 && (
-            <p className="text-center text-xs text-gray-600 mt-2">
+            <p className="text-center text-xs text-ink-faint mt-2">
               Start a session to add exercises from the library
             </p>
           )}

@@ -177,7 +177,7 @@ function UserMenuButton({
           'flex flex-col items-center gap-0.5 py-2.5 px-3 min-h-[44px] min-w-[44px] justify-center',
           'text-xs font-medium transition-colors duration-150',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
-          (isPrefsActive || open) ? 'text-command-blue' : 'text-gray-500',
+          (isPrefsActive || open) ? 'text-command-blue' : 'text-ink-subtle',
         )}
       >
         <div className={cn(
@@ -186,7 +186,7 @@ function UserMenuButton({
           'text-[10px] font-bold leading-none',
           (isPrefsActive || open)
             ? 'bg-command-blue/20 border-command-blue/50 text-command-blue'
-            : 'bg-surface-raised border-surface-border text-gray-400',
+            : 'bg-surface-raised border-surface-border text-ink-muted',
         )}>
           {initials}
         </div>
@@ -305,7 +305,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                     'border-b border-surface-border',
                     'text-sm font-medium transition-colors duration-100',
                     'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
-                    isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200',
+                    isActive ? 'text-white' : 'text-ink-muted hover:text-gray-200',
                   )
                 }
               >
@@ -332,7 +332,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-medium text-gray-200 truncate">{trainer.name}</p>
-                <p className="text-[10px] text-gray-500 truncate">{trainer.email}</p>
+                <p className="text-[10px] text-ink-subtle truncate">{trainer.email}</p>
               </div>
             </div>
 
@@ -345,7 +345,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                   'border-b border-surface-border',
                   'text-xs font-medium transition-colors duration-100',
                   'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
-                  isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200',
+                  isActive ? 'text-white' : 'text-ink-muted hover:text-gray-200',
                 )
               }
             >
@@ -366,7 +366,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                   'border-b border-surface-border',
                   'text-xs font-medium transition-colors duration-100',
                   'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
-                  isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200',
+                  isActive ? 'text-white' : 'text-ink-muted hover:text-gray-200',
                 )
               }
             >
@@ -416,7 +416,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               className={cn(
                 'group relative flex items-center gap-3 w-full px-5 py-3',
                 'text-xs font-medium transition-colors duration-100',
-                'text-gray-400 hover:text-red-400',
+                'text-ink-muted hover:text-red-400',
                 'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
               )}
             >
@@ -470,7 +470,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                 'flex flex-col items-center gap-0.5 py-2.5 px-3',
                 'text-xs font-medium transition-colors duration-150',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
-                isActive ? 'text-command-blue' : 'text-gray-500',
+                isActive ? 'text-command-blue' : 'text-ink-subtle',
               )
             }
           >

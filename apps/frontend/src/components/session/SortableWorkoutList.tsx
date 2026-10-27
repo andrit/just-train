@@ -95,7 +95,7 @@ export function SortableWorkoutList({
         <div className="space-y-4">
           {groups.map((group) => (
             <div key={`${group.type}-${group.items[0]?.id ?? ''}`}>
-              <p className="text-[10px] uppercase tracking-widest text-gray-600 font-medium mb-2 px-1">
+              <p className="text-[10px] uppercase tracking-widest text-ink-faint font-medium mb-2 px-1">
                 {WORKOUT_TYPE_LABEL[group.type] ?? group.type}
               </p>
               <WorkoutBlock
@@ -135,7 +135,7 @@ function _SortableExerciseItem({ id, children }: { id: string; children: React.R
         className={cn(
           'absolute -left-1 top-1/2 -translate-y-1/2 z-10',
           'flex items-center justify-center w-6 h-10 rounded-lg',
-          'text-gray-600 hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none select-none',
+          'text-ink-faint hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none select-none',
         )}
         aria-label="Drag to reorder"
       >

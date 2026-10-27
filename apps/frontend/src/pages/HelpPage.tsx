@@ -15,17 +15,17 @@ import type { HelpBlock }     from '@/lib/helpContent'
 
 function Block({ block }: { block: HelpBlock }): React.JSX.Element {
   if (block.kind === 'p') {
-    return <p className="text-gray-400 leading-relaxed mb-3">{block.text}</p>
+    return <p className="text-ink-muted leading-relaxed mb-3">{block.text}</p>
   }
   if (block.kind === 'ul') {
     return (
-      <ul className="list-disc list-inside space-y-1.5 text-gray-400 mb-3">
+      <ul className="list-disc list-inside space-y-1.5 text-ink-muted mb-3">
         {block.items.map((item) => <li key={item}>{item}</li>)}
       </ul>
     )
   }
   return (
-    <ol className="list-decimal list-inside space-y-2 text-gray-400 mb-3">
+    <ol className="list-decimal list-inside space-y-2 text-ink-muted mb-3">
       {block.items.map((item) => <li key={item} className="leading-relaxed">{item}</li>)}
     </ol>
   )
@@ -50,7 +50,7 @@ export default function HelpPage(): React.JSX.Element {
       {/* Header */}
       <div className="mb-4 animate-slide-up">
         <h1 className="font-display text-3xl uppercase tracking-wide text-white">Help</h1>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-ink-subtle mt-1">
           How Just Train works, screen by screen.
         </p>
       </div>
@@ -90,7 +90,7 @@ export default function HelpPage(): React.JSX.Element {
         ))}
       </div>
 
-      <p className="text-[10px] text-gray-600 mt-10">
+      <p className="text-[10px] text-ink-faint mt-10">
         Can’t find an answer here? Reach out from the app store listing or your account email.
       </p>
     </div>

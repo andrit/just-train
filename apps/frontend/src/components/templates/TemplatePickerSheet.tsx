@@ -37,11 +37,11 @@ export function TemplatePickerSheet({
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-surface-border shrink-0">
-          <h2 className="text-sm font-medium text-gray-200">Load template</h2>
+          <h2 className="text-sm font-medium text-ink">Load template</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-ink-subtle hover:text-gray-300 text-sm transition-colors"
+            className="text-ink-subtle hover:text-ink text-sm transition-colors"
           >
             Cancel
           </button>
@@ -54,7 +54,7 @@ export function TemplatePickerSheet({
             placeholder="Search templates…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-ink placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
           />
         </div>
 
@@ -104,7 +104,7 @@ function TemplateRow({ template, onSelect, loading }: {
         interactions.button.press,
       )}
     >
-      <p className="text-sm font-medium text-gray-200">{template.name}</p>
+      <p className="text-sm font-medium text-ink">{template.name}</p>
       {template.description && (
         <p className="text-xs text-ink-subtle mt-0.5 line-clamp-1">{template.description}</p>
       )}

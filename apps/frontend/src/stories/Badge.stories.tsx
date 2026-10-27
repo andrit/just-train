@@ -54,7 +54,7 @@ export const AllVariants: Story = {
 /** Badges are inline — they can sit inside text naturally. */
 export const InlineWithText: Story = {
   render: () => (
-    <p className="text-gray-200 p-4">
+    <p className="text-ink p-4">
       Romanian Deadlift <Badge variant="warning">Draft</Badge> is a{' '}
       <Badge variant="info">Resistance</Badge> exercise targeting{' '}
       <Badge variant="default">Back</Badge>

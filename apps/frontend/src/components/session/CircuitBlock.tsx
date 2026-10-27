@@ -86,7 +86,7 @@ export function CircuitBlock({
           <div key={m.id} className="flex items-center gap-2">
             <span className={cn(
               'text-[11px] truncate flex-1',
-              mi === nextIndex && !isComplete ? 'text-white font-medium' : 'text-ink-subtle',
+              mi === nextIndex && !isComplete ? 'text-ink font-medium' : 'text-ink-subtle',
             )}>
               {m.exercise?.name ?? 'Exercise'}
             </span>
@@ -165,7 +165,7 @@ export function CircuitBlock({
           <button
             type="button"
             onClick={() => restTimer?.skip()}
-            className="px-4 py-3 text-xs text-ink-subtle hover:text-gray-300 border-l border-surface-border transition-colors"
+            className="px-4 py-3 text-xs text-ink-subtle hover:text-ink border-l border-surface-border transition-colors"
           >
             Skip
           </button>

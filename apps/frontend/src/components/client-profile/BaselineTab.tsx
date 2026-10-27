@@ -66,7 +66,7 @@ function SnapshotCard({
             <div key={row.label} className="flex items-center justify-between px-4 py-2.5">
               <span className="text-sm text-ink-muted">{row.label}</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-200 font-mono">
+                <span className="text-sm font-medium text-ink font-mono">
                   {row.value}{row.unit}
                 </span>
                 {d && (
@@ -149,7 +149,7 @@ export function BaselineTab({
             </svg>
           </div>
           <div>
-            <p className="font-medium text-sm text-white">Take a Snapshot</p>
+            <p className="font-medium text-sm text-ink">Take a Snapshot</p>
             <p className="text-xs text-ink-subtle mt-0.5">
               {snapshots?.length === 0 ? 'Capture the initial baseline' : 'Record current measurements'}
             </p>

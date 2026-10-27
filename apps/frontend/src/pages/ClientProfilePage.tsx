@@ -67,8 +67,8 @@ function TabButton({ id, label, active, incomplete, onClick }: {
         'relative flex-1 py-3 text-sm font-medium transition-colors duration-150',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
         active
-          ? 'text-white border-b-2 border-command-blue'
-          : 'text-ink-subtle hover:text-gray-300 border-b-2 border-transparent',
+          ? 'text-ink border-b-2 border-command-blue'
+          : 'text-ink-subtle hover:text-ink border-b-2 border-transparent',
       )}
     >
       {label}
@@ -138,7 +138,7 @@ export default function ClientProfilePage(): React.JSX.Element {
           <button
             type="button"
             onClick={() => navigate('/clients')}
-            className={cn('flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300', interactions.button.base)}
+            className={cn('flex items-center gap-1.5 text-sm text-ink-subtle hover:text-ink', interactions.button.base)}
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4" aria-hidden>
               <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -158,7 +158,7 @@ export default function ClientProfilePage(): React.JSX.Element {
                 'bg-surface border border-surface-border',
                 'transition-all duration-150',
                 (kpis?.sessionsThisMonth ?? 0) > 0
-                  ? 'text-gray-300 hover:border-command-blue/40 hover:text-white'
+                  ? 'text-ink hover:border-command-blue/40 hover:text-ink'
                   : 'text-ink-faint cursor-not-allowed opacity-50',
                 interactions.button.base,
                 interactions.button.press,
@@ -195,8 +195,8 @@ export default function ClientProfilePage(): React.JSX.Element {
               aria-label={`Edit ${client.name}`}
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm',
-                'bg-surface border border-surface-border text-gray-300',
-                'hover:border-command-blue/40 hover:text-white',
+                'bg-surface border border-surface-border text-ink',
+                'hover:border-command-blue/40 hover:text-ink',
                 interactions.button.base,
                 interactions.button.hover,
                 interactions.button.press,
@@ -215,7 +215,7 @@ export default function ClientProfilePage(): React.JSX.Element {
         <div className="flex items-center gap-4 mb-5">
           <SilhouetteAvatar name={client.name} photoUrl={client.photoUrl} size="lg" />
           <div>
-            <h1 className="font-display text-3xl uppercase tracking-wide text-white leading-none">
+            <h1 className="font-display text-3xl uppercase tracking-wide text-ink leading-none">
               {client.name}
             </h1>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">

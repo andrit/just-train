@@ -37,6 +37,8 @@
   --knurl:          138 144 153; /* iron-grey — crosshatch texture lines */
   --knurl-alpha:    0.10;        /* page texture line opacity */
   --ring-offset:    0 0 0;       /* focus-ring offset = the ground behind a focused element */
+  --brand-secondary: 28 28 28;   /* #1C1C1C — card ground (bg-brand-secondary) */
+  --brand-accent:    17 17 17;   /* #111111 — panel/sidebar ground (bg-brand-accent) */
 }
 
 :root[data-theme="light"] {
@@ -55,6 +57,8 @@
   --knurl:          120 113 108;  /* warm stone — faint light engrave */
   --knurl-alpha:    0.07;         /* subtler on light */
   --ring-offset:    250 249 247;  /* light ground behind focused elements */
+  --brand-secondary: 255 255 255; /* white card ground */
+  --brand-accent:    245 245 244; /* #F5F5F4 stone-100 — panel/sidebar ground */
 }
 
 /* ── Base resets ──────────────────────────────────────────────────────────── */

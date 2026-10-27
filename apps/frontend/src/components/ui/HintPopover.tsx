@@ -71,7 +71,7 @@ export function HintPopover({
         onClick={() => setOpen((o) => !o)}
         aria-label={ariaLabel}
         aria-expanded={open}
-        className="w-4 h-4 rounded-full border border-gray-600 text-ink-subtle hover:border-gray-400 hover:text-gray-300 text-[10px] font-bold leading-none flex items-center justify-center transition-colors"
+        className="w-4 h-4 rounded-full border border-gray-600 text-ink-subtle hover:border-gray-400 hover:text-ink text-[10px] font-bold leading-none flex items-center justify-center transition-colors"
       >
         {glyph}
       </button>
@@ -90,7 +90,7 @@ export function HintPopover({
             }}
             className={cn(
               'absolute left-1/2 z-50 w-60 px-3 py-2.5 rounded-xl',
-              'text-xs text-gray-300 leading-relaxed touch-pan-y select-none',
+              'text-xs text-ink leading-relaxed touch-pan-y select-none',
               'bg-brand-primary border border-surface-border shadow-lg',
               side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
               dragging ? 'transition-none' : 'transition-all duration-200',

@@ -62,7 +62,7 @@ export function SelfTrainingWidget({
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="font-display text-lg uppercase tracking-wide text-white">
+          <p className="font-display text-lg uppercase tracking-wide text-ink">
             My Training
           </p>
           <div className="flex items-center gap-2 mt-0.5">
@@ -85,7 +85,7 @@ export function SelfTrainingWidget({
           <p className="text-[10px] uppercase tracking-widest text-ink-faint mb-1">
             Current Goal
           </p>
-          <p className="text-sm text-gray-300 leading-snug">{activeGoal.goal}</p>
+          <p className="text-sm text-ink leading-snug">{activeGoal.goal}</p>
         </div>
       )}
 
@@ -110,8 +110,8 @@ export function SelfTrainingWidget({
           onClick={tapProfile}
           className={cn(
             KEY_CLASSES,
-            'bg-surface-raised border border-surface-border text-gray-300',
-            'hover:border-white/20 hover:text-white',
+            'bg-surface-raised border border-surface-border text-ink',
+            'hover:border-white/20 hover:text-ink',
             profileTapping && 'animate-key-tap',
           )}
           aria-label="View my training profile"

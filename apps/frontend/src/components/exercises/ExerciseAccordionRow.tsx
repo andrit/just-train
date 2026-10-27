@@ -169,7 +169,7 @@ export function ExerciseAccordionRow({
           </svg>
 
           {/* Name */}
-          <span className="text-sm text-gray-200 flex-1 truncate">{exercise.name}</span>
+          <span className="text-sm text-ink flex-1 truncate">{exercise.name}</span>
 
           {/* Tags */}
           {exercise.bodyPart && (

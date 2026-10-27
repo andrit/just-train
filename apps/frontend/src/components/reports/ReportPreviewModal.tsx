@@ -97,11 +97,11 @@ export function ReportPreviewModal({
         {/* Period + destination */}
         {preview && (
           <p className="text-xs text-ink-subtle">
-            Covering: <span className="text-gray-300">{preview.periodLabel}</span>
+            Covering: <span className="text-ink">{preview.periodLabel}</span>
             {' · '}
-            <span className="text-gray-300">{preview.sessionCount} sessions</span>
+            <span className="text-ink">{preview.sessionCount} sessions</span>
             {preview.clientEmail && (
-              <> · Sending to <span className="text-gray-300">{preview.clientEmail}</span></>
+              <> · Sending to <span className="text-ink">{preview.clientEmail}</span></>
             )}
           </p>
         )}

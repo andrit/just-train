@@ -171,8 +171,8 @@ export function SnapshotPhotoCapture({
                       'absolute top-1 left-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px]',
                       'transition-all duration-150',
                       existing.shareable
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-black/50 text-ink-muted hover:text-white',
+                        ? 'bg-emerald-500 text-ink'
+                        : 'bg-black/50 text-ink-muted hover:text-ink',
                     )}
                   >
                     {existing.shareable ? '👁' : '👁‍🗨'}
@@ -185,7 +185,7 @@ export function SnapshotPhotoCapture({
                     type="button"
                     onClick={() => handleCapture(pose.id)}
                     aria-label="Retake photo"
-                    className="text-xs bg-white/20 hover:bg-white/30 text-white rounded px-2 py-1 transition-colors"
+                    className="text-xs bg-white/20 hover:bg-white/30 text-ink rounded px-2 py-1 transition-colors"
                   >
                     ↻
                   </button>
@@ -194,7 +194,7 @@ export function SnapshotPhotoCapture({
                     onClick={() => handleDelete(existing)}
                     disabled={deleteMutation.isPending}
                     aria-label="Delete photo"
-                    className="text-xs bg-red-600/60 hover:bg-red-600 text-white rounded px-2 py-1 transition-colors"
+                    className="text-xs bg-red-600/60 hover:bg-red-600 text-ink rounded px-2 py-1 transition-colors"
                   >
                     ✕
                   </button>

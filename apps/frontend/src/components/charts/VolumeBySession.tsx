@@ -44,7 +44,7 @@ export function VolumeBySession({ points }: VolumeBySessionProps): React.JSX.Ele
         <p className="section-label">Volume per session</p>
         {sel && (
           <p className="text-xs text-ink-muted tabular-nums">
-            <span className="text-gray-200 font-medium">{sel.volume.toLocaleString()}</span>
+            <span className="text-ink font-medium">{sel.volume.toLocaleString()}</span>
             <span className="text-ink-faint"> lbs · </span>
             {formatDate(sel.date)}
           </p>

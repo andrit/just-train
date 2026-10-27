@@ -72,8 +72,8 @@ function TabButton({ id, label, active, incomplete, onClick }: {
         'relative flex-1 py-3 text-sm font-medium transition-colors duration-150',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
         active
-          ? 'text-white border-b-2 border-command-blue'
-          : 'text-ink-subtle hover:text-gray-300 border-b-2 border-transparent',
+          ? 'text-ink border-b-2 border-command-blue'
+          : 'text-ink-subtle hover:text-ink border-b-2 border-transparent',
       )}
     >
       {label}
@@ -158,7 +158,7 @@ export default function MyTrainingPage(): React.JSX.Element {
         <div className="flex items-center gap-4 mb-5">
           <SilhouetteAvatar name={client.name} photoUrl={client.photoUrl} size="lg" />
           <div>
-            <h1 className="font-display text-3xl uppercase tracking-wide text-white leading-none">
+            <h1 className="font-display text-3xl uppercase tracking-wide text-ink leading-none">
               {trainerMode === 'athlete' ? 'Your Training' : client.name}
             </h1>
             <div className="flex items-center gap-2 mt-1.5">

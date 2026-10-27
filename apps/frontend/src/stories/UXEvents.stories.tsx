@@ -28,7 +28,7 @@ function AnimationDemo(): React.JSX.Element {
   return (
     <div className="p-6 max-w-2xl space-y-6">
       <div>
-        <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
+        <h2 className="font-display text-xl uppercase tracking-wide text-ink mb-1">
           UX Event → Animation
         </h2>
         <p className="text-xs text-ink-subtle">
@@ -135,7 +135,7 @@ function SideEffectDemo(): React.JSX.Element {
   return (
     <div className="p-6 max-w-xl space-y-6">
       <div>
-        <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
+        <h2 className="font-display text-xl uppercase tracking-wide text-ink mb-1">
           Side Effect Registry
         </h2>
         <p className="text-xs text-ink-subtle mb-4">
@@ -156,7 +156,7 @@ function SideEffectDemo(): React.JSX.Element {
                 ? 'bg-red-500/10 border-red-500/20 text-red-400'
                 : et === 'achieve' || et === 'success'
                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                : 'bg-surface border-surface-border text-gray-300',
+                : 'bg-surface border-surface-border text-ink',
               interactions.button.base,
               interactions.button.press,
             )}
@@ -197,7 +197,7 @@ function RefHelperDemo(): React.JSX.Element {
 
   return (
     <div className="p-6 max-w-sm space-y-4">
-      <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
+      <h2 className="font-display text-xl uppercase tracking-wide text-ink mb-1">
         useUXEventRef
       </h2>
       <p className="text-xs text-ink-subtle mb-4">
@@ -222,7 +222,7 @@ function RefHelperDemo(): React.JSX.Element {
         type="button"
         onClick={() => fireOnAchieve('achieve', { entity: 'goal' })}
         className={cn(
-          'w-full px-4 py-2.5 rounded-xl text-sm bg-emerald-600 text-white',
+          'w-full px-4 py-2.5 rounded-xl text-sm bg-emerald-600 text-ink',
           interactions.button.base, interactions.button.press,
         )}
       >
@@ -250,7 +250,7 @@ export const EventTaxonomy: StoryObj = {
   name: 'Full event taxonomy',
   render: () => (
     <div className="p-6 max-w-2xl">
-      <h2 className="font-display text-xl uppercase tracking-wide text-white mb-4">
+      <h2 className="font-display text-xl uppercase tracking-wide text-ink mb-4">
         All {UX_EVENT_TYPES.length} event types
       </h2>
       <div className="grid grid-cols-2 gap-1.5">
@@ -261,7 +261,7 @@ export const EventTaxonomy: StoryObj = {
               key={et}
               className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface border border-surface-border"
             >
-              <code className="text-xs text-gray-300">{et}</code>
+              <code className="text-xs text-ink">{et}</code>
               {anim ? (
                 <code className="text-[10px] text-command-blue/70 ml-2 truncate max-w-[120px]">
                   {anim.replace('animate-', '')}

@@ -62,7 +62,7 @@ export const ExerciseDetailContent: Story = {
         </div>
 
         {/* Name */}
-        <h1 className="font-display text-2xl text-gray-100">
+        <h1 className="font-display text-2xl text-ink">
           Romanian Deadlift
         </h1>
 
@@ -78,7 +78,7 @@ export const ExerciseDetailContent: Story = {
               <div className="text-xs text-ink-subtle uppercase tracking-wider mb-0.5">
                 {label}
               </div>
-              <div className="text-sm text-gray-200 capitalize">{value}</div>
+              <div className="text-sm text-ink capitalize">{value}</div>
             </div>
           ))}
         </div>
@@ -86,7 +86,7 @@ export const ExerciseDetailContent: Story = {
         {/* Description */}
         <section>
           <h3 className="field-label mb-2">Description</h3>
-          <p className="text-sm text-gray-300 leading-relaxed">
+          <p className="text-sm text-ink leading-relaxed">
             A hip-hinge movement targeting the posterior chain. Keeps the bar
             close to the body through the full range of motion.
           </p>

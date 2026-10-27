@@ -118,10 +118,10 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-4 border-b border-surface-border shrink-0">
             <button type="button" onClick={handleClose}
-              className="text-ink-subtle hover:text-gray-300 text-sm transition-colors">
+              className="text-ink-subtle hover:text-ink text-sm transition-colors">
               {activeId ? 'Done' : 'Cancel'}
             </button>
-            <h2 className="text-sm font-medium text-gray-200">
+            <h2 className="text-sm font-medium text-ink">
               {templateId ? 'Edit template' : 'New template'}
             </h2>
             <button
@@ -147,7 +147,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. Push Day A, Full Body Strength…"
-                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
+                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
                 />
               </div>
 
@@ -161,7 +161,7 @@ export function TemplateBuilderSheet({ open, templateId, onClose }: TemplateBuil
                   onChange={e => setDescription(e.target.value)}
                   placeholder="What's this template for?"
                   rows={2}
-                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50 resize-none"
+                  className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-faint focus:outline-none focus:border-command-blue/50 resize-none"
                 />
               </div>
 
@@ -353,7 +353,7 @@ function SortableExerciseItem({ exercise, templateId }: {
         {...listeners}
         className={cn(
           'flex items-center justify-center w-6 h-10 rounded-lg shrink-0',
-          'text-ink-faint hover:text-gray-300 cursor-grab active:cursor-grabbing',
+          'text-ink-faint hover:text-ink cursor-grab active:cursor-grabbing',
           'touch-none select-none',
         )}
         aria-label="Drag to reorder"
@@ -371,7 +371,7 @@ function SortableExerciseItem({ exercise, templateId }: {
       {/* Card */}
       <div className="flex-1 bg-brand-primary rounded-xl border border-surface-border px-3 py-2.5 flex items-center justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-200 truncate">{exercise.exercise?.name ?? 'Unknown'}</p>
+          <p className="text-sm text-ink truncate">{exercise.exercise?.name ?? 'Unknown'}</p>
           <div className="flex items-center gap-2 mt-0.5">
             <span className={cn('text-[10px] uppercase tracking-widest font-medium', colorClass)}>
               {typeLabel}

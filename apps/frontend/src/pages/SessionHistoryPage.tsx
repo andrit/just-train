@@ -39,7 +39,7 @@ function ScoreRow({ label, value }: { label: string; value: number }): React.JSX
           style={{ width: `${value * 10}%` }}
         />
       </div>
-      <span className="font-mono text-xs text-gray-300 w-6 text-right">{value}</span>
+      <span className="font-mono text-xs text-ink w-6 text-right">{value}</span>
     </div>
   )
 }
@@ -121,7 +121,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
           <button
             type="button"
             onClick={handleBack}
-            className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-ink transition-colors"
           >
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
               <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -136,7 +136,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
             <p className="text-xs text-ink-faint uppercase tracking-wider mb-1">
               {workoutTypeLabels}
             </p>
-            <h1 className="font-display text-2xl uppercase tracking-wide text-white">
+            <h1 className="font-display text-2xl uppercase tracking-wide text-ink">
               {session.name ?? 'Training Session'}
             </h1>
             <p className="text-sm text-ink-subtle mt-1">{formatDateLong(session.date)}</p>
@@ -158,17 +158,17 @@ export default function SessionHistoryPage(): React.JSX.Element {
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3 py-4 border-b border-surface-border">
           <div className="text-center">
-            <p className="font-mono text-2xl font-bold text-white">{totalSets}</p>
+            <p className="font-mono text-2xl font-bold text-ink">{totalSets}</p>
             <p className="text-[10px] uppercase tracking-widest text-ink-faint mt-0.5">sets</p>
           </div>
           <div className="text-center">
-            <p className="font-mono text-2xl font-bold text-white">
+            <p className="font-mono text-2xl font-bold text-ink">
               {totalVolume > 0 ? Math.round(totalVolume).toLocaleString() : '—'}
             </p>
             <p className="text-[10px] uppercase tracking-widest text-ink-faint mt-0.5">lbs</p>
           </div>
           <div className="text-center">
-            <p className="font-mono text-2xl font-bold text-white">{duration ?? '—'}</p>
+            <p className="font-mono text-2xl font-bold text-ink">{duration ?? '—'}</p>
             <p className="text-[10px] uppercase tracking-widest text-ink-faint mt-0.5">duration</p>
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
                   <div key={se.id}>
                     {/* Exercise name + target */}
                     <div className="flex items-baseline justify-between mb-2">
-                      <p className="text-sm font-medium text-gray-200">{name}</p>
+                      <p className="text-sm font-medium text-ink">{name}</p>
                       {(se.targetSets || se.targetReps || se.targetWeight) && (
                         <p className="text-xs text-ink-faint font-mono">
                           target{se.targetSets ? ` ${se.targetSets}×` : ''}{se.targetReps ?? ''}{se.targetWeight ? ` @ ${se.targetWeight}` : ''}
@@ -237,7 +237,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
                                 'font-mono text-sm font-medium',
                                 missed    ? 'text-amber-400'  :
                                 surpassed ? 'text-emerald-300' :
-                                            'text-gray-300',
+                                            'text-ink',
                               )}>
                                 {[
                                   s.weight != null ? `${s.weight}` : null,
@@ -290,7 +290,7 @@ export default function SessionHistoryPage(): React.JSX.Element {
         {session.sessionNotes && (
           <div className="py-4">
             <h2 className="section-label mb-2">Notes</h2>
-            <p className="text-sm text-gray-300 leading-relaxed">{session.sessionNotes}</p>
+            <p className="text-sm text-ink leading-relaxed">{session.sessionNotes}</p>
           </div>
         )}
 

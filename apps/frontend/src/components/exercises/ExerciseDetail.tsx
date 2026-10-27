@@ -103,7 +103,7 @@ export default function ExerciseDetail({
       </div>
 
       {/* Name */}
-      <h1 className="font-display text-2xl text-gray-100 leading-tight">
+      <h1 className="font-display text-2xl text-ink leading-tight">
         {exercise.name}
       </h1>
 
@@ -114,7 +114,7 @@ export default function ExerciseDetail({
             <dt className="text-xs text-ink-subtle uppercase tracking-wider mb-0.5">
               {label}
             </dt>
-            <dd className="text-sm text-gray-200 capitalize">{value}</dd>
+            <dd className="text-sm text-ink capitalize">{value}</dd>
           </div>
         ))}
       </dl>
@@ -123,7 +123,7 @@ export default function ExerciseDetail({
       {exercise.description != null && exercise.description.length > 0 && (
         <section>
           <h3 className="field-label mb-2">Description</h3>
-          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
             {exercise.description}
           </p>
         </section>
@@ -133,7 +133,7 @@ export default function ExerciseDetail({
       {exercise.instructions != null && exercise.instructions.length > 0 && (
         <section>
           <h3 className="field-label mb-2">Form Instructions</h3>
-          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
             {exercise.instructions}
           </p>
         </section>

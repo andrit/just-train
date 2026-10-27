@@ -76,7 +76,7 @@ export default function TemplatesPage(): React.JSX.Element {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-surface-border shrink-0">
         <div>
-          <h1 className="text-lg font-display font-medium text-white">Templates</h1>
+          <h1 className="text-lg font-display font-medium text-ink">Templates</h1>
           <p className="text-xs text-ink-subtle mt-0.5">Reusable workout programs</p>
         </div>
         <button
@@ -112,13 +112,13 @@ export default function TemplatesPage(): React.JSX.Element {
             placeholder="Search by name, description, or muscle group…"
             value={inputValue}
             onChange={e => handleSearchChange(e.target.value)}
-            className="w-full bg-brand-primary border border-surface-border rounded-xl pl-8 pr-8 py-2 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl pl-8 pr-8 py-2 text-sm text-ink placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
           />
           {inputValue && (
             <button
               type="button"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-faint hover:text-gray-300 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink transition-colors"
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -224,7 +224,7 @@ function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
     <div className="bg-brand-secondary rounded-2xl border border-surface-border p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-gray-100 truncate">{template.name}</p>
+          <p className="font-medium text-ink truncate">{template.name}</p>
           {template.description && (
             <p className="text-xs text-ink-subtle mt-0.5 line-clamp-2">{template.description}</p>
           )}
@@ -233,7 +233,7 @@ function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-1.5 rounded-lg text-ink-faint hover:text-gray-300 hover:bg-surface-border/30 transition-colors"
+            className="p-1.5 rounded-lg text-ink-faint hover:text-ink hover:bg-surface-border/30 transition-colors"
           >
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
               <circle cx="8" cy="3" r="1.2" />
@@ -250,7 +250,7 @@ function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
                   disabled={!isOnline}
                   onClick={() => { if (isOnline) { onEdit(); setMenuOpen(false) } }}
                   title={isOnline ? undefined : 'Connect to edit'}
-                  className={cn('w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors', !isOnline && offlineMenuItemClass)}
+                  className={cn('w-full text-left px-4 py-3 text-sm text-ink hover:bg-surface-border/30 transition-colors', !isOnline && offlineMenuItemClass)}
                 >
                   Edit template
                 </button>
@@ -259,7 +259,7 @@ function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
                   disabled={!isOnline}
                   onClick={() => { if (isOnline) { onFork(); setMenuOpen(false) } }}
                   title={isOnline ? undefined : 'Connect to duplicate'}
-                  className={cn('w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-surface-border/30 transition-colors border-t border-surface-border', !isOnline && offlineMenuItemClass)}
+                  className={cn('w-full text-left px-4 py-3 text-sm text-ink hover:bg-surface-border/30 transition-colors border-t border-surface-border', !isOnline && offlineMenuItemClass)}
                 >
                   Duplicate
                 </button>

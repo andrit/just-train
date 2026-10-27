@@ -96,7 +96,7 @@ export function KpiCarousel({ cards, isLoading }: KpiCarouselProps): React.JSX.E
             className={cn(
               'hidden md:flex w-6 h-6 items-center justify-center rounded-full',
               'border border-surface-border text-ink-subtle',
-              'hover:text-gray-300 hover:border-gray-500',
+              'hover:text-ink hover:border-gray-500',
               'disabled:opacity-30 disabled:cursor-not-allowed',
               'transition-all duration-150',
               interactions.button.press,
@@ -132,7 +132,7 @@ export function KpiCarousel({ cards, isLoading }: KpiCarouselProps): React.JSX.E
             className={cn(
               'hidden md:flex w-6 h-6 items-center justify-center rounded-full',
               'border border-surface-border text-ink-subtle',
-              'hover:text-gray-300 hover:border-gray-500',
+              'hover:text-ink hover:border-gray-500',
               'disabled:opacity-30 disabled:cursor-not-allowed',
               'transition-all duration-150',
               interactions.button.press,

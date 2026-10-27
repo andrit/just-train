@@ -147,7 +147,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
             style={{ backgroundColor: heatFill(count, max) }}
             aria-hidden
           />
-          <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-gray-200' : 'text-ink-subtle')}>
+          <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-ink' : 'text-ink-subtle')}>
             {MUSCLE_LABEL[muscle]}
           </span>
           <span className={cn('text-xs tabular-nums', count > 0 ? 'text-ink-muted' : 'text-ink-faint')}>
@@ -199,7 +199,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
               <div className="rounded-lg border border-surface-border bg-surface px-3 py-2">
                 <p className="text-[10px] uppercase tracking-widest text-ink-subtle">Most trained</p>
                 {topMuscle ? (
-                  <p className="text-sm text-white mt-0.5 truncate">
+                  <p className="text-sm text-ink mt-0.5 truncate">
                     {MUSCLE_LABEL[topMuscle.muscle]} <span className="text-ink-subtle">· {topMuscle.count}×</span>
                   </p>
                 ) : (
@@ -218,7 +218,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
                 )}
               >
                 <p className="text-[10px] uppercase tracking-widest text-ink-subtle">Neglected</p>
-                <p className="text-sm text-white mt-0.5">
+                <p className="text-sm text-ink mt-0.5">
                   {neglectedCount} <span className="text-ink-subtle">muscle{neglectedCount === 1 ? '' : 's'} untrained</span>
                 </p>
                 {neglectedCount > 0 && (
@@ -273,7 +273,7 @@ function MuscleDrill({ muscle, clientId, onPick }: {
             onClick={() => setTab(k)}
             className={cn(
               'px-2 py-1 rounded-md text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
-              tab === k ? 'bg-command-blue/15 text-command-blue' : 'text-ink-subtle hover:text-gray-300',
+              tab === k ? 'bg-command-blue/15 text-command-blue' : 'text-ink-subtle hover:text-ink',
             )}
           >
             {label}
@@ -329,7 +329,7 @@ function MuscleHistoryList({ muscle, clientId, onPick, onSeeMovers }: {
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-surface border border-surface-border hover:border-command-blue/30 text-left transition-colors"
         >
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-200 truncate">{ex.name}</p>
+            <p className="text-sm text-ink truncate">{ex.name}</p>
             <p className="text-[10px] text-ink-subtle">
               {ex.totalSessions} session{ex.totalSessions === 1 ? '' : 's'} · last {formatDate(ex.lastPerformed)}
             </p>
@@ -381,7 +381,7 @@ function ExerciseRow({ ex, onPick }: {
       onClick={() => onPick(ex.id)}
       className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-surface border border-surface-border hover:border-command-blue/30 text-left transition-colors"
     >
-      <span className="text-sm text-gray-200 flex-1 truncate">{ex.name}</span>
+      <span className="text-sm text-ink flex-1 truncate">{ex.name}</span>
       <span className="text-[10px] uppercase tracking-wider text-ink-subtle shrink-0">
         {EQUIPMENT_LABEL[ex.equipment] ?? ex.equipment}
       </span>

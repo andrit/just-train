@@ -170,7 +170,7 @@ function SessionCard({
             </p>
 
             {/* Session name */}
-            <p className="font-display text-lg uppercase tracking-wide text-white leading-tight truncate">
+            <p className="font-display text-lg uppercase tracking-wide text-ink leading-tight truncate">
               {session.name || (isPlanned ? 'Untitled Plan' : 'Training Session')}
             </p>
 
@@ -208,7 +208,7 @@ function SessionCard({
                   onClick={onTap}
                   className={cn(
                     'px-2.5 py-1.5 rounded-lg text-xs text-ink-muted border border-surface-border',
-                    'hover:text-gray-200 hover:border-gray-500 transition-colors',
+                    'hover:text-ink hover:border-gray-500 transition-colors',
                     interactions.button.base,
                   )}
                 >
@@ -245,7 +245,7 @@ function SessionCard({
                     <button
                       type="button"
                       onClick={() => setConfirmCancel(false)}
-                      className="px-2.5 py-1.5 rounded-lg text-xs text-ink-muted border border-surface-border hover:text-gray-200 transition-colors"
+                      className="px-2.5 py-1.5 rounded-lg text-xs text-ink-muted border border-surface-border hover:text-ink transition-colors"
                     >
                       Keep
                     </button>
@@ -407,7 +407,7 @@ export default function SessionsPage(): React.JSX.Element {
 
         {/* Title + New Plan */}
         <div className="flex items-center justify-between px-4 md:px-6 pt-4 pb-3">
-          <h1 className="font-display text-3xl uppercase tracking-wide text-white">Sessions</h1>
+          <h1 className="font-display text-3xl uppercase tracking-wide text-ink">Sessions</h1>
           <button
             type="button"
             onClick={() => nav.openSessionPlan()}
@@ -453,7 +453,7 @@ export default function SessionsPage(): React.JSX.Element {
                 'shrink-0 px-4 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
                 tab === id
                   ? 'bg-command-blue text-white border-command-blue'
-                  : 'bg-[#1C1C1C] border-surface-border text-gray-300 hover:border-gray-400 hover:text-gray-200',
+                  : 'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
               )}
             >
               {label}
@@ -473,7 +473,7 @@ export default function SessionsPage(): React.JSX.Element {
                     'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
                     clientFilter === client.id
                       ? 'bg-command-blue/20 border-command-blue/60 text-command-blue'
-                      : 'bg-[#1C1C1C] border-surface-border text-gray-300 hover:border-gray-400 hover:text-gray-200',
+                      : 'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
                   )}
                 >
                   {client.isSelf ? 'Me' : client.name}

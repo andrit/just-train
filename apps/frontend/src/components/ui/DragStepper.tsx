@@ -113,7 +113,7 @@ export function DragStepper({
         aria-label={`Increase ${label ?? 'value'}`}
         className={cn(
           'w-8 h-6 flex items-center justify-center rounded-lg',
-          'text-ink-muted hover:text-white hover:bg-surface',
+          'text-ink-muted hover:text-ink hover:bg-surface',
           'transition-colors duration-100 active:scale-95',
           value >= max && 'opacity-30 cursor-not-allowed',
         )}
@@ -140,7 +140,7 @@ export function DragStepper({
         }}
         className={cn(
           'w-12 h-12 flex items-center justify-center rounded-xl',
-          'font-mono font-bold text-2xl text-white',
+          'font-mono font-bold text-2xl text-ink',
           'border-2 transition-all duration-100 cursor-ns-resize',
           isDragging
             ? 'border-command-blue bg-command-blue/10 scale-105'
@@ -159,7 +159,7 @@ export function DragStepper({
         aria-label={`Decrease ${label ?? 'value'}`}
         className={cn(
           'w-8 h-6 flex items-center justify-center rounded-lg',
-          'text-ink-muted hover:text-white hover:bg-surface',
+          'text-ink-muted hover:text-ink hover:bg-surface',
           'transition-colors duration-100 active:scale-95',
           value <= min && 'opacity-30 cursor-not-allowed',
         )}

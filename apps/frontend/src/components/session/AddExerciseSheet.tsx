@@ -64,7 +64,7 @@ function RepsModeToggle({ mode, onMode }: { mode: RepsMode; onMode: (v: RepsMode
             'flex-1 py-1.5 rounded-xl text-xs font-medium border transition-all',
             mode === m
               ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-              : 'border-surface-border text-ink-subtle hover:text-gray-300',
+              : 'border-surface-border text-ink-subtle hover:text-ink',
           )}
         >
           {REPS_MODE_LABEL[m]}
@@ -137,7 +137,7 @@ function UseLastTimeToggle({ on, onToggle }: { on: boolean; onToggle: (v: boolea
   return (
     <label className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-surface-border bg-surface/40 cursor-pointer">
       <div>
-        <p className="text-sm text-gray-300">Use last time&rsquo;s weights</p>
+        <p className="text-sm text-ink">Use last time&rsquo;s weights</p>
         <p className="text-[11px] text-ink-faint">Prefill each set from your last session for this exercise</p>
       </div>
       <button
@@ -284,7 +284,7 @@ function CardioTargets({
                 'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
                 metrics.has(m)
                   ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                  : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                  : 'border-surface-border text-ink-subtle hover:text-ink',
               )}
             >
               {m === 'distance' ? '📏 Distance' : m === 'time' ? '⏱ Time' : '🔥 Intensity'}
@@ -328,7 +328,7 @@ function CardioTargets({
                   'flex-1 py-2.5 rounded-xl text-xs font-medium border capitalize transition-all',
                   intensity === level
                     ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                    : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:text-ink',
                 )}
               >
                 {level}
@@ -370,7 +370,7 @@ function CalisthenicsTargets({
               'flex-1 py-2 rounded-xl text-xs font-medium border transition-all',
               mode === m
                 ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                : 'border-surface-border text-ink-subtle hover:text-ink',
             )}
           >
             {m === 'reps' ? 'By Reps' : 'By Time'}
@@ -707,7 +707,7 @@ export function AddExerciseSheet({
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize',
                   !showAllTypes
                     ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                    : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:text-ink',
                 )}
               >
                 {workoutType}
@@ -719,7 +719,7 @@ export function AddExerciseSheet({
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all',
                   showAllTypes
                     ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                    : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:text-ink',
                 )}
               >
                 All types
@@ -766,7 +766,7 @@ export function AddExerciseSheet({
                       className={cn(
                         'flex-1 py-2 rounded-lg text-xs font-medium',
                         'text-ink-muted border border-surface-border',
-                        'hover:text-gray-200 hover:border-gray-500 transition-colors',
+                        'hover:text-ink hover:border-gray-500 transition-colors',
                         interactions.button.base,
                         isPending && 'opacity-50 pointer-events-none',
                       )}
@@ -813,7 +813,7 @@ export function AddExerciseSheet({
         <div className="p-6 pb-8 space-y-6">
           {/* Exercise name */}
           <div className="text-center">
-            <p className="font-display text-xl uppercase tracking-wide text-white">{selected?.name}</p>
+            <p className="font-display text-xl uppercase tracking-wide text-ink">{selected?.name}</p>
             {selected?.bodyPart && (
               <p className="text-sm text-ink-subtle mt-1">{selected.bodyPart.name}</p>
             )}
@@ -886,7 +886,7 @@ export function AddExerciseSheet({
           <button
             type="button"
             onClick={() => setIsConfirming(false)}
-            className="w-full py-2 text-sm text-ink-subtle hover:text-gray-300"
+            className="w-full py-2 text-sm text-ink-subtle hover:text-ink"
           >
             ← Back to search
           </button>

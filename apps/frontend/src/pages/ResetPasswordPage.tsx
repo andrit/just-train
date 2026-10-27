@@ -42,14 +42,14 @@ export default function ResetPasswordPage(): React.JSX.Element {
     <div className="min-h-screen bg-brand-primary flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-2xl uppercase tracking-widest text-white">Choose a new password</h1>
+          <h1 className="font-display text-2xl uppercase tracking-widest text-ink">Choose a new password</h1>
           <p className="text-ink-subtle mt-2 text-sm">Every device will be signed out.</p>
         </div>
 
         {!token ? (
           <div className="text-center space-y-4">
             <p className="text-sm text-red-400">This link is missing its token.</p>
-            <Link to="/forgot-password" className="inline-block text-sm text-ink-muted hover:text-gray-200 underline underline-offset-2">Request a new link</Link>
+            <Link to="/forgot-password" className="inline-block text-sm text-ink-muted hover:text-ink underline underline-offset-2">Request a new link</Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">

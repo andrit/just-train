@@ -232,7 +232,7 @@ export function WorkoutBlock({
                   key={ex.id}
                   className="flex items-center justify-between py-2.5 border-b border-surface-border/50 last:border-0"
                 >
-                  <p className="text-sm text-gray-200 truncate flex-1">{ex.exercise?.name ?? 'Unknown'}</p>
+                  <p className="text-sm text-ink truncate flex-1">{ex.exercise?.name ?? 'Unknown'}</p>
                   <p className="text-xs text-ink-subtle font-mono ml-3 shrink-0">
                     {ex.targetSets && `${ex.targetSets}×`}
                     {ex.targetReps ?? (ex.targetDurationSeconds ? `${ex.targetDurationSeconds}s` : null) ?? '—'}
@@ -280,7 +280,7 @@ export function WorkoutBlock({
               <button
                 type="button"
                 onClick={() => restTimer?.skip()}
-                className="px-4 py-3 text-xs text-ink-subtle hover:text-gray-300 border-l border-surface-border transition-colors"
+                className="px-4 py-3 text-xs text-ink-subtle hover:text-ink border-l border-surface-border transition-colors"
               >
                 Skip
               </button>
@@ -293,7 +293,7 @@ export function WorkoutBlock({
                 onClick={() => setAddExerciseOpen(true)}
                 className={cn(
                   'flex-1 flex items-center justify-center gap-1.5 py-3 px-3',
-                  'text-xs font-medium text-ink-muted hover:text-gray-200',
+                  'text-xs font-medium text-ink-muted hover:text-ink',
                   'border-r border-surface-border',
                   'transition-colors duration-150',
                   interactions.button.base,
@@ -311,7 +311,7 @@ export function WorkoutBlock({
                   onClick={onAddBlock}
                   className={cn(
                     'flex-1 flex items-center justify-center gap-1.5 py-3 px-3',
-                    'text-xs text-ink-subtle hover:text-gray-300',
+                    'text-xs text-ink-subtle hover:text-ink',
                     'transition-colors duration-150',
                     interactions.button.base,
                     interactions.button.press,

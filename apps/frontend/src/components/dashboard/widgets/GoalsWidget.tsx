@@ -24,7 +24,7 @@ export function GoalsWidget({
 
       <div className="flex items-end justify-between">
         <div>
-          <span className="font-display text-5xl text-white leading-none">
+          <span className="font-display text-5xl text-ink leading-none">
             {activeGoalCount}
           </span>
           <p className="text-xs text-ink-subtle mt-1">active</p>

@@ -47,7 +47,7 @@ export function DevicesCard(): React.JSX.Element {
   return (
     <div className="card p-4 space-y-3">
       <div>
-        <p className="text-sm font-medium text-gray-200 mb-1">Devices</p>
+        <p className="text-sm font-medium text-ink mb-1">Devices</p>
         <p className="text-xs text-ink-subtle">Where you're signed in. Sign out anything you don't recognise.</p>
       </div>
 
@@ -59,7 +59,7 @@ export function DevicesCard(): React.JSX.Element {
           {devices.map((d) => (
             <li key={d.deviceId} className="flex items-center justify-between gap-3 py-2.5">
               <div className="min-w-0">
-                <p className="text-sm text-gray-200 truncate">
+                <p className="text-sm text-ink truncate">
                   {describeUserAgent(d.deviceName)}
                   {d.current && <span className="ml-2 text-[10px] uppercase tracking-wider text-command-blue">this device</span>}
                 </p>

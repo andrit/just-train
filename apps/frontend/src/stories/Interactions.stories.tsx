@@ -22,7 +22,7 @@ function Demo({
   return (
     <div className="flex items-start gap-4">
       <div className="w-36 shrink-0">
-        <p className="text-xs font-medium text-gray-300">{label}</p>
+        <p className="text-xs font-medium text-ink">{label}</p>
         {note && <p className="text-[10px] text-ink-faint mt-0.5">{note}</p>}
       </div>
       <div className={className}>
@@ -38,7 +38,7 @@ export const ButtonInteractions: StoryObj = {
   name: 'Button / All interaction classes',
   render: () => (
     <div className="p-6 space-y-6 max-w-xl">
-      <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
+      <h2 className="font-display text-xl uppercase tracking-wide text-ink mb-1">
         Button Interactions
       </h2>
       <p className="text-xs text-ink-subtle mb-6">
@@ -59,7 +59,7 @@ export const ButtonInteractions: StoryObj = {
 
         <Demo label="base + hover" note="hover:scale-[1.02]">
           <button className={cn(
-            'px-4 py-2 rounded-lg bg-surface border border-surface-border text-gray-200 text-sm',
+            'px-4 py-2 rounded-lg bg-surface border border-surface-border text-ink text-sm',
             interactions.button.base,
             interactions.button.hover,
           )}>
@@ -97,7 +97,7 @@ export const ButtonInteractions: StoryObj = {
             interactions.card.hover,
             interactions.card.press,
           )}>
-            <p className="text-sm text-gray-300">Hover card</p>
+            <p className="text-sm text-ink">Hover card</p>
           </div>
         </Demo>
 
@@ -135,7 +135,7 @@ export const Animations: StoryObj = {
   name: 'Animations / All keyframes',
   render: () => (
     <div className="p-6 space-y-6 max-w-xl">
-      <h2 className="font-display text-xl uppercase tracking-wide text-white mb-1">
+      <h2 className="font-display text-xl uppercase tracking-wide text-ink mb-1">
         Animation Keyframes
       </h2>
       <p className="text-xs text-ink-subtle mb-6">
@@ -154,7 +154,7 @@ export const Animations: StoryObj = {
         ].map(({ name, cls, label, note }) => (
           <Demo key={name} label={label} note={note}>
             <div className={cn(
-              'px-4 py-2 rounded-lg bg-surface border border-surface-border text-sm text-gray-300',
+              'px-4 py-2 rounded-lg bg-surface border border-surface-border text-sm text-ink',
               cls,
             )}>
               {label}
@@ -178,7 +178,7 @@ export const StaggeredList: StoryObj = {
       {['AtRisk alert', 'Self training', 'Active clients', 'Goals', 'Recent sessions'].map((label, i) => (
         <div
           key={label}
-          className="card p-3 text-sm text-gray-300 animate-slide-up"
+          className="card p-3 text-sm text-ink animate-slide-up"
           style={{ animationDelay: `${i * 50}ms` }}
         >
           {label}

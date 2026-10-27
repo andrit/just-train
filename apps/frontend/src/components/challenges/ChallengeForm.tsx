@@ -173,8 +173,8 @@ export function ChallengeForm({
                 className={cn(
                   'px-3 py-2 rounded-lg text-xs text-left border transition-colors',
                   metricType === opt.value
-                    ? 'border-command-blue/40 bg-command-blue/5 text-white'
-                    : 'border-surface-border text-ink-muted hover:text-gray-200 hover:border-gray-500',
+                    ? 'border-command-blue/40 bg-command-blue/5 text-ink'
+                    : 'border-surface-border text-ink-muted hover:text-ink hover:border-gray-500',
                   interactions.button.base,
                 )}
               >
@@ -201,7 +201,7 @@ export function ChallengeForm({
               aria-describedby={fieldErrors.exercise ? exerciseErrId : undefined}
               aria-required
               className={cn(
-                'w-full bg-surface border rounded-lg px-3 py-2 text-sm text-gray-300',
+                'w-full bg-surface border rounded-lg px-3 py-2 text-sm text-ink',
                 fieldErrors.exercise ? 'border-red-500' : 'border-surface-border',
               )}
             >
@@ -238,7 +238,7 @@ export function ChallengeForm({
               <select
                 value={targetUnit}
                 onChange={(e) => setTargetUnit(e.target.value)}
-                className="w-full bg-surface border border-surface-border rounded-lg px-3 py-2 text-sm text-gray-300"
+                className="w-full bg-surface border border-surface-border rounded-lg px-3 py-2 text-sm text-ink"
               >
                 {metricType === 'weight_lifted' && (
                   <>
@@ -278,7 +278,7 @@ export function ChallengeForm({
             aria-describedby={fieldErrors.deadline ? deadlineErrId : undefined}
             aria-required
             className={cn(
-              'w-full bg-surface border rounded-lg px-3 py-2 text-sm text-gray-300',
+              'w-full bg-surface border rounded-lg px-3 py-2 text-sm text-ink',
               fieldErrors.deadline ? 'border-red-500' : 'border-surface-border',
             )}
           />

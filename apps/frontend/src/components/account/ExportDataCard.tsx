@@ -24,7 +24,7 @@ export function ExportDataCard(): React.JSX.Element {
   return (
     <div className="card p-4 space-y-3">
       <div>
-        <p className="text-sm font-medium text-gray-200 mb-1">Download my data</p>
+        <p className="text-sm font-medium text-ink mb-1">Download my data</p>
         <p className="text-xs text-ink-subtle">
           Everything in your account — sessions, sets, goals, snapshots, templates, challenges —
           as one JSON file. Photos and clips are included as links.

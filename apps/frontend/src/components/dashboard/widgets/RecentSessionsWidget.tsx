@@ -43,7 +43,7 @@ export function RecentSessionsWidget(): React.JSX.Element {
               className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-surface border border-surface-border hover:border-command-blue/30 text-left transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-200 font-medium truncate">{s.name ?? 'Session'}</p>
+                <p className="text-sm text-ink font-medium truncate">{s.name ?? 'Session'}</p>
                 <p className="text-[11px] text-ink-subtle">{formatDate(s.date)}</p>
               </div>
               <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-faint shrink-0" aria-hidden>

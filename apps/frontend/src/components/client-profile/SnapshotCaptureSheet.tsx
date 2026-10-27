@@ -127,7 +127,7 @@ export function SnapshotCaptureSheet({
           <p className="section-label">Performance</p>
           <NumberRow label="Max push-ups" unit="reps" value={pushUps} onChange={setPushUps} placeholder="—" />
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-300">Mile time</span>
+            <span className="text-sm text-ink">Mile time</span>
             <MinSecField seconds={mileSecs} onChange={setMileSecs} />
           </div>
         </section>
@@ -196,7 +196,7 @@ function NumberRow({ label, unit, value, onChange, placeholder }: {
 }): React.JSX.Element {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-sm text-gray-300">{label}</span>
+      <span className="text-sm text-ink">{label}</span>
       <div className="flex items-center gap-2">
         <input
           type="number"

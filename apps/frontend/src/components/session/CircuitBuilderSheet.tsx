@@ -189,7 +189,7 @@ export function CircuitBuilderSheet({
                 'h-full flex items-center gap-1.5 px-3 rounded-xl border text-xs font-medium transition-colors',
                 bodyPart
                   ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                  : 'border-surface-border text-ink-muted hover:text-gray-200',
+                  : 'border-surface-border text-ink-muted hover:text-ink',
               )}
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5" aria-hidden>
@@ -254,7 +254,7 @@ export function CircuitBuilderSheet({
                   )}>
                     {selected ? idx + 1 : ''}
                   </span>
-                  <span className="flex-1 text-sm text-gray-200 truncate">{ex.name}</span>
+                  <span className="flex-1 text-sm text-ink truncate">{ex.name}</span>
                   {ex.bodyPart && (
                     <span className="text-[10px] text-ink-faint capitalize shrink-0">{ex.bodyPart.name.replace('_', ' ')}</span>
                   )}
@@ -302,7 +302,7 @@ function BpOption({ label, active, onClick }: {
       onClick={onClick}
       className={cn(
         'w-full text-left px-3 py-2 text-sm transition-colors',
-        active ? 'text-command-blue bg-command-blue/10' : 'text-gray-300 hover:bg-surface',
+        active ? 'text-command-blue bg-command-blue/10' : 'text-ink hover:bg-surface',
       )}
     >
       {label}

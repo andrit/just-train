@@ -124,7 +124,7 @@ export function SessionCloseout({
         {/* Header — the work is done and worth marking; the record is saved on Finish. */}
         <div className="text-center">
           <p className="text-4xl mb-2" aria-hidden>🏆</p>
-          <h2 className="text-xl font-display font-bold text-white">Nice work</h2>
+          <h2 className="text-xl font-display font-bold text-ink">Nice work</h2>
           {durationMin != null && (
             <p className="text-sm text-ink-subtle mt-1">{durationMin} minutes</p>
           )}
@@ -140,7 +140,7 @@ export function SessionCloseout({
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="e.g. Push Day, Leg Day - {date}…"
-            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
           />
           {/* Always show what will be stored — including the date-stamped default
               for an empty field, so it is a visible choice rather than a surprise
@@ -148,7 +148,7 @@ export function SessionCloseout({
           <div className="relative mt-2 pr-5">
             <p className="text-[11px] text-ink-subtle">
               Saves as{' '}
-              <span className="text-gray-300 font-medium">
+              <span className="text-ink font-medium">
                 {name.trim() !== ''
                   ? resolveNameTokens(name, { date: session.date })
                   : defaultSessionName(session.date)}
@@ -247,7 +247,7 @@ export function SessionCloseout({
                   type="button"
                   onClick={() => setFeelDismissed(true)}
                   aria-label="Skip how you felt"
-                  className="shrink-0 w-7 h-7 rounded-full border border-surface-border text-ink-subtle leading-none hover:text-gray-300 hover:border-gray-600 transition-colors"
+                  className="shrink-0 w-7 h-7 rounded-full border border-surface-border text-ink-subtle leading-none hover:text-ink hover:border-gray-600 transition-colors"
                 >
                   ×
                 </button>
@@ -308,7 +308,7 @@ function StatCard({ label, value, unit, highlight }: {
       'rounded-xl border p-3 text-center',
       highlight ? 'bg-amber-500/10 border-amber-500/30' : 'bg-brand-primary border-surface-border',
     )}>
-      <p className={cn('text-2xl font-bold font-mono', highlight ? 'text-amber-400' : 'text-white')}>
+      <p className={cn('text-2xl font-bold font-mono', highlight ? 'text-amber-400' : 'text-ink')}>
         {value}
         {unit && <span className="text-sm font-normal text-ink-subtle ml-1">{unit}</span>}
       </p>

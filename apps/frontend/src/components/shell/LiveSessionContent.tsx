@@ -229,7 +229,7 @@ export default function LiveSessionContent({
         <header className="px-4 py-3 border-b border-surface-border flex items-center justify-between shrink-0">
           <div className="min-w-0">
             <p className="text-xs text-ink-faint uppercase tracking-wider">{clientName}</p>
-            <h1 className="font-display text-xl uppercase tracking-wide text-white truncate">
+            <h1 className="font-display text-xl uppercase tracking-wide text-ink truncate">
               {session.name ?? 'Training Session'}
             </h1>
           </div>
@@ -251,7 +251,7 @@ export default function LiveSessionContent({
                 <button
                   type="button"
                   onClick={() => setShowDiscardConfirm(false)}
-                  className="text-xs text-ink-subtle hover:text-gray-300"
+                  className="text-xs text-ink-subtle hover:text-ink"
                 >
                   Cancel
                 </button>
@@ -268,7 +268,7 @@ export default function LiveSessionContent({
                 <button
                   type="button"
                   onClick={() => setShowDiscardMenu(false)}
-                  className="text-xs text-ink-subtle hover:text-gray-300 p-1"
+                  className="text-xs text-ink-subtle hover:text-ink p-1"
                 >
                   <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
                     <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -283,7 +283,7 @@ export default function LiveSessionContent({
                   onClick={() => setShowDiscardMenu(true)}
                   aria-label="Session options"
                   className={cn(
-                    'p-1.5 rounded-lg text-ink-subtle hover:text-gray-300',
+                    'p-1.5 rounded-lg text-ink-subtle hover:text-ink',
                     interactions.button.base,
                   )}
                 >
@@ -318,7 +318,7 @@ export default function LiveSessionContent({
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
               <p className="text-4xl mb-4" aria-hidden>🏋️</p>
-              <p className="text-gray-300 font-medium mb-1">Ready to train</p>
+              <p className="text-ink font-medium mb-1">Ready to train</p>
               <p className="text-ink-faint text-sm mb-6">Add your first exercise to get started</p>
               <div className="flex flex-col items-center gap-2">
                 <button
@@ -341,7 +341,7 @@ export default function LiveSessionContent({
                   onClick={() => setCircuitOpen(true)}
                   className={cn(
                     'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm',
-                    'border border-surface-border text-gray-300 hover:border-command-blue/40 hover:text-command-blue',
+                    'border border-surface-border text-ink hover:border-command-blue/40 hover:text-command-blue',
                     interactions.button.base,
                     interactions.button.press,
                   )}

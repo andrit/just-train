@@ -20,7 +20,7 @@ function ScoreBar({ label, value }: { label: string; value: number }): React.JSX
     <div className="space-y-1">
       <div className="flex justify-between text-xs">
         <span className="text-ink-subtle">{label}</span>
-        <span className="font-mono text-gray-300">{value}/10</span>
+        <span className="font-mono text-ink">{value}/10</span>
       </div>
       <div className="h-1.5 bg-surface-border rounded-full overflow-hidden">
         <div
@@ -81,7 +81,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
       {/* Completion header */}
       <div className="text-center py-8 animate-slide-up">
         <div className="text-5xl mb-4" aria-hidden>🏆</div>
-        <h1 className="font-display text-4xl uppercase tracking-wide text-white mb-2">
+        <h1 className="font-display text-4xl uppercase tracking-wide text-ink mb-2">
           Session Done
         </h1>
         <p className="text-ink-subtle text-sm">
@@ -97,7 +97,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
           { label: 'Volume',  value: totalVolume > 0 ? `${Math.round(totalVolume).toLocaleString()}` : '—' },
         ].map(({ label, value }) => (
           <div key={label} className="card p-3 text-center">
-            <p className="font-mono text-2xl font-bold text-white">{value}</p>
+            <p className="font-mono text-2xl font-bold text-ink">{value}</p>
             <p className="text-[10px] uppercase tracking-widest text-ink-faint mt-1">{label}</p>
           </div>
         ))}
@@ -106,7 +106,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
       {durationMin != null && (
         <div className="card p-3 text-center mb-6">
           <p className="text-sm text-ink-muted">
-            Duration: <span className="font-mono text-white">{durationMin} min</span>
+            Duration: <span className="font-mono text-ink">{durationMin} min</span>
           </p>
         </div>
       )}
@@ -139,7 +139,7 @@ export default function SessionSummaryPage(): React.JSX.Element {
       {session.sessionNotes && (
         <div className="card p-4 mb-6">
           <h3 className="section-label">Notes</h3>
-          <p className="text-sm text-gray-300 leading-relaxed">{session.sessionNotes}</p>
+          <p className="text-sm text-ink leading-relaxed">{session.sessionNotes}</p>
         </div>
       )}
 
@@ -150,8 +150,8 @@ export default function SessionSummaryPage(): React.JSX.Element {
             to={`/clients/${session.clientId}`}
             className={cn(
               'block w-full py-3 rounded-xl text-center text-sm font-medium',
-              'bg-surface border border-surface-border text-gray-300',
-              'hover:border-command-blue/30 hover:text-white',
+              'bg-surface border border-surface-border text-ink',
+              'hover:border-command-blue/30 hover:text-ink',
               interactions.button.base,
               interactions.button.hover,
               interactions.button.press,

@@ -24,7 +24,7 @@ export function ErrorState({
     >
       <span className="block text-5xl mb-4 opacity-30 select-none" aria-hidden>⚠</span>
 
-      <h3 className="font-display text-lg text-gray-300 mb-2">{title}</h3>
+      <h3 className="font-display text-lg text-ink mb-2">{title}</h3>
 
       <p className="text-sm text-ink-subtle max-w-xs leading-relaxed mb-6">{message}</p>
 

@@ -61,7 +61,7 @@ export function ClientCard({ client }: ClientCardProps): React.JSX.Element {
         {/* Main info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-display text-lg uppercase tracking-wide text-white truncate">
+            <span className="font-display text-lg uppercase tracking-wide text-ink truncate">
               {client.name}
             </span>
 

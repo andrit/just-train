@@ -298,7 +298,7 @@ export function InlineCameraSheet({
                   type="button"
                   onClick={() => { setState('loading'); startCamera(facing) }}
                   className={cn(
-                    'px-6 py-3 rounded-xl border border-surface-border text-gray-300',
+                    'px-6 py-3 rounded-xl border border-surface-border text-ink',
                     'hover:bg-surface transition-colors',
                     interactions.button.base,
                   )}
@@ -354,7 +354,7 @@ export function InlineCameraSheet({
               {state === 'recording' && (
                 <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 rounded-full px-3 py-1">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-                  <span className="font-mono text-sm text-white">{formatTime(recordTime)}</span>
+                  <span className="font-mono text-sm text-ink">{formatTime(recordTime)}</span>
                   <span className="text-xs text-ink-muted">/ {formatTime(MAX_VIDEO_SECONDS)}</span>
                 </div>
               )}
@@ -365,7 +365,7 @@ export function InlineCameraSheet({
                   type="button"
                   onClick={flipCamera}
                   aria-label="Flip camera"
-                  className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors"
+                  className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-ink transition-colors"
                 >
                   <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5" aria-hidden>
                     <path d="M3 10a7 7 0 0112.9-3.7M17 10a7 7 0 01-12.9 3.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -454,7 +454,7 @@ export function InlineCameraSheet({
                 type="button"
                 onClick={retake}
                 className={cn(
-                  'flex-1 py-3 rounded-xl border border-surface-border text-gray-300',
+                  'flex-1 py-3 rounded-xl border border-surface-border text-ink',
                   'hover:bg-surface transition-colors',
                   interactions.button.base,
                 )}

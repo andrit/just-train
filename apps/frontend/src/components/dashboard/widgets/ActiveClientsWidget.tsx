@@ -51,7 +51,7 @@ export function ActiveClientsWidget({ clients }: ActiveClientsWidgetProps): Reac
 
       {/* Big number */}
       <div className="flex items-end gap-2 mb-4">
-        <span className="font-display text-5xl text-white leading-none">{total}</span>
+        <span className="font-display text-5xl text-ink leading-none">{total}</span>
         <span className="text-sm text-ink-subtle mb-1">
           {activeThisMonth} active this month
         </span>

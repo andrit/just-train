@@ -198,20 +198,20 @@ export function ClientForm({
             {/* Weekly session target */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-200">Weekly session target</p>
+                <p className="text-sm font-medium text-ink">Weekly session target</p>
                 <p className="text-xs text-ink-subtle mt-0.5">Used for the consistency score</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setWeeklyTarget(Math.max(1, weeklyTarget - 1))}
-                  className="w-7 h-7 rounded-lg border border-surface-border text-ink-muted hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                  className="w-7 h-7 rounded-lg border border-surface-border text-ink-muted hover:text-ink hover:border-gray-500 transition-colors flex items-center justify-center"
                 >−</button>
-                <span className="font-mono text-white w-4 text-center">{weeklyTarget}</span>
+                <span className="font-mono text-ink w-4 text-center">{weeklyTarget}</span>
                 <button
                   type="button"
                   onClick={() => setWeeklyTarget(Math.min(14, weeklyTarget + 1))}
-                  className="w-7 h-7 rounded-lg border border-surface-border text-ink-muted hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center"
+                  className="w-7 h-7 rounded-lg border border-surface-border text-ink-muted hover:text-ink hover:border-gray-500 transition-colors flex items-center justify-center"
                 >+</button>
               </div>
             </div>
@@ -219,7 +219,7 @@ export function ClientForm({
             {/* 1RM estimate toggle */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-200">Show 1RM estimates</p>
+                <p className="text-sm font-medium text-ink">Show 1RM estimates</p>
                 <p className="text-xs text-ink-subtle mt-0.5">Epley formula — best guess from logged sets</p>
               </div>
               <button
@@ -242,7 +242,7 @@ export function ClientForm({
             {/* Auto-send monthly report toggle */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-200">Auto-send monthly report</p>
+                <p className="text-sm font-medium text-ink">Auto-send monthly report</p>
                 <p className="text-xs text-ink-subtle mt-0.5">Sends on the 1st — requires client email</p>
               </div>
               <button

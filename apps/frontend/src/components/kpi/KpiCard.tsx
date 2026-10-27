@@ -38,7 +38,7 @@ export function KpiCard({ data }: { data: KpiCardData }): React.JSX.Element {
         {label}
       </p>
       <div className="flex items-end gap-1.5 mt-auto">
-        <p className={cn('font-mono font-bold leading-none text-xl', isEmpty ? 'text-ink-faint' : highlight ? 'text-amber-300' : 'text-white')}>
+        <p className={cn('font-mono font-bold leading-none text-xl', isEmpty ? 'text-ink-faint' : highlight ? 'text-amber-300' : 'text-ink')}>
           {isEmpty ? '—' : value}
         </p>
         {!isEmpty && trend !== undefined && <TrendArrow trend={trend ?? null} />}

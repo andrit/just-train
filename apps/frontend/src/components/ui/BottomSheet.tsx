@@ -149,14 +149,14 @@ export function BottomSheet({
         {/* Title */}
         {title && (
           <div className="flex items-center justify-between px-5 pb-3 border-b border-surface-border">
-            <h2 className="font-display text-lg uppercase tracking-wide text-white">
+            <h2 className="font-display text-lg uppercase tracking-wide text-ink">
               {title}
             </h2>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="text-ink-subtle hover:text-gray-300 p-1"
+              className="text-ink-subtle hover:text-ink p-1"
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

@@ -82,7 +82,7 @@ export default function ExerciseCard({
 
       {/* Card body */}
       <div className="p-3.5">
-        <h3 className="font-display text-base text-gray-100 leading-tight mb-2 truncate group-hover:text-white transition-colors">
+        <h3 className="font-display text-base text-ink leading-tight mb-2 truncate group-hover:text-ink transition-colors">
           {exercise.name}
         </h3>
 

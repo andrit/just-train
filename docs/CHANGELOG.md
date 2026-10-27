@@ -7,6 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Theme — Step 2 text sweep complete (bright tier) + brand grounds tokenized (2026-10-27)
+- Finishes the light/dark text sweep. The **bright tier** (`text-white`, `text-gray-100/200/300`) is migrated to
+  `ink.*` app-wide via a bulk pass with a **scoped revert**, so `text-white` is preserved wherever it labels a
+  **solid** accent (`bg-command-blue` / `bg-ember-red`) — those must stay white since the accent doesn't change in
+  light; text on translucent accents and surfaces flips to `ink`. Also tokenized the fixed-dark **card/panel
+  grounds** (`bg-brand-secondary` → white, `bg-brand-accent` → light panel in light) so text adapts with them.
+  With the earlier muted-grey pass, **no raw `text-gray-*` remains, and `text-white` survives only on solid
+  accents.** Dark byte-identical at the exact token levels; `tsc` + `eslint` clean. Left for later: chart hex
+  (Step 3), the toggle (Step 4), and 4 `text-black`-on-`signal-yellow` labels (handle when signal flips to amber).
+
 ### Theme — Step 2 sweep: Preferences + muted-grey bulk pass (2026-10-27)
 - The light/dark text sweep is underway. **Preferences** is fully migrated (both tiers). The **muted-grey tier**
   (`text-gray-400/500/600/700`, `placeholder-gray-*`) is now migrated to the `ink.*` scale **across all ~115

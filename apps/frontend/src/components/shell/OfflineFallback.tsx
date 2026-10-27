@@ -33,7 +33,7 @@ export function OfflineFallback({
 
       {/* WiFi-slash icon */}
       <span className="mb-5 opacity-25" aria-hidden>
-        <svg viewBox="0 0 48 48" fill="none" className="w-16 h-16 text-gray-300">
+        <svg viewBox="0 0 48 48" fill="none" className="w-16 h-16 text-ink">
           <path d="M6 6l36 36" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
           <path d="M24 38h.02" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
           <path d="M16.5 31.5A10.5 10.5 0 0124 29c2.2 0 4.25.68 5.96 1.83" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
@@ -43,7 +43,7 @@ export function OfflineFallback({
         </svg>
       </span>
 
-      <h2 className="font-display text-2xl uppercase tracking-wide text-white mb-2">
+      <h2 className="font-display text-2xl uppercase tracking-wide text-ink mb-2">
         {title}
       </h2>
 

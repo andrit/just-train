@@ -109,7 +109,7 @@ export function Modal({
           <div className="flex items-center justify-between px-6 py-4 border-b border-surface-border">
             <h2
               id={titleId}
-              className="font-display text-xl text-gray-100"
+              className="font-display text-xl text-ink"
             >
               {title}
             </h2>
@@ -118,7 +118,7 @@ export function Modal({
               aria-label="Close dialog"
               className={cn(
                 'w-8 h-8 flex items-center justify-center rounded-lg',
-                'text-ink-subtle hover:text-gray-300 hover:bg-surface-raised',
+                'text-ink-subtle hover:text-ink hover:bg-surface-raised',
                 'transition-colors focus-visible:outline-none',
                 'focus-visible:ring-2 focus-visible:ring-command-blue',
               )}

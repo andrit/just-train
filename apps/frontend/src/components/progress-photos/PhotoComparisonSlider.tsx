@@ -94,12 +94,12 @@ export function PhotoComparisonSlider({
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-black/80 border-b border-surface-border shrink-0">
-        <h2 className="font-display text-lg uppercase tracking-wide text-white">Compare</h2>
+        <h2 className="font-display text-lg uppercase tracking-wide text-ink">Compare</h2>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close comparison"
-          className={cn('text-ink-muted hover:text-white p-1', interactions.button.base)}
+          className={cn('text-ink-muted hover:text-ink p-1', interactions.button.base)}
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
             <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -114,7 +114,7 @@ export function PhotoComparisonSlider({
           <select
             value={beforeIdx}
             onChange={(e) => setBeforeIdx(Number(e.target.value))}
-            className="w-full bg-surface border border-surface-border rounded px-2 py-1 text-sm text-gray-300"
+            className="w-full bg-surface border border-surface-border rounded px-2 py-1 text-sm text-ink"
           >
             {groups.map((g, i) => (
               <option key={g.snapshotId} value={i}>{formatDate(g.capturedAt)}</option>
@@ -126,7 +126,7 @@ export function PhotoComparisonSlider({
           <select
             value={afterIdx}
             onChange={(e) => setAfterIdx(Number(e.target.value))}
-            className="w-full bg-surface border border-surface-border rounded px-2 py-1 text-sm text-gray-300"
+            className="w-full bg-surface border border-surface-border rounded px-2 py-1 text-sm text-ink"
           >
             {groups.map((g, i) => (
               <option key={g.snapshotId} value={i}>{formatDate(g.capturedAt)}</option>
@@ -146,7 +146,7 @@ export function PhotoComparisonSlider({
               'px-3 py-1 rounded-full text-xs capitalize whitespace-nowrap transition-colors',
               poseFilter === pose
                 ? 'bg-command-blue text-white'
-                : 'bg-surface border border-surface-border text-ink-muted hover:text-gray-200',
+                : 'bg-surface border border-surface-border text-ink-muted hover:text-ink',
             )}
           >
             {pose.replace('_', ' ')}
@@ -194,10 +194,10 @@ export function PhotoComparisonSlider({
             </div>
 
             {/* Labels */}
-            <div className="absolute bottom-4 left-4 bg-black/60 rounded px-2 py-1 text-xs text-white">
+            <div className="absolute bottom-4 left-4 bg-black/60 rounded px-2 py-1 text-xs text-ink">
               Before · {formatDate(beforeGroup?.capturedAt ?? '')}
             </div>
-            <div className="absolute bottom-4 right-4 bg-black/60 rounded px-2 py-1 text-xs text-white">
+            <div className="absolute bottom-4 right-4 bg-black/60 rounded px-2 py-1 text-xs text-ink">
               After · {formatDate(afterGroup?.capturedAt ?? '')}
             </div>
           </>

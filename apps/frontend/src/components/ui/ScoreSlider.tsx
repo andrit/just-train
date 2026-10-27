@@ -37,10 +37,10 @@ export function ScoreSlider({
     <div className={cn('space-y-2 transition-opacity', dimmed && 'opacity-50')}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-200">{label}</p>
+          <p className="text-sm font-medium text-ink">{label}</p>
           {hint && <p className="text-xs text-ink-faint">{hint}</p>}
         </div>
-        <span className="font-mono text-2xl font-bold text-white w-8 text-right">{value}</span>
+        <span className="font-mono text-2xl font-bold text-ink w-8 text-right">{value}</span>
       </div>
       <input
         type="range"

@@ -47,7 +47,7 @@ function TemplateCard({
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
       )}
     >
-      <p className="font-display text-lg uppercase tracking-wide text-white">
+      <p className="font-display text-lg uppercase tracking-wide text-ink">
         {template.name}
       </p>
       {template.description && (
@@ -99,7 +99,7 @@ function ClientSelector({
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className={cn('text-sm font-medium', selected === c.id ? 'text-white' : 'text-gray-300')}>
+            <p className={cn('text-sm font-medium', selected === c.id ? 'text-ink' : 'text-ink')}>
               {c.isSelf ? 'My Training' : c.name}
             </p>
             <p className="text-xs text-ink-faint">{c.progressionState}</p>
@@ -232,7 +232,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => setView('main')}
-          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-6"
+          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-ink mb-6"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -240,7 +240,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
           Back
         </button>
 
-        <h1 className="font-display text-3xl uppercase tracking-wide text-white mb-6">
+        <h1 className="font-display text-3xl uppercase tracking-wide text-ink mb-6">
           Who is training?
         </h1>
 
@@ -263,7 +263,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => setView('main')}
-          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-6"
+          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-ink mb-6"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -271,7 +271,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
           Back
         </button>
 
-        <h1 className="font-display text-3xl uppercase tracking-wide text-white mb-6">
+        <h1 className="font-display text-3xl uppercase tracking-wide text-ink mb-6">
           Choose a template
         </h1>
 
@@ -309,7 +309,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
           <div className="fixed inset-0 bg-brand-primary/80 flex items-center justify-center z-50">
             <div className="text-center">
               <Spinner size="lg" className="text-command-blue mx-auto" />
-              <p className="text-gray-300 text-sm mt-4">Loading template…</p>
+              <p className="text-ink text-sm mt-4">Loading template…</p>
             </div>
           </div>
         )}
@@ -332,7 +332,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-4"
+          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-ink mb-4"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -360,7 +360,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-4"
+          className="flex items-center gap-1.5 text-sm text-ink-subtle hover:text-ink mb-4"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -368,7 +368,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
           Back
         </button>
 
-        <h1 className="font-display text-4xl uppercase tracking-wide text-white">
+        <h1 className="font-display text-4xl uppercase tracking-wide text-ink">
           {displayCta}
         </h1>
         {clientName && (
@@ -381,7 +381,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
         <div className="card p-4 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-200">Training</p>
+              <p className="text-sm font-medium text-ink">Training</p>
               <p className="text-xs text-ink-subtle mt-0.5">
                 {selectedClientId ? (selectedClientId === selfClient?.id ? 'Myself' : 'A client') : 'Select who is training'}
               </p>
@@ -392,7 +392,7 @@ export default function SessionLauncherPage(): React.JSX.Element {
               className={cn(
                 'px-3 py-1.5 rounded-lg border text-sm transition-all duration-150',
                 selectedClientId
-                  ? 'border-surface-border text-ink-muted hover:text-gray-200'
+                  ? 'border-surface-border text-ink-muted hover:text-ink'
                   : 'border-command-blue/40 text-command-blue',
                 interactions.button.base,
                 interactions.button.press,
@@ -451,8 +451,8 @@ export default function SessionLauncherPage(): React.JSX.Element {
           disabled={isLoading}
           className={cn(
             'w-full py-4 rounded-2xl text-sm font-medium',
-            'bg-surface border border-surface-border text-gray-300',
-            'hover:border-command-blue/30 hover:text-white',
+            'bg-surface border border-surface-border text-ink',
+            'hover:border-command-blue/30 hover:text-ink',
             interactions.button.base,
             interactions.button.hover,
             interactions.button.press,

@@ -51,7 +51,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-brand-primary px-6 text-center">
         <p className="text-4xl mb-4" aria-hidden>⚠️</p>
-        <h1 className="font-display text-2xl uppercase tracking-wide text-white mb-2">
+        <h1 className="font-display text-2xl uppercase tracking-wide text-ink mb-2">
           Something went wrong
         </h1>
         <p className="text-sm text-ink-muted mb-6 max-w-xs">
@@ -66,7 +66,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <button
             type="button"
             onClick={this.handleReset}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-surface border border-surface-border text-gray-300 hover:text-white transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-surface border border-surface-border text-ink hover:text-ink transition-colors"
           >
             Try again
           </button>
@@ -120,7 +120,7 @@ export class SessionErrorBoundary extends Component<SessionErrorBoundaryProps, E
     return (
       <div className="flex flex-col items-center justify-center flex-1 px-6 text-center">
         <p className="text-3xl mb-3" aria-hidden>⚡</p>
-        <h2 className="font-display text-xl uppercase tracking-wide text-white mb-2">
+        <h2 className="font-display text-xl uppercase tracking-wide text-ink mb-2">
           Session error
         </h2>
         <p className="text-sm text-ink-muted mb-5 max-w-xs">

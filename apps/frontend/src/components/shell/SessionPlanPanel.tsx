@@ -215,7 +215,7 @@ export function SessionPlanPanel({
               <button
                 type="button"
                 onClick={() => setShowDiscardConfirm(false)}
-                className="text-xs text-ink-subtle hover:text-gray-300"
+                className="text-xs text-ink-subtle hover:text-ink"
               >
                 Cancel
               </button>
@@ -225,7 +225,7 @@ export function SessionPlanPanel({
               <button
                 type="button"
                 onClick={onClose}
-                className={cn('flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300', interactions.button.base)}
+                className={cn('flex items-center gap-1.5 text-sm text-ink-subtle hover:text-ink', interactions.button.base)}
               >
                 <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
                   <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -254,8 +254,8 @@ export function SessionPlanPanel({
                     onClick={() => { toast.success('Plan saved!'); onClose() }}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium',
-                      'border border-surface-border text-gray-300',
-                      'hover:border-command-blue/40 hover:text-white',
+                      'border border-surface-border text-ink',
+                      'hover:border-command-blue/40 hover:text-ink',
                       interactions.button.base,
                       interactions.button.press,
                     )}
@@ -318,7 +318,7 @@ export function SessionPlanPanel({
           >
             <h1 className={cn(
               'font-display text-2xl uppercase tracking-wide leading-tight',
-              sessionName ? 'text-white' : 'text-ink-faint',
+              sessionName ? 'text-ink' : 'text-ink-faint',
             )}>
               {sessionName || 'Untitled Plan'}
             </h1>
@@ -344,7 +344,7 @@ export function SessionPlanPanel({
                   'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                   selectedClientId === client.id
                     ? 'bg-command-blue text-white border-command-blue'
-                    : 'border-surface-border text-ink-subtle hover:border-gray-400 hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:border-gray-400 hover:text-ink',
                 )}
               >
                 {client.isSelf ? 'My Training' : client.name}
@@ -370,7 +370,7 @@ export function SessionPlanPanel({
         ) : sessionExercises.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-3xl mb-4" aria-hidden>📋</p>
-            <p className="text-gray-300 font-medium mb-1">Plan your session</p>
+            <p className="text-ink font-medium mb-1">Plan your session</p>
             <p className="text-ink-faint text-sm mb-6">
               Build from scratch or load a saved template.
             </p>
@@ -410,7 +410,7 @@ export function SessionPlanPanel({
                   interactions.button.base,
                   interactions.button.press,
                   selectedClientId
-                    ? 'text-gray-300 hover:border-command-blue/40 hover:text-command-blue'
+                    ? 'text-ink hover:border-command-blue/40 hover:text-command-blue'
                     : 'text-ink-faint cursor-not-allowed',
                 )}
               >
@@ -432,7 +432,7 @@ export function SessionPlanPanel({
                   interactions.button.base,
                   interactions.button.press,
                   selectedClientId
-                    ? 'text-gray-300 hover:border-command-blue/40 hover:text-command-blue'
+                    ? 'text-ink hover:border-command-blue/40 hover:text-command-blue'
                     : 'text-ink-faint cursor-not-allowed',
                 )}
               >

@@ -68,7 +68,7 @@ export function PersonalBestsTab({ clientId }: PersonalBestsTabProps): React.JSX
             className="bg-brand-secondary rounded-xl border border-surface-border px-3 py-3"
           >
             {/* Exercise name */}
-            <p className="text-sm font-medium text-gray-200 mb-2 truncate">
+            <p className="text-sm font-medium text-ink mb-2 truncate">
               {pr.exerciseName}
             </p>
 

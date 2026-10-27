@@ -49,7 +49,7 @@ export function DeleteSessionButton({
         <button
           type="button"
           onClick={() => setConfirming(false)}
-          className="px-2.5 py-1.5 rounded-lg text-xs text-ink-muted border border-surface-border hover:text-gray-200 transition-colors"
+          className="px-2.5 py-1.5 rounded-lg text-xs text-ink-muted border border-surface-border hover:text-ink transition-colors"
         >
           Keep
         </button>

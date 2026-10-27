@@ -45,7 +45,7 @@ export default function ClientsPage(): React.JSX.Element {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl uppercase tracking-wide text-white">
+        <h1 className="font-display text-3xl uppercase tracking-wide text-ink">
           {isTrainer ? 'Clients' : 'My Training'}
         </h1>
 
@@ -113,7 +113,7 @@ export default function ClientsPage(): React.JSX.Element {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-display text-lg uppercase tracking-wide text-white">
+                    <span className="font-display text-lg uppercase tracking-wide text-ink">
                       My Training
                     </span>
                     <span className={cn(

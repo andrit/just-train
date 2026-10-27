@@ -180,7 +180,7 @@ function ActiveSetRow({
             className={cn(
               'w-full text-center text-3xl font-mono font-bold',
               'bg-brand-primary border-2 border-surface-border rounded-xl py-3',
-              'text-white placeholder-ink-faint',
+              'text-ink placeholder-ink-faint',
               'focus:outline-none focus:border-command-blue',
               'transition-colors duration-150',
             )}
@@ -204,7 +204,7 @@ function ActiveSetRow({
             className={cn(
               'w-full text-center text-3xl font-mono font-bold',
               'bg-brand-primary border-2 border-surface-border rounded-xl py-3',
-              'text-white placeholder-ink-faint',
+              'text-ink placeholder-ink-faint',
               'focus:outline-none focus:border-command-blue',
               'transition-colors duration-150',
             )}

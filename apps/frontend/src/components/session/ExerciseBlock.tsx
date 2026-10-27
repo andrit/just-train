@@ -70,7 +70,7 @@ function BigInput({ label, value, onChange, placeholder, mode = 'decimal', onEnt
         placeholder={placeholder ?? '—'}
         className={cn(
           'w-full text-center text-3xl font-mono font-bold py-3 rounded-xl',
-          'bg-brand-primary border-2 border-surface-border text-white placeholder-ink-faint',
+          'bg-brand-primary border-2 border-surface-border text-ink placeholder-ink-faint',
           'focus:outline-none focus:border-command-blue transition-colors',
         )}
       />
@@ -112,7 +112,7 @@ function IntensityPicker({ value, onChange }: { value: string; onChange: (v: str
               'flex-1 py-3 rounded-xl text-sm font-medium capitalize border transition-all',
               value === level
                 ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                : 'border-surface-border text-ink-subtle hover:text-ink',
             )}
           >
             {level}
@@ -480,7 +480,7 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
           <>
             {set.distance        != null && <span className={cn(OUTCOME_COLOR[distOk],  'font-medium')}>{set.distance}m</span>}
             {set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk],  'font-medium')}>{formatSeconds(set.durationSeconds)}</span>}
-            {set.intensity       != null && <span className="text-gray-300 font-medium capitalize">{set.intensity}</span>}
+            {set.intensity       != null && <span className="text-ink font-medium capitalize">{set.intensity}</span>}
             {set.reps            != null && <span className={cn(OUTCOME_COLOR[repsOk],  'font-medium')}>{set.reps} reps</span>}
           </>
         )}
@@ -644,7 +644,7 @@ export function ExerciseBlock({
       {/* Exercise header */}
       <div className="flex items-start justify-between mb-2 px-1">
         <div className="flex items-center gap-2">
-          <h3 className="font-display text-xl uppercase tracking-wide text-white leading-tight">
+          <h3 className="font-display text-xl uppercase tracking-wide text-ink leading-tight">
             {sessionExercise.exercise?.name ?? 'Unknown Exercise'}
           </h3>
           <FormCheckBadge count={mediaCount} />
@@ -695,7 +695,7 @@ export function ExerciseBlock({
                   'px-2.5 py-1 text-[11px] font-medium transition-colors',
                   !!sessionExercise.trackPerSide === value
                     ? 'bg-command-blue/15 text-command-blue'
-                    : 'text-ink-subtle hover:text-gray-300',
+                    : 'text-ink-subtle hover:text-ink',
                 )}
               >
                 {label}

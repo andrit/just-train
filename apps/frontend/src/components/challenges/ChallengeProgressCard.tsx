@@ -76,7 +76,7 @@ export function ChallengeProgressCard({
       {/* Title row */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-sm text-white truncate">{challenge.title}</p>
+          <p className="font-medium text-sm text-ink truncate">{challenge.title}</p>
           {challenge.exercise && (
             <p className="text-xs text-ink-subtle mt-0.5 truncate">
               {challenge.exercise.name}
@@ -104,7 +104,7 @@ export function ChallengeProgressCard({
       {/* Stats row */}
       <div className="flex items-center justify-between text-xs">
         <span className="text-ink-muted">
-          <span className="font-mono text-gray-200">{challenge.currentValue}</span>
+          <span className="font-mono text-ink">{challenge.currentValue}</span>
           {' / '}
           <span className="font-mono">{challenge.targetValue}</span>
           {challenge.targetUnit && <span className="ml-0.5">{challenge.targetUnit}</span>}

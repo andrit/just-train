@@ -12,7 +12,7 @@ export function OfflineAuthScreen({ onRetry }: OfflineAuthScreenProps): React.JS
 
       {/* Logo */}
       <h1 className="font-display text-3xl tracking-wider uppercase">
-        <span className="text-white">Just Train</span>
+        <span className="text-ink">Just Train</span>
       </h1>
 
       {/* Icon */}
@@ -30,7 +30,7 @@ export function OfflineAuthScreen({ onRetry }: OfflineAuthScreenProps): React.JS
 
       {/* Message */}
       <div className="text-center space-y-2">
-        <p className="text-white text-lg font-semibold">You're offline</p>
+        <p className="text-ink text-lg font-semibold">You're offline</p>
         <p className="text-ink-subtle text-sm leading-relaxed max-w-xs">
           Please reconnect to log in. Your session will resume automatically when you're back online.
         </p>
@@ -40,7 +40,7 @@ export function OfflineAuthScreen({ onRetry }: OfflineAuthScreenProps): React.JS
       <button
         type="button"
         onClick={onRetry}
-        className="px-6 py-2.5 rounded-xl border border-surface-border text-sm text-gray-300 hover:text-white hover:border-gray-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue"
+        className="px-6 py-2.5 rounded-xl border border-surface-border text-sm text-ink hover:text-ink hover:border-gray-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue"
       >
         Try again
       </button>

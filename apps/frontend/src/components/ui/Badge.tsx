@@ -21,7 +21,7 @@ export interface BadgeProps {
 // ── Style map ─────────────────────────────────────────────────────────────────
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: 'bg-surface-raised text-gray-300 border-surface-border',
+  default: 'bg-surface-raised text-ink border-surface-border',
   success: 'bg-green-500/15  text-green-400  border-green-500/20',
   warning: 'bg-amber-500/15  text-amber-400  border-amber-500/20',
   danger:  'bg-red-500/15    text-red-400    border-red-500/20',

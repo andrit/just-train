@@ -43,7 +43,7 @@ export function DeactivateAccountCard(): React.JSX.Element {
   return (
     <div className="card p-4 space-y-3 border-red-500/30">
       <div>
-        <p className="text-sm font-medium text-gray-200 mb-1">Deactivate account</p>
+        <p className="text-sm font-medium text-ink mb-1">Deactivate account</p>
         <p className="text-xs text-ink-subtle">
           Your account is hidden and every device is signed out. Sign in again within 30 days to
           restore it. After 30 days your training data and photos are permanently deleted.

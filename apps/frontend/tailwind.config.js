@@ -22,8 +22,10 @@ export default {
         // ── Structural tokens (mapped to design system) ───────────────────────
         brand: {
           primary:   '#0d0d0d',   // near-black — page background (crosshatch texture via index.css)
-          secondary: '#1C1C1C',   // dark — card backgrounds
-          accent:    '#111111',   // slightly lighter than primary — sidebar, panels
+          // secondary/accent are variable-backed so card/panel grounds flip by theme
+          // (dark values equal the former hex → dark byte-identical).
+          secondary: 'rgb(var(--brand-secondary) / <alpha-value>)',  // card backgrounds (#1C1C1C dark)
+          accent:    'rgb(var(--brand-accent) / <alpha-value>)',     // sidebar, panels (#111111 dark)
           // highlight removed — use ember-red, command-blue, or signal-yellow by intent
         },
         // Functional shades used in the UI.

@@ -72,7 +72,7 @@ export function MinSecField({ seconds, onChange, label, size = 'md', onEnter }: 
 
   const boxClass = cn(
     'text-center font-mono font-bold rounded-xl',
-    'bg-brand-primary border-2 border-surface-border text-white placeholder-ink-faint',
+    'bg-brand-primary border-2 border-surface-border text-ink placeholder-ink-faint',
     'focus:outline-none focus:border-command-blue transition-colors',
     size === 'lg' ? 'text-3xl py-3 w-24' : 'text-2xl py-2 w-20',
   )

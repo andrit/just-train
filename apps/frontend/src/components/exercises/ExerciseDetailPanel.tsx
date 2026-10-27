@@ -111,7 +111,7 @@ function ExerciseHero({
               'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
               mode === 'visualization'
                 ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                : 'border-surface-border text-ink-subtle hover:text-ink',
             )}
           >
             📊 Muscles
@@ -123,7 +123,7 @@ function ExerciseHero({
               'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
               mode === 'demonstration'
                 ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                : 'border-surface-border text-ink-subtle hover:text-ink',
             )}
           >
             ▶ Demo
@@ -166,7 +166,7 @@ function SessionPickerSheet({
           >
             <div className="w-2 h-2 rounded-full bg-command-blue shrink-0 animate-pulse" />
             <div>
-              <p className="text-sm font-medium text-gray-200">{session.clientName}</p>
+              <p className="text-sm font-medium text-ink">{session.clientName}</p>
               <p className="text-xs text-ink-subtle mt-0.5">Active session</p>
             </div>
             <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-faint ml-auto">
@@ -214,7 +214,7 @@ function AddToWorkoutSheet({
   return (
     <BottomSheet open={open} onClose={onClose} title="Add to Session" maxHeight="55vh">
       <div className="p-6 pb-8">
-        <p className="text-center font-display text-xl uppercase tracking-wide text-white mb-1">
+        <p className="text-center font-display text-xl uppercase tracking-wide text-ink mb-1">
           {exerciseName}
         </p>
         <p className="text-center text-xs text-ink-subtle mb-6">
@@ -405,7 +405,7 @@ export default function ExerciseDetailPanel({
               </span>
             )}
           </div>
-          <h1 className="font-display text-2xl uppercase tracking-wide text-white leading-tight">
+          <h1 className="font-display text-2xl uppercase tracking-wide text-ink leading-tight">
             {exercise.name}
           </h1>
         </div>
@@ -458,7 +458,7 @@ export default function ExerciseDetailPanel({
         {exercise.description && (
           <section>
             <h3 className="text-[10px] uppercase tracking-widest text-ink-subtle mb-2">Description</h3>
-            <p className="text-sm text-gray-300 leading-relaxed">{exercise.description}</p>
+            <p className="text-sm text-ink leading-relaxed">{exercise.description}</p>
           </section>
         )}
 
@@ -466,7 +466,7 @@ export default function ExerciseDetailPanel({
         {exercise.instructions && (
           <section>
             <h3 className="text-[10px] uppercase tracking-widest text-ink-subtle mb-2">Form Instructions</h3>
-            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{exercise.instructions}</p>
+            <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">{exercise.instructions}</p>
           </section>
         )}
 

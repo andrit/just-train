@@ -61,7 +61,7 @@ export function SessionExerciseBreakdown({
         return (
           <div key={se.id} className="bg-surface rounded-xl px-3 py-3 border border-surface-border">
             <div className="flex items-center gap-2 mb-2">
-              <p className="font-medium text-sm text-gray-200">{se.exercise?.name ?? 'Unknown'}</p>
+              <p className="font-medium text-sm text-ink">{se.exercise?.name ?? 'Unknown'}</p>
               {renderMediaThumbs?.(se)}
             </div>
 
@@ -116,12 +116,12 @@ export function SessionExerciseBreakdown({
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-surface-border/60 text-[11px]">
                 <span className="text-ink-subtle">
                   {showEst1rm && est1rm != null && (
-                    <>est. 1RM <span className="font-mono text-gray-300">{est1rm}</span></>
+                    <>est. 1RM <span className="font-mono text-ink">{est1rm}</span></>
                   )}
                 </span>
                 {showVolumeTotals && vol > 0 && (
                   <span className="text-ink-subtle">
-                    vol <span className="font-mono text-gray-300">{Math.round(vol).toLocaleString()}</span>
+                    vol <span className="font-mono text-ink">{Math.round(vol).toLocaleString()}</span>
                   </span>
                 )}
               </div>
@@ -156,7 +156,7 @@ export function SessionExerciseBreakdown({
       {showVolumeTotals && grandTotalVolume > 0 && (
         <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-surface border border-surface-border">
           <span className="text-[10px] uppercase tracking-widest text-ink-subtle">Total volume</span>
-          <span className="font-mono text-lg font-bold text-white">
+          <span className="font-mono text-lg font-bold text-ink">
             {Math.round(grandTotalVolume).toLocaleString()}
           </span>
         </div>

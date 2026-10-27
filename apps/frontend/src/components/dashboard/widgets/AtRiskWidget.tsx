@@ -162,7 +162,7 @@ export function AtRiskWidget({
                 size="sm"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-300 truncate">{client.name}</p>
+                <p className="text-sm text-ink truncate">{client.name}</p>
                 <p className="text-xs text-ink-faint">{lastSessionLabel(client)}</p>
               </div>
               <span className={cn('text-[10px] px-1.5 py-0.5 rounded font-medium', colors.badge)}>

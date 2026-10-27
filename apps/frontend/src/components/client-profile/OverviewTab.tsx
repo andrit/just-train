@@ -48,7 +48,7 @@ function StatCard({
         'text-sm font-medium leading-tight',
         colorClass ? colorClass.split(' ').find((c) => c.startsWith('text-')) : '',
         warning && 'text-amber-400',
-        !colorClass && !warning && 'text-gray-200',
+        !colorClass && !warning && 'text-ink',
       )}>
         {value}
       </p>
@@ -89,7 +89,7 @@ function GoalRow({
           interactions.button.press,
         )}
       />
-      <p className="flex-1 text-sm text-gray-300 leading-relaxed">{goal.goal}</p>
+      <p className="flex-1 text-sm text-ink leading-relaxed">{goal.goal}</p>
       <button
         type="button"
         onClick={onDelete}
@@ -196,7 +196,7 @@ export function OverviewTab({
           <h3 className="section-label">Training Focus</h3>
           <div className="flex gap-2 flex-wrap">
             {primaryFocus && (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-surface-border text-sm text-gray-300">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-surface-border text-sm text-ink">
                 <span aria-hidden>{FOCUS_ICON[primaryFocus]}</span>
                 {FOCUS_LABEL[primaryFocus]}
                 <span className="text-xs text-ink-faint ml-1">Primary</span>
@@ -257,7 +257,7 @@ export function OverviewTab({
                 type="button"
                 onClick={() => setAddingGoal(true)}
                 className={cn(
-                  'flex items-center gap-2 text-sm text-ink-subtle hover:text-gray-300 py-1',
+                  'flex items-center gap-2 text-sm text-ink-subtle hover:text-ink py-1',
                   interactions.button.base,
                   'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-command-blue rounded',
                 )}

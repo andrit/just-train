@@ -131,7 +131,7 @@ export default function MediaUploader({
                   type="button"
                   onClick={() => setDeleteTarget(item)}
                   aria-label="Delete media"
-                  className="text-xs bg-red-600/80 hover:bg-red-600 text-white rounded px-2 py-1 font-medium transition-colors"
+                  className="text-xs bg-red-600/80 hover:bg-red-600 text-ink rounded px-2 py-1 font-medium transition-colors"
                 >
                   🗑
                 </button>

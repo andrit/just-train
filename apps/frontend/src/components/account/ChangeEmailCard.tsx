@@ -49,9 +49,9 @@ export function ChangeEmailCard(): React.JSX.Element {
   return (
     <form onSubmit={handleSubmit} className="card p-4 space-y-3">
       <div>
-        <p className="text-sm font-medium text-gray-200 mb-1">Sign-in email</p>
+        <p className="text-sm font-medium text-ink mb-1">Sign-in email</p>
         <p className="text-xs text-ink-subtle">
-          Currently <span className="text-gray-300">{current}</span>. A new address takes over only after you confirm it from its inbox — until then this one keeps working.
+          Currently <span className="text-ink">{current}</span>. A new address takes over only after you confirm it from its inbox — until then this one keeps working.
         </p>
       </div>
 
@@ -62,7 +62,7 @@ export function ChangeEmailCard(): React.JSX.Element {
             type="button"
             onClick={handleCancel}
             disabled={cancel.isPending}
-            className="shrink-0 underline underline-offset-2 hover:text-white disabled:opacity-50"
+            className="shrink-0 underline underline-offset-2 hover:text-ink disabled:opacity-50"
           >
             Cancel
           </button>

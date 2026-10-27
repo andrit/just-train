@@ -49,7 +49,7 @@ export default function HelpPage(): React.JSX.Element {
 
       {/* Header */}
       <div className="mb-4 animate-slide-up">
-        <h1 className="font-display text-3xl uppercase tracking-wide text-white">Help</h1>
+        <h1 className="font-display text-3xl uppercase tracking-wide text-ink">Help</h1>
         <p className="text-xs text-ink-subtle mt-1">
           How Just Train works, screen by screen.
         </p>
@@ -65,7 +65,7 @@ export default function HelpPage(): React.JSX.Element {
               onClick={() => jumpTo(s.id)}
               className={cn(
                 'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
-                'bg-[#1C1C1C] border-surface-border text-gray-300 hover:border-gray-400 hover:text-gray-200',
+                'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
               )}
             >

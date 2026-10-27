@@ -66,8 +66,8 @@ export function TemplateExercisePickerSheet({
       <div className="relative w-full bg-brand-secondary rounded-t-2xl border-t border-surface-border flex flex-col" style={{ maxHeight: '80vh' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-surface-border shrink-0">
-          <h3 className="text-sm font-medium text-gray-200">Add exercise</h3>
-          <button type="button" onClick={onClose} className="text-ink-subtle hover:text-gray-300 text-sm">Cancel</button>
+          <h3 className="text-sm font-medium text-ink">Add exercise</h3>
+          <button type="button" onClick={onClose} className="text-ink-subtle hover:text-ink text-sm">Cancel</button>
         </div>
 
         {/* Search + filter chips */}
@@ -78,7 +78,7 @@ export function TemplateExercisePickerSheet({
             value={search}
             onChange={e => setSearch(e.target.value)}
             autoFocus
-            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
+            className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2 text-sm text-ink placeholder-ink-faint focus:outline-none focus:border-command-blue/50"
           />
           {workoutType && (
             <div className="flex gap-2">
@@ -89,7 +89,7 @@ export function TemplateExercisePickerSheet({
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize',
                   !showAllTypes
                     ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                    : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:text-ink',
                 )}
               >
                 {typeLabel}
@@ -101,7 +101,7 @@ export function TemplateExercisePickerSheet({
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all',
                   showAllTypes
                     ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                    : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                    : 'border-surface-border text-ink-subtle hover:text-ink',
                 )}
               >
                 All types

@@ -59,7 +59,7 @@ export function VolumeByBodyPart({ entries }: VolumeByBodyPartProps): React.JSX.
                   aria-hidden
                 />
               </div>
-              <span className="w-14 shrink-0 text-right text-xs text-gray-300 tabular-nums">
+              <span className="w-14 shrink-0 text-right text-xs text-ink tabular-nums">
                 {e.volume.toLocaleString()}
               </span>
             </div>

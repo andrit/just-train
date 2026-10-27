@@ -70,7 +70,7 @@ export function ChallengesTab({
             </svg>
           </div>
           <div>
-            <p className="font-medium text-sm text-white">
+            <p className="font-medium text-sm text-ink">
               {isSelf ? 'Set a Challenge' : 'New Challenge'}
             </p>
             <p className="text-xs text-ink-subtle mt-0.5">

@@ -41,7 +41,7 @@ export function InstallPromptBanner({
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white leading-snug">
+          <p className="text-sm font-semibold text-ink leading-snug">
             Train anywhere, even without signal
           </p>
           {isIOS ? (
@@ -51,7 +51,7 @@ export function InstallPromptBanner({
                 <path d="M10 3v10M6 7l4-4 4 4M4 15h12" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
               </svg>{' '}
               Share button then{' '}
-              <strong className="text-white font-medium">Add to Home Screen</strong>
+              <strong className="text-ink font-medium">Add to Home Screen</strong>
             </p>
           ) : (
             <p className="text-xs text-ink-muted mt-1">
@@ -65,7 +65,7 @@ export function InstallPromptBanner({
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
-          className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-ink-subtle hover:text-gray-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue"
+          className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-ink-subtle hover:text-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue"
         >
           ×
         </button>

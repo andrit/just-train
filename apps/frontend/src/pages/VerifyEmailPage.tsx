@@ -48,7 +48,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
     <div className="min-h-screen bg-black flex items-center justify-center p-6">
       <div className="w-full max-w-sm text-center">
         {/* Logo / wordmark */}
-        <p className="font-display text-2xl uppercase tracking-widest text-white mb-10">
+        <p className="font-display text-2xl uppercase tracking-widest text-ink mb-10">
           Just Train
         </p>
 
@@ -66,7 +66,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="font-display text-xl uppercase tracking-widest text-white mb-2">
+            <h1 className="font-display text-xl uppercase tracking-widest text-ink mb-2">
               Email verified
             </h1>
             <p className="text-ink-muted text-sm mb-8">
@@ -90,7 +90,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h1 className="font-display text-xl uppercase tracking-widest text-white mb-2">
+            <h1 className="font-display text-xl uppercase tracking-widest text-ink mb-2">
               Link invalid
             </h1>
             <p className="text-ink-muted text-sm mb-8">
@@ -99,7 +99,7 @@ export default function VerifyEmailPage(): React.JSX.Element {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="w-full py-3 rounded-lg border border-surface-border text-gray-300 font-display text-sm uppercase tracking-widest hover:border-gray-500 transition-colors"
+              className="w-full py-3 rounded-lg border border-surface-border text-ink font-display text-sm uppercase tracking-widest hover:border-gray-500 transition-colors"
             >
               Back to Login
             </button>

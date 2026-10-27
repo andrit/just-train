@@ -152,7 +152,7 @@ export function NumberField({
           onPointerCancel={endHold}
           onContextMenu={(e) => e.preventDefault()}
           onClick={handleTap(-1)}
-          className="w-9 select-none rounded-xl border border-surface-border text-ink-muted hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
+          className="w-9 select-none rounded-xl border border-surface-border text-ink-muted hover:text-ink hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
         >
           <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none"><path d="M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
         </button>
@@ -184,7 +184,7 @@ export function NumberField({
           onPointerCancel={endHold}
           onContextMenu={(e) => e.preventDefault()}
           onClick={handleTap(1)}
-          className="w-9 select-none rounded-xl border border-surface-border text-ink-muted hover:text-white hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
+          className="w-9 select-none rounded-xl border border-surface-border text-ink-muted hover:text-ink hover:border-command-blue/40 transition-colors flex items-center justify-center active:scale-95"
         >
           <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
         </button>

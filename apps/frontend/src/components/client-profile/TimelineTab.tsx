@@ -130,7 +130,7 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
                     <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
-                <p className="text-sm text-gray-200 font-medium">
+                <p className="text-sm text-ink font-medium">
                   {event.session.name ?? 'Training Session'}
                 </p>
                 {event.session.energyLevel != null && (
@@ -142,7 +142,7 @@ export function TimelineTab({ clientId, clientName }: TimelineTabProps): React.J
                 <p className="text-xs text-emerald-400 uppercase tracking-wider mb-1">
                   {event.goal.achievedAt ? '✓ Goal Achieved' : 'Goal Set'}
                 </p>
-                <p className="text-sm text-gray-300">{event.goal.goal}</p>
+                <p className="text-sm text-ink">{event.goal.goal}</p>
               </div>
             ) : (
               <div className="card p-3">

@@ -8,13 +8,13 @@ export default function TermsPage(): React.JSX.Element {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-brand-primary text-gray-300 px-4 py-10">
+    <div className="min-h-screen bg-brand-primary text-ink px-4 py-10">
       <div className="max-w-2xl mx-auto">
 
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="text-xs text-ink-subtle hover:text-gray-300 uppercase tracking-widest mb-8 flex items-center gap-2 transition-colors"
+          className="text-xs text-ink-subtle hover:text-ink uppercase tracking-widest mb-8 flex items-center gap-2 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -22,7 +22,7 @@ export default function TermsPage(): React.JSX.Element {
           Back
         </button>
 
-        <h1 className="font-display text-3xl uppercase tracking-wide text-white mb-2">
+        <h1 className="font-display text-3xl uppercase tracking-wide text-ink mb-2">
           Terms of Service
         </h1>
         <p className="text-xs text-ink-subtle mb-10">Last updated: [DATE — PLACEHOLDER]</p>

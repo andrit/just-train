@@ -92,7 +92,7 @@ export function ExerciseProgressSection({ clientId, exerciseId, onOpenSession }:
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-[10px] uppercase tracking-wider text-ink-subtle">Est. 1RM</p>
-            <p className="font-display text-3xl text-white leading-none mt-1">
+            <p className="font-display text-3xl text-ink leading-none mt-1">
               {overall.currentEst1rm ?? '—'}
               <span className="text-sm text-ink-subtle ml-1">{unit}</span>
             </p>
@@ -104,11 +104,11 @@ export function ExerciseProgressSection({ clientId, exerciseId, onOpenSession }:
         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-surface-border/60 text-xs">
           <div>
             <span className="text-ink-subtle">Top set </span>
-            <span className="font-mono text-gray-200">{overall.currentTopSetWeight ?? '—'}</span>
+            <span className="font-mono text-ink">{overall.currentTopSetWeight ?? '—'}</span>
           </div>
           <div>
             <span className="text-ink-subtle">Best vol </span>
-            <span className="font-mono text-gray-200">{overall.bestVolume != null ? formatTotalVolume(overall.bestVolume) : '—'}</span>
+            <span className="font-mono text-ink">{overall.bestVolume != null ? formatTotalVolume(overall.bestVolume) : '—'}</span>
           </div>
           <div className="ml-auto">
             <TrendChip trend={overall.highestWeightTrend} unit={unit} />
@@ -122,7 +122,7 @@ export function ExerciseProgressSection({ clientId, exerciseId, onOpenSession }:
           {byRank.map((r) => (
             <div key={r.rank} className="flex items-center gap-3">
               <span className="text-[11px] text-ink-subtle w-16 shrink-0">{RANK_LABEL[r.rank] ?? `#${r.rank}`}</span>
-              <span className="font-mono text-sm text-gray-200 w-14 shrink-0 text-right">{r.latestWeight ?? '—'}</span>
+              <span className="font-mono text-sm text-ink w-14 shrink-0 text-right">{r.latestWeight ?? '—'}</span>
               <div className="flex-1"><TrendChip trend={r.trend} unit={unit} /></div>
             </div>
           ))}
@@ -143,7 +143,7 @@ export function ExerciseProgressSection({ clientId, exerciseId, onOpenSession }:
             {bySetPosition.map((s) => (
               <div key={s.setNumber} className="flex items-center gap-3">
                 <span className="text-[11px] text-ink-subtle w-16 shrink-0">Set {s.setNumber}</span>
-                <span className="font-mono text-sm text-gray-200">
+                <span className="font-mono text-sm text-ink">
                   {s.avgWeight ?? '—'}
                   {s.avgWeight != null && <span className="text-xs text-ink-subtle ml-0.5">{unit}</span>}
                   {s.avgReps != null && <span className="text-ink-muted"> × {s.avgReps}</span>}
@@ -176,7 +176,7 @@ export function ExerciseProgressSection({ clientId, exerciseId, onOpenSession }:
               )}
             >
               <span className="text-xs text-ink-subtle w-20 shrink-0">{formatDate(s.date)}</span>
-              <span className="flex-1 font-mono text-xs text-gray-300">
+              <span className="flex-1 font-mono text-xs text-ink">
                 {s.topSet ? `${s.topSet.weight ?? '—'} × ${s.topSet.reps ?? '—'}` : '—'}
               </span>
               {s.est1rm != null && (

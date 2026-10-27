@@ -82,7 +82,7 @@ export function ConfirmDialog({
         </div>
 
         {/* Copy */}
-        <h3 className="font-display text-xl text-gray-100 mb-2">{title}</h3>
+        <h3 className="font-display text-xl text-ink mb-2">{title}</h3>
         <p className="text-sm text-ink-muted mb-6 leading-relaxed">{message}</p>
 
         {/* Actions */}

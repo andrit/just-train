@@ -90,7 +90,7 @@ function UserMenuButton({
             className={cn(
               'flex items-center gap-3 px-4 py-3 w-full text-left rounded-xl',
               'bg-brand-accent border border-surface-border',
-              'text-sm text-gray-300 hover:text-red-400 transition-colors',
+              'text-sm text-ink hover:text-red-400 transition-colors',
               'animate-wheel-roll-up',
             )}
             style={{ animationDelay: showInstall ? '90ms' : '60ms' }}
@@ -110,7 +110,7 @@ function UserMenuButton({
               className={cn(
                 'flex items-center gap-3 px-4 py-3 w-full text-left rounded-xl',
                 'bg-brand-accent border border-surface-border',
-                'text-sm text-gray-300 hover:text-white transition-colors',
+                'text-sm text-ink hover:text-ink transition-colors',
                 'animate-wheel-roll-up',
               )}
               style={{ animationDelay: '60ms' }}
@@ -129,7 +129,7 @@ function UserMenuButton({
             className={cn(
               'flex items-center gap-3 px-4 py-3 rounded-xl',
               'bg-brand-accent border border-surface-border',
-              'text-sm text-gray-300 hover:text-white transition-colors',
+              'text-sm text-ink hover:text-ink transition-colors',
               'animate-wheel-roll-up',
             )}
           >
@@ -151,7 +151,7 @@ function UserMenuButton({
             className={cn(
               'flex items-center gap-3 px-4 py-3 rounded-xl',
               'bg-brand-accent border border-surface-border',
-              'text-sm text-gray-300 hover:text-white transition-colors',
+              'text-sm text-ink hover:text-ink transition-colors',
               'animate-wheel-roll-up',
             )}
           >
@@ -274,12 +274,12 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
               >
                 <BicepLogo className="w-7 h-7" />
                 <span className="font-display text-2xl tracking-wider uppercase">
-                  <span className="text-white">Just Train</span>
+                  <span className="text-ink">Just Train</span>
                 </span>
               </button>
             ) : (
               <span className="font-display text-2xl tracking-wider uppercase">
-                <span className="text-white">Just Train</span>
+                <span className="text-ink">Just Train</span>
               </span>
             )}
             {pendingSyncCount > 0 && (
@@ -305,7 +305,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                     'border-b border-surface-border',
                     'text-sm font-medium transition-colors duration-100',
                     'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
-                    isActive ? 'text-white' : 'text-ink-muted hover:text-gray-200',
+                    isActive ? 'text-ink' : 'text-ink-muted hover:text-ink',
                   )
                 }
               >
@@ -331,7 +331,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                 <span className="text-xs font-bold text-command-blue">{initials}</span>
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-gray-200 truncate">{trainer.name}</p>
+                <p className="text-xs font-medium text-ink truncate">{trainer.name}</p>
                 <p className="text-[10px] text-ink-subtle truncate">{trainer.email}</p>
               </div>
             </div>
@@ -345,7 +345,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                   'border-b border-surface-border',
                   'text-xs font-medium transition-colors duration-100',
                   'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
-                  isActive ? 'text-white' : 'text-ink-muted hover:text-gray-200',
+                  isActive ? 'text-ink' : 'text-ink-muted hover:text-ink',
                 )
               }
             >
@@ -366,7 +366,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
                   'border-b border-surface-border',
                   'text-xs font-medium transition-colors duration-100',
                   'focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-command-blue',
-                  isActive ? 'text-white' : 'text-ink-muted hover:text-gray-200',
+                  isActive ? 'text-ink' : 'text-ink-muted hover:text-ink',
                 )
               }
             >

@@ -56,7 +56,7 @@ export function NamePromptModal({
         onClick={onCancel}
       />
       <div className="relative w-full max-w-sm bg-brand-secondary rounded-2xl border border-surface-border shadow-2xl p-5">
-        <p className="text-sm font-medium text-gray-200 mb-3">{title}</p>
+        <p className="text-sm font-medium text-ink mb-3">{title}</p>
 
         <input
           ref={inputRef}
@@ -65,14 +65,14 @@ export function NamePromptModal({
           onChange={e => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-gray-200 placeholder-ink-faint focus:outline-none focus:border-command-blue/50 mb-4"
+          className="w-full bg-brand-primary border border-surface-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-faint focus:outline-none focus:border-command-blue/50 mb-4"
         />
 
         <div className="flex gap-2">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl border border-surface-border text-sm text-ink-muted hover:text-gray-200 transition-colors"
+            className="flex-1 py-2.5 rounded-xl border border-surface-border text-sm text-ink-muted hover:text-ink transition-colors"
           >
             Cancel
           </button>

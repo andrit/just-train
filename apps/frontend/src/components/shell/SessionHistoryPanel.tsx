@@ -28,7 +28,7 @@ function ScoreRow({ label, value }: { label: string; value: number }): React.JSX
       <div className="flex-1 h-1.5 bg-surface-border rounded-full overflow-hidden">
         <div className="h-full bg-command-blue rounded-full" style={{ width: `${value * 10}%` }} />
       </div>
-      <span className="font-mono text-xs text-gray-300 w-6 text-right">{value}</span>
+      <span className="font-mono text-xs text-ink w-6 text-right">{value}</span>
     </div>
   )
 }
@@ -99,7 +99,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
           type="button"
           onClick={onClose}
           className={cn(
-            'flex items-center gap-1.5 text-sm text-ink-subtle hover:text-gray-300 mb-4',
+            'flex items-center gap-1.5 text-sm text-ink-subtle hover:text-ink mb-4',
             interactions.button.base,
           )}
         >
@@ -114,7 +114,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
             <p className="text-xs text-ink-subtle uppercase tracking-wider mb-0.5">
               {session.client?.name ?? 'Session'}
             </p>
-            <h1 className="font-display text-2xl uppercase tracking-wide text-white leading-tight">
+            <h1 className="font-display text-2xl uppercase tracking-wide text-ink leading-tight">
               {session.name ?? 'Training Session'}
             </h1>
             <p className="text-sm text-ink-subtle mt-1">{formatDate(session.date)}</p>
@@ -137,17 +137,17 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
       <div className="flex gap-4 px-4 py-4 border-b border-surface-border shrink-0">
         {duration && (
           <div className="flex-1 text-center">
-            <p className="font-display text-xl text-white">{duration}</p>
+            <p className="font-display text-xl text-ink">{duration}</p>
             <p className="text-[10px] text-ink-subtle uppercase tracking-wider mt-0.5">Duration</p>
           </div>
         )}
         <div className="flex-1 text-center">
-          <p className="font-display text-xl text-white">{totalSets}</p>
+          <p className="font-display text-xl text-ink">{totalSets}</p>
           <p className="text-[10px] text-ink-subtle uppercase tracking-wider mt-0.5">Sets</p>
         </div>
         {totalVolume > 0 && (
           <div className="flex-1 text-center">
-            <p className="font-display text-xl text-white">
+            <p className="font-display text-xl text-ink">
               {formatTotalVolume(totalVolume)}
             </p>
             <p className="text-[10px] text-ink-subtle uppercase tracking-wider mt-0.5">Volume</p>
@@ -164,7 +164,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
             'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
             prFilterOn
               ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
-              : 'border-surface-border text-ink-subtle hover:border-gray-500 hover:text-gray-300',
+              : 'border-surface-border text-ink-subtle hover:border-gray-500 hover:text-ink',
           )}
         >
           <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
@@ -206,7 +206,7 @@ export function SessionHistoryPanel({ sessionId, onClose }: SessionHistoryPanelP
         {session.sessionNotes && (
           <div className="pt-2">
             <p className="text-[10px] uppercase tracking-widest text-ink-subtle mb-2">Notes</p>
-            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">
               {session.sessionNotes}
             </p>
           </div>

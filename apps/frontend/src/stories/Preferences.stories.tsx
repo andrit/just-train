@@ -122,7 +122,7 @@ export const TonePicker: StoryObj = {
                 interactions.button.base, interactions.button.press,
               )}
             >
-              <span className={cn('text-sm font-medium', tone === opt.value ? 'text-white' : 'text-gray-300')}>
+              <span className={cn('text-sm font-medium', tone === opt.value ? 'text-ink' : 'text-ink')}>
                 {opt.label}
               </span>
               <span className="text-xs text-ink-subtle font-mono">{opt.example}</span>
@@ -156,8 +156,8 @@ export const CTALabelPicker: StoryObj = {
                 className={cn(
                   'px-3 py-2 rounded-xl border text-sm text-left transition-all duration-150',
                   cta === label
-                    ? 'border-command-blue/50 bg-command-blue/10 text-white'
-                    : 'border-surface-border bg-surface text-ink-muted hover:border-gray-500 hover:text-gray-300',
+                    ? 'border-command-blue/50 bg-command-blue/10 text-ink'
+                    : 'border-surface-border bg-surface text-ink-muted hover:border-gray-500 hover:text-ink',
                   interactions.button.base, interactions.button.press,
                 )}
               >
@@ -203,7 +203,7 @@ export const WidgetRow: StoryObj = {
             ))}
           </div>
           <div className="flex-1 min-w-0">
-            <p className={cn('text-sm font-medium', enabled ? 'text-gray-200' : 'text-ink-subtle')}>{label}</p>
+            <p className={cn('text-sm font-medium', enabled ? 'text-ink' : 'text-ink-subtle')}>{label}</p>
             <p className="text-xs text-ink-faint truncate">{desc}</p>
           </div>
           {!enabled && (

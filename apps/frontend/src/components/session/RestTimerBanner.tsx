@@ -68,7 +68,7 @@ export function RestTimerBanner({ timer }: RestTimerBannerProps): React.JSX.Elem
         </svg>
         <span className={cn(
           'text-sm font-medium',
-          isVeryLow ? 'text-white' : 'text-gray-300',
+          isVeryLow ? 'text-ink' : 'text-ink',
         )}>
           Rest
         </span>
@@ -79,7 +79,7 @@ export function RestTimerBanner({ timer }: RestTimerBannerProps): React.JSX.Elem
         key={timer.remaining} // key change triggers CSS animation on each tick
         className={cn(
           'font-mono text-xl font-bold tabular-nums animate-bounce-in',
-          isVeryLow ? 'text-white' : isLow ? 'text-amber-300' : 'text-white',
+          isVeryLow ? 'text-ink' : isLow ? 'text-amber-300' : 'text-ink',
         )}
       >
         {formatTime(timer.remaining)}
@@ -93,8 +93,8 @@ export function RestTimerBanner({ timer }: RestTimerBannerProps): React.JSX.Elem
           'text-xs px-3 py-1.5 rounded-lg border',
           'transition-all duration-150',
           isVeryLow
-            ? 'border-white/30 text-white hover:bg-white/10'
-            : 'border-surface-border text-ink-muted hover:text-gray-200 hover:border-gray-500',
+            ? 'border-white/30 text-ink hover:bg-white/10'
+            : 'border-surface-border text-ink-muted hover:text-ink hover:border-gray-500',
           interactions.button.base,
           interactions.button.press,
         )}

@@ -49,7 +49,7 @@ export function EmptyState({
         {icon}
       </span>
 
-      <h3 className="font-display text-lg text-gray-300 mb-2">
+      <h3 className="font-display text-lg text-ink mb-2">
         {title}
       </h3>
 

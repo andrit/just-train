@@ -130,7 +130,7 @@ function TrainCard({ selfClientId, onStart }: TrainCardProps): React.JSX.Element
     return (
       <div className="rounded-lg border border-signal-yellow/30 bg-signal-yellow/10 px-4 py-4">
         <p className="font-display text-xs uppercase tracking-widest text-signal-yellow mb-1">Live session</p>
-        <p className="text-white text-sm font-medium mb-3 truncate">
+        <p className="text-ink text-sm font-medium mb-3 truncate">
           Resume: {activeSession.clientName}
         </p>
         <div className="flex gap-2">
@@ -159,7 +159,7 @@ function TrainCard({ selfClientId, onStart }: TrainCardProps): React.JSX.Element
     return (
       <div className="rounded-lg border border-command-blue/30 bg-command-blue/10 px-4 py-4">
         <p className="font-display text-xs uppercase tracking-widest text-command-blue mb-1">Planned</p>
-        <p className="text-white text-sm font-medium mb-3 truncate">
+        <p className="text-ink text-sm font-medium mb-3 truncate">
           Begin: {label}
         </p>
         <div className="flex gap-2">
@@ -246,7 +246,7 @@ export default function DashboardPage(): React.JSX.Element {
         {/* Greeting */}
         <div className="mb-3 animate-slide-up">
           <p className="text-ink-subtle text-sm mb-0.5">{greeting}</p>
-          <h1 className="font-display text-3xl md:text-4xl uppercase tracking-wide text-white">
+          <h1 className="font-display text-3xl md:text-4xl uppercase tracking-wide text-ink">
             {mode.labels.dashboardTitle}
           </h1>
         </div>

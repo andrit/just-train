@@ -80,7 +80,7 @@ function SessionPill({
       </div>
 
       <div className="text-left">
-        <p className="text-xs font-medium text-white leading-tight">{clientName}</p>
+        <p className="text-xs font-medium text-ink leading-tight">{clientName}</p>
         <p className="text-[10px] text-ink-subtle leading-tight tabular-nums">{elapsed}</p>
       </div>
 
@@ -186,7 +186,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
                 'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                 session.clientId === focusedSession.clientId
                   ? 'bg-command-blue text-white border-command-blue'
-                  : 'border-surface-border text-ink-subtle hover:text-gray-300',
+                  : 'border-surface-border text-ink-subtle hover:text-ink',
               )}
             >
               {getClientName(session.clientId)}
@@ -200,7 +200,7 @@ export function ActiveSessionOverlay(): React.JSX.Element | null {
         <button
           type="button"
           onClick={minimise}
-          className="flex items-center gap-1.5 text-xs text-ink-subtle hover:text-gray-300 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-ink-subtle hover:text-ink transition-colors"
         >
           <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
             <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

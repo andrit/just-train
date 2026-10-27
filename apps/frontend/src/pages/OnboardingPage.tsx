@@ -161,7 +161,7 @@ function ChoiceCard({
       <h2
         className={cn(
           'font-display text-3xl md:text-4xl tracking-wide uppercase mb-2 transition-colors duration-300',
-          selected ? 'text-white' : 'text-gray-200',
+          selected ? 'text-ink' : 'text-ink',
         )}
       >
         {title}
@@ -186,7 +186,7 @@ function ChoiceCard({
                 <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               </svg>
             </span>
-            <span className={selected ? 'text-gray-300' : 'text-ink-subtle'}>
+            <span className={selected ? 'text-ink' : 'text-ink-subtle'}>
               {point}
             </span>
           </li>
@@ -239,7 +239,7 @@ export default function OnboardingPage(): React.JSX.Element {
       <header className="flex items-center justify-center pt-10 pb-6 px-6">
         <div className="text-center">
           <span className="font-display text-3xl tracking-widest uppercase">
-            <span className="text-white">Just Train</span>
+            <span className="text-ink">Just Train</span>
           </span>
         </div>
       </header>
@@ -253,7 +253,7 @@ export default function OnboardingPage(): React.JSX.Element {
           <div className="text-center mb-10 animate-slide-up">
             {OFFER_TRAINER_MODE ? (
               <>
-                <h1 className="font-display text-4xl md:text-5xl text-white uppercase tracking-wide mb-3">
+                <h1 className="font-display text-4xl md:text-5xl text-ink uppercase tracking-wide mb-3">
                   How will you use
                   <span className="text-command-blue block">Just Train?</span>
                 </h1>
@@ -263,7 +263,7 @@ export default function OnboardingPage(): React.JSX.Element {
               </>
             ) : (
               <>
-                <h1 className="font-display text-4xl md:text-5xl text-white uppercase tracking-wide mb-3">
+                <h1 className="font-display text-4xl md:text-5xl text-ink uppercase tracking-wide mb-3">
                   Welcome to
                   <span className="text-command-blue block">Just Train</span>
                 </h1>

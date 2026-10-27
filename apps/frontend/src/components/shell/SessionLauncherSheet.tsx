@@ -144,8 +144,8 @@ export function SessionLauncherSheet({
                     'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left',
                     'border transition-all duration-150',
                     selectedClientId === client.id
-                      ? 'border-command-blue/60 bg-command-blue/10 text-white'
-                      : 'border-surface-border bg-surface text-gray-300 hover:border-command-blue/30',
+                      ? 'border-command-blue/60 bg-command-blue/10 text-ink'
+                      : 'border-surface-border bg-surface text-ink hover:border-command-blue/30',
                   )}
                 >
                   <span className="text-sm font-medium truncate">{client.name}</span>
@@ -202,7 +202,7 @@ export function SessionLauncherSheet({
               openSessionPlan(undefined, selectedClientId)
               onClose()
             }}
-            className="w-full text-center text-sm text-ink-subtle hover:text-gray-300 py-2 transition-colors"
+            className="w-full text-center text-sm text-ink-subtle hover:text-ink py-2 transition-colors"
           >
             Or plan a future session →
           </button>
@@ -233,7 +233,7 @@ export function SessionLauncherSheet({
                     (!selectedClientId || isLoading) && 'opacity-50 pointer-events-none',
                   )}
                 >
-                  <span className="text-sm font-medium text-gray-200 truncate">{template.name}</span>
+                  <span className="text-sm font-medium text-ink truncate">{template.name}</span>
                   <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-faint ml-auto shrink-0">
                     <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>

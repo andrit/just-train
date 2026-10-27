@@ -24,7 +24,7 @@ export default function ForgotPasswordPage(): React.JSX.Element {
     <div className="min-h-screen bg-brand-primary flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-2xl uppercase tracking-widest text-white">Reset password</h1>
+          <h1 className="font-display text-2xl uppercase tracking-widest text-ink">Reset password</h1>
           <p className="text-ink-subtle mt-2 text-sm">
             {sent ? 'Check your inbox' : "Enter your email and we'll send a link"}
           </p>
@@ -32,12 +32,12 @@ export default function ForgotPasswordPage(): React.JSX.Element {
 
         {sent ? (
           <div className="text-center space-y-6">
-            <p className="text-sm text-gray-300">
-              If an account exists for <span className="text-white">{email.trim()}</span>, a reset link is on its way.
+            <p className="text-sm text-ink">
+              If an account exists for <span className="text-ink">{email.trim()}</span>, a reset link is on its way.
               It works for one hour.
             </p>
             <p className="text-xs text-ink-subtle">Nothing arrived? Check spam, or try again in a minute.</p>
-            <Link to="/login" className="inline-block text-sm text-ink-muted hover:text-gray-200 underline underline-offset-2">Back to sign in</Link>
+            <Link to="/login" className="inline-block text-sm text-ink-muted hover:text-ink underline underline-offset-2">Back to sign in</Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,7 +53,7 @@ export default function ForgotPasswordPage(): React.JSX.Element {
               Send reset link
             </Button>
             <p className="text-xs text-center">
-              <Link to="/login" className="text-ink-muted hover:text-gray-200 underline underline-offset-2">Back to sign in</Link>
+              <Link to="/login" className="text-ink-muted hover:text-ink underline underline-offset-2">Back to sign in</Link>
             </p>
           </form>
         )}

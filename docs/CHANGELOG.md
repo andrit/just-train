@@ -7,6 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Theme — Step 4: the toggle (System / Light / Dark) — light/dark complete (2026-10-27)
+- The light/dark theme is now **live and user-selectable**, completing the sweep. `lib/theme.ts` (`useTheme`)
+  persists the choice to localStorage and stamps `data-theme` on `<html>`; an inline **no-flash script** in
+  `index.html` applies an explicit choice before first paint; `index.css` resolves three modes — `:root` dark
+  baseline, a `@media(prefers-color-scheme: light)` block for the **system default** (follow the OS), and
+  `[data-theme="light"]`/`"dark"` for explicit choices that win on any OS. The Preferences **Appearance** control
+  is now a live System/Light/Dark segmented toggle (closes preferences-audit rec #6). **Default is system** — a
+  first-time user follows their OS; dark can be pinned. Dark byte-identical. Files: `lib/theme.ts` (new),
+  `index.html`, `index.css`, `PreferencesPage.tsx`. **Remaining:** QA every screen in light (human pass).
+
 ### Theme — Step 3: charts tokenized for light/dark (2026-10-27)
 - The body heat-map, muscle map, and the shared `heatRamp` no longer hardcode dark hex. The untrained fill, the
   region stroke, and the three-tier Command-Blue frequency ramp are now CSS variables (`--chart-base`,

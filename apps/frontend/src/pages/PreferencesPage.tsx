@@ -24,6 +24,7 @@ import { useState, useRef, useCallback }  from 'react'
 import { cn }                              from '@/lib/cn'
 import { interactions }                    from '@/lib/interactions'
 import { usePreferences }                  from '@/hooks/usePreferences'
+import { useTheme }                        from '@/lib/theme'
 import { useUXEvent }                      from '@/hooks/useUXEvent'
 import { useReorderList }                  from '@/hooks/useReorderList'
 import { useAuthStore }                    from '@/store/authStore'
@@ -285,6 +286,7 @@ export default function PreferencesPage(): React.JSX.Element {
   const trainer    = useAuthStore((s) => s.trainer)
   const setTrainer = useAuthStore((s) => s.setTrainer)
   const { fire }   = useUXEvent()
+  const [theme, setThemePref] = useTheme()
 
   const {
     ctaLabel,
@@ -410,37 +412,34 @@ export default function PreferencesPage(): React.JSX.Element {
           </div>
         </Section>
 
-        {/* ── Appearance — STUB. Light/dark themes aren't built yet (the light
-            palette is pending; see task-plan-light-dark-theme.md). This is a
-            disabled placeholder so the setting has a home; it intentionally does
-            nothing and is labelled "Coming soon" so it never reads as a live
-            control. Wire it to the real theme store when the sweep lands. */}
+        {/* ── Appearance — live theme control (System / Light / Dark) ──────── */}
         <Section title="Appearance">
           <div className="card p-4">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-medium text-ink">Theme</p>
-              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border border-surface-border text-ink-faint uppercase tracking-wider">
-                Coming soon
-              </span>
-            </div>
-            <p className="text-xs text-ink-subtle mb-3">
-              Light and dark themes are on the way. The app is dark for now.
-            </p>
-            <div className="flex gap-1 p-0.5 rounded-lg bg-brand-primary border border-surface-border opacity-50">
-              {(['System', 'Light', 'Dark'] as const).map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className={cn(
-                    'flex-1 px-3 py-1.5 rounded-md text-xs font-medium cursor-not-allowed',
-                    opt === 'Dark' ? 'bg-command-blue text-white' : 'text-ink-subtle',
-                  )}
-                >
-                  {opt}
-                </button>
-              ))}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-ink">Theme</p>
+                <p className="text-xs text-ink-subtle mt-0.5">System follows your device.</p>
+              </div>
+              <div className="flex gap-1 p-0.5 rounded-lg bg-brand-primary border border-surface-border">
+                {(['system', 'light', 'dark'] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setThemePref(opt)}
+                    aria-pressed={theme === opt}
+                    className={cn(
+                      'px-3 py-1.5 rounded-md text-xs font-medium capitalize transition-all duration-150',
+                      theme === opt
+                        ? 'bg-command-blue text-white'
+                        : 'text-ink-subtle hover:text-ink',
+                      interactions.button.base,
+                      interactions.button.press,
+                    )}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </Section>

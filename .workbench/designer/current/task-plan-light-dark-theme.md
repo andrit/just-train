@@ -58,11 +58,23 @@ so system works and an explicit toggle wins both directions.
 
 Not mechanical where grays sit on different grounds (on-`surface` vs on-page) — needs eyes per screen.
 
+**⚠ Critical gotcha (found in the Preferences slice, 2026-10-27).** `text-white` / bright text sitting on a
+**solid fixed accent** (`bg-command-blue`, `bg-ember-red`, `bg-signal-yellow`) must **stay `text-white`** —
+the accent doesn't change in light, so flipping it to `text-ink` paints a dark label on a dark accent
+(unreadable). **Translucent** accents (`bg-command-blue/10` over surface) are fine → `text-ink`. So the
+`text-white` / `text-gray-100/200/300` migration is **context-sensitive, not a blind replace**. Per slice:
+after the mechanical pass, grep `bg-(command-blue|ember-red|signal-yellow) text-ink` (and the reversed class
+order) and revert those to `text-white`. The muted grays (`text-gray-400/500/600/700`, `placeholder-*`) are
+safe to bulk-map — they're never solid-accent labels.
+
 ## Steps
 
-0. **Design the light palette** *(design, gates 2–4)* — light ground, surfaces, the 4 ink levels, the
-   `signal-yellow`-on-light fix, and what the crosshatch becomes in light (a lighter engrave, or drop
-   the texture). Add a light section to `COLOR_SYSTEM.md`.
+0. **Design the light palette** *(DONE 2026-10-27)* — approved warm off-white ground + warm-stone ink +
+   amber `signal-yellow`-on-light (`#B45309`) + faint light engrave, clean light cards. Values written to
+   `index.css` `[data-theme="light"]`; the global classes tokenized (body, focus-ring offset, `.field` /
+   `.field-label` / `.section-label`, `.card` + `.header-crosshatch` light overrides, `.bg-brand-primary`
+   crosshatch); `signal-yellow` made variable-backed in `tailwind.config.js`; light section added to
+   `COLOR_SYSTEM.md`; mockup in `light-dark-mockup/index.html`. Dark byte-identical.
 1. **Token infrastructure** *(DONE 2026-10-21)* — see below.
 2. **The sweep** *(the bulk)* — replace raw gray/white/black with `ink.*` / surface tokens across the
    116 files, screen-by-screen, each keeping dark correct.
@@ -99,6 +111,7 @@ light.**
 
 ## Files
 
+- **Step-0 proposal mockup:** `light-dark-mockup/index.html` — side-by-side dark (current tokens) vs proposed light; open in a browser to decide the three Step-0 calls.
 - `tailwind.config.js`, `src/index.css` (Step 1 — done).
 - Step 2: the 116 component files (sweep).
 - Step 3: `components/charts/{heatRamp.ts,MuscleMap.tsx,BodyHeatMap.tsx}`, `index.css` crosshatch,

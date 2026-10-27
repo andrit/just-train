@@ -23,6 +23,16 @@
     <meta name="description" content="Just Train — a private training record. Log the work, keep going, nothing else. For athletes and the coaches who guide them." />
 
     <title>Just Train</title>
+
+    <!-- Theme: stamp an explicit light/dark choice before first paint (no flash).
+         'system' or unset leaves the attribute off, so the CSS prefers-color-scheme
+         media query follows the OS. Kept in sync by src/lib/theme.ts. -->
+    <script>
+      try {
+        var t = localStorage.getItem('theme')
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t)
+      } catch (e) { /* storage blocked — fall back to system */ }
+    </script>
   </head>
   <body>
     <!-- React mounts here -->

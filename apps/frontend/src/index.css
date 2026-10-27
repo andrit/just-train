@@ -48,10 +48,14 @@
   --on-signal:    0 0 0;       /* text on signal-yellow (black on bright yellow) */
 }
 
+/* Theme resolution (Step 4):
+   - :root above = DARK (the shipped baseline, unchanged → byte-identical).
+   - The @media(light) block below applies the light palette as the SYSTEM DEFAULT
+     — a light-preferring OS gets light UNLESS the user forced dark (:not([data-theme="dark"])).
+   - :root[data-theme="light"] = the toggle's EXPLICIT light, winning on any OS.
+   Dark needs no explicit block: :root is dark, and the media block excludes forced-dark.
+   The media block duplicates the values here — keep the two light sets in sync. */
 :root[data-theme="light"] {
-  /* Light palette — approved 2026-10-27 (warm off-white ground + warm-stone ink).
-     See light-dark-mockup/index.html and COLOR_SYSTEM.md § Light theme. Reachable
-     only via data-theme="light"; no shipped UI sets it until the Step-2 sweep. */
   --surface:        255 255 255; /* white card */
   --surface-raised: 245 245 244; /* #F5F5F4 stone-100 — elevated */
   --surface-border: 231 229 228; /* #E7E5E4 stone-200 — borders */
@@ -74,6 +78,34 @@
   --heat-2:       91 141 232;   /* #5B8DE8 — med */
   --heat-3:       27 80 217;    /* #1B50D9 — high (command-blue; darkest, pops on white) */
   --on-signal:    255 255 255;  /* white text on the amber signal */
+}
+
+/* System default: follow the OS. Mirrors the light palette above; applies whenever
+   the OS prefers light and the user hasn't explicitly forced dark. Keep in sync with
+   :root[data-theme="light"]. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --surface:        255 255 255;
+    --surface-raised: 245 245 244;
+    --surface-border: 231 229 228;
+    --ink:            28 25 23;
+    --ink-muted:      87 83 78;
+    --ink-subtle:     120 113 108;
+    --ink-faint:      168 162 158;
+    --signal-yellow:  180 83 9;
+    --ground:         250 249 247;
+    --knurl:          120 113 108;
+    --knurl-alpha:    0.07;
+    --ring-offset:    250 249 247;
+    --brand-secondary: 255 255 255;
+    --brand-accent:    245 245 244;
+    --chart-base:     228 226 223;
+    --chart-stroke:   207 203 197;
+    --heat-1:         174 198 240;
+    --heat-2:         91 141 232;
+    --heat-3:         27 80 217;
+    --on-signal:      255 255 255;
+  }
 }
 
 /* ── Base resets ──────────────────────────────────────────────────────────── */

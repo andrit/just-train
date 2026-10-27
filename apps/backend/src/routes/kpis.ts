@@ -860,7 +860,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       security: [{ bearerAuth: [] }],
       summary:  'My exercises that train a muscle (lifetime)',
       description: 'Exercises the client has logged in completed sessions that target the muscle, newest-first by last performed, with a lifetime session count. Self-client scoped.',
-      params:   UuidParamSchema.extend({ muscle: MuscleEnum }),
+      params:   UuidParamSchema.extend({ muscle: z.string() }),
       response: {
         200: MuscleHistoryResponseSchema,
         400: ErrorResponseSchema,
@@ -869,7 +869,16 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
       },
     },
   }, async (request, reply) => {
-    const { id: clientId, muscle } = request.params as { id: string; muscle: Muscle }
+    const { id: clientId, muscle } = request.params as { id: string; muscle: string }
+
+    // Validate the muscle in-handler (not via a params-schema enum): schema
+    // validation runs BEFORE the auth preHandler, so enum-validating the param
+    // would answer 400 to an anonymous request before the 401 — which the
+    // no-anonymous-route security test (rightly) forbids. Auth has already run by
+    // the time we're here, so a bad muscle 400s only an authenticated caller.
+    const parsedMuscle = MuscleEnum.safeParse(muscle)
+    if (!parsedMuscle.success) return reply.status(400).send({ error: 'Unknown muscle' })
+    const targetMuscle = parsedMuscle.data
 
     try {
       // Ownership — the client must belong to this trainer.
@@ -911,7 +920,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         for (const se of s.sessionExercises) {
           const ex = se.exercise
           if (!ex) continue
-          const hit = ex.muscles.find((m) => m.muscle === muscle)
+          const hit = ex.muscles.find((m) => m.muscle === targetMuscle)
           if (!hit) continue
           const acc = byExercise.get(ex.id)
           if (acc) {
@@ -943,7 +952,7 @@ export async function kpiRoutes(app: FastifyInstance): Promise<void> {
         }))
         .sort((a, b) => b.lastPerformed.localeCompare(a.lastPerformed) || a.name.localeCompare(b.name))
 
-      return reply.send({ muscle, exercises: exerciseList })
+      return reply.send({ muscle: targetMuscle, exercises: exerciseList })
     } catch (error) {
       ;routeLog(app).error(error)
       return reply.status(500).send({ error: 'Failed to fetch muscle history' })

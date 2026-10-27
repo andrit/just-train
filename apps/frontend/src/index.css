@@ -32,17 +32,29 @@
   --ink-muted:      156 163 175; /* gray-400 — secondary */
   --ink-subtle:     107 114 128; /* gray-500 — tertiary */
   --ink-faint:      75 85 99;    /* gray-600 — placeholder/disabled */
+  --signal-yellow:  255 226 0;   /* #FFE200 — live/notification accent (flips to amber on light) */
+  --ground:         13 13 13;    /* #0d0d0d — page background under the crosshatch */
+  --knurl:          138 144 153; /* iron-grey — crosshatch texture lines */
+  --knurl-alpha:    0.10;        /* page texture line opacity */
+  --ring-offset:    0 0 0;       /* focus-ring offset = the ground behind a focused element */
 }
 
 :root[data-theme="light"] {
-  /* PLACEHOLDER — real values come from the light-palette design pass. */
+  /* Light palette — approved 2026-10-27 (warm off-white ground + warm-stone ink).
+     See light-dark-mockup/index.html and COLOR_SYSTEM.md § Light theme. Reachable
+     only via data-theme="light"; no shipped UI sets it until the Step-2 sweep. */
   --surface:        255 255 255; /* white card */
-  --surface-raised: 248 250 252; /* slate-50 — elevated */
-  --surface-border: 226 232 240; /* slate-200 — borders */
-  --ink:            17 24 39;     /* gray-900 — primary text on light */
-  --ink-muted:      75 85 99;     /* gray-600 — secondary */
-  --ink-subtle:     107 114 128;  /* gray-500 — tertiary */
-  --ink-faint:      156 163 175;  /* gray-400 — placeholder/disabled */
+  --surface-raised: 245 245 244; /* #F5F5F4 stone-100 — elevated */
+  --surface-border: 231 229 228; /* #E7E5E4 stone-200 — borders */
+  --ink:            28 25 23;     /* #1C1917 stone-900 — primary text on light */
+  --ink-muted:      87 83 78;     /* #57534E stone-600 — secondary */
+  --ink-subtle:     120 113 108;  /* #78716C stone-500 — tertiary */
+  --ink-faint:      168 162 158;  /* #A8A29E stone-400 — placeholder/disabled */
+  --signal-yellow:  180 83 9;     /* #B45309 amber-700 — signal on white (the on-light fix) */
+  --ground:         250 249 247;  /* #FAF9F7 warm off-white page */
+  --knurl:          120 113 108;  /* warm stone — faint light engrave */
+  --knurl-alpha:    0.07;         /* subtler on light */
+  --ring-offset:    250 249 247;  /* light ground behind focused elements */
 }
 
 /* ── Base resets ──────────────────────────────────────────────────────────── */
@@ -54,7 +66,7 @@
   }
 
   body {
-    @apply bg-brand-primary text-gray-100 antialiased;
+    @apply bg-brand-primary text-ink antialiased;
     /* Smooth scrolling for the main content area */
     scroll-behavior: smooth;
   }
@@ -71,7 +83,9 @@
 
   /* Focus ring — keyboard accessibility */
   :focus-visible {
-    @apply outline-none ring-2 ring-command-blue ring-offset-2 ring-offset-black;
+    @apply outline-none ring-2 ring-command-blue ring-offset-2;
+    /* Offset = the ground behind the element; flips by theme (dark #000 → light ground). */
+    --tw-ring-offset-color: rgb(var(--ring-offset));
   }
 }
 
@@ -102,21 +116,21 @@
    * Form inputs use bg-surface so they read as elevated fields above the page.
    */
   .bg-brand-primary {
-    background-color: #0d0d0d;
+    background-color: rgb(var(--ground));
     background-image:
       repeating-linear-gradient(
         45deg,
-        rgba(138, 144, 153, 0.10) 0px,
-        rgba(138, 144, 153, 0.10) 1px,
-        transparent               1px,
-        transparent               7px
+        rgb(var(--knurl) / var(--knurl-alpha)) 0px,
+        rgb(var(--knurl) / var(--knurl-alpha)) 1px,
+        transparent                            1px,
+        transparent                            7px
       ),
       repeating-linear-gradient(
         135deg,
-        rgba(138, 144, 153, 0.10) 0px,
-        rgba(138, 144, 153, 0.10) 1px,
-        transparent               1px,
-        transparent               7px
+        rgb(var(--knurl) / var(--knurl-alpha)) 0px,
+        rgb(var(--knurl) / var(--knurl-alpha)) 1px,
+        transparent                            1px,
+        transparent                            7px
       );
   }
 }
@@ -236,24 +250,41 @@
   /* Input field — bg-surface elevates inputs above the near-black page background */
   .field {
     @apply w-full bg-surface border border-surface-border rounded-lg
-           px-3 py-2.5 text-sm text-gray-100 placeholder-gray-500
+           px-3 py-2.5 text-sm text-ink placeholder-ink-subtle
            focus:outline-none focus:ring-2 focus:ring-command-blue/50 focus:border-command-blue
            transition-colors;
   }
 
   /* Label — consistent form label style */
   .field-label {
-    @apply block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5;
+    @apply block text-xs font-medium text-ink-muted uppercase tracking-wider mb-1.5;
   }
 
   /* Section heading inside cards / profile tabs */
   .section-label {
-    @apply text-[11px] uppercase tracking-widest text-gray-500 mb-3;
+    @apply text-[11px] uppercase tracking-widest text-ink-subtle mb-3;
   }
 
   /* Draft badge — shown on exercises that need enrichment */
   .badge-draft {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5
            bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-full;
+  }
+
+  /* ── Light-theme overrides for the dark-specific texture classes ──────────────
+     The dark .card / .header-crosshatch use a transparent-border crosshatch + heavy
+     shadow technique that doesn't translate to light. In light they become clean
+     surfaces: a white card with a real border + soft shadow, and a flat header.
+     Scoped to [data-theme="light"] only — dark is byte-identical. */
+  :root[data-theme="light"] .card {
+    background: rgb(var(--surface));
+    border: 1px solid rgb(var(--surface-border));
+    box-shadow:
+      0 1px 2px rgba(28, 25, 23, 0.06),
+      0 3px 10px rgba(28, 25, 23, 0.06);
+  }
+  :root[data-theme="light"] .header-crosshatch {
+    background-color: rgb(var(--ground) / 0.92);
+    background-image: none;
   }
 }

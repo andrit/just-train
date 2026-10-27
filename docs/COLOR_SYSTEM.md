@@ -185,3 +185,50 @@ colors: {
 `brand.highlight` (`#e94560`) has been removed. Component-level references to
 `brand-highlight` are being migrated to `command-blue` (actions/focus),
 `ember-red` (destructive/intensity), or `signal-yellow` (notifications) by intent.
+
+---
+
+## Light Theme (variable-backed tokens)
+
+The app ships dark; a designed **light** theme is selectable (system / light / dark). It is not an
+auto-inversion — both grounds are designed, for visual ergonomics (some athletes read a white screen
+at a glance; others want dark).
+
+### Architecture
+Surface, ink, and `signal-yellow` are **CSS-variable-backed** in `tailwind.config.js`
+(`rgb(var(--x) / <alpha-value>)`); the variables live in `src/index.css` and flip by theme. The app
+uses zero `dark:` variants — the variables swap instead.
+
+- `:root` = **dark** (values equal the former fixed hex, so dark is byte-identical).
+- `:root[data-theme="light"]` = **light**.
+- `prefers-color-scheme` is **not** wired until the text sweep (Step 2) makes light readable.
+
+### Light palette (approved 2026-10-27)
+Warm off-white ground + warm-stone ink. See `light-dark-mockup/index.html`.
+
+| Token | Dark | Light | Role |
+|---|---|---|---|
+| `--ground` | `#0d0d0d` | `#FAF9F7` | Page background (under the crosshatch) |
+| `--surface` | `#1E1E1E` | `#FFFFFF` | Card / field surface |
+| `--surface-raised` | `#282828` | `#F5F5F4` | Elevated surface |
+| `--surface-border` | `#404040` | `#E7E5E4` | Borders |
+| `--ink` | `#F3F4F6` | `#1C1917` | Primary text |
+| `--ink-muted` | `#9CA3AF` | `#57534E` | Secondary text |
+| `--ink-subtle` | `#6B7280` | `#78716C` | Tertiary / captions |
+| `--ink-faint` | `#4B5563` | `#A8A29E` | Placeholder / disabled |
+| `--knurl` / alpha | `#8A9099` / .10 | `#78716C` / .07 | Crosshatch texture lines |
+| `--ring-offset` | `#000000` | `#FAF9F7` | Focus-ring offset ground |
+| `signal-yellow` | `#FFE200` | `#B45309` | Live/notification — **on-light amber** (yellow is invisible on white) |
+
+**Fixed in both themes:** `command-blue` `#1B50D9`, `ember-red` `#D91B1B` (accents, read on either ground).
+
+### Texture in light
+The dark **crosshatch** becomes a faint warm engrave on the off-white page; **cards** drop the
+crosshatch for a clean white surface with a real border + soft shadow (`[data-theme="light"] .card`
+and `.header-crosshatch` overrides in `index.css`).
+
+### Status
+Step 0 (this palette + global `index.css` tokenization) and Step 1 (token infra) are **done**. The
+~1,000-occurrence `text-gray-*` → `ink.*` sweep (Step 2), charts (Step 3), and the toggle (Step 4) are
+tracked in `task-plan-light-dark-theme.md`. Until the sweep lands, light is reachable only by setting
+`document.documentElement.dataset.theme = 'light'` in devtools.

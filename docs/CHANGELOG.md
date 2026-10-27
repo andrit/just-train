@@ -7,6 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Theme — light palette + global tokenization (Step 0 of light/dark) (2026-10-27)
+- The light theme's palette is designed and locked, and the global `index.css` foundation is tokenized
+  (**dark unchanged** — every light-variable's dark value equals the former hex). `signal-yellow` is now
+  variable-backed and flips to an on-light amber (`#B45309`, since `#FFE200` is invisible on white); the
+  page crosshatch, focus-ring offset, `body` text, `.field` / `.field-label` / `.section-label`, and the
+  `.card` / `.header-crosshatch` textures read theme variables. Light = warm off-white ground (`#FAF9F7`),
+  white cards, a warm-stone ink scale. Reachable only via `data-theme="light"` in devtools — no shipped UI
+  sets it until the per-screen `text-gray-*` → `ink.*` sweep (Step 2). See `COLOR_SYSTEM.md` § Light theme
+  and the proposal mockup. Files: `tailwind.config.js`, `src/index.css`, `docs/COLOR_SYSTEM.md`.
+
 ### Body map — "Your history" tab on a drilled muscle (2026-10-26)
 - Drilling a muscle in the Home body-breakdown drawer now shows a **tab strip**: **Your history** (default) ·
   **Primary movers** · **Also works it**. "Your history" lists the exercises you've actually logged that train

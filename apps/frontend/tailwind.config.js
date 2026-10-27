@@ -17,7 +17,7 @@ export default {
         // Chromatic accents — one job each, never decorative
         'ember-red':     '#D91B1B',  // intensity: PRs, destructive, threshold moments
         'command-blue':  '#1B50D9',  // action: primary buttons, active states, navigation
-        'signal-yellow': '#FFE200',  // notification: badges, alerts, achievements
+        'signal-yellow': 'rgb(var(--signal-yellow) / <alpha-value>)',  // notification — variable-backed so it flips to an on-light amber; dark = #FFE200
 
         // ── Structural tokens (mapped to design system) ───────────────────────
         brand: {

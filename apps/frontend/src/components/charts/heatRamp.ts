@@ -12,8 +12,11 @@
 // value in the set, so the top tier always lights up.
 // ------------------------------------------------------------
 
-export const HEAT_BASE_FILL  = '#3F444C'                                  // untrained (gray, no-data neutral)
-export const HEAT_TIER_FILLS = ['#335C9E', '#4F82E0', '#86B2FF'] as const // low, med, high
+// Variable-backed so the ramp flips by theme (dark values equal the former hex).
+// Returned as rgb(var(--x)) strings — consumed via `style` (SVG fill / CSS bg),
+// since var() does not resolve inside SVG presentation attributes.
+export const HEAT_BASE_FILL  = 'rgb(var(--chart-base))'                                      // untrained (neutral)
+export const HEAT_TIER_FILLS = ['rgb(var(--heat-1))', 'rgb(var(--heat-2))', 'rgb(var(--heat-3))'] as const // low, med, high
 
 // Fill color for a value given the busiest value in the set. `max` must be ≥ 1.
 export function heatFill(value: number, max: number): string {

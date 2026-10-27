@@ -137,7 +137,7 @@ function TrainCard({ selfClientId, onStart }: TrainCardProps): React.JSX.Element
           <button
             type="button"
             onClick={() => navigate(`/session/${activeSession.sessionId}`)}
-            className="flex-1 rounded-md bg-signal-yellow text-black text-sm font-semibold py-2 hover:bg-signal-yellow/90 transition-colors"
+            className="flex-1 rounded-md bg-signal-yellow text-on-signal text-sm font-semibold py-2 hover:bg-signal-yellow/90 transition-colors"
           >
             Resume
           </button>

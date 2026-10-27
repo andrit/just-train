@@ -39,6 +39,13 @@
   --ring-offset:    0 0 0;       /* focus-ring offset = the ground behind a focused element */
   --brand-secondary: 28 28 28;   /* #1C1C1C — card ground (bg-brand-secondary) */
   --brand-accent:    17 17 17;   /* #111111 — panel/sidebar ground (bg-brand-accent) */
+  /* Charts — body heat-map + muscle map (SVG fills via `style`; see heatRamp.ts). */
+  --chart-base:   63 68 76;    /* #3F444C — untrained region fill */
+  --chart-stroke: 42 46 52;    /* #2A2E34 — region outline */
+  --heat-1:       51 92 158;   /* #335C9E — low frequency */
+  --heat-2:       79 130 224;  /* #4F82E0 — med */
+  --heat-3:       134 178 255; /* #86B2FF — high (brightest; pops on the dark ground) */
+  --on-signal:    0 0 0;       /* text on signal-yellow (black on bright yellow) */
 }
 
 :root[data-theme="light"] {
@@ -59,6 +66,14 @@
   --ring-offset:    250 249 247;  /* light ground behind focused elements */
   --brand-secondary: 255 255 255; /* white card ground */
   --brand-accent:    245 245 244; /* #F5F5F4 stone-100 — panel/sidebar ground */
+  /* Charts in light: a faint figure on white; the heat ramp DARKENS with frequency
+     so the busiest region pops dark on white (inverse of the dark ramp). */
+  --chart-base:   228 226 223;  /* #E4E2DF — faint untrained figure */
+  --chart-stroke: 207 203 197;  /* #CFCBC5 — light region outline */
+  --heat-1:       174 198 240;  /* #AEC6F0 — low */
+  --heat-2:       91 141 232;   /* #5B8DE8 — med */
+  --heat-3:       27 80 217;    /* #1B50D9 — high (command-blue; darkest, pops on white) */
+  --on-signal:    255 255 255;  /* white text on the amber signal */
 }
 
 /* ── Base resets ──────────────────────────────────────────────────────────── */
@@ -291,4 +306,8 @@
     background-color: rgb(var(--ground) / 0.92);
     background-image: none;
   }
+
+  /* Text on signal-yellow — flips black→white because signal-yellow becomes a
+     dark amber in light (see --signal-yellow / --on-signal). */
+  .text-on-signal { color: rgb(var(--on-signal)); }
 }

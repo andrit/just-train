@@ -84,8 +84,8 @@ export const REGION_LABEL: Record<string, string> = {
 }
 
 // Self-contained palette (reads on the dark detail surface, like a placard).
-const BASE_FILL      = '#3F444C'
-const BASE_STROKE    = '#2A2E34'
+const BASE_FILL      = 'rgb(var(--chart-base))'
+const BASE_STROKE    = 'rgb(var(--chart-stroke))'
 const PRIMARY_FILL   = '#D91B1B'  // Ember Red
 const SECONDARY_FILL = '#D91B1B'
 const SECONDARY_OPACITY = 0.4
@@ -146,9 +146,8 @@ function Figure({ label, regions, intensityOf }: FigureProps): React.JSX.Element
             <polygon
               key={points}
               points={points}
-              fill={fill}
+              style={{ fill, stroke: BASE_STROKE }}
               fillOpacity={intensity === 'secondary' ? SECONDARY_OPACITY : 1}
-              stroke={BASE_STROKE}
               strokeWidth={2}
             />
           ))

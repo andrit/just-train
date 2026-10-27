@@ -7,6 +7,15 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Theme — Step 3: charts tokenized for light/dark (2026-10-27)
+- The body heat-map, muscle map, and the shared `heatRamp` no longer hardcode dark hex. The untrained fill, the
+  region stroke, and the three-tier Command-Blue frequency ramp are now CSS variables (`--chart-base`,
+  `--chart-stroke`, `--heat-1/2/3`), consumed via `style` on the SVG polygons (var() doesn't resolve in SVG
+  presentation attributes). In light the figure is faint on white and the ramp **darkens** with frequency
+  (busiest = command-blue) so the hot region still pops. Added a `.text-on-signal` utility (black in dark, white
+  in light) for the live-session button, since `signal-yellow` becomes a dark amber in light. Dark renders
+  identically. Files: `heatRamp.ts`, `BodyHeatMap.tsx`, `MuscleMap.tsx`, `index.css`, `DashboardPage.tsx`.
+
 ### Theme — Step 2 text sweep complete (bright tier) + brand grounds tokenized (2026-10-27)
 - Finishes the light/dark text sweep. The **bright tier** (`text-white`, `text-gray-100/200/300`) is migrated to
   `ink.*` app-wide via a bulk pass with a **scoped revert**, so `text-white` is preserved wherever it labels a

@@ -29,7 +29,7 @@ import {
 } from './muscleMapData'
 import type { MuscleFrequencyCount } from '@trainer-app/shared'
 
-const BASE_STROKE = '#2A2E34'
+const BASE_STROKE = 'rgb(var(--chart-stroke))'
 
 // A region is tappable only if it stands for at least one muscle (head/knees
 // don't, and are inert).
@@ -96,8 +96,7 @@ function Figure({ label, regions, fillOf, onRegionTap }: FigureProps): React.JSX
             <polygon
               key={points}
               points={points}
-              fill={fill}
-              stroke={BASE_STROKE}
+              style={{ fill, stroke: BASE_STROKE }}
               strokeWidth={2}
               onClick={onClick}
               className={tappable ? 'cursor-pointer' : undefined}

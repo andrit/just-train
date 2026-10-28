@@ -199,6 +199,7 @@ export interface AddExerciseInput {
   targetDurationSeconds?: number
   targetDistance?:        number
   targetIntensity?:       'low' | 'moderate' | 'high' | 'max'
+  targetIntensityLevel?:  number
 }
 
 export function useAddExercise(): UseMutationResult<SessionExerciseResponse, Error, AddExerciseInput> {
@@ -228,6 +229,7 @@ export interface LogSetInput {
   durationSeconds?:  number
   distance?:         number
   intensity?:        string
+  intensityLevel?:   number
   perSide?:          boolean
   repsLeft?:         number
   repsRight?:        number

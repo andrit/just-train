@@ -23,7 +23,7 @@ import { useExerciseHistory }      from '@/lib/queries/clients'
 import { pickPrefillSet, isPriorInSession } from '@/lib/setPrefill'
 import { useSessionExerciseMedia, useUploadSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
 import { useUXEventRef }           from '@/hooks/useUXEvent'
-import { formatSetReps, formatSeconds } from '@/lib/formatters'
+import { formatSetReps, formatSeconds, formatDistance } from '@/lib/formatters'
 import { MinSecField }             from '@/components/ui/MinSecField'
 import { InlineCameraSheet }       from '@/components/session/InlineCameraSheet'
 import { FormCheckBadge }          from '@/components/session/FormCheckBadge'
@@ -78,49 +78,29 @@ function BigInput({ label, value, onChange, placeholder, mode = 'decimal', onEnt
   )
 }
 
-// ── Detect which cardio mode to show based on targets ─────────────────────────
+// ── Cardio shape ──────────────────────────────────────────────────────────────
+//
+// Distance-cardio (run / bike / row) captures all four: Time → Distance →
+// Intensity (a numeric machine level) → Rounds (= sets). The old low/mod/high
+// enum is gone from this surface; subjective effort lives in rpe.
+//
+// Rep-only cardio (jumping jacks etc.) keeps its own simple reps field — detected
+// as "reps targeted, nothing else." Everything else cardio is distance-cardio.
 
-type CardioMode = 'distance' | 'time' | 'intensity' | 'reps'
-
-// Every metric this cardio exercise was set up to capture — any combination of
-// distance / time / intensity / reps. Falls back to time when none were targeted.
-function detectCardioModes(se: SessionExerciseResponse): CardioMode[] {
-  const modes: CardioMode[] = []
-  if (se.targetDistance        != null) modes.push('distance')
-  if (se.targetDurationSeconds != null) modes.push('time')
-  if (se.targetIntensity       != null) modes.push('intensity')
-  if (se.targetReps            != null) modes.push('reps')
-  return modes.length > 0 ? modes : ['time']
+function isRepOnlyCardio(se: SessionExerciseResponse): boolean {
+  return se.targetReps != null
+    && se.targetDistance == null
+    && se.targetDurationSeconds == null
+    && se.targetIntensity == null
+    && se.targetIntensityLevel == null
+    && (se.exercise?.distanceUnit ?? null) == null
 }
 
-// ── Intensity selector ────────────────────────────────────────────────────────
-
-const INTENSITY_LEVELS = ['low', 'moderate', 'high', 'max'] as const
-type IntensityLevel = typeof INTENSITY_LEVELS[number]
-
-function IntensityPicker({ value, onChange }: { value: string; onChange: (v: string) => void }): React.JSX.Element {
-  return (
-    <div className="space-y-2">
-      <p className="text-[10px] text-ink-subtle uppercase tracking-wider text-center">Intensity</p>
-      <div className="flex gap-2">
-        {INTENSITY_LEVELS.map((level) => (
-          <button
-            key={level}
-            type="button"
-            onClick={() => onChange(level)}
-            className={cn(
-              'flex-1 py-3 rounded-xl text-sm font-medium capitalize border transition-all',
-              value === level
-                ? 'bg-command-blue/10 border-command-blue/40 text-command-blue'
-                : 'border-surface-border text-ink-subtle hover:text-ink',
-            )}
-          >
-            {level}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
+// Distance label for a distance-cardio exercise — the exercise's own unit
+// ("mi"/"m"/"trips") or a neutral "Distance" when unset. A label only.
+function distanceLabel(se: SessionExerciseResponse): string {
+  const unit = se.exercise?.distanceUnit
+  return unit ? `Distance (${unit})` : 'Distance'
 }
 
 // ── Active set hero — workout-type-aware ──────────────────────────────────────
@@ -168,11 +148,13 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
   }
 
   // ── Cardio state ──────────────────────────────────────────────────────────
-  const cardioModes = detectCardioModes(sessionExercise)
-  const [distance,  setDistance]  = useState(String(sessionExercise.targetDistance ?? ''))
-  const [duration,  setDuration]  = useState(String(sessionExercise.targetDurationSeconds ?? ''))
-  const [intensity, setIntensity] = useState<string>(sessionExercise.targetIntensity ?? 'moderate')
-  const [cardioReps,setCardioReps] = useState(String(effectiveTargetReps ?? ''))
+  // Distance is result-only (not planned) — blank each round, last shown as a hint.
+  // Time + intensity level are remembered (prefilled from target/last).
+  const repOnlyCardio = isRepOnlyCardio(sessionExercise)
+  const [distance,     setDistance]     = useState('')
+  const [duration,     setDuration]     = useState(String(sessionExercise.targetDurationSeconds ?? ''))
+  const [intensityLvl, setIntensityLvl] = useState(String(sessionExercise.targetIntensityLevel ?? ''))
+  const [cardioReps,   setCardioReps]   = useState(String(effectiveTargetReps ?? ''))
 
   // ── Calisthenics state ────────────────────────────────────────────────────
   const caliIsTime = sessionExercise.targetDurationSeconds != null && sessionExercise.targetReps == null
@@ -188,7 +170,12 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
     setWeight(rampWeightStr())
     setReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setCaliReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
+    setCardioReps(String(effectiveTargetReps ?? lastSet?.reps ?? ''))
     setDuration(String(sessionExercise.targetDurationSeconds ?? lastSet?.durationSeconds ?? ''))
+    // "Remember your usual" — time + intensity level prefill from target → last.
+    setIntensityLvl(String(sessionExercise.targetIntensityLevel ?? lastSet?.intensityLevel ?? ''))
+    // Distance is recorded fresh each round — start blank (last shown as a hint).
+    setDistance('')
     // Restore an asymmetric L/R split when last time was uneven; otherwise close it.
     if (perSide && lastSet?.repsLeft != null && lastSet?.repsRight != null && lastSet.repsLeft !== lastSet.repsRight) {
       setSplitOpen(true)
@@ -198,7 +185,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
       setSplitOpen(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setNumber, lastSet?.weight, lastSet?.reps, lastSet?.durationSeconds, lastSet?.repsLeft, lastSet?.repsRight])
+  }, [setNumber, lastSet?.weight, lastSet?.reps, lastSet?.durationSeconds, lastSet?.intensityLevel, lastSet?.repsLeft, lastSet?.repsRight])
 
   const canLog = (): boolean => {
     switch (workoutType) {
@@ -207,15 +194,11 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
           ? repsLeft.trim().length > 0 && repsRight.trim().length > 0
           : reps.trim().length > 0
       case 'cardio': {
-        // Loggable once any enabled metric has a value. Intensity always counts
-        // (it carries a default), so a cardio exercise that tracks intensity is
-        // always loggable; distance/time/reps need a value entered.
-        const vals: boolean[] = []
-        if (cardioModes.includes('distance'))  vals.push(distance.trim().length > 0)
-        if (cardioModes.includes('time'))      vals.push((parseInt(duration, 10) || 0) > 0)
-        if (cardioModes.includes('reps'))      vals.push(cardioReps.trim().length > 0)
-        if (cardioModes.includes('intensity')) vals.push(true)
-        return vals.some(Boolean)
+        if (repOnlyCardio) return cardioReps.trim().length > 0
+        // Distance-cardio: loggable once any of time / distance / intensity is entered.
+        return (parseInt(duration, 10) || 0) > 0
+          || distance.trim().length > 0
+          || intensityLvl.trim().length > 0
       }
       case 'calisthenics': return caliIsTime ? caliTime.trim().length > 0 : caliReps.trim().length > 0
       case 'stretching':   return duration.trim().length > 0
@@ -253,13 +236,16 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
         break
       }
       case 'cardio':
-        // Log every enabled metric that has a value — distance, time, intensity
-        // and reps can all travel on one set.
+        if (repOnlyCardio) {
+          onLog({ reps: parseInt(cardioReps, 10) || undefined })
+          break
+        }
+        // Distance-cardio round — time, distance, and numeric intensity level
+        // all travel on one set. Only non-empty metrics are sent.
         onLog({
-          ...(cardioModes.includes('distance')  && distance.trim()            && { distance:        parseFloat(distance) }),
-          ...(cardioModes.includes('time')      && (parseInt(duration, 10) || 0) > 0 && { durationSeconds: parseInt(duration, 10) }),
-          ...(cardioModes.includes('intensity') && { intensity:       intensity as IntensityLevel }),
-          ...(cardioModes.includes('reps')      && cardioReps.trim()          && { reps:            parseInt(cardioReps, 10) }),
+          ...(((parseInt(duration, 10) || 0) > 0) && { durationSeconds: parseInt(duration, 10) }),
+          ...(distance.trim()     && { distance:       parseFloat(distance) }),
+          ...(intensityLvl.trim() && { intensityLevel: parseInt(intensityLvl, 10) }),
         })
         break
       case 'calisthenics':
@@ -285,8 +271,9 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
     if (lastSet.weight   != null) parts.push(`${lastSet.weight}${weightUnit}`)
     if (lastSet.reps     != null) parts.push(`${lastSet.reps} reps`)
     if (lastSet.durationSeconds != null) parts.push(formatSeconds(lastSet.durationSeconds))
-    if (lastSet.distance != null) parts.push(`${lastSet.distance}m`)
-    if (lastSet.intensity!= null) parts.push(lastSet.intensity)
+    if (lastSet.distance != null) parts.push(formatDistance(lastSet.distance, sessionExercise.exercise?.distanceUnit))
+    if (lastSet.intensityLevel != null) parts.push(`Lv ${lastSet.intensityLevel}`)
+    else if (lastSet.intensity != null) parts.push(lastSet.intensity)
     return parts.length > 0 ? parts.join(' · ') : null
   }
 
@@ -301,7 +288,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
 
       <div className="flex-1">
         <p className="text-[10px] uppercase tracking-widest text-command-blue/70 mb-3">
-          Set {setNumber}
+          {workoutType === 'cardio' && !repOnlyCardio ? 'Round' : 'Set'} {setNumber}
         </p>
 
         {/* ── Resistance: Weight × Reps (per-side aware) ─────────── */}
@@ -348,13 +335,17 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
           </div>
         )}
 
-        {/* ── Cardio: one input per enabled metric (any combination) ─ */}
+        {/* ── Cardio ─────────────────────────────────────────────── */}
         {workoutType === 'cardio' && (
-          <div className="mb-3 space-y-3">
-            {cardioModes.includes('distance') && (
-              <BigInput label="Distance (m)" value={distance} onChange={setDistance} placeholder={sessionExercise.targetDistance ? String(sessionExercise.targetDistance) : '—'} onEnter={handleLog} />
-            )}
-            {cardioModes.includes('time') && (
+          repOnlyCardio ? (
+            // Rep-only cardio (jumping jacks etc.) — unchanged simple reps field.
+            <div className="mb-3">
+              <BigInput label="Reps" value={cardioReps} onChange={setCardioReps} mode="numeric" placeholder={effectiveTargetReps ? String(effectiveTargetReps) : '—'} onEnter={handleLog} />
+            </div>
+          ) : (
+            // Distance-cardio (run / bike / row) — all four, ordered by importance:
+            // Time (primary) → Distance → Intensity level. Rounds = the set spine.
+            <div className="mb-3 space-y-3">
               <div className="flex justify-center">
                 <MinSecField
                   seconds={parseInt(duration, 10) || 0}
@@ -364,14 +355,25 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
                   onEnter={handleLog}
                 />
               </div>
-            )}
-            {cardioModes.includes('intensity') && (
-              <IntensityPicker value={intensity} onChange={setIntensity} />
-            )}
-            {cardioModes.includes('reps') && (
-              <BigInput label="Reps" value={cardioReps} onChange={setCardioReps} mode="numeric" placeholder={effectiveTargetReps ? String(effectiveTargetReps) : '—'} onEnter={handleLog} />
-            )}
-          </div>
+              <div className="flex gap-3 items-center">
+                <BigInput
+                  label={distanceLabel(sessionExercise)}
+                  value={distance}
+                  onChange={setDistance}
+                  placeholder={lastSet?.distance != null ? String(lastSet.distance) : (sessionExercise.targetDistance != null ? String(sessionExercise.targetDistance) : '—')}
+                  onEnter={handleLog}
+                />
+                <BigInput
+                  label="Intensity"
+                  value={intensityLvl}
+                  onChange={setIntensityLvl}
+                  mode="numeric"
+                  placeholder={sessionExercise.targetIntensityLevel != null ? String(sessionExercise.targetIntensityLevel) : '—'}
+                  onEnter={handleLog}
+                />
+              </div>
+            </div>
+          )
         )}
 
         {/* ── Calisthenics: Reps OR Time ────────────────────────── */}
@@ -427,7 +429,7 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
             (isLogging || !canLog()) && 'opacity-50 cursor-not-allowed',
           )}
         >
-          {isLogging ? '…' : '+ Log Set'}
+          {isLogging ? '…' : (workoutType === 'cardio' && !repOnlyCardio ? '+ Log Round' : '+ Log Set')}
         </button>
       </div>
     </div>
@@ -478,9 +480,10 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
         )}
         {workoutType === 'cardio' && (
           <>
-            {set.distance        != null && <span className={cn(OUTCOME_COLOR[distOk],  'font-medium')}>{set.distance}m</span>}
             {set.durationSeconds != null && <span className={cn(OUTCOME_COLOR[timeOk],  'font-medium')}>{formatSeconds(set.durationSeconds)}</span>}
-            {set.intensity       != null && <span className="text-ink font-medium capitalize">{set.intensity}</span>}
+            {set.distance        != null && <span className={cn(OUTCOME_COLOR[distOk],  'font-medium')}>{formatDistance(set.distance, sessionExercise.exercise?.distanceUnit)}</span>}
+            {set.intensityLevel  != null && <span className="text-ink font-medium">Lv {set.intensityLevel}</span>}
+            {set.intensityLevel  == null && set.intensity != null && <span className="text-ink font-medium capitalize">{set.intensity}</span>}
             {set.reps            != null && <span className={cn(OUTCOME_COLOR[repsOk],  'font-medium')}>{set.reps} reps</span>}
           </>
         )}
@@ -539,6 +542,7 @@ interface LogData {
   durationSeconds?: number
   distance?:        number
   intensity?:       string
+  intensityLevel?:  number
   perSide?:         boolean
   repsLeft?:        number
   repsRight?:       number
@@ -565,6 +569,8 @@ export function ExerciseBlock({
   const uploadMedia    = useUploadSessionExerciseMedia()
 
   const isUnilateral = sessionExercise.exercise?.laterality === 'unilateral'
+  // Distance-cardio counts its sets as "rounds" (intervals); everything else "sets".
+  const roundWord = workoutType === 'cardio' && !isRepOnlyCardio(sessionExercise) ? 'round' : 'set'
   const setTrackPerSide = (trackPerSide: boolean): void => {
     if (trackPerSide === !!sessionExercise.trackPerSide) return
     updateExercise.mutate({ sessionExerciseId: sessionExercise.id, sessionId, trackPerSide })
@@ -620,6 +626,7 @@ export function ExerciseBlock({
         durationSeconds:  data.durationSeconds,
         distance:         data.distance,
         intensity:        data.intensity,
+        intensityLevel:   data.intensityLevel,
         perSide:          data.perSide,
         repsLeft:         data.repsLeft,
         repsRight:        data.repsRight,
@@ -752,7 +759,7 @@ export function ExerciseBlock({
                   </svg>
                 </div>
               </div>
-              <span className="text-sm text-emerald-400">{loggedCount} / {targetSets} sets</span>
+              <span className="text-sm text-emerald-400">{loggedCount} / {targetSets} {roundWord}s</span>
             </div>
             <button
               type="button"

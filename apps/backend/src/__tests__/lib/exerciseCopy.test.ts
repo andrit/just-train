@@ -32,6 +32,7 @@ function src(overrides: Partial<PlannedExerciseSource> = {}): PlannedExerciseSou
     targetDurationSeconds: 45,
     targetDistance:        1.5,
     targetIntensity:       'high',
+    targetIntensityLevel:  12,
     notes:                 'pause at bottom',
     trackPerSide:          null,
     ...overrides,
@@ -80,6 +81,7 @@ describe('toTemplateExerciseRow', () => {
       targetDurationSeconds: 45,
       targetDistance:        1.5,
       targetIntensity:       'high',
+      targetIntensityLevel:  12,
       notes:                 'pause at bottom',
       trackPerSide:          null,
     })
@@ -121,6 +123,7 @@ describe('toSessionExerciseRow', () => {
       targetDurationSeconds: 45,
       targetDistance:        1.5,
       targetIntensity:       'high',
+      targetIntensityLevel:  12,
       notes:                 'pause at bottom',
       trackPerSide:          false,
     })

@@ -74,6 +74,8 @@ export const templateExercises = pgTable('template_exercises', {
   targetDurationSeconds: integer('target_duration_seconds'),
   targetDistance:        real('target_distance'),
   targetIntensity:       intensityEnum('target_intensity'),
+  // Planned numeric machine level for distance-cardio — mirrors session_exercises.
+  targetIntensityLevel:  integer('target_intensity_level'),
   notes:                 text('notes'),
 
   // Per-side input mode, tri-state. NULL = inherit from the exercise's laterality

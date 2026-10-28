@@ -132,8 +132,17 @@ export function formatSetReps(set: {
 }
 
 /**
+ * Formats a distance with its exercise-specific unit label ("mi"/"m"/"trips").
+ * Falls back to a bare "m" suffix for legacy rows with no unit. A label only —
+ * no unit conversion.
+ */
+export function formatDistance(value: number, unit?: string | null): string {
+  return unit ? `${value} ${unit}` : `${value}m`
+}
+
+/**
  * Formats a set's logged values as a compact string.
- * e.g. "100 × 8", "100 × 8 ea", "30s", "400m", "moderate"
+ * e.g. "100 × 8", "100 × 8 ea", "30s", "5 mi", "Lv 15"
  */
 export function formatSetSummary(set: {
   weight?:          number | null
@@ -143,7 +152,9 @@ export function formatSetSummary(set: {
   repsRight?:       number | null
   durationSeconds?: number | null
   distance?:        number | null
+  distanceUnit?:    string | null
   intensity?:       string | null
+  intensityLevel?:  number | null
 }): string {
   const parts: string[] = []
   const repsStr = formatSetReps(set)
@@ -151,8 +162,9 @@ export function formatSetSummary(set: {
   if (set.weight != null && repsStr != null) parts.push('×')
   if (repsStr            != null) parts.push(repsStr)
   if (set.durationSeconds!= null) parts.push(formatSeconds(set.durationSeconds))
-  if (set.distance       != null) parts.push(`${set.distance}m`)
-  if (set.intensity      != null) parts.push(set.intensity)
+  if (set.distance       != null) parts.push(formatDistance(set.distance, set.distanceUnit))
+  if (set.intensityLevel != null) parts.push(`Lv ${set.intensityLevel}`)
+  else if (set.intensity != null) parts.push(set.intensity)
   return parts.join(' ')
 }
 

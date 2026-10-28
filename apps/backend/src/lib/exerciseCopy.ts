@@ -30,6 +30,7 @@ export interface PlannedExerciseSource {
   targetDurationSeconds: number | null
   targetDistance:        number | null
   targetIntensity:       NewTemplateExercise['targetIntensity']
+  targetIntensityLevel:  number | null
   notes:                 string | null
   // Tri-state on templates (null = inherit from laterality); boolean on sessions.
   trackPerSide:          boolean | null
@@ -69,6 +70,7 @@ function planningFields(src: PlannedExerciseSource, remap: CircuitRemap) {
     targetDurationSeconds: src.targetDurationSeconds ?? null,
     targetDistance:        src.targetDistance        ?? null,
     targetIntensity:       src.targetIntensity       ?? null,
+    targetIntensityLevel:  src.targetIntensityLevel  ?? null,
     notes:                 src.notes                 ?? null,
   }
 }

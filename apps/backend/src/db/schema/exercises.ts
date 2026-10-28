@@ -87,6 +87,11 @@ export const exercises = pgTable('exercises', {
   // true = visible to all trainers (future multi-trainer feature)
   isPublic: boolean('is_public').notNull().default(false),
 
+  // Display label for distance on distance-cardio exercises (run / bike / row).
+  // Device-specific: treadmill "mi", rower "m", spin bike "trips". Null = show a
+  // neutral "Distance" label. Not a unit conversion — a label only.
+  distanceUnit:   text('distance_unit'),
+
   // Media — populated in Phase 9 (post-SPA refactor)
   // visualization: URL to a still image showing muscle groups (like a gym machine diagram)
   // demonstration: URL to a video demonstrating proper form

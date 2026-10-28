@@ -317,6 +317,7 @@ export const ExerciseSummaryResponseSchema = z.object({
   laterality:  LateralityEnum.default('bilateral').describe('bilateral = both limbs together; unilateral = trained one side at a time (surfaces the per-side toggle)'),
   isDraft:     z.boolean().describe('true = quick-added mid-session, needs enriching in the library'),
   bodyPart:    BodyPartResponseSchema.nullable(),
+  distanceUnit: z.string().nullable().default(null).describe('Display label for distance on distance-cardio exercises (e.g. "mi", "m", "trips"). Null = neutral "Distance" label. A label only, not a unit conversion.'),
   media:       z.array(ExerciseMediaResponseSchema).max(1)
     .describe('Primary thumbnail only. Use GET /exercises/:id for all media.'),
   muscleRole:  MuscleRoleEnum.nullable().optional()
@@ -368,6 +369,7 @@ export const SetResponseSchema = z.object({
   distance:          z.number().nullable(),
   speed:             z.number().nullable(),
   intensity:         IntensityEnum.nullable(),
+  intensityLevel:    z.number().int().nullable().default(null).describe('Recorded numeric machine level (spin-bike resistance, rower damper, treadmill level). Device-specific, no fixed range.'),
   side:              SideEnum.nullable(),
   perSide:           z.boolean().default(false).describe('true = this set was logged as a per-side effort; reps is the per-side count and total reps = both sides. Snapshotted at log time so volume never recomputes.'),
   repsLeft:          z.number().int().nullable().describe('Left-side reps when the L/R drill-down split them; null = symmetric (both sides used reps).'),
@@ -405,6 +407,7 @@ export const SessionExerciseResponseSchema = z.object({
   targetDurationSeconds: z.number().int().nullable(),
   targetDistance:        z.number().nullable(),
   targetIntensity:       IntensityEnum.nullable(),
+  targetIntensityLevel:  z.number().int().nullable().default(null).describe('Planned numeric machine level for distance-cardio. Device-specific, no fixed range.'),
   notes:                 z.string().nullable(),
   sets:                  z.array(SetResponseSchema).describe('All recorded sets ordered by setNumber'),
 })
@@ -474,6 +477,7 @@ export const TemplateExerciseResponseSchema = z.object({
   targetWeightUnit:      WeightUnitEnum,
   targetDurationSeconds: z.number().int().nullable(),
   targetDistance:        z.number().nullable(),
+  targetIntensityLevel:  z.number().int().nullable().default(null).describe('Planned numeric machine level for distance-cardio. Mirrors the session field; carried through save-as-template, fork and apply.'),
   notes:                 z.string().nullable(),
   trackPerSide:          z.boolean().nullable().default(null).describe('Per-side input mode, tri-state. null = inherit from the exercise laterality on apply; true/false = explicit (captured from a session).'),
 })

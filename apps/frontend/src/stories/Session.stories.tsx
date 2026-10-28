@@ -21,6 +21,7 @@ const makeSet = (overrides: Partial<SetResponse> = {}): SetResponse => ({
   distance:          null,
   speed:             null,
   intensity:         null,
+  intensityLevel:    null,
   side:              null,
   perSide:           false,
   repsLeft:          null,

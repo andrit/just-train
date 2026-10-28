@@ -7,6 +7,32 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Timed / distance-cardio redesign (#21) — record-after model (2026-10-27)
+- Reshapes distance-cardio (run / bike / row) logging for the **record-after** model: the machine captures live,
+  the app plans the target off-device and records the result. Distance-cardio now shows **all four** metrics,
+  ordered by importance — **Time → Distance → Intensity → Rounds** — instead of auto-hiding by target.
+- **Intensity is now a number**, not the low/moderate/high enum. New nullable columns `sets.intensity_level`,
+  `session_exercises.target_intensity_level`, `template_exercises.target_intensity_level` carry a device-specific
+  machine level (spin-bike resistance, rower damper, treadmill level; no fixed range). The enum columns are
+  **kept** (still valid for outdoor/feel efforts) but dropped from the cardio UI; subjective effort stays covered
+  per-set by **RPE**.
+- **Rounds = sets.** An interval effort logs one set per round (e.g. 20 min / 15 / 10) — the existing set spine;
+  the active-set header reads "Round N" for distance-cardio. Per-round time stays `durationSeconds` on the set, so
+  a future live timer can feed it without a model change (extensibility honored, not built).
+- **Distance carries a per-exercise unit label** — new `exercises.distance_unit` ("mi"/"m"/"trips"); the hardcoded
+  "(m)" is gone. Seeded defaults for the standard machines (treadmill → mi, spin bike → trips, rower → m, …).
+- **"Remember your usual":** time + intensity prefill from the exercise's last session; distance is recorded fresh
+  each round (last shown as a hint). Rep-only cardio (jumping jacks) and stretching/cooldown are untouched.
+- Files: schema `sessions.ts`/`templates.ts`/`exercises.ts`; `packages/shared` response + input schemas;
+  `lib/exerciseCopy.ts` (one copier → apply/fork/save-as-template all carry the level); routes `sessions.ts`/
+  `templates.ts`/`exercises.ts`; seed `exercises.ts` + `exercises-library.json`; frontend `ExerciseBlock.tsx`,
+  `AddExerciseSheet.tsx`, `SessionExerciseBreakdown.tsx`, `SessionHistoryPage.tsx`, `lib/formatters.ts`
+  (`formatDistance`), `lib/queries/sessions.ts`. Migration: `docs/sql/add-cardio-intensity-level-and-distance-unit.sql`
+  + data labels `docs/sql/set-cardio-distance-units.sql`. `tsc` + `eslint` clean (frontend + backend).
+  **Deferred:** per-round *target* planning accordion (distinct targets per round upfront) — intervals are entered
+  live today; needs per-round target storage. **Remaining:** `drizzle-kit generate` + prod SQL, `pnpm verify`
+  (vitest), and on-device QA — all the user's.
+
 ### Theme — Step 4: the toggle (System / Light / Dark) — light/dark complete (2026-10-27)
 - The light/dark theme is now **live and user-selectable**, completing the sweep. `lib/theme.ts` (`useTheme`)
   persists the choice to localStorage and stamps `data-theme` on `<html>`; an inline **no-flash script** in

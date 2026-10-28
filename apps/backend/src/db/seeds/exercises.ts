@@ -44,6 +44,7 @@ function buildInsert(e: any, bodyPartId: string, workoutType: string) {
     difficulty:    (e.difficulty   ?? 'beginner') as any,
     category:      (e.category     ?? null) as any,
     laterality:    (e.laterality   ?? 'bilateral') as any,
+    distanceUnit:  e.distanceUnit  ?? null,
     visualization: e.visualization ?? null,
     demonstration: e.demonstration ?? null,
     isDraft:       false,

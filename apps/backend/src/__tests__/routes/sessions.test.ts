@@ -379,6 +379,15 @@ describe('POST /sessions/:id/exercises — trackPerSide', () => {
       expect.objectContaining({ trackPerSide: false }),
     )
   })
+
+  it('carries a distance-cardio plan (targetDurationSeconds + targetIntensityLevel) to the insert', async () => {
+    const { db } = await import('../../db')
+    const res = await addExercise('bilateral', { targetSets: 1, targetDurationSeconds: 600, targetIntensityLevel: 15 })
+    expect(res.statusCode).toBe(201)
+    expect(vi.mocked(db.insert({} as never).values)).toHaveBeenCalledWith(
+      expect.objectContaining({ targetDurationSeconds: 600, targetIntensityLevel: 15 }),
+    )
+  })
 })
 
 // ── POST /sessions/:id/circuits ─────────────────────────────────────────────────

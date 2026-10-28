@@ -115,6 +115,11 @@ export const sessionExercises = pgTable('session_exercises', {
   targetDurationSeconds: integer('target_duration_seconds'),
   targetDistance:        real('target_distance'),
   targetIntensity:       intensityEnum('target_intensity'),
+  // Planned numeric machine level for distance-cardio (spin-bike resistance,
+  // rower damper, treadmill level). Free integer, no fixed range — device-
+  // specific. The low/moderate/high enum above is kept for outdoor/feel efforts;
+  // subjective effort is covered per-set by rpe.
+  targetIntensityLevel:  integer('target_intensity_level'),
   notes:                 text('notes'),
 }, (t) => ({
   sessionIdIdx:  index('session_exercises_session_id_idx').on(t.sessionId),
@@ -158,6 +163,10 @@ export const sets = pgTable('sets', {
   distance:        real('distance'),
   speed:           real('speed'),
   intensity:       intensityEnum('intensity'),
+  // Recorded numeric machine level (spin-bike resistance, rower damper, etc.).
+  // Device-specific, no fixed range. Source-agnostic: typed after the effort
+  // today, could be fed live by a machine interface later without a model change.
+  intensityLevel:  integer('intensity_level'),
 
   // Stretching
   side: sideEnum('side'),

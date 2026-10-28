@@ -859,6 +859,7 @@
   "cardio": [
     {
       "name": "Treadmill Run",
+      "distanceUnit": "mi",
       "bodyPart": "legs",
       "category": null,
       "equipment": "cardio_machine",
@@ -872,6 +873,7 @@
     },
     {
       "name": "Stationary Bike",
+      "distanceUnit": "trips",
       "bodyPart": "legs",
       "category": null,
       "equipment": "cardio_machine",
@@ -885,6 +887,7 @@
     },
     {
       "name": "Cycling",
+      "distanceUnit": "mi",
       "bodyPart": "legs",
       "category": null,
       "equipment": "cardio_machine",
@@ -898,6 +901,7 @@
     },
     {
       "name": "Rowing Machine",
+      "distanceUnit": "m",
       "bodyPart": "full_body",
       "category": null,
       "equipment": "cardio_machine",
@@ -924,6 +928,7 @@
     },
     {
       "name": "Sprint Intervals",
+      "distanceUnit": "m",
       "bodyPart": "legs",
       "category": null,
       "equipment": "none",
@@ -937,6 +942,7 @@
     },
     {
       "name": "Sled Push",
+      "distanceUnit": "m",
       "bodyPart": "legs",
       "category": null,
       "equipment": "other",
@@ -950,6 +956,7 @@
     },
     {
       "name": "Sled Pull",
+      "distanceUnit": "m",
       "bodyPart": "legs",
       "category": null,
       "equipment": "other",
@@ -976,6 +983,7 @@
     },
     {
       "name": "Ski Erg",
+      "distanceUnit": "m",
       "bodyPart": "back",
       "category": null,
       "equipment": "cardio_machine",
@@ -989,6 +997,7 @@
     },
     {
       "name": "Swimming",
+      "distanceUnit": "laps",
       "bodyPart": "full_body",
       "category": null,
       "equipment": "other",
@@ -1002,6 +1011,7 @@
     },
     {
       "name": "Assault Bike",
+      "distanceUnit": "mi",
       "bodyPart": "full_body",
       "category": null,
       "equipment": "cardio_machine",
@@ -1015,6 +1025,7 @@
     },
     {
       "name": "Stair Climber",
+      "distanceUnit": "floors",
       "bodyPart": "legs",
       "category": null,
       "equipment": "cardio_machine",
@@ -1028,6 +1039,7 @@
     },
     {
       "name": "Elliptical",
+      "distanceUnit": "mi",
       "bodyPart": "full_body",
       "category": null,
       "equipment": "cardio_machine",

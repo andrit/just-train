@@ -436,6 +436,7 @@ export async function templateRoutes(app: FastifyInstance): Promise<void> {
         targetDurationSeconds: body.targetDurationSeconds ?? null,
         targetDistance:        body.targetDistance        ?? null,
         targetIntensity:       body.targetIntensity       ?? null,
+        targetIntensityLevel:  body.targetIntensityLevel  ?? null,
         notes:                 body.notes                 ?? null,
         trackPerSide:          body.trackPerSide          ?? null,
       }).returning()

@@ -278,6 +278,8 @@ export const CreateExerciseSchema = z.object({
     .describe('compound = multi-joint, isolation = single-joint. Mainly for resistance exercises.'),
   laterality: LateralityEnum.default('bilateral')
     .describe('bilateral = both limbs together; unilateral = trained one side at a time (surfaces per-side tracking).'),
+  distanceUnit: z.string().max(20).optional()
+    .describe('Display label for distance on distance-cardio exercises (e.g. "mi", "m", "trips"). Omit/null for a neutral "Distance" label. A label only, not a unit conversion.'),
   isDraft: z.boolean().default(false)
     .describe('true = quick-added mid-session, needs enriching in the library later'),
   isPublic: z.boolean().default(false)
@@ -350,6 +352,8 @@ export const AddSessionExerciseSchema = z.object({
   targetDurationSeconds: z.number().int().min(1).optional(),
   targetDistance: z.number().min(0).optional(),
   targetIntensity: IntensityEnum.optional(),
+  targetIntensityLevel: z.number().int().min(0).optional()
+    .describe('Planned numeric machine level for distance-cardio (spin-bike resistance, rower damper, etc.). Device-specific, no fixed range.'),
   notes: z.string().max(1000).optional(),
 })
 export type AddSessionExerciseInput = z.infer<typeof AddSessionExerciseSchema>
@@ -362,6 +366,9 @@ export const UpdateSessionExerciseSchema = z.object({
   targetReps: z.number().int().min(1).optional(),
   targetWeight: z.number().min(0).optional(),
   targetWeightStep: z.number().optional(),
+  targetDurationSeconds: z.number().int().min(1).optional(),
+  targetDistance: z.number().min(0).optional(),
+  targetIntensityLevel: z.number().int().min(0).optional(),
   notes: z.string().max(1000).optional(),
 })
 export type UpdateSessionExerciseInput = z.infer<typeof UpdateSessionExerciseSchema>
@@ -402,6 +409,8 @@ export const CreateSetSchema = z.object({
   distance: z.number().min(0).optional(),
   speed: z.number().min(0).optional(),
   intensity: IntensityEnum.optional(),
+  intensityLevel: z.number().int().min(0).optional()
+    .describe('Recorded numeric machine level (spin-bike resistance, rower damper, treadmill level). Device-specific, no fixed range.'),
   side: SideEnum.optional(),
   perSide: z.boolean().optional().describe('true = per-side effort; reps is the per-side count. Omitted = server derives from the session-exercise trackPerSide.'),
   repsLeft: z.number().int().min(0).optional().describe('Left-side reps when the L/R drill-down splits them; omit for symmetric.'),
@@ -439,6 +448,8 @@ export const AddTemplateExerciseSchema = z.object({
   targetDurationSeconds: z.number().int().min(1).optional(),
   targetDistance: z.number().min(0).optional(),
   targetIntensity: IntensityEnum.optional(),
+  targetIntensityLevel: z.number().int().min(0).optional()
+    .describe('Planned numeric machine level for distance-cardio. Device-specific, no fixed range.'),
   notes: z.string().max(1000).optional(),
   trackPerSide: z.boolean().optional().describe('Explicit per-side input mode. Omit to inherit from the exercise laterality on apply.'),
 })

@@ -13,7 +13,7 @@ import type { ReactNode } from 'react'
 import type { SessionExerciseResponse } from '@trainer-app/shared'
 import { setVolume }     from '@trainer-app/shared'
 import { cn }            from '@/lib/cn'
-import { formatEpley, formatSetReps, formatSeconds } from '@/lib/formatters'
+import { formatEpley, formatSetReps, formatSeconds, formatDistance } from '@/lib/formatters'
 import { groupExercisesByCircuit }    from '@/lib/circuits'
 
 interface SessionExerciseBreakdownProps {
@@ -83,9 +83,10 @@ export function SessionExerciseBreakdown({
                         {set.weight != null && <span>{set.weight}</span>}
                         {set.weight != null && set.reps != null && <span className="text-ink-faint">×</span>}
                         {set.reps != null && <span>{formatSetReps(set)}</span>}
-                        {set.distance != null && <span>{set.distance}m</span>}
                         {set.durationSeconds != null && <span>{formatSeconds(set.durationSeconds)}</span>}
-                        {set.intensity != null && <span className="capitalize">{set.intensity}</span>}
+                        {set.distance != null && <span>{formatDistance(set.distance, se.exercise?.distanceUnit)}</span>}
+                        {set.intensityLevel != null && <span>Lv {set.intensityLevel}</span>}
+                        {set.intensityLevel == null && set.intensity != null && <span className="capitalize">{set.intensity}</span>}
                       </div>
                       <div className="flex gap-1 shrink-0">
                         {set.isLoadRecord && (

@@ -152,7 +152,7 @@ export function AtRiskWidget({
               to={`/clients/${client.id}`}
               className={cn(
                 'flex items-center gap-2.5 p-2 rounded-xl',
-                'hover:bg-white/5 transition-colors duration-150',
+                'hover:bg-ink/5 transition-colors duration-150',
                 'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-command-blue',
               )}
             >

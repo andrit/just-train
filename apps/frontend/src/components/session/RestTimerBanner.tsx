@@ -93,7 +93,7 @@ export function RestTimerBanner({ timer }: RestTimerBannerProps): React.JSX.Elem
           'text-xs px-3 py-1.5 rounded-lg border',
           'transition-all duration-150',
           isVeryLow
-            ? 'border-white/30 text-ink hover:bg-white/10'
+            ? 'border-ink/30 text-ink hover:bg-ink/10'
             : 'border-surface-border text-ink-muted hover:text-ink hover:border-gray-500',
           interactions.button.base,
           interactions.button.press,

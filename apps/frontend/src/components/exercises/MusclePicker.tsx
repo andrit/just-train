@@ -105,7 +105,7 @@ export default function MusclePicker({ value, onChange }: MusclePickerProps): Re
                       'rounded-full px-2.5 py-1 text-xs font-medium transition-colors border',
                       role === 'primary'   && 'bg-ember-red text-chalk-white border-ember-red',
                       role === 'secondary' && 'bg-ember-red/20 text-ember-red border-ember-red/40',
-                      role === 'none'      && 'bg-transparent text-iron-grey border-white/15 hover:border-white/30',
+                      role === 'none'      && 'bg-transparent text-iron-grey border-ink/15 hover:border-ink/30',
                     )}
                   >
                     {MUSCLE_LABEL[m]}

@@ -527,7 +527,7 @@ function FutureSetRow({ setNumber }: { setNumber: number }): React.JSX.Element {
       </div>
       <span className="text-xs text-ink-faint font-mono w-5">{setNumber}</span>
       <div className="flex gap-1">
-        {[0,1,2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-gray-700" />)}
+        {[0,1,2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-surface-border" />)}
       </div>
     </div>
   )

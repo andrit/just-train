@@ -53,6 +53,13 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - **Home body-map lacked definition.** The body heat-map button on Home was a transparent figure on the page
   ground. Added a card treatment — `border border-surface-border bg-surface/50 shadow-sm` with `p-3` insets — so
   it reads as a contained panel in both themes. Files: `DashboardPage.tsx`.
+- **Low-opacity white accents that faded out in light.** Hover tints, accent borders, and placeholder
+  pips used fixed-white or fixed-gray that didn't flip: `hover:bg-white/5` → `hover:bg-ink/5`
+  (`AtRiskWidget`), `border-white/30 … hover:bg-white/10` → `border-ink/… ` (`RestTimerBanner`),
+  `hover:border-white/20` → `hover:border-ink/20` (`SelfTrainingWidget`), the unselected role-chip
+  outline `border-white/15 hover:border-white/30` → `border-ink/…` (`MusclePicker`), and the future-set
+  pip dots `bg-gray-700` → `bg-surface-border` (`SetRow`, `ExerciseBlock`). `ink`/`surface-border` are
+  light in dark (dark byte-identical) and flip to dark/grey in light so the accent stays visible.
 
 ### Theme — Step 3: charts tokenized for light/dark (2026-10-27)
 - The body heat-map, muscle map, and the shared `heatRamp` no longer hardcode dark hex. The untrained fill, the

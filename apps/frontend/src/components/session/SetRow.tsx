@@ -261,7 +261,7 @@ function FutureSetRow({
       </div>
       <div className="flex gap-1 text-xs text-ink-faint font-mono">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="w-1.5 h-1.5 rounded-full bg-gray-700" />
+          <div key={i} className="w-1.5 h-1.5 rounded-full bg-surface-border" />
         ))}
       </div>
       {(targetReps != null || targetWeight != null) && (

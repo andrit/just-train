@@ -111,7 +111,7 @@ export function SelfTrainingWidget({
           className={cn(
             KEY_CLASSES,
             'bg-surface-raised border border-surface-border text-ink',
-            'hover:border-white/20 hover:text-ink',
+            'hover:border-ink/20 hover:text-ink',
             profileTapping && 'animate-key-tap',
           )}
           aria-label="View my training profile"

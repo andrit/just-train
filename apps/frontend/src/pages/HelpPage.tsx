@@ -65,7 +65,7 @@ export default function HelpPage(): React.JSX.Element {
               onClick={() => jumpTo(s.id)}
               className={cn(
                 'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
-                'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
+                'bg-surface border-surface-border text-ink hover:border-gray-400 hover:text-ink',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue',
               )}
             >

@@ -259,7 +259,7 @@ export default function DashboardPage(): React.JSX.Element {
         type="button"
         onClick={() => openBody(null)}
         aria-label="View full body breakdown — muscles trained in the last 30 days"
-        className="flex-1 min-h-0 flex flex-col py-2 w-full rounded-lg animate-slide-up focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        className="flex-1 min-h-0 flex flex-col p-3 w-full rounded-lg border border-surface-border bg-surface/50 shadow-sm animate-slide-up focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-command-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         style={{ animationDelay: '50ms' }}
       >
         <BodyHeatMap

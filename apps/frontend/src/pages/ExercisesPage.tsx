@@ -140,7 +140,7 @@ export default function ExercisesPage(): React.JSX.Element {
                 'shrink-0 px-4 py-1.5 rounded-full border text-xs font-medium transition-all duration-150 shadow-pressable',
                 workoutType === value
                   ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
-                  : 'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
+                  : 'bg-surface border-surface-border text-ink hover:border-gray-400 hover:text-ink',
               )}
             >
               {label}
@@ -162,7 +162,7 @@ export default function ExercisesPage(): React.JSX.Element {
                 'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium capitalize transition-all duration-150 shadow-pressable',
                 bodyPartId === bp.id
                   ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
-                  : 'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
+                  : 'bg-surface border-surface-border text-ink hover:border-gray-400 hover:text-ink',
               )}
             >
               {bp.name.replace('_', ' ')}
@@ -179,7 +179,7 @@ export default function ExercisesPage(): React.JSX.Element {
                 'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium transition-all duration-150 shadow-pressable',
                 category === value
                   ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
-                  : 'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
+                  : 'bg-surface border-surface-border text-ink hover:border-gray-400 hover:text-ink',
               )}
             >
               {label}
@@ -197,7 +197,7 @@ export default function ExercisesPage(): React.JSX.Element {
               'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium transition-all duration-150 shadow-pressable',
               draftsOnly
                 ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
-                : 'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
+                : 'bg-surface border-surface-border text-ink hover:border-gray-400 hover:text-ink',
             )}
           >
             ✏️ Drafts

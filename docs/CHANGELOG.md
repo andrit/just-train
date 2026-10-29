@@ -43,6 +43,17 @@ Versions follow [Semantic Versioning](https://semver.org/).
   first-time user follows their OS; dark can be pinned. Dark byte-identical. Files: `lib/theme.ts` (new),
   `index.html`, `index.css`, `PreferencesPage.tsx`. **Remaining:** QA every screen in light (human pass).
 
+### Theme — light-QA stragglers (#22) (2026-10-29)
+- **Inactive filter pills unreadable in light.** The inactive filter/tab pills under the search bar on the
+  Exercises and Sessions pages (and the Help-page section chips) hardcoded `bg-[#1C1C1C]` for their background.
+  In light that near-black fill didn't flip, so `text-ink` (near-black in light) sat on a near-black pill —
+  invisible. Swapped all 7 to the `bg-surface` token (dark `#1E1E1E` ≈ the old `#1C1C1C`, so dark is unchanged;
+  flips to white in light). Active pills were already correct (fixed `chalk-white`/`#1C1C1C` pair). Files:
+  `ExercisesPage.tsx`, `SessionsPage.tsx`, `HelpPage.tsx`.
+- **Home body-map lacked definition.** The body heat-map button on Home was a transparent figure on the page
+  ground. Added a card treatment — `border border-surface-border bg-surface/50 shadow-sm` with `p-3` insets — so
+  it reads as a contained panel in both themes. Files: `DashboardPage.tsx`.
+
 ### Theme — Step 3: charts tokenized for light/dark (2026-10-27)
 - The body heat-map, muscle map, and the shared `heatRamp` no longer hardcode dark hex. The untrained fill, the
   region stroke, and the three-tier Command-Blue frequency ramp are now CSS variables (`--chart-base`,

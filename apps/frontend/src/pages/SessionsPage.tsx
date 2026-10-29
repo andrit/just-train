@@ -453,7 +453,7 @@ export default function SessionsPage(): React.JSX.Element {
                 'shrink-0 px-4 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
                 tab === id
                   ? 'bg-command-blue text-white border-command-blue'
-                  : 'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
+                  : 'bg-surface border-surface-border text-ink hover:border-gray-400 hover:text-ink',
               )}
             >
               {label}
@@ -473,7 +473,7 @@ export default function SessionsPage(): React.JSX.Element {
                     'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150',
                     clientFilter === client.id
                       ? 'bg-command-blue/20 border-command-blue/60 text-command-blue'
-                      : 'bg-[#1C1C1C] border-surface-border text-ink hover:border-gray-400 hover:text-ink',
+                      : 'bg-surface border-surface-border text-ink hover:border-gray-400 hover:text-ink',
                   )}
                 >
                   {client.isSelf ? 'Me' : client.name}

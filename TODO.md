@@ -1,72 +1,57 @@
 # TODO — Trainer (Just Train) · Phase 19 Go Live
 
-_Resume pointer. Updated 2026-10-27. Full handover is in the `self:session-close` memory (read via `session_start`)._
+_Resume pointer. Updated 2026-10-28. Full handover is in the `self:session-close` memory (read via `session_start`)._
 
 ## Load first on resume
 - `session_start` (Mode B — mandatory), then this file.
-- **Business-plan docs are GITIGNORED** at `docs/product-development/business-plan/` — they will NOT show in
-  `git status`. (exec summary · financial model · competitive pricing teardown · GTM/content plan · pricing memo.)
-- Two audit docs drive the current queue: `docs/preferences-audit.md` and `docs/paid-user-account-audit.md`.
-- Active UX plans in `.workbench/designer/current/`: `task-plan-light-dark-theme.md` (#22, done),
-  `task-plan-body-map-history.md` (#20, done), `task-plan-initial-load-perf.md` (#19, done),
+- **Idea inbox:** check `discussions/offline-task-idea-inbox/` for new idea files (designer's
+  out-of-session drop-box). Triage any new ones, respond in-file. See that folder's `README.md`.
+- **Business-plan docs are GITIGNORED** at `docs/product-development/business-plan/` (won't show in `git status`).
+- Audit docs driving queues: `docs/preferences-audit.md`, `docs/paid-user-account-audit.md`.
+- Active UX plans in `.workbench/designer/current/`: `task-plan-timed-exercise.md` (#21, done),
   `task-plan-paid-user-account-audit.md` (#18 → #23), `task-plan-maintenance.md`.
 
-## This session (2026-10-24→27) — all committed/green except #22 Step 4 (STAGED, commit at clear)
-- **#17 Preferences audit EXECUTED (done).** Lane A: trainer-guarded Alerts / Auto-send reports / Timezone;
-  widget "Phase N" → "Coming soon"; photo-sharing relabelled "Not yet active". Lane C: unified toggles →
-  `PrefRow`+`Toggle`; Dashboard catch-all regrouped → **Session / Reports (trainer-only) / Dashboard**.
-  Dead `prNotifyType` **wired** into the PR flash gate (`WorkoutBlock.tsx`).
-- **#18 Paid-user account deep audit (done)** → `docs/paid-user-account-audit.md`. Surface strong, no auth
-  bypass. Findings → **#23** below.
-- **#19 Initial-load perf (done).** Lighthouse 88→90, FCP 2.6→1.8s. AppShell → React.lazy+Suspense; Sentry/SW/
-  sync/telemetry deferred post-paint (`afterPaint`); `AppInitSkeleton` replaces the auth spinner; Home renders
-  progressively. The on-phone 3-4s is the `/auth/refresh`→dashboard waterfall (TTI ~3.5s), not bundle/cold-start.
-- **#20 Body-map "Your history" tab (done).** `GET /clients/:id/muscle-history/:muscle` (enum validated IN
-  HANDLER, ownership-matrix line added) + tab strip (Your history | Primary movers | Also works it). Closed **#24**
-  (per-session sets + trend already live in the exercise detail).
-- **#22 Light/dark themes — COMPLETE, all 4 steps.** Palette + global token pass (`:root` dark = canonical;
-  light in `[data-theme=light]` + `@media(prefers-color-scheme:light)`); full text sweep (~120 files); charts
-  tokenized; **live System/Light/Dark toggle** in Preferences (`lib/theme.ts` + no-flash script in `index.html`).
-  ⚠️ BEHAVIOR CHANGE: default = SYSTEM, so existing users on a light OS flip to light next load unless they pin dark.
+## Last session (2026-10-27/28) — #21 timed/distance-cardio redesign SHIPPED
+- Record-after model for run/bike/row. Four nullable cols live in prod (`sets.intensity_level`,
+  `session/template_exercises.target_intensity_level`, `exercises.distance_unit`). Intensity is now a
+  NUMBER in the cardio UI (enum kept in data for outdoor/feel; RPE = subjective). Rounds = sets
+  (intervals logged one round per set). Distance has a per-exercise unit label, seeded + prod-labelled.
+  "Remember your usual" prefills time + intensity. Rep-cardio / stretch / cooldown untouched.
+- Committed **`92fb08a`**; prod migrated via `docs/sql/*`; `pnpm verify` + CI green.
+- Release note: `docs/release-notes/timed-exercise-redesign.md`.
 
-## Queue — remaining (view with `task_list`)
-1. **#21 Timed-exercise UI** *(NEXT — do together)* — stationary-bike-style redesign; **user brings inspiration
-   before any build**. Post-clear collaborative task.
-2. **#23 Account-audit fixes** — mostly USER Railway env: D2 email/Resend (HIGH), D1 `COOKIE_SECRET` + fail-fast
-   guard (HIGH), D3 consent capture (col add + checkbox), P1 XFF/`trustProxy` (confirm-then-fix), P3 in-process
-   lockout (confirm replica count), P2 iOS export (confirm). See `docs/paid-user-account-audit.md`.
+## ⚠️ FIRST on resume — one follow-up commit owed
+The Drizzle migration generated for #21 is **staged but NOT in `92fb08a`** (feature commit shipped
+without it). Per CLAUDE.md **critical rule 5**, the migration must be committed with the schema.
+Prod is already applied (via `docs/sql` DDL), so this only keeps the Drizzle snapshot in sync:
+```
+git commit -m "chore(db): add 0011 migration for cardio intensity_level + distance_unit (#21)"
+```
+Staged files: `apps/backend/drizzle/0011_neat_the_watchers.sql`,
+`apps/backend/drizzle/meta/0011_snapshot.json`, `apps/backend/drizzle/meta/_journal.json`.
 
-## #22 remaining = USER QA only
-Eyeball every screen in **light** (vite dev + Appearance toggle). Fix any stragglers: text left on a fixed-dark
-ground, chart legibility, amber-signal (`#B45309`) contrast.
+## Queue — next is the user's call
+1. **#21 remaining:** on-device QA only (bike 10 min @ 15 → trips; rounds=3 interval; prefill works;
+   treadmill → mi; rep-cardio/stretch unchanged).
+2. **#21 DEFERRED feature:** per-round *target* planning accordion (distinct targets per round upfront,
+   e.g. 20 high / 15 mid / 10 high) — needs per-round target comma-list cols + copier + an
+   `AddExerciseSheet` accordion. Intervals entered live today. See `DEFERRED_ITEMS.md` (2026-10-27).
+3. **#23 account-audit fixes** — mostly USER Railway env: D2 Resend trio (HIGH), D1 `COOKIE_SECRET` +
+   fail-fast guard (HIGH), D3 consent capture, P1 XFF/`trustProxy`, P3 replica count, P2 iOS export.
+   See `docs/paid-user-account-audit.md`.
+4. **#22 light QA** (user eyeballs every screen in light).
+5. **Maintenance queue** (`task-plan-maintenance.md`), G16 first.
 
-## Open follow-ups (small)
-- **#19:** on-phone `/auth/refresh` measurement BLOCKED on a DATA USB cable (remote-debug stuck Offline/pending-auth,
-  device `43140DLJH001PS`). Sentry Session-Replay trim (~120KB post-paint). Benign Vite warnings telemetry/syncService.
-- **prNotifyType default** decision (1rm vs both — schema change if "celebrate either").
-- DragStepper hold-to-jump-5 parity (offered). Help: keep `lib/helpContent.ts` in sync with `docs/USER_MANUAL.md`.
-
-## Open — needs the user (blocks #23 D2/P3 + password recovery, long-carried)
-`UPSTASH_REDIS_URL` + the Resend trio (`RESEND_API_KEY` · `REPORT_FROM_EMAIL=no-reply@just-train.fit` ·
-`APP_URL=https://www.just-train.fit`) on Railway, with `just-train.fit` verified in Resend. **Until set, password
-recovery is non-functional for beta users** (D2), and reports/at-risk/purge stay inert. Plus set `COOKIE_SECRET`
-on Railway (D1). **ASK whether these are done.**
-
-## Business plan follow-ups (feeds v3 SaaS)
-Decide the athlete **price** ($8.99 vs recommended $5.99 + annual $49 + lifetime $99, A/B); post-launch feed real
-CAC/conversion/churn into the model. Docs gitignored under `docs/product-development/business-plan/`.
-
-## When the UX track pauses — maintenance queue, IN ORDER (`task-plan-maintenance.md`)
-_Unstarted; carried:_ (1) G16 leftovers (`useSignOut` → `caches.delete('cloudinary-media')` feature-detect+try/catch;
-`getThumbnailUrl` unchanged for signed URLs; one-line test). (2) `@sentry/react` 8→10 (user runs). (3) argon2
-0.31→latest (Railway prebuilt risk, user runs). (4) Admin routes + formalize Slice B (owner `role='admin'` SQL
-prereq; G3 matrix special-cases admin). (5) drizzle 0.30→0.45 / kit 0.21→0.31 (DEFER LAST).
-Also unstarted: athlete progression-phase review · muscle-map JSON↔prod reconcile · Project 2 movement demonstration ·
-three-way exercise→muscle role (`stabilizer`) · female silhouette asset · heat/breakdown metric toggle.
+## Open — needs the user (ASK; long-carried)
+`UPSTASH_REDIS_URL` + Resend trio (`RESEND_API_KEY` · `REPORT_FROM_EMAIL=no-reply@just-train.fit` ·
+`APP_URL=https://www.just-train.fit`, domain verified in Resend) + `COOKIE_SECRET` on Railway.
+Until set: password recovery non-functional (D2), reports/at-risk/purge inert.
 
 ## Rules (container)
-- Container runs `tsc --noEmit` + `eslint` + `node`/`postcss.parse`. It does NOT run vitest/vite/tsx/drizzle-kit/psql —
-  the USER runs `pnpm verify` + prod SQL + env changes.
-- Stage specific files; user commits + pushes. Prod SQL before push on col/table adds (e.g. #23 D3 consent column);
-  prod-mutating data SQL defaults to a `BEGIN…ROLLBACK` dry-run. A new `:id` route needs an ownership-matrix line (G3)
-  + in-handler enum param validation (schema enum → 400 beats 401). For CSS edits, `postcss.parse` is the gate.
+- Container runs `tsc --noEmit` + `eslint` + `node`/`postcss.parse` only. USER runs `pnpm verify`,
+  vitest, vite, `drizzle-kit`, prod SQL, env changes.
+- **Prod is authoritative over the drifted seed JSON** (`exercises-library.json` ≠ prod). Dry-run data
+  SQL against prod before committing names. Additive DDL (`ADD COLUMN IF NOT EXISTS`) needs no txn
+  wrapper; data-mutating SQL defaults to a `BEGIN…ROLLBACK` dry-run (flip to COMMIT to apply).
+- Stage specific files; user commits + pushes. A new `:id` route needs an ownership-matrix line (G3)
+  + in-handler enum param validation. CSS edits gated by `postcss.parse`.

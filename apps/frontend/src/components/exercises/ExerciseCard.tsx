@@ -55,7 +55,7 @@ export default function ExerciseCard({
         )}
 
         <div className="absolute top-2 right-2">
-          <ExerciseTypeBadge type={exercise.workoutType} />
+          <ExerciseTypeBadge type={exercise.workoutType} showIcon={false} />
         </div>
       </div>
 

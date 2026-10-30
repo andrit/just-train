@@ -110,7 +110,16 @@ export function ExerciseTypeIcon({ type, className }: { type: string; className?
   return <Glyph className={className} />
 }
 
-export function ExerciseTypeBadge({ type, className }: { type: string; className?: string }): React.JSX.Element {
+export function ExerciseTypeBadge({
+  type,
+  showIcon = true,
+  className,
+}: {
+  type: string
+  /** Show the glyph before the label. Off where the icon already appears nearby (e.g. card art). */
+  showIcon?: boolean
+  className?: string
+}): React.JSX.Element {
   const theme = exerciseTypeTheme(type)
   return (
     <span
@@ -123,7 +132,7 @@ export function ExerciseTypeBadge({ type, className }: { type: string; className
         className,
       )}
     >
-      <ExerciseTypeIcon type={type} className="w-3.5 h-3.5" />
+      {showIcon && <ExerciseTypeIcon type={type} className="w-3.5 h-3.5" />}
       {theme.label}
     </span>
   )

@@ -7,8 +7,8 @@
 // ------------------------------------------------------------
 
 import { cn }                            from '@/lib/cn'
-import { ExerciseTypeBadge }             from './ExerciseTypeBadge'
-import { getThumbnailUrl }               from './utils'
+import { ExerciseTypeBadge, ExerciseTypeIcon } from './ExerciseTypeBadge'
+import { exerciseTypeTheme }             from '@/lib/exerciseTypeTheme'
 import {
   EQUIPMENT_LABEL,
   DIFFICULTY_TEXT_COLOR,
@@ -28,11 +28,6 @@ export default function ExerciseCard({
   exercise,
   onClick,
 }: ExerciseCardProps): React.JSX.Element {
-  const primaryMedia = exercise.media?.[0]
-  const thumbnailUrl = primaryMedia?.cloudinaryUrl
-    ? getThumbnailUrl(primaryMedia.cloudinaryUrl)
-    : null
-
   return (
     <button
       type="button"
@@ -46,24 +41,12 @@ export default function ExerciseCard({
         'focus-visible:ring-offset-brand-primary',
       )}
     >
-      {/* Thumbnail */}
-      <div className="aspect-[4/3] bg-brand-accent overflow-hidden relative">
-        {thumbnailUrl != null ? (
-          <img
-            src={thumbnailUrl}
-            alt=""
-            aria-hidden
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
-        ) : (
-          <div
-            className="w-full h-full flex items-center justify-center"
-            aria-hidden
-          >
-            <span className="text-4xl opacity-20">💪</span>
-          </div>
-        )}
+      {/* Type art — the exercise photo lives in the detail drawer, not the card */}
+      <div className="aspect-[4/3] bg-brand-accent overflow-hidden relative flex items-center justify-center">
+        <ExerciseTypeIcon
+          type={exercise.workoutType}
+          className={cn(exerciseTypeTheme(exercise.workoutType).text, 'w-16 h-16 opacity-50')}
+        />
 
         {exercise.isDraft && (
           <div className="absolute top-2 left-2">

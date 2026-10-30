@@ -24,8 +24,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - Applied across all consumers: library cards + detail (`ExerciseCard`, `ExerciseDetail`,
   `ExerciseDetailPanel`) now render a themed icon pill; session + template headers (`WorkoutBlock`,
   `TemplateBuilderSheet`) read the type text token. `WORKOUT_TYPE_LABEL` now derives from the one
-  source. First of the 3→2→1 exercise-library sequence (idea file in `discussions/`). **Remaining:**
-  eyeball the five hues + icons on device in both themes (can't render in-container).
+  source. First of the 3→2→1 exercise-library sequence (idea file in `discussions/`).
+- **Library card art:** each exercise card's thumbnail is now the type icon in the type colour (was a
+  single `💪` emoji on every card); the exercise photo moves to the detail drawer. Glyphs: resistance =
+  barbell, cardio = bike, calisthenics = jumping-jacks, stretching = split, cooldown = snowflake.
+  **Remaining:** eyeball the five hues + glyphs on device in both themes (can't render in-container).
 
 ### Timed / distance-cardio redesign (#21) — record-after model (2026-10-27)
 - Reshapes distance-cardio (run / bike / row) logging for the **record-after** model: the machine captures live,

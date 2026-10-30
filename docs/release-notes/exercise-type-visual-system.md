@@ -44,8 +44,14 @@ Tailwind `type.*` colours. Brighter on dark, darker on white:
 | cooldown (neutral) | `#94A3B8` | `#334155` |
 
 **Icon as secondary encoding** — `components/exercises/ExerciseTypeBadge.tsx` ships five hand-rolled,
-shape-distinct SVG glyphs (dumbbell / pulse / star-jump figure / outward arrows / snowflake — no new
-dependency) plus `ExerciseTypeBadge` (icon + label pill) and `ExerciseTypeIcon` (icon alone).
+shape-distinct SVG glyphs (resistance = barbell, cardio = bike, calisthenics = jumping-jacks figure,
+stretching = split figure, cooldown = snowflake — no new dependency) plus `ExerciseTypeBadge` (icon +
+label pill) and `ExerciseTypeIcon` (icon alone).
+
+**Library card art** — the exercise card's thumbnail slot is now the type icon in the type colour (it
+used to show a single `💪` emoji placeholder on every exercise, since most have no uploaded photo). The
+actual exercise photo / visualization / demonstration lives in the detail drawer (`MediaUploader` +
+hero), so nothing is lost.
 
 **Palette validation** — run through the `dataviz` skill's validator in both modes: normal-vision
 ΔE ≥ 15 on every pair, contrast ≥ 3:1 on both grounds. CVD separation sits in the 6–8 band, which is

@@ -32,43 +32,56 @@ function Svg({ className, children }: { className?: string; children: React.Reac
   )
 }
 
-// Dumbbell
+// Barbell — long bar with grouped plates at each end
 function ResistanceGlyph({ className }: { className?: string }): React.JSX.Element {
   return (
     <Svg className={className}>
-      <line x1="6" y1="7" x2="6" y2="17" />
-      <line x1="18" y1="7" x2="18" y2="17" />
-      <line x1="3" y1="9.5" x2="3" y2="14.5" />
-      <line x1="21" y1="9.5" x2="21" y2="14.5" />
-      <line x1="6" y1="12" x2="18" y2="12" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="7" y1="8.5" x2="7" y2="15.5" />
+      <line x1="5" y1="10" x2="5" y2="14" />
+      <line x1="17" y1="8.5" x2="17" y2="15.5" />
+      <line x1="19" y1="10" x2="19" y2="14" />
     </Svg>
   )
 }
 
-// Heartbeat / pulse line
+// Bicycle — two wheels + frame
 function CardioGlyph({ className }: { className?: string }): React.JSX.Element {
   return (
     <Svg className={className}>
-      <path d="M2 12h4l2-5 4 10 2-5h8" />
+      <circle cx="5.5" cy="15.5" r="3.5" />
+      <circle cx="18.5" cy="15.5" r="3.5" />
+      <path d="M5.5 15.5 10 8h4l4.5 7.5" />
+      <path d="M10 8 11.5 15.5 5.5 15.5" />
+      <path d="M14 8 11.5 15.5" />
     </Svg>
   )
 }
 
-// Bodyweight figure (star-jump)
+// Jumping jack — arms up and out, legs spread
 function CalisthenicsGlyph({ className }: { className?: string }): React.JSX.Element {
   return (
     <Svg className={className}>
-      <circle cx="12" cy="5" r="2.25" />
-      <path d="M12 7.5v6M12 9.5 6.5 12M12 9.5 17.5 12M12 13.5l-3 6M12 13.5l3 6" />
+      <circle cx="12" cy="4.5" r="2" />
+      <path d="M12 6.5 12 13" />
+      <path d="M12 8 6.5 4.5" />
+      <path d="M12 8 17.5 4.5" />
+      <path d="M12 13 7.5 20" />
+      <path d="M12 13 16.5 20" />
     </Svg>
   )
 }
 
-// Outward arrows on a baseline — "stretch"
+// Person doing a split — upright torso, legs spread wide and low
 function StretchingGlyph({ className }: { className?: string }): React.JSX.Element {
   return (
     <Svg className={className}>
-      <path d="M9 7 4 12l5 5M15 7l5 5-5 5M4 12h16" />
+      <circle cx="12" cy="6" r="2" />
+      <path d="M12 8 12 14.5" />
+      <path d="M12 11 8 10" />
+      <path d="M12 11 16 10" />
+      <path d="M12 14.5 4 17.5" />
+      <path d="M12 14.5 20 17.5" />
     </Svg>
   )
 }

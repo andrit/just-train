@@ -1,57 +1,48 @@
 # TODO — Trainer (Just Train) · Phase 19 Go Live
 
-_Resume pointer. Updated 2026-10-28. Full handover is in the `self:session-close` memory (read via `session_start`)._
+_Resume pointer. Updated 2026-10-30. Full handover is in the `self:session-close` memory (read via `session_start`)._
 
 ## Load first on resume
 - `session_start` (Mode B — mandatory), then this file.
 - **Idea inbox:** check `discussions/offline-task-idea-inbox/` for new idea files (designer's
-  out-of-session drop-box). Triage any new ones, respond in-file. See that folder's `README.md`.
-- **Business-plan docs are GITIGNORED** at `docs/product-development/business-plan/` (won't show in `git status`).
+  out-of-session drop-box). Triage new ones, respond in-file. See that folder's `README.md`.
+- **Business-plan docs are GITIGNORED** at `docs/product-development/business-plan/`.
 - Audit docs driving queues: `docs/preferences-audit.md`, `docs/paid-user-account-audit.md`.
-- Active UX plans in `.workbench/designer/current/`: `task-plan-timed-exercise.md` (#21, done),
-  `task-plan-paid-user-account-audit.md` (#18 → #23), `task-plan-maintenance.md`.
 
-## Last session (2026-10-27/28) — #21 timed/distance-cardio redesign SHIPPED
-- Record-after model for run/bike/row. Four nullable cols live in prod (`sets.intensity_level`,
-  `session/template_exercises.target_intensity_level`, `exercises.distance_unit`). Intensity is now a
-  NUMBER in the cardio UI (enum kept in data for outdoor/feel; RPE = subjective). Rounds = sets
-  (intervals logged one round per set). Distance has a per-exercise unit label, seeded + prod-labelled.
-  "Remember your usual" prefills time + intensity. Rep-cardio / stretch / cooldown untouched.
-- Committed **`92fb08a`**; prod migrated via `docs/sql/*`; `pnpm verify` + CI green.
-- Release note: `docs/release-notes/timed-exercise-redesign.md`.
+## Last session (2026-10-29/30) — three shipped, all committed + device-verified
+- **#22 light stragglers:** inactive filter pills `bg-[#1C1C1C]`→`bg-surface` (Exercises/Sessions/Help),
+  Home body-map border+shadow, low-opacity white accents→`ink`/`surface-border` (commits `56a13e6`,`84b1b13`).
+- **#25 exercise-type visual system:** one tokenized `EXERCISE_TYPE_THEME` (`lib/exerciseTypeTheme.ts`)
+  + 5 `--type-*` light/dark tokens + hand-rolled glyphs (barbell/bike/jumping-jacks/split/snowflake) +
+  card thumbnail = type art + label-only corner pill. dataviz-validated palette (`ead4e77`,`321c5ed`,`d50a721`).
+- **#2 provenance:** Yours vs Library via `trainer_id`; `trainerId` added to the summary schema
+  (`.nullable().optional()`); All·Yours·Library filter + grouped grid + "Yours" badge (`9effb7a`).
+- Established the offline idea-inbox (`c790604`). Tasks **#25 and #26 done**. Latest commit **`9effb7a`**.
 
-## ⚠️ FIRST on resume — one follow-up commit owed
-The Drizzle migration generated for #21 is **staged but NOT in `92fb08a`** (feature commit shipped
-without it). Per CLAUDE.md **critical rule 5**, the migration must be committed with the schema.
-Prod is already applied (via `docs/sql` DDL), so this only keeps the Drizzle snapshot in sync:
-```
-git commit -m "chore(db): add 0011 migration for cardio intensity_level + distance_unit (#21)"
-```
-Staged files: `apps/backend/drizzle/0011_neat_the_watchers.sql`,
-`apps/backend/drizzle/meta/0011_snapshot.json`, `apps/backend/drizzle/meta/_journal.json`.
+## Queue — next is the designer's call
+1. **#1 type-aware `ExerciseForm`** (last of the 3→2→1 sequence): fields change by workout type
+   (cardio = distance-unit + intensity from #21; stretch/cooldown = hold-time); reuse #21 field
+   components; **+ the BW max-reps catch** (0-weight resistance set → PR by max reps). Context:
+   `discussions/offline-task-idea-inbox/custom-exercise-improvements.md`.
+2. **edit-logged-set** (`discussions/offline-task-idea-inbox/edit-logged-set.md`): no edit/delete path
+   once a set is submitted — user hit it live (135 vs 155). Captured, not scoped.
+3. **#23 account-audit** (`docs/paid-user-account-audit.md`): D2 Resend (HIGH), D1 `COOKIE_SECRET`
+   guard (HIGH), D3 consent, P1 XFF/`trustProxy`, P3 replicas, P2 iOS export — mostly Railway env.
+4. **Maintenance queue** (`task-plan-maintenance.md`), G16 first.
 
-## Queue — next is the user's call
-1. **#21 remaining:** on-device QA only (bike 10 min @ 15 → trips; rounds=3 interval; prefill works;
-   treadmill → mi; rep-cardio/stretch unchanged).
-2. **#21 DEFERRED feature:** per-round *target* planning accordion (distinct targets per round upfront,
-   e.g. 20 high / 15 mid / 10 high) — needs per-round target comma-list cols + copier + an
-   `AddExerciseSheet` accordion. Intervals entered live today. See `DEFERRED_ITEMS.md` (2026-10-27).
-3. **#23 account-audit fixes** — mostly USER Railway env: D2 Resend trio (HIGH), D1 `COOKIE_SECRET` +
-   fail-fast guard (HIGH), D3 consent capture, P1 XFF/`trustProxy`, P3 replica count, P2 iOS export.
-   See `docs/paid-user-account-audit.md`.
-4. **#22 light QA** (user eyeballs every screen in light).
-5. **Maintenance queue** (`task-plan-maintenance.md`), G16 first.
+## Data note (optional — not urgent; device looked right)
+Some hand-added prod exercises may be `trainer_id = null` from the 2026-07-27 library collapse → they'd
+show as "Library" not "Yours". Re-attribution is a data decision only (code is correct). Investigate
+with the read-only SELECTs in the chat log if pursued.
 
 ## Open — needs the user (ASK; long-carried)
 `UPSTASH_REDIS_URL` + Resend trio (`RESEND_API_KEY` · `REPORT_FROM_EMAIL=no-reply@just-train.fit` ·
-`APP_URL=https://www.just-train.fit`, domain verified in Resend) + `COOKIE_SECRET` on Railway.
-Until set: password recovery non-functional (D2), reports/at-risk/purge inert.
+`APP_URL=https://www.just-train.fit`) + `COOKIE_SECRET` on Railway. Until set: password recovery
+non-functional (D2), reports/at-risk/purge inert.
 
 ## Rules (container)
-- Container runs `tsc --noEmit` + `eslint` + `node`/`postcss.parse` only. USER runs `pnpm verify`,
-  vitest, vite, `drizzle-kit`, prod SQL, env changes.
-- **Prod is authoritative over the drifted seed JSON** (`exercises-library.json` ≠ prod). Dry-run data
-  SQL against prod before committing names. Additive DDL (`ADD COLUMN IF NOT EXISTS`) needs no txn
-  wrapper; data-mutating SQL defaults to a `BEGIN…ROLLBACK` dry-run (flip to COMMIT to apply).
-- Stage specific files; user commits + pushes. A new `:id` route needs an ownership-matrix line (G3)
-  + in-handler enum param validation. CSS edits gated by `postcss.parse`.
+- Container runs `tsc --noEmit` + `eslint` + `postcss.parse`, and `npx tsc -p packages/shared/tsconfig.build.json`
+  to rebuild shared. USER runs `pnpm verify`, vitest, vite, `drizzle-kit`, prod SQL, env changes.
+- **Prod is authoritative over the drifted seed JSON.** Read-only SELECTs are safe to run directly;
+  data-mutating SQL defaults to a `BEGIN…ROLLBACK` dry-run (flip to COMMIT to apply).
+- Stage specific SOURCE files; **never stage `packages/shared/dist`** (gitignored). User commits + pushes.

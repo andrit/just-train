@@ -18,6 +18,16 @@ At the start of each phase, review this list:
 
 Captured from the user's own training sessions. Small, concrete, not yet scheduled.
 
+### Edit / correct a logged set (2026-10-30)
+When: next pass on live-session UX; small-to-medium, and worth prioritising because bad data propagates.
+What: a set is read-only once submitted — there is no edit or delete path. The user planned 135/10,
+did 155/7, changed the reps but not the weight, and hit **Submit set**; it logged 135/7 with no way to
+fix it. A wrong value then feeds volume, PRs, and the progress narrative. Scope: the past-set render in
+`SetRow` / `LiveSessionContent` (make it tap-to-edit), a `PATCH` set endpoint (guard ownership +
+renumber rules), and PR/volume recompute on edit (and on delete). Likely wanted in session history too,
+not just the live screen. Captured in `discussions/offline-task-idea-inbox/edit-logged-set.md`; not yet
+scoped.
+
 ### Per-round target planning accordion for distance-cardio intervals (2026-10-27)
 When: a follow-on to the timed-exercise redesign (#21), once the live record-after flow is proven on device.
 What: #21 lets you plan one time + one intensity level that prefills every round, and enter per-round *variation* live (each round = a set, so 20 min @ 15 / 15 @ 11 / 10 @ 15 is three logged sets). What's **not** planned upfront is distinct per-round *targets* — the "toggle that opens an accordion" the user floated (20 high / 15 mid / 10 high as a pre-set interval structure). Doing it needs per-round target storage: comma-list columns mirroring `target_reps_per_set` (e.g. `target_duration_per_set`, `target_intensity_level_per_set`) on `session_exercises` + `template_exercises`, the copier (`lib/exerciseCopy.ts`) carrying them, and an accordion UI in `AddExerciseSheet`'s `CardioTargets` that expands when rounds > 1. Deferred as scope on 2026-10-27 (user: "all leans acceptable"); live per-round entry covers the common case, and the user floated the accordion tentatively. Plan: `.workbench/designer/current/task-plan-timed-exercise.md`.

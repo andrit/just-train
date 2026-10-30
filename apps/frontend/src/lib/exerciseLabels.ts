@@ -9,34 +9,18 @@
 //   import { WORKOUT_TYPE_LABEL, EQUIPMENT_LABEL, DIFFICULTY_COLOR } from '@/lib/exerciseLabels'
 // ------------------------------------------------------------
 
-import type { BadgeVariant } from '@/components/ui/Badge'
+import { EXERCISE_TYPE_THEME } from './exerciseTypeTheme'
 
 // ── Workout type ──────────────────────────────────────────────────────────────
+//
+// The type COLOUR system now lives in `exerciseTypeTheme.ts` (one source of
+// truth) — consume `EXERCISE_TYPE_THEME` / `<ExerciseTypeBadge>` for colour +
+// icon. The old WORKOUT_TYPE_COLOR and WORKOUT_TYPE_BADGE_VARIANT maps are gone
+// (they disagreed on hue). Labels still live here, derived from that one source.
 
-export const WORKOUT_TYPE_LABEL: Record<string, string> = {
-  cardio:       'Cardio',
-  stretching:   'Stretching',
-  calisthenics: 'Calisthenics',
-  resistance:   'Resistance',
-  cooldown:     'Cooldown',
-}
-
-export const WORKOUT_TYPE_BADGE_VARIANT: Record<string, BadgeVariant> = {
-  cardio:       'info',
-  stretching:   'success',
-  calisthenics: 'warning',
-  resistance:   'danger',
-  cooldown:     'default',
-}
-
-// Tailwind color strings for filter chips and inline labels
-export const WORKOUT_TYPE_COLOR: Record<string, string> = {
-  cardio:       'text-sky-400   border-sky-500/60',
-  stretching:   'text-violet-400 border-violet-500/60',
-  calisthenics: 'text-emerald-400 border-emerald-500/60',
-  resistance:   'text-ember-red border-ember-red/60',
-  cooldown:     'text-ink-muted  border-gray-500/60',
-}
+export const WORKOUT_TYPE_LABEL: Record<string, string> = Object.fromEntries(
+  Object.entries(EXERCISE_TYPE_THEME).map(([type, theme]) => [type, theme.label]),
+)
 
 // ── Equipment ─────────────────────────────────────────────────────────────────
 

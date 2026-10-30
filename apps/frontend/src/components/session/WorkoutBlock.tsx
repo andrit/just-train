@@ -24,7 +24,8 @@ import { cn }                            from '@/lib/cn'
 import { interactions }                  from '@/lib/interactions'
 import { usePreferences }                from '@/hooks/usePreferences'
 import { formatSeconds }                 from '@/lib/formatters'
-import { WORKOUT_TYPE_LABEL, WORKOUT_TYPE_COLOR } from '@/lib/exerciseLabels'
+import { WORKOUT_TYPE_LABEL }            from '@/lib/exerciseLabels'
+import { exerciseTypeTheme }             from '@/lib/exerciseTypeTheme'
 import { ExerciseBlock }                 from './ExerciseBlock'
 import { AddExerciseSheet }              from './AddExerciseSheet'
 import type { SessionExerciseResponse }  from '@trainer-app/shared'
@@ -63,7 +64,7 @@ export function WorkoutBlock({
   const prevEx       = exercises[clampedIdx - 1]
   const nextEx       = exercises[clampedIdx + 1]
 
-  const typeColor = WORKOUT_TYPE_COLOR[workoutType] ?? 'text-ink-muted border-gray-500/60'
+  const typeTheme = exerciseTypeTheme(workoutType)
   const typeLabel = WORKOUT_TYPE_LABEL[workoutType] ?? workoutType
 
   const handleExerciseAdded = (): void => {
@@ -100,7 +101,7 @@ export function WorkoutBlock({
         {/* Block header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border">
           <div className="flex items-center gap-2">
-            <span className={cn('text-[10px] uppercase tracking-widest font-medium', typeColor.split(' ')[0])}>
+            <span className={cn('text-[10px] uppercase tracking-widest font-medium', typeTheme.text)}>
               {typeLabel}
             </span>
             {totalEx > 0 && layout === 'horizontal' && (

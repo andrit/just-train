@@ -29,11 +29,10 @@ import { useClients, useSelfClient }             from '@/lib/queries/clients'
 import { BottomSheet }                           from '@/components/ui/BottomSheet'
 import { DragStepper }                           from '@/components/ui/DragStepper'
 import { Button }                                from '@/components/ui/Button'
-import { Badge }                                 from '@/components/ui/Badge'
+import { ExerciseTypeBadge }                     from './ExerciseTypeBadge'
 import { Spinner }                               from '@/components/ui/Spinner'
 import { ConfirmDialog }                         from '@/components/ui/ConfirmDialog'
 import {
-  WORKOUT_TYPE_BADGE_VARIANT,
   EQUIPMENT_LABEL,
   DIFFICULTY_COLOR,
 }                                                from '@/lib/exerciseLabels'
@@ -396,9 +395,7 @@ export default function ExerciseDetailPanel({
         {/* Name + type */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant={WORKOUT_TYPE_BADGE_VARIANT[exercise.workoutType] ?? 'default'}>
-              {exercise.workoutType}
-            </Badge>
+            <ExerciseTypeBadge type={exercise.workoutType} />
             {exercise.category && (
               <span className="text-[10px] uppercase tracking-wider text-ink-subtle border border-surface-border px-2 py-0.5 rounded-full">
                 {exercise.category}

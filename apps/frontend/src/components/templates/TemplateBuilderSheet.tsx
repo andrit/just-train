@@ -39,7 +39,8 @@ import {
   useReorderTemplateExercises,
 }                                             from '@/lib/queries/templates'
 import { toast }                              from '@/store/toastStore'
-import { WORKOUT_TYPE_LABEL, WORKOUT_TYPE_COLOR } from '@/lib/exerciseLabels'
+import { WORKOUT_TYPE_LABEL }                  from '@/lib/exerciseLabels'
+import { exerciseTypeTheme }                  from '@/lib/exerciseTypeTheme'
 import { TemplateExercisePickerSheet }        from './TemplateExercisePickerSheet'
 import { CircuitBuilderSheet }                from '@/components/session/CircuitBuilderSheet'
 import { useAuthStore }                       from '@/store/authStore'
@@ -332,7 +333,7 @@ function SortableExerciseItem({ exercise, templateId }: {
   }
 
   const deleteExercise = useDeleteTemplateExercise()
-  const colorClass = WORKOUT_TYPE_COLOR[exercise.workoutType]?.split(' ')[0] ?? 'text-ink-muted'
+  const colorClass = exerciseTypeTheme(exercise.workoutType).text
   const typeLabel  = WORKOUT_TYPE_LABEL[exercise.workoutType] ?? exercise.workoutType
 
   const handleDelete = (): void => {

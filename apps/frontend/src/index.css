@@ -46,6 +46,14 @@
   --heat-2:       79 130 224;  /* #4F82E0 — med */
   --heat-3:       134 178 255; /* #86B2FF — high (brightest; pops on the dark ground) */
   --on-signal:    0 0 0;       /* text on signal-yellow (black on bright yellow) */
+  /* Exercise-type accents — categorical, one per workout type. Brighter on dark.
+     Validated colour-blind-safe (dataviz skill): normal-vision ΔE ≥15 all pairs,
+     contrast ≥3:1; always paired with an icon + label (secondary encoding). */
+  --type-resistance:   217 27 27;   /* #D91B1B red */
+  --type-cardio:       59 130 246;  /* #3B82F6 blue */
+  --type-calisthenics: 192 38 211;  /* #C026D3 fuchsia */
+  --type-stretching:   5 150 105;   /* #059669 emerald */
+  --type-cooldown:     148 163 184; /* #94A3B8 slate — neutral/null slot */
 }
 
 /* Theme resolution (Step 4):
@@ -78,6 +86,12 @@
   --heat-2:       91 141 232;   /* #5B8DE8 — med */
   --heat-3:       27 80 217;    /* #1B50D9 — high (command-blue; darkest, pops on white) */
   --on-signal:    255 255 255;  /* white text on the amber signal */
+  /* Exercise-type accents — darker steps for contrast on the white ground. */
+  --type-resistance:   185 28 28;  /* #B91C1C */
+  --type-cardio:       29 78 216;  /* #1D4ED8 */
+  --type-calisthenics: 162 28 175; /* #A21CAF */
+  --type-stretching:   4 120 87;   /* #047857 */
+  --type-cooldown:     51 65 85;   /* #334155 slate — neutral/null slot */
 }
 
 /* System default: follow the OS. Mirrors the light palette above; applies whenever
@@ -105,6 +119,11 @@
     --heat-2:         91 141 232;
     --heat-3:         27 80 217;
     --on-signal:      255 255 255;
+    --type-resistance:   185 28 28;
+    --type-cardio:       29 78 216;
+    --type-calisthenics: 162 28 175;
+    --type-stretching:   4 120 87;
+    --type-cooldown:     51 65 85;
   }
 }
 

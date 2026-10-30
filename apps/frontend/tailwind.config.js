@@ -45,6 +45,16 @@ export default {
           subtle:  'rgb(var(--ink-subtle) / <alpha-value>)', // tertiary / captions
           faint:   'rgb(var(--ink-faint) / <alpha-value>)',  // placeholder / disabled
         },
+        // Exercise-type accents — categorical, one per workout type. Variable-backed
+        // so they flip per theme (brighter on dark, darker on white). The single
+        // colour source for EXERCISE_TYPE_THEME; never reuse for anything else.
+        type: {
+          resistance:   'rgb(var(--type-resistance) / <alpha-value>)',
+          cardio:       'rgb(var(--type-cardio) / <alpha-value>)',
+          calisthenics: 'rgb(var(--type-calisthenics) / <alpha-value>)',
+          stretching:   'rgb(var(--type-stretching) / <alpha-value>)',
+          cooldown:     'rgb(var(--type-cooldown) / <alpha-value>)',
+        },
       },
 
       // ── Typography ─────────────────────────────────────────────────────────

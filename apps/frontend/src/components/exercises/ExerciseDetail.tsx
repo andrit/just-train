@@ -8,10 +8,9 @@
 import { useState }                          from 'react'
 import { useExercise, useDeleteExercise }    from '@/lib/queries/exercises'
 import { Button }         from '@/components/ui/Button'
-import { Badge }          from '@/components/ui/Badge'
+import { ExerciseTypeBadge } from './ExerciseTypeBadge'
 import { Spinner }        from '@/components/ui/Spinner'
 import { ConfirmDialog }  from '@/components/ui/ConfirmDialog'
-import { WORKOUT_TYPE_BADGE_VARIANT } from '@/lib/exerciseLabels'
 import ExerciseForm       from './ExerciseForm'
 import MediaUploader      from './MediaUploader'
 
@@ -90,9 +89,7 @@ export default function ExerciseDetail({
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant={WORKOUT_TYPE_BADGE_VARIANT[exercise.workoutType] ?? 'default'}>
-            {exercise.workoutType}
-          </Badge>
+          <ExerciseTypeBadge type={exercise.workoutType} />
           {exercise.isDraft && (
             <span className="badge-draft">✏️ Draft</span>
           )}

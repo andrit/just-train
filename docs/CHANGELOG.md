@@ -7,6 +7,26 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Exercise-type visual system — one tokenized theme + icons (#25) (2026-10-29)
+- Collapses the two previously-divergent type maps in `lib/exerciseLabels.ts` (`WORKOUT_TYPE_COLOR` and
+  `WORKOUT_TYPE_BADGE_VARIANT` — they disagreed on hue, so a card and a badge for the *same* type could
+  show different colours) into **one source of truth**: `lib/exerciseTypeTheme.ts`
+  (`EXERCISE_TYPE_THEME`) maps each workout type → label + `text`/`border`/`tint` theme-token classes.
+- **Colour now lives in the #22 light/dark token system** — five `--type-*` tokens (`index.css` ×3
+  blocks → Tailwind `type.*`), brighter on dark, darker on white. The old dark-tuned `-400` shades
+  (which had no light-theme vetting) are gone.
+- **Every type carries an icon** (`ExerciseTypeBadge` / `ExerciseTypeIcon`, five hand-rolled SVG glyphs
+  — no new dependency) so identity is never colour-alone (WCAG 1.4.1). Palette validated with the
+  `dataviz` skill: normal-vision ΔE ≥ 15 on every pair, contrast ≥ 3:1 on both grounds; CVD separation
+  sits in the 6–8 band, carried by the icon + label (secondary encoding). Cooldown is the neutral/null
+  slot (grey + snowflake). Final colours: resistance=red, cardio=blue, calisthenics=fuchsia,
+  stretching=emerald, cooldown=slate.
+- Applied across all consumers: library cards + detail (`ExerciseCard`, `ExerciseDetail`,
+  `ExerciseDetailPanel`) now render a themed icon pill; session + template headers (`WorkoutBlock`,
+  `TemplateBuilderSheet`) read the type text token. `WORKOUT_TYPE_LABEL` now derives from the one
+  source. First of the 3→2→1 exercise-library sequence (idea file in `discussions/`). **Remaining:**
+  eyeball the five hues + icons on device in both themes (can't render in-container).
+
 ### Timed / distance-cardio redesign (#21) — record-after model (2026-10-27)
 - Reshapes distance-cardio (run / bike / row) logging for the **record-after** model: the machine captures live,
   the app plans the target off-device and records the result. Distance-cardio now shows **all four** metrics,

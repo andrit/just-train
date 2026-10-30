@@ -7,11 +7,9 @@
 // ------------------------------------------------------------
 
 import { cn }                            from '@/lib/cn'
-import { Badge }                         from '@/components/ui/Badge'
+import { ExerciseTypeBadge }             from './ExerciseTypeBadge'
 import { getThumbnailUrl }               from './utils'
 import {
-  WORKOUT_TYPE_BADGE_VARIANT,
-  WORKOUT_TYPE_LABEL,
   EQUIPMENT_LABEL,
   DIFFICULTY_TEXT_COLOR,
 }                                        from '@/lib/exerciseLabels'
@@ -74,9 +72,7 @@ export default function ExerciseCard({
         )}
 
         <div className="absolute top-2 right-2">
-          <Badge variant={WORKOUT_TYPE_BADGE_VARIANT[exercise.workoutType] ?? 'default'}>
-            {WORKOUT_TYPE_LABEL[exercise.workoutType] ?? exercise.workoutType}
-          </Badge>
+          <ExerciseTypeBadge type={exercise.workoutType} />
         </div>
       </div>
 

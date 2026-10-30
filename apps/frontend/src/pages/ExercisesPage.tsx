@@ -54,6 +54,7 @@ export default function ExercisesPage(): React.JSX.Element {
   const [bodyPartId,       setBodyPartId]       = useState('')
   const [category,         setCategory]         = useState('')
   const [draftsOnly,       setDraftsOnly]       = useState(false)
+  const [provenance,       setProvenance]       = useState<'all' | 'yours' | 'system'>('all')
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null)
   const [createOpen,       setCreateOpen]       = useState(false)
 
@@ -83,12 +84,40 @@ export default function ExercisesPage(): React.JSX.Element {
   const { data: bodyParts }                   = useBodyParts()
 
   // Client-side category filter (not in backend query yet)
-  const filtered = category
+  const byCategory = category
     ? (exercises ?? []).filter((e) => ( e as { category?: string }).category === category)
     : (exercises ?? [])
 
-  const hasFilters = !!(search || bodyPartId || workoutType || draftsOnly || category)
+  // Provenance: in this list every non-null trainerId is the current trainer's own
+  // (the query returns only own + public), so trainerId != null ⇒ "yours".
+  const filtered = provenance === 'all'
+    ? byCategory
+    : byCategory.filter((e) => (provenance === 'yours' ? e.trainerId != null : e.trainerId == null))
+
+  const yoursItems  = filtered.filter((e) => e.trainerId != null)
+  const systemItems = filtered.filter((e) => e.trainerId == null)
+  // Show the two labelled groups only when both are present (an un-split list reads cleaner flat).
+  const grouped = provenance === 'all' && yoursItems.length > 0 && systemItems.length > 0
+
+  const hasFilters = !!(search || bodyPartId || workoutType || draftsOnly || category || provenance !== 'all')
   const showCategoryFilter = workoutType === 'resistance' || workoutType === ''
+
+  const renderGrid = (items: typeof filtered): React.JSX.Element => (
+    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+      {items.map((exercise, i) => (
+        <div
+          key={exercise.id}
+          className="animate-slide-up"
+          style={{ animationDelay: `${Math.min(i * 20, 200)}ms`, animationFillMode: 'both' }}
+        >
+          <ExerciseCard
+            exercise={exercise}
+            onClick={() => setActiveExerciseId(exercise.id)}
+          />
+        </div>
+      ))}
+    </div>
+  )
 
   return (
     <div className="flex flex-col min-h-full">
@@ -152,6 +181,29 @@ export default function ExercisesPage(): React.JSX.Element {
 
         {/* Secondary filters */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hidden px-4 md:px-6 pb-3 pt-2">
+          {/* Provenance — yours vs the shared library */}
+          {([
+            { value: 'all',    label: 'All' },
+            { value: 'yours',  label: 'Yours' },
+            { value: 'system', label: 'Library' },
+          ] as const).map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setProvenance(value)}
+              className={cn(
+                'shrink-0 px-3 py-1 rounded-full border text-[11px] font-medium transition-all duration-150 shadow-pressable',
+                provenance === value
+                  ? 'bg-chalk-white text-[#1C1C1C] border-transparent'
+                  : 'bg-surface border-surface-border text-ink hover:border-gray-400 hover:text-ink',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+
+          <div className="w-px bg-surface-border shrink-0 mx-1" />
+
           {/* Body parts */}
           {(bodyParts ?? []).map((bp) => (
             <button
@@ -236,6 +288,7 @@ export default function ExercisesPage(): React.JSX.Element {
                 setWorkoutType('')
                 setCategory('')
                 setDraftsOnly(false)
+                setProvenance('all')
               }}
               className="text-xs text-ink-faint hover:text-ink"
             >
@@ -260,6 +313,7 @@ export default function ExercisesPage(): React.JSX.Element {
                     setWorkoutType('')
                     setCategory('')
                     setDraftsOnly(false)
+                    setProvenance('all')
                   }}
                   className="mt-4 text-sm text-command-blue hover:underline"
                 >
@@ -276,22 +330,22 @@ export default function ExercisesPage(): React.JSX.Element {
           </div>
         )}
 
-        {/* Exercise grid */}
+        {/* Exercise grid — grouped into Yours / Library when both are present */}
         {!isLoading && !error && filtered.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-            {filtered.map((exercise, i) => (
-              <div
-                key={exercise.id}
-                className="animate-slide-up"
-                style={{ animationDelay: `${Math.min(i * 20, 200)}ms`, animationFillMode: 'both' }}
-              >
-                <ExerciseCard
-                  exercise={exercise}
-                  onClick={() => setActiveExerciseId(exercise.id)}
-                />
-              </div>
-            ))}
-          </div>
+          grouped ? (
+            <div className="space-y-6">
+              <section>
+                <h2 className="text-[11px] uppercase tracking-widest text-ink-subtle font-medium mb-3">Your exercises</h2>
+                {renderGrid(yoursItems)}
+              </section>
+              <section>
+                <h2 className="text-[11px] uppercase tracking-widest text-ink-subtle font-medium mb-3">Library</h2>
+                {renderGrid(systemItems)}
+              </section>
+            </div>
+          ) : (
+            renderGrid(filtered)
+          )
         )}
       </div>
 

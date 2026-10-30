@@ -48,11 +48,14 @@ export default function ExerciseCard({
           className={cn(exerciseTypeTheme(exercise.workoutType).text, 'w-16 h-16 opacity-50')}
         />
 
-        {exercise.isDraft && (
-          <div className="absolute top-2 left-2">
-            <span className="badge-draft">✏️ Draft</span>
-          </div>
-        )}
+        <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
+          {exercise.isDraft && <span className="badge-draft">✏️ Draft</span>}
+          {exercise.trainerId != null && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-surface/90 text-ink-muted border border-surface-border backdrop-blur-sm">
+              Yours
+            </span>
+          )}
+        </div>
 
         <div className="absolute top-2 right-2">
           <ExerciseTypeBadge type={exercise.workoutType} showIcon={false} />

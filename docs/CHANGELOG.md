@@ -7,6 +7,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Exercise provenance — Yours vs the shared Library (#2) (2026-10-30)
+- The exercise library now distinguishes **your custom exercises** from the **shared public library**,
+  keyed off `trainer_id` (a trainer id = yours; `null` = public) — the same signal the visibility filter
+  and the detail panel already use. (`is_public` is a separate future-multi-trainer flag, deliberately
+  not used for this.)
+- **`trainerId` added to `ExerciseSummaryResponseSchema`** (`.nullable().optional()`, mirroring
+  `muscleRole`) so the library list carries provenance. The list already sent raw rows — the field was
+  simply being stripped by the schema — so no serializer change. Optional means the nested
+  session/template summaries are unaffected (no response-validation break).
+- **UI:** a **All · Yours · Library** filter beside the type tabs; when both are present the grid
+  **groups** into "Your exercises" and "Library" sections; a quiet **"Yours"** badge marks custom cards
+  (defaults unmarked). Second of the 3→2→1 sequence. Files: `packages/shared … response-schemas.ts`,
+  `ExercisesPage.tsx`, `ExerciseCard.tsx`.
+
 ### Exercise-type visual system — one tokenized theme + icons (#25) (2026-10-29)
 - Collapses the two previously-divergent type maps in `lib/exerciseLabels.ts` (`WORKOUT_TYPE_COLOR` and
   `WORKOUT_TYPE_BADGE_VARIANT` — they disagreed on hue, so a card and a badge for the *same* type could

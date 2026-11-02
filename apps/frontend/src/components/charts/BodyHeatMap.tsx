@@ -8,13 +8,14 @@
 // (a sequential frequency ramp, not primary/secondary roles).
 //
 // Coloring is a single-hue sequential scale in DISCRETE buckets: untrained =
-// gray, then three Command-Blue tiers (low/med/high) that brighten with
-// frequency so the busiest region pops on the dark ground. Blue, not red — red
-// on a body reads as soreness/injury. Magnitude = one hue, never a rainbow.
+// gray, then five Command-Blue tiers that step with frequency (brighter on the
+// dark ground, darker on white). Blue, not red — red on a body reads as
+// soreness/injury. Magnitude = one hue, never a rainbow.
 //
-// Tiers are NORMALIZED to the athlete's own busiest region, so the top tier
-// always lights up. A region's value is the MAX session-count among the muscles
-// that map to it (summing would double-count a session that hit two of them).
+// Tiers are ABSOLUTE 30-day session-count buckets (not normalized to the
+// athlete's own peak), so the heat reads as real training frequency. A region's
+// value is the MAX session-count among the muscles that map to it (summing would
+// double-count a session that hit two of them).
 //
 // v1 is a single (neutral/male) silhouette — the only geometry we have. A
 // male/female toggle is deferred until a second silhouette with the same region
@@ -51,11 +52,9 @@ export function BodyHeatMap({ counts, className, onRegionTap }: BodyHeatMapProps
       regionValue.set(region, Math.max(regionValue.get(region) ?? 0, count))
     }
   }
-  const max = Math.max(1, ...regionValue.values())
-
-  // Fill color for a region, bucketed from its frequency normalized to the
-  // busiest region (gray if untrained). Shared ramp — see heatRamp.ts.
-  const fillOf = (region: BodyRegion): string => heatFill(regionValue.get(region) ?? 0, max)
+  // Fill color for a region from its absolute 30-day session count (gray if
+  // untrained). Shared ramp — see heatRamp.ts.
+  const fillOf = (region: BodyRegion): string => heatFill(regionValue.get(region) ?? 0)
 
   return (
     <div className={cn('flex items-stretch justify-center gap-4 w-full', className)}>

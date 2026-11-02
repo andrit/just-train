@@ -42,9 +42,11 @@
   /* Charts — body heat-map + muscle map (SVG fills via `style`; see heatRamp.ts). */
   --chart-base:   63 68 76;    /* #3F444C — untrained region fill */
   --chart-stroke: 42 46 52;    /* #2A2E34 — region outline */
-  --heat-1:       51 92 158;   /* #335C9E — low frequency */
-  --heat-2:       79 130 224;  /* #4F82E0 — med */
-  --heat-3:       134 178 255; /* #86B2FF — high (brightest; pops on the dark ground) */
+  --heat-1:       51 88 155;   /* #33589B — tier 1 (1–2 sessions/30d) */
+  --heat-2:       68 118 196;  /* #4476C4 — tier 2 (3–4) */
+  --heat-3:       91 147 230;  /* #5B93E6 — tier 3 (5–6) */
+  --heat-4:       122 173 246; /* #7AADF6 — tier 4 (7–9) */
+  --heat-5:       158 198 255; /* #9EC6FF — tier 5 (10+; brightest, pops on dark) */
   --on-signal:    0 0 0;       /* text on signal-yellow (black on bright yellow) */
   /* Exercise-type accents — categorical, one per workout type. Brighter on dark.
      Validated colour-blind-safe (dataviz skill): normal-vision ΔE ≥15 all pairs,
@@ -82,9 +84,11 @@
      so the busiest region pops dark on white (inverse of the dark ramp). */
   --chart-base:   228 226 223;  /* #E4E2DF — faint untrained figure */
   --chart-stroke: 207 203 197;  /* #CFCBC5 — light region outline */
-  --heat-1:       174 198 240;  /* #AEC6F0 — low */
-  --heat-2:       91 141 232;   /* #5B8DE8 — med */
-  --heat-3:       27 80 217;    /* #1B50D9 — high (command-blue; darkest, pops on white) */
+  --heat-1:       107 152 224;  /* #6B98E0 — tier 1 (1–2 sessions/30d) */
+  --heat-2:       79 122 210;   /* #4F7AD2 — tier 2 (3–4) */
+  --heat-3:       55 98 192;    /* #3762C0 — tier 3 (5–6) */
+  --heat-4:       36 76 158;    /* #244C9E — tier 4 (7–9) */
+  --heat-5:       21 57 126;    /* #15397E — tier 5 (10+; darkest navy, pops on white) */
   --on-signal:    255 255 255;  /* white text on the amber signal */
   /* Exercise-type accents — darker steps for contrast on the white ground. */
   --type-resistance:   185 28 28;  /* #B91C1C */
@@ -115,9 +119,11 @@
     --brand-accent:    245 245 244;
     --chart-base:     228 226 223;
     --chart-stroke:   207 203 197;
-    --heat-1:         174 198 240;
-    --heat-2:         91 141 232;
-    --heat-3:         27 80 217;
+    --heat-1:         107 152 224;
+    --heat-2:         79 122 210;
+    --heat-3:         55 98 192;
+    --heat-4:         36 76 158;
+    --heat-5:         21 57 126;
     --on-signal:      255 255 255;
     --type-resistance:   185 28 28;
     --type-cardio:       29 78 216;

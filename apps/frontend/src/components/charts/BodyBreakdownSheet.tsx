@@ -81,9 +81,8 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
     return m
   }, [counts])
 
-  const { groups, max, topMuscle, neglectedCount, neglectedMuscles } = useMemo(() => {
+  const { groups, topMuscle, neglectedCount, neglectedMuscles } = useMemo(() => {
     const allMuscles = Object.keys(MUSCLE_BODY_PART) as Muscle[]
-    const max = Math.max(1, ...allMuscles.map((m) => countOf.get(m) ?? 0))
 
     const byGroup = new Map<BodyPart, { muscle: Muscle; count: number }[]>()
     for (const m of allMuscles) {
@@ -113,7 +112,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
       || MUSCLE_LABEL[a].localeCompare(MUSCLE_LABEL[b]),
     )
 
-    return { groups, max, topMuscle, neglectedCount, neglectedMuscles }
+    return { groups, topMuscle, neglectedCount, neglectedMuscles }
   }, [countOf])
 
   // The region's muscles, busiest-first (name tiebreak). Primary-prevalence
@@ -144,7 +143,7 @@ export function BodyBreakdownSheet({ open, onClose, counts, scopeRegion, clientI
         >
           <span
             className="w-2.5 h-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: heatFill(count, max) }}
+            style={{ backgroundColor: heatFill(count) }}
             aria-hidden
           />
           <span className={cn('text-sm flex-1 truncate', count > 0 ? 'text-ink' : 'text-ink-subtle')}>

@@ -7,6 +7,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Body heat-map — absolute scale + 5 tiers (2026-11-02)
+- The Home body heat-map now shades each muscle region by its **absolute** 30-day completed-session
+  count on a **fixed 5-tier ladder** (1–2 · 3–4 · 5–6 · 7–9 · 10+ → tiers 1–5; untrained = grey),
+  replacing the previous **relative** 3-tier scale that normalized to the athlete's own busiest region.
+  Relative scaling hid real training volume (a once-a-week and a twice-a-day athlete rendered the same)
+  and worked against the "what am I neglecting?" read — a mostly-grey figure is now the honest signal.
+- **New `--heat-4` / `--heat-5` tokens** in all three `index.css` theme blocks; the five-step
+  Command-Blue ramp is dataviz-validated (single hue, monotone lightness, ΔL ≥ 0.06, light-end clears
+  contrast on each ground — brighter on dark, darker on white). `heatFill(value)` is now a pure
+  absolute-threshold function; the `max`-normalization is dropped from `BodyHeatMap` and
+  `BodyBreakdownSheet`. Thresholds were tuned against the real 30-day distribution
+  (`docs/sql/body-heat-distribution.sql`). Files: `index.css`, `charts/heatRamp.ts`,
+  `charts/BodyHeatMap.tsx`, `charts/BodyBreakdownSheet.tsx`.
+
 ### Exercise provenance — Yours vs the shared Library (#2) (2026-10-30)
 - The exercise library now distinguishes **your custom exercises** from the **shared public library**,
   keyed off `trainer_id` (a trainer id = yours; `null` = public) — the same signal the visibility filter

@@ -142,8 +142,8 @@ Fix: Add `public/robots.txt` with appropriate crawl directives before launch.
 
 ## Auth & Security
 
-### Password Reset Flow ✅ BUILT (2026-09-15, account plan B6)
-`password_reset_tokens` (SHA-256 of a 48-byte token, 1 h TTL, single use), `POST /auth/forgot-password` (always 202), `POST /auth/reset-password` (sets the hash, signs out every device), `/forgot-password` + `/reset-password` pages. **Not yet live:** the email goes out through `services/email.service.ts`, which needs `RESEND_API_KEY`, `REPORT_FROM_EMAIL` (a Resend-verified `just-train.fit` sender) and `APP_URL` on Railway — until those are set the request is accepted and the send fails (logged, Sentry event). Remaining: set the three variables after the domain is verified in Resend.
+### Password Reset Flow ✅ LIVE (built 2026-09-15; email configured + verified 2026-11-13, account plan B6)
+`password_reset_tokens` (SHA-256 of a 48-byte token, 1 h TTL, single use), `POST /auth/forgot-password` (always 202), `POST /auth/reset-password` (sets the hash, signs out every device), `/forgot-password` + `/reset-password` pages. **✅ Now live (2026-11-13):** `RESEND_API_KEY`, `REPORT_FROM_EMAIL=no-reply@just-train.fit` and `APP_URL=https://www.just-train.fit` are set on Railway and `just-train.fit` is verified in Resend. Verified end-to-end: forgot-password → Resend `Delivered` → reset email received with a correct `www.just-train.fit` link. (This also activates the scheduled reports, at-risk digests, and the lockout notice-email, now that mail + `UPSTASH_REDIS_URL` are configured.)
 
 ### Email Verification
 When: When registration opens to multiple trainers

@@ -62,6 +62,7 @@ import { authenticate } from '../middleware/authenticate'
 import { seedDefaultTemplates } from '../db/seeds/defaultTemplates'
 import {
   CreateTrainerSchema,
+  TERMS_VERSION,
   LoginSchema,
   OnboardTrainerSchema,
   UpdateTrainerSchema,
@@ -154,6 +155,8 @@ export function serializeTrainer(
     prNotifyType:         (trainer.prNotifyType ?? '1rm') as '1rm' | 'volume' | 'both',
     restDurationSeconds:  trainer.restDurationSeconds ?? 90,
     photoSharingPreference: (trainer.photoSharingPreference ?? 'private') as 'private' | 'share_selected' | 'share_all',
+    termsAcceptedAt:      trainer.termsAcceptedAt?.toISOString() ?? null,
+    termsVersion:         trainer.termsVersion ?? null,
     createdAt:            trainer.createdAt.toISOString(),
     updatedAt:            trainer.updatedAt.toISOString(),
   }
@@ -198,6 +201,8 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
 **Password requirements:** minimum 8 characters.
 
+**Consent:** \`acceptTerms\` must be \`true\` — the accepted terms version and timestamp are recorded on the account.
+
 **Email verification:** not enforced in Phase 2 — \`emailVerified\` is set to \`false\` but not checked. See DEFERRED_ITEMS.md.`,
       body: CreateTrainerSchema,
       response: {
@@ -228,6 +233,10 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
           email: email.toLowerCase(),
           passwordHash,
           emailVerified: false,
+          // Consent audit (account plan D3): acceptTerms is validated true by the
+          // schema; stamp when and which version was agreed to.
+          termsAcceptedAt: new Date(),
+          termsVersion:    TERMS_VERSION,
         })
         .returning()
 

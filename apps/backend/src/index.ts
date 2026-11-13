@@ -196,8 +196,16 @@ app.register(multipart, {
 // The cookie secret adds HMAC signing for tamper detection
 // (the token itself is still verified via argon2 in the DB).
 // ------------------------------------------------------------
+// Fail fast in production rather than silently accepting a public default
+// (matches JWT_SECRET's requireEnv guard). A dev fallback keeps local dev simple.
+// The cookie secret is unused today (no cookie is set with `signed: true`), but a
+// public default would become a forgery vector the moment one is — so require it.
+const cookieSecret = process.env.COOKIE_SECRET
+if (!cookieSecret && process.env.NODE_ENV === 'production') {
+  throw new Error('Missing required environment variable: COOKIE_SECRET')
+}
 app.register(cookie as unknown as FastifyPluginCallback<Record<string, unknown>>, {
-  secret: process.env.COOKIE_SECRET ?? 'change-this-cookie-secret-in-production',
+  secret: cookieSecret ?? 'dev-only-insecure-cookie-secret',
 })
 
 // ------------------------------------------------------------

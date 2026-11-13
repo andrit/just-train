@@ -37,6 +37,8 @@ export default function LoginPage(): React.JSX.Element {
   const [emailError, setEmailError]       = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [serverError, setServerError]     = useState<string | null>(null)
+  const [acceptTerms, setAcceptTerms]     = useState(false)
+  const [termsError, setTermsError]       = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   // Lockout (423 / 429 with retryAfterSeconds): hold the button and count down
   // rather than let the user keep hitting a wall.
@@ -59,6 +61,7 @@ export default function LoginPage(): React.JSX.Element {
     setEmailError(null)
     setPasswordError(null)
     setServerError(null)
+    setTermsError(null)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -77,6 +80,7 @@ export default function LoginPage(): React.JSX.Element {
     if (mode === 'register' && !name.trim()) { setNameError('Name is required'); hasError = true }
     if (!email.trim()) { setEmailError('Email is required'); hasError = true }
     if (!password || password.length < 8) { setPasswordError('Password must be at least 8 characters'); hasError = true }
+    if (mode === 'register' && !acceptTerms) { setTermsError('Please accept the Terms of Service and Privacy Policy to continue'); hasError = true }
     if (hasError) return
 
     setLoading(true)
@@ -87,7 +91,7 @@ export default function LoginPage(): React.JSX.Element {
       if (mode === 'login') {
         data = await apiClient.post<AuthResponse>('/auth/login', { email, password })
       } else {
-        data = await apiClient.post<AuthResponse>('/auth/register', { name, email, password })
+        data = await apiClient.post<AuthResponse>('/auth/register', { name, email, password, acceptTerms })
       }
 
       // Clear stale cache from any previous session before setting new auth
@@ -193,6 +197,30 @@ export default function LoginPage(): React.JSX.Element {
             required
           />
 
+          {mode === 'register' && (
+            <div>
+              <div className="flex items-start gap-2">
+                <input
+                  id="acceptTerms"
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => { setAcceptTerms(e.target.checked); if (termsError) setTermsError(null) }}
+                  aria-invalid={termsError != null ? true : undefined}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-ink cursor-pointer"
+                />
+                <label htmlFor="acceptTerms" className="text-xs text-ink-faint">
+                  I agree to the{' '}
+                  <Link to="/terms" onClick={(e: React.MouseEvent) => e.stopPropagation()} className="text-ink-muted hover:text-ink underline underline-offset-2">Terms of Service</Link>
+                  {' '}and{' '}
+                  <Link to="/privacy" onClick={(e: React.MouseEvent) => e.stopPropagation()} className="text-ink-muted hover:text-ink underline underline-offset-2">Privacy Policy</Link>.
+                </label>
+              </div>
+              {termsError != null && termsError.length > 0 && (
+                <p role="alert" className="mt-1 text-xs text-red-400">{termsError}</p>
+              )}
+            </div>
+          )}
+
           {/* Server error */}
           {serverError != null && serverError.length > 0 && (
             <div
@@ -224,14 +252,6 @@ export default function LoginPage(): React.JSX.Element {
             </p>
           )}
 
-          {mode === 'register' && (
-            <p className="text-xs text-ink-faint text-center mt-3">
-              By creating an account you agree to our{' '}
-              <Link to="/terms" className="text-ink-muted hover:text-ink underline underline-offset-2">Terms of Service</Link>
-              {' '}and{' '}
-              <Link to="/privacy" className="text-ink-muted hover:text-ink underline underline-offset-2">Privacy Policy</Link>.
-            </p>
-          )}
         </form>
       </div>
     </div>

@@ -35,10 +35,16 @@ import {
 // TRAINER
 // ============================================================
 
+// The Terms of Service / Privacy Policy version a user consents to at register.
+// A date string (the day the /terms + /privacy pages went live). When the terms
+// change, bump this in one place — the register handler stamps whatever is current.
+export const TERMS_VERSION = '2026-06-21'
+
 export const CreateTrainerSchema = z.object({
   name: z.string().min(1).max(100).describe('Full name of the trainer'),
   email: z.string().email(),
   password: z.string().min(8).max(100),
+  acceptTerms: z.literal(true).describe('Must be true — explicit consent to the Terms of Service and Privacy Policy'),
 })
 export type CreateTrainerInput = z.infer<typeof CreateTrainerSchema>
 

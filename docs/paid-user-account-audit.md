@@ -4,6 +4,12 @@
 **Method:** read-only trace of the authoritative code. Findings are classified **DEFINITE** (a problem now — including latent/future problems, which this audit treats as present) or **CONFIRM** (likely a problem; the exact check to settle it is given). Fixes are follow-up work (queued as task #23), not applied here.
 **Headline:** the account/auth surface is unusually well-built. No reachable auth bypass was found. The real exposures are two operational gaps that bite *in a production beta* (email sending, cookie secret), a missing consent record, and three things that need a one-command confirmation.
 
+**Resolution status (2026-11-13) — D1 ✅ · D2 ✅ · D3 ✅ fixed:**
+- **D1** — `COOKIE_SECRET` now fail-fast in production (`index.ts`, dev fallback kept); var set on Railway.
+- **D2** — Resend configured (`RESEND_API_KEY` / `REPORT_FROM_EMAIL=no-reply@just-train.fit` / `APP_URL=https://www.just-train.fit`, domain verified) **and** `UPSTASH_REDIS_URL` set → BullMQ workers + scheduler live, password recovery **verified delivering end-to-end** (forgot-password → Resend `Delivered` → inbox, correct link).
+- **D3** — consent is now recorded: required checkbox at register + `terms_accepted_at` / `terms_version` columns, stamped in the register handler (`TERMS_VERSION`), backfill in `docs/sql/add-terms-consent-columns.sql`.
+- **Still open:** P1 (XFF/`trustProxy` confirm), P2 (iOS export confirm), P3 (move lockout/rate-limit store to Redis — in-process today; adding Redis for the queue did **not** change it).
+
 ---
 
 ## Verified strengths (so the findings are read in proportion)

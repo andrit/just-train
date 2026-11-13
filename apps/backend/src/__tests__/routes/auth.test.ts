@@ -26,6 +26,7 @@ import {
   TEST_TRAINER_ID, TEST_DEVICE_ID, TEST_TOKEN_ID,
 } from '../helpers/factories'
 import { generateAccessToken } from '../../services/auth.service'
+import { TERMS_VERSION } from '@trainer-app/shared'
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
 // vi.mock() calls are hoisted to the top of the file by Vitest.
@@ -188,6 +189,49 @@ describe('POST /api/v1/auth/register', () => {
     })
 
     expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 400 when terms are not accepted (acceptTerms must be true)', async () => {
+    const { acceptTerms: _omit, ...withoutConsent } = validRegisterBody
+    const res = await app.inject({
+      method:  'POST',
+      url:     '/api/v1/auth/register',
+      payload: withoutConsent, // no acceptTerms
+    })
+
+    expect(res.statusCode).toBe(400)
+
+    // acceptTerms: false must also be rejected (z.literal(true))
+    const resFalse = await app.inject({
+      method:  'POST',
+      url:     '/api/v1/auth/register',
+      payload: { ...validRegisterBody, acceptTerms: false },
+    })
+    expect(resFalse.statusCode).toBe(400)
+  })
+
+  it('records consent (termsAcceptedAt + termsVersion) on the new trainer', async () => {
+    const { db }     = await import('../../db')
+    const newTrainer = makeTrainer()
+
+    vi.mocked(db.query.trainers.findFirst).mockResolvedValueOnce(undefined)
+    const valuesMock = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValueOnce([newTrainer]) })
+    vi.mocked(db.insert).mockReturnValueOnce({ values: valuesMock } as any)
+
+    const res = await app.inject({
+      method:  'POST',
+      url:     '/api/v1/auth/register',
+      payload: validRegisterBody,
+      headers: { 'x-device-id': TEST_DEVICE_ID },
+    })
+
+    expect(res.statusCode).toBe(201)
+    expect(valuesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        termsVersion:    TERMS_VERSION,
+        termsAcceptedAt: expect.any(Date),
+      }),
+    )
   })
 
   it('sets an httpOnly cookie on success', async () => {

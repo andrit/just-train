@@ -7,6 +7,28 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Account hardening — consent capture, `COOKIE_SECRET` fail-fast, email + queue go-live (2026-11-13)
+- **Env go-live (`#23` D2):** `UPSTASH_REDIS_URL` + the Resend trio (`RESEND_API_KEY` /
+  `REPORT_FROM_EMAIL` / `APP_URL`) set on Railway with the domain verified. BullMQ workers +
+  scheduler now start (five cron jobs: report/alert fan-out, challenge-expiry, account-purge,
+  refresh-token cleanup) and **password recovery is live** — verified end-to-end (Resend `Delivered`
+  + reset link opens `www.just-train.fit`). Reports/at-risk digests now deliver instead of failing.
+- **`COOKIE_SECRET` fail-fast (`#23` D1):** `index.ts` now throws at boot in production if
+  `COOKIE_SECRET` is unset (matches the `JWT_SECRET` guard), with a dev-only fallback. Replaces the
+  silent public-default fallback. Var set on Railway.
+- **Consent recorded at register (`#23` D3):** a **required** Terms/Privacy checkbox now gates the
+  register form (replaces the passive "by creating an account you agree…" text), and the server
+  stamps `terms_accepted_at` + `terms_version` (`TERMS_VERSION = '2026-06-21'`) on the trainer row.
+  New nullable columns on `trainers`; `acceptTerms: z.literal(true)` added to `CreateTrainerSchema`;
+  exposed on `TrainerResponseSchema`. Backfill for existing beta accounts in
+  `docs/sql/add-terms-consent-columns.sql` (dry-run default). Tests: register rejects without
+  consent, and stamps version + timestamp on success.
+- **Observability:** queue-start log bumped `info → warn` so it's visible in prod logs (prod logger
+  runs at `warn`). Files: `index.ts`, `routes/auth.ts`, `db/schema/trainers.ts`,
+  `packages/shared/src/schemas/{index,response-schemas}.ts`, `pages/LoginPage.tsx`, test factories +
+  fixtures. ⚠️ Deploy order: apply `docs/sql/add-terms-consent-columns.sql` + `drizzle-kit generate`
+  **before** pushing, and confirm `COOKIE_SECRET` is set or the backend won't boot.
+
 ### Body heat-map — absolute scale + 5 tiers (2026-11-02)
 - The Home body heat-map now shades each muscle region by its **absolute** 30-day completed-session
   count on a **fixed 5-tier ladder** (1–2 · 3–4 · 5–6 · 7–9 · 10+ → tiers 1–5; untrained = grey),

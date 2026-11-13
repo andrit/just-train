@@ -120,6 +120,12 @@ export const TrainerResponseSchema = z.object({
   photoSharingPreference: PhotoSharingPreferenceEnum.default('private')
     .describe('Controls which progress photos are eligible for social sharing'),
 
+  // Consent audit — recorded at registration (null on accounts that predate consent capture)
+  termsAcceptedAt: z.string().datetime().nullable().default(null)
+    .describe('ISO datetime the user accepted the Terms of Service / Privacy Policy. null if never recorded.'),
+  termsVersion: z.string().nullable().default(null)
+    .describe('The terms version string the user consented to — see TERMS_VERSION. null if never recorded.'),
+
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   // passwordHash intentionally excluded — never returned

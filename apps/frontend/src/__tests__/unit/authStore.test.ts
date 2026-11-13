@@ -30,6 +30,8 @@ const mockTrainer: TrainerResponse = {
   prNotifyType:         '1rm',
   restDurationSeconds:  90,
   photoSharingPreference: 'private',
+  termsAcceptedAt:      null,
+  termsVersion:         null,
   createdAt:            '2024-01-01T00:00:00Z',
   updatedAt:            '2024-01-01T00:00:00Z',
 }

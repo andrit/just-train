@@ -36,7 +36,7 @@ function assertStripped(name: string, schema: { safeParse: (v: unknown) => { suc
 
 describe('mass-assignment — privileged fields never survive input parsing', () => {
   it('CreateTrainerSchema (register)', () => {
-    assertStripped('CreateTrainerSchema', CreateTrainerSchema, { name: 'A', email: 'a@b.co', password: 'correct-horse-battery' })
+    assertStripped('CreateTrainerSchema', CreateTrainerSchema, { name: 'A', email: 'a@b.co', password: 'correct-horse-battery', acceptTerms: true })
   })
   it('UpdateTrainerSchema (PATCH /auth/me)', () => {
     assertStripped('UpdateTrainerSchema', UpdateTrainerSchema, { name: 'A' })

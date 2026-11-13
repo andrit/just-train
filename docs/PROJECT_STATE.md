@@ -821,7 +821,7 @@ Full details in `DEFERRED_ITEMS.md`.
 |---|---|
 | Subscription billing gates | v3.0.0 SaaS |
 | Email verification | Multi-trainer launch |
-| Password reset flow | ✅ built 2026-09-15 — live once email is configured |
+| Password reset flow | ✅ live 2026-11-13 — Resend configured + verified delivering end-to-end |
 | Visualization / demonstration content | Phase 9 (post-SPA) |
 | Draft exercise enrichment queue | v1.9.x |
 | Post-session wrap-up | After session planning (v2.2.0+) |
@@ -835,7 +835,7 @@ Full details in `DEFERRED_ITEMS.md`.
 | Database migration dry-run in CI | Phase 6 (noted in CI yml) |
 | Reconcile `exercises-library.json` to prod (seed drift after single-public-library refactor, 2026-07-27) | Before relying on local `db:seed` — see `DEFERRED_ITEMS.md` + `LOCAL_DEV_CATCHUP.md` |
 | Preferences-audit follow-ups (theme toggle = task #22; other recs done 2026-10-24) | `docs/preferences-audit.md` |
-| Paid-user account audit fixes — `COOKIE_SECRET` guard, Resend/email activation, consent capture, XFF/`trustProxy` + in-process-lockout confirms (task #23, 2026-10-24) | `docs/paid-user-account-audit.md` |
+| Paid-user account audit fixes — D1 `COOKIE_SECRET` guard ✅, D2 Resend/Redis email+queue go-live ✅, D3 consent capture ✅ (all 2026-11-13); **remaining:** P1 XFF/`trustProxy` confirm, P2 iOS export confirm, P3 Redis-backed lockout store (task #23, 2026-10-24) | `docs/paid-user-account-audit.md` |
 
 ---
 

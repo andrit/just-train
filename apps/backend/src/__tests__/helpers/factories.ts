@@ -51,6 +51,8 @@ export function makeTrainer(overrides: Partial<Trainer> = {}): Trainer {
     emailVerified:        false,
     pendingEmail:         null,
     lastLoginAt:          null,
+    termsAcceptedAt:      new Date('2026-06-21T00:00:00.000Z'),
+    termsVersion:         '2026-06-21',
     // Phase 3C
     subscriptionTier:     'free',
     subscriptionStatus:   'trialing',
@@ -186,9 +188,10 @@ export function makeRefreshToken(overrides: Partial<RefreshToken> = {}): Refresh
 // ── Valid request bodies ──────────────────────────────────────────────────────
 
 export const validRegisterBody = {
-  name:     'Test Trainer',
-  email:    'trainer@example.com',
-  password: 'securepassword123',
+  name:       'Test Trainer',
+  email:      'trainer@example.com',
+  password:   'securepassword123',
+  acceptTerms: true as const,
 }
 
 export const validLoginBody = {

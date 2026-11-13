@@ -59,6 +59,11 @@ export const trainers = pgTable('trainers', {
   pendingEmail:  text('pending_email'),
   lastLoginAt:   timestamp('last_login_at'),
 
+  // Consent audit (account plan D3) — stamped at registration. Nullable: rows
+  // created before consent capture stay null until backfilled.
+  termsAcceptedAt: timestamp('terms_accepted_at'),
+  termsVersion:    text('terms_version'),
+
   // Phase 3C: SaaS subscription — not yet enforced (billing deferred to SaaS phase)
   // free    = limited usage for either mode
   // pro     = full features for either mode (different price per mode)

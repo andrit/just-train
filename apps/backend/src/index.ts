@@ -379,7 +379,7 @@ const start = async (): Promise<void> => {
       const reportWorker = startReportWorker()
       const alertWorker  = startAlertWorker()
       await startScheduler()
-      ;routeLog(app).info('Queue:        BullMQ workers + scheduler started')
+      ;routeLog(app).warn('Queue:        BullMQ workers + scheduler started')
 
       // Graceful shutdown — drain workers before exit
       const shutdown = async (): Promise<void> => {

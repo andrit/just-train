@@ -836,6 +836,7 @@ Full details in `DEFERRED_ITEMS.md`.
 | Reconcile `exercises-library.json` to prod (seed drift after single-public-library refactor, 2026-07-27) | Before relying on local `db:seed` — see `DEFERRED_ITEMS.md` + `LOCAL_DEV_CATCHUP.md` |
 | Preferences-audit follow-ups (theme toggle = task #22; other recs done 2026-10-24) | `docs/preferences-audit.md` |
 | Paid-user account audit fixes — D1 `COOKIE_SECRET` guard ✅, D2 Resend/Redis email+queue go-live ✅, D3 consent capture ✅ (all 2026-11-13); **remaining:** P1 XFF/`trustProxy` confirm, P2 iOS export confirm, P3 Redis-backed lockout store (task #23, 2026-10-24) | `docs/paid-user-account-audit.md` |
+| Analytics: admin metrics endpoint (`GET /admin/metrics`, `requireRole('admin')`) + landing-visit top-of-funnel stitch. Definitions + SQL shipped 2026-11-14; endpoint deferred until definitions proven on real data (task #31) | `docs/analytics-metrics.md` |
 
 ---
 

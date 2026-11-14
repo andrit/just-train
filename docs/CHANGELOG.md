@@ -7,6 +7,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Analytics foundations — North Star / funnel / retention definitions + SQL (2026-11-14)
+- Defined the three headline product metrics and shipped runnable queries, computed from the
+  **operational DB** (durable) rather than the fire-and-forget `client_events` telemetry (which stays for
+  engagement colour only). No schema change, no new events — every signal is already a durable row.
+- **North Star = Weekly Logged Sessions** = Weekly Active Athletes × Sessions per Active Athlete.
+- **Activation funnel:** signup → onboard → first-start → first-complete (activation, 7-day window) →
+  habit (≥3 in 14 days). **Retention:** weekly cohorts by signup week, self-client completed sessions.
+- Locked definitions (in `docs/analytics-metrics.md`): completed = `status='completed'` only (matches
+  `kpis.ts`/`report.service.ts`); unit = athlete (self-client); ISO Monday weeks; test accounts excluded
+  by explicit email list, not by role (owner is a real admin). Files: `docs/analytics-metrics.md`,
+  `docs/sql/analytics/{north-star-weekly,activation-funnel,retention-cohorts-weekly}.sql`. Admin metrics
+  endpoint + marketing-site visit stitch deferred (task #31).
+
 ### Three UX fixes — add-exercise default, tappable template cards, plan-future link (2026-11-13)
 - **Add Exercise defaults to "All types"** (was the block's workout type, e.g. Resistance). Building a
   workout on the fly now shows the whole library first; the block-type chip narrows on demand.

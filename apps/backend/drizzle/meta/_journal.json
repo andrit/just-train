@@ -85,6 +85,13 @@
       "when": 1793142253052,
       "tag": "0011_neat_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1794590699943,
+      "tag": "0012_smart_fallen_one",
+      "breakpoints": true
     }
   ]
 }

@@ -36,9 +36,10 @@ _Resume pointer. Updated 2026-11-03. Full handover is in the `self:session-close
   max-reps catch. `discussions/offline-task-idea-inbox/custom-exercise-improvements.md`.
 - **edit-logged-set** (`.../edit-logged-set.md`): no edit/delete path once a set is submitted.
 - **#23 account-audit** (`docs/paid-user-account-audit.md`): ✅ D1 `COOKIE_SECRET` guard, D2 Resend/Redis
-  email+queue go-live, D3 consent capture — all done 2026-11-13 (uncommitted; deploy order in the
-  release note). **Remaining:** P1 XFF/`trustProxy` confirm, P2 iOS export confirm, P3 Redis-backed
-  lockout store (in-process today).
+  email+queue go-live, D3 consent capture — all done 2026-11-13, **committed + pushed, CI + verify green**.
+  Prod consent columns applied + backfill COMMITted (1 post-terms account stamped) + drizzle snapshot in
+  sync. **Remaining:** P1 XFF/`trustProxy` confirm, P2 iOS export confirm, P3 Redis-backed lockout store
+  (in-process today).
 - **Maintenance queue** (`task-plan-maintenance.md`), G16 first.
 - Parked inbox ideas: `circuit-builder-reorder.md`, `capture-interstitial-work.md`.
 

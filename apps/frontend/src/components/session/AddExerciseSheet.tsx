@@ -447,8 +447,8 @@ export function AddExerciseSheet({
   const addExercise                    = useAddExercise()
   const createExercise                 = useCreateExercise()
 
-  // Pre-filter by the block's workout type — trainer can override with "All"
-  const [showAllTypes, setShowAllTypes] = useState(false)
+  // Default to showing ALL types — the block type chip narrows on demand.
+  const [showAllTypes, setShowAllTypes] = useState(true)
 
   const filtered = useMemo(() => {
     if (!exercises) return []
@@ -466,7 +466,7 @@ export function AddExerciseSheet({
   const showQuickAdd = search.trim().length > 1 && filtered.length === 0
 
   const handleClose = (): void => {
-    setSearch(''); setSelected(null); setIsConfirming(false); setShowAllTypes(false); setExpandedId(null)
+    setSearch(''); setSelected(null); setIsConfirming(false); setShowAllTypes(true); setExpandedId(null)
     onClose()
   }
 

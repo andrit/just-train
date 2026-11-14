@@ -16,6 +16,7 @@ import { ErrorState }                 from '@/components/ui/ErrorState'
 import { useOnlineStatus }            from '@/hooks/useOnlineStatus'
 import { ConfirmDialog }               from '@/components/ui/ConfirmDialog'
 import { TemplateBuilderSheet }        from '@/components/templates/TemplateBuilderSheet'
+import { TemplateDetailSheet }          from '@/components/templates/TemplateDetailSheet'
 import { toast }                       from '@/store/toastStore'
 import { apiClient }                   from '@/lib/api'
 import type { TemplateSummaryResponse } from '@trainer-app/shared'
@@ -25,6 +26,7 @@ export default function TemplatesPage(): React.JSX.Element {
   const [search,      setSearch]      = useState('')
   const [builderOpen, setBuilderOpen] = useState(false)
   const [editId,      setEditId]      = useState<string | null>(null)
+  const [detailId,    setDetailId]    = useState<string | null>(null)
   const [deleteId,    setDeleteId]    = useState<string | null>(null)
   const seededRef   = useRef(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -59,7 +61,7 @@ export default function TemplatesPage(): React.JSX.Element {
   const handleDelete = (): void => {
     if (!deleteId) return
     deleteTemplate.mutate(deleteId, {
-      onSuccess: () => { setDeleteId(null); toast.success('Template deleted') },
+      onSuccess: () => { setDeleteId(null); setDetailId(null); toast.success('Template deleted') },
       onError:   () => toast.error('Failed to delete template'),
     })
   }
@@ -178,15 +180,26 @@ export default function TemplatesPage(): React.JSX.Element {
               <TemplateCard
                 key={t.id}
                 template={t}
-                isOnline={isOnline}
-                onEdit={() => { setEditId(t.id); setBuilderOpen(true) }}
-                onFork={() => handleFork(t.id, t.name)}
-                onDelete={() => setDeleteId(t.id)}
+                onOpen={() => setDetailId(t.id)}
               />
             ))}
           </div>
         )}
       </div>
+
+      <TemplateDetailSheet
+        open={!!detailId}
+        templateId={detailId}
+        isOnline={isOnline}
+        onEdit={() => { if (detailId) { setEditId(detailId); setBuilderOpen(true) } }}
+        onFork={() => {
+          const t = (templates ?? []).find(x => x.id === detailId)
+          if (t) handleFork(t.id, t.name)
+          setDetailId(null)
+        }}
+        onDelete={() => { if (detailId) setDeleteId(detailId) }}
+        onClose={() => setDetailId(null)}
+      />
 
       <TemplateBuilderSheet
         open={builderOpen}
@@ -209,19 +222,24 @@ export default function TemplatesPage(): React.JSX.Element {
 
 // ── Template card ─────────────────────────────────────────────────────────────
 
-function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
+function TemplateCard({ template, onOpen }: {
   template: TemplateSummaryResponse
-  isOnline: boolean
-  onEdit:   () => void
-  onFork:   () => void
-  onDelete: () => void
+  onOpen:   () => void
 }): React.JSX.Element {
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  const offlineMenuItemClass = 'opacity-40 cursor-not-allowed'
-
   return (
-    <div className="bg-brand-secondary rounded-2xl border border-surface-border p-4">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen() } }}
+      className={cn(
+        'bg-brand-secondary rounded-2xl border border-surface-border p-4 cursor-pointer',
+        'hover:border-command-blue/30 focus:outline-none focus-visible:border-command-blue/50',
+        'transition-colors',
+        interactions.button.base,
+        interactions.button.press,
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className="font-medium text-ink truncate">{template.name}</p>
@@ -229,58 +247,9 @@ function TemplateCard({ template, isOnline, onEdit, onFork, onDelete }: {
             <p className="text-xs text-ink-subtle mt-0.5 line-clamp-2">{template.description}</p>
           )}
         </div>
-        <div className="relative shrink-0">
-          <button
-            type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-1.5 rounded-lg text-ink-faint hover:text-ink hover:bg-surface-border/30 transition-colors"
-          >
-            <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-              <circle cx="8" cy="3" r="1.2" />
-              <circle cx="8" cy="8" r="1.2" />
-              <circle cx="8" cy="13" r="1.2" />
-            </svg>
-          </button>
-          {menuOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 top-8 z-50 w-44 bg-brand-primary border border-surface-border rounded-xl shadow-lg overflow-hidden">
-                <button
-                  type="button"
-                  disabled={!isOnline}
-                  onClick={() => { if (isOnline) { onEdit(); setMenuOpen(false) } }}
-                  title={isOnline ? undefined : 'Connect to edit'}
-                  className={cn('w-full text-left px-4 py-3 text-sm text-ink hover:bg-surface-border/30 transition-colors', !isOnline && offlineMenuItemClass)}
-                >
-                  Edit template
-                </button>
-                <button
-                  type="button"
-                  disabled={!isOnline}
-                  onClick={() => { if (isOnline) { onFork(); setMenuOpen(false) } }}
-                  title={isOnline ? undefined : 'Connect to duplicate'}
-                  className={cn('w-full text-left px-4 py-3 text-sm text-ink hover:bg-surface-border/30 transition-colors border-t border-surface-border', !isOnline && offlineMenuItemClass)}
-                >
-                  Duplicate
-                </button>
-                <button
-                  type="button"
-                  disabled={!isOnline}
-                  onClick={() => { if (isOnline) { onDelete(); setMenuOpen(false) } }}
-                  title={isOnline ? undefined : 'Connect to delete'}
-                  className={cn('w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-surface-border/30 transition-colors border-t border-surface-border', !isOnline && offlineMenuItemClass)}
-                >
-                  Delete
-                </button>
-                {!isOnline && (
-                  <p className="px-4 py-2 text-[10px] text-ink-faint border-t border-surface-border">
-                    Connect to make changes
-                  </p>
-                )}
-              </div>
-            </>
-          )}
-        </div>
+        <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 text-ink-faint shrink-0 mt-0.5" aria-hidden>
+          <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </div>
       <p className="text-[10px] text-ink-faint mt-3">
         Created {new Date(template.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}

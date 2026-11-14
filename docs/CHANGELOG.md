@@ -7,6 +7,21 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Three UX fixes — add-exercise default, tappable template cards, plan-future link (2026-11-13)
+- **Add Exercise defaults to "All types"** (was the block's workout type, e.g. Resistance). Building a
+  workout on the fly now shows the whole library first; the block-type chip narrows on demand.
+  `AddExerciseSheet` — `showAllTypes` default `false → true`.
+- **Templates are tap-to-open.** Tapping anywhere on a template card now opens a **read-only**
+  `TemplateDetailSheet` showing the template's exercises, targets, and circuits (grouped). Edit,
+  Duplicate, and Delete moved into that view as icons; the per-card ⋯ menu is gone. The card is a
+  proper keyboard-accessible control (`role="button"` + Enter/Space). Viewing works offline (read);
+  an uncached template offline shows a "connect to view" message instead of a hung spinner. New file:
+  `components/templates/TemplateDetailSheet.tsx`; `TemplatesPage` card refactor.
+- **"Or plan a future session →" now works.** It was calling `openSessionPlan()` (which pushes the
+  plan panel) immediately followed by `onClose()` → `closePanel()` → `navigate(-1)`, which popped the
+  just-pushed entry. Removed the redundant `onClose()` — pushing the plan panel already closes the
+  launcher. `SessionLauncherSheet`.
+
 ### Account hardening — consent capture, `COOKIE_SECRET` fail-fast, email + queue go-live (2026-11-13)
 - **Env go-live (`#23` D2):** `UPSTASH_REDIS_URL` + the Resend trio (`RESEND_API_KEY` /
   `REPORT_FROM_EMAIL` / `APP_URL`) set on Railway with the domain verified. BullMQ workers +

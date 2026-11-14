@@ -198,10 +198,7 @@ export function SessionLauncherSheet({
         {!sessionActive && selectedClientId && (
           <button
             type="button"
-            onClick={() => {
-              openSessionPlan(undefined, selectedClientId)
-              onClose()
-            }}
+            onClick={() => openSessionPlan(undefined, selectedClientId)}
             className="w-full text-center text-sm text-ink-subtle hover:text-ink py-2 transition-colors"
           >
             Or plan a future session →

@@ -53,6 +53,10 @@ In an exercise picker, swipe a row to the right to drop it straight into the blo
 Blocks and exercises in the plan/template builder have a grip handle. Press and drag it to reorder; the item lifts as you pick it up and settles into place when you drop it. The new order saves on its own.
 *Where:* session plan, template builder · *Under the hood:* `SortableWorkoutList`, `@dnd-kit`
 
+**Tap a template card → open it (read-only).**
+On the Templates tab, tapping anywhere on a template card opens a read-only view of its contents — the exercises, their targets, and any circuits. Edit, Duplicate, and Delete live as icons inside that view, so the card itself is just "look." (Replaces the old ⋯ menu, which was the only tappable spot.)
+*Where:* Templates tab · *Under the hood:* `TemplateDetailSheet`, `TemplateCard`
+
 ### Charts
 
 **Tap the body figure → open the body breakdown; tap a muscle → its exercises.**

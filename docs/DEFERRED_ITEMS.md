@@ -93,6 +93,24 @@ that work it (Phase 1 + 2). Deferred follow-ons:
   Still open: *weight range over time per exercise* (mostly built — exercise-progress endpoint +
   `Sparkline` power the exercise detail; could surface on My Training).
 
+## Analytics & Metrics
+
+### Analytics consumers — ON HOLD until beta traffic (2026-11-14, task #31)
+Definitions + runnable SQL for the three headline metrics are **done** (`docs/analytics-metrics.md`;
+`docs/sql/analytics/{north-star-weekly,activation-funnel,retention-cohorts-weekly}.sql` — read-only,
+off the operational DB). The *consumers* are intentionally deferred.
+- **When to revisit:** once there is **real beta traffic** — concretely, **≥1 non-test account has
+  signed up and logged a completed session**, so the queries return non-degenerate rows worth tuning.
+- **Then, in order:** (1) fill the `excluded` test-email list atop each `.sql`; (2) run the three
+  queries and sanity-check shapes against the definitions; (3) build the deferred consumers:
+  - **Admin metrics endpoint** — `GET /api/v1/admin/metrics` behind `requireRole('admin')` → JSON
+    (new route layer; needs go-ahead).
+  - **Visual dashboard** (optional) — Artifact/page rendering NSM trend / funnel / cohort heatmap.
+  - **Landing-visit stitch** — join the marketing-site visit count onto the top of the funnel after
+    #30 split-hosting makes the signup boundary a clean redirect.
+- **Why hold:** building a consumer before the source has real data to shape it is premature; the SQL
+  is enough until traffic exists.
+
 ## PWA — Phase 1 Scaffold Audit Findings
 
 Items surfaced during the Phase 1 Lighthouse audit (2026-06-19). All are non-blocking for Phase 1 sign-off but should be addressed in the phases noted.

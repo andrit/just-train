@@ -148,11 +148,23 @@ psql "<DATABASE_PUBLIC_URL>" -f docs/sql/analytics/north-star-weekly.sql
 Before trusting the output, fill the `excluded` email list at the top of each file with the test
 accounts, or the numbers are dominated by test data.
 
-## Deferred — the next layer (not built yet)
+## Deferred — the next layer (ON HOLD until beta traffic)
+
+> **⏸ Revisit trigger:** do nothing more here until there is **real beta traffic** — concretely, once
+> **≥1 non-test account has signed up and logged a completed session**, so the queries above return
+> non-degenerate rows worth tuning against. Building the consumer (endpoint/dashboard) before the source
+> has real data to shape it is premature. Decision 2026-11-14: hold the items below; the definitions +
+> SQL are enough until then.
+>
+> **When that trigger fires, in order:**
+> 1. Fill the `excluded` test-email list at the top of each `docs/sql/analytics/*.sql`.
+> 2. Run all three queries; sanity-check the shapes against the definitions above.
+> 3. *Then* build the deferred items below.
 
 - **Admin metrics endpoint.** `GET /api/v1/admin/metrics` behind `requireRole('admin')` (owner is admin),
-  running these queries and returning JSON, to back a live dashboard instead of hand-run SQL. Deferred on
-  purpose until the definitions have been run against real-ish data and settled — build the consumer after
-  the source is proven. See PROJECT_STATE deferred table.
+  running these queries and returning JSON, to back a live dashboard instead of hand-run SQL. (New route
+  layer — needs a go-ahead.)
+- **Visual dashboard** (optional). An Artifact or small page rendering NSM trend / funnel bars / cohort
+  heatmap from the query output, if the ASCII shapes above want to become something you look at.
 - **Landing-visit stitch.** Wire the marketing-site visit count into the top of the funnel once #30
   (split hosting: `app.just-train.fit` + apex landing) lands and the signup boundary is a clean redirect.

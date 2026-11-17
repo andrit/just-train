@@ -547,8 +547,8 @@ const OTHER_TRAINER = '99999999-9999-9999-9999-999999999999'
 function seOwnedBy(trainerId: string, overrides: Partial<ReturnType<typeof makeSessionExercise>> = {}) {
   return { ...makeSessionExercise(overrides), session: { id: TEST_SESSION_ID, trainerId, clientId: TEST_CLIENT_ID } }
 }
-function setOwnedBy(trainerId: string) {
-  return { ...makeSet(), sessionExercise: { ...makeSessionExercise(), session: { trainerId } } }
+function setOwnedBy(trainerId: string, status: string = 'in_progress') {
+  return { ...makeSet(), sessionExercise: { ...makeSessionExercise(), session: { trainerId, status } } }
 }
 
 describe('Ownership — session tree', () => {
@@ -627,6 +627,25 @@ describe('Ownership — session tree', () => {
     const res = await app.inject({ method: 'PATCH', url: `/api/v1/sets/${makeSet().id}`, headers: authHeader(), payload: { reps: 12 } })
     expect(res.statusCode).toBe(200)
     expect(db.update).toHaveBeenCalledTimes(1)
+  })
+
+  // Sets are editable only while the session is live — correcting a fat-fingered
+  // weight/reps is an in-session affordance. Once the session is ended the record
+  // is frozen (it has fed volume, PRs and the report), so edit/delete must 409.
+  it('PATCH /sets/:id → 409 when the session is no longer active, no update', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sets.findFirst).mockResolvedValueOnce(setOwnedBy(TEST_TRAINER_ID, 'completed') as never)
+    const res = await app.inject({ method: 'PATCH', url: `/api/v1/sets/${makeSet().id}`, headers: authHeader(), payload: { reps: 12 } })
+    expect(res.statusCode).toBe(409)
+    expect(db.update).not.toHaveBeenCalled()
+  })
+
+  it('DELETE /sets/:id → 409 when the session is no longer active, no delete', async () => {
+    const { db } = await import('../../db')
+    vi.mocked(db.query.sets.findFirst).mockResolvedValueOnce(setOwnedBy(TEST_TRAINER_ID, 'completed') as never)
+    const res = await app.inject({ method: 'DELETE', url: `/api/v1/sets/${makeSet().id}`, headers: authHeader() })
+    expect(res.statusCode).toBe(409)
+    expect(db.delete).not.toHaveBeenCalled()
   })
 })
 

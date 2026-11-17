@@ -906,6 +906,7 @@ Which fields you populate depends on the workout type:
       response: {
         200: SetResponseSchema,
         404: ErrorResponseSchema,
+        409: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
@@ -914,8 +915,15 @@ Which fields you populate depends on the workout type:
     const body = request.body as Partial<Omit<z.infer<typeof CreateSetSchema>, 'sessionExerciseId'>>
 
     try {
-      if (!(await ownedSet(id, request.trainer.trainerId))) {
+      const owned = await ownedSet(id, request.trainer.trainerId)
+      if (!owned) {
         return reply.status(404).send({ error: 'Set not found' })
+      }
+      // Sets become read-only once the session is ended. Correcting a mistyped
+      // weight/reps is a live-session affordance only; a completed session's
+      // record is immutable (it has already fed volume, PRs and the report).
+      if (owned.sessionExercise.session.status !== 'in_progress') {
+        return reply.status(409).send({ error: 'Sets can only be edited while the session is active' })
       }
 
       const [updated] = await db
@@ -951,6 +959,7 @@ Which fields you populate depends on the workout type:
       response: {
         204: z.null().describe('Set deleted'),
         404: ErrorResponseSchema,
+        409: ErrorResponseSchema,
         500: ErrorResponseSchema,
       },
     },
@@ -958,8 +967,13 @@ Which fields you populate depends on the workout type:
     const { id } = request.params as z.infer<typeof UuidParamSchema>
 
     try {
-      if (!(await ownedSet(id, request.trainer.trainerId))) {
+      const owned = await ownedSet(id, request.trainer.trainerId)
+      if (!owned) {
         return reply.status(404).send({ error: 'Set not found' })
+      }
+      // Same rule as edit: a set can only be removed while the session is active.
+      if (owned.sessionExercise.session.status !== 'in_progress') {
+        return reply.status(409).send({ error: 'Sets can only be deleted while the session is active' })
       }
 
       const [deleted] = await db

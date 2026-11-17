@@ -7,6 +7,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Edit a logged set in a live session (2026-11-17)
+- **Correct a mistyped set without deleting it.** A logged set in the live spine now shows a pencil;
+  tapping it turns its recorded values into inputs (weight + reps for resistance; time / distance /
+  level / reps for other types — one field per metric the set actually holds). Save writes the
+  correction; record chips (`isLoadRecord` / `isVolumeRecord`) re-settle on the next read since they're
+  derived server-side. Fixes the reported fat-finger case (an extra zero, `135→155`) where the wrong
+  value became the permanent record. `ExerciseBlock` — new `SetEditRow`; `useEditSet` wired in for the
+  first time and widened to carry the non-resistance metrics; offline-aware like `useLogSet`.
+- **Editing is a live-session right only — enforced server-side.** `PATCH /sets/:id` **and**
+  `DELETE /sets/:id` now reject with **409** unless the parent session is `in_progress`. Once a session
+  is ended its sets are frozen (they have already fed volume, PRs and reports). `ownedSet` now carries
+  the session `status`; ordering keeps the ownership `404` ahead of the `409`, so nothing leaks.
+- **Scope:** circuit sets and asymmetric L/R split sets are left read-only for this pass. Delete has no
+  UI (the request was edit); the endpoint gate is hardened regardless. Tests: `PATCH`/`DELETE` → 409
+  when the session is completed, no write.
+
 ### Analytics foundations — North Star / funnel / retention definitions + SQL (2026-11-14)
 - Defined the three headline product metrics and shipped runnable queries, computed from the
   **operational DB** (durable) rather than the fire-and-forget `client_events` telemetry (which stays for

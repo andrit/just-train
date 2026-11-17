@@ -18,7 +18,7 @@
 import { useState, useEffect }    from 'react'
 import { cn }                      from '@/lib/cn'
 import { interactions }            from '@/lib/interactions'
-import { useLogSet, useDeleteSessionExercise, useUpdateSessionExercise } from '@/lib/queries/sessions'
+import { useLogSet, useEditSet, useDeleteSessionExercise, useUpdateSessionExercise } from '@/lib/queries/sessions'
 import { useExerciseHistory }      from '@/lib/queries/clients'
 import { pickPrefillSet, isPriorInSession } from '@/lib/setPrefill'
 import { useSessionExerciseMedia, useUploadSessionExerciseMedia } from '@/lib/queries/session-exercise-media'
@@ -438,12 +438,33 @@ function ActiveSetHero({ setNumber, sessionExercise, workoutType, weightUnit, la
 
 // ── Past set row ──────────────────────────────────────────────────────────────
 
-function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOverride }: {
+// Which numeric metrics a logged set exposes for correction. We edit only the
+// fields the set already records (fix a fat-fingered value) rather than letting
+// the trainer invent a metric that wasn't captured. Asymmetric L/R splits are
+// excluded for v1 — they carry repsLeft/repsRight, edited elsewhere later.
+type SetMetric = 'weight' | 'reps' | 'durationSeconds' | 'distance' | 'intensityLevel'
+
+function editableMetrics(set: SetResponse): SetMetric[] {
+  const all: SetMetric[] = ['weight', 'reps', 'durationSeconds', 'distance', 'intensityLevel']
+  return all.filter((m) => set[m] != null)
+}
+
+const METRIC_LABEL: Record<SetMetric, string> = {
+  weight:         'Weight',
+  reps:           'Reps',
+  durationSeconds: 'Time (s)',
+  distance:       'Dist',
+  intensityLevel: 'Level',
+}
+
+function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOverride, onEdit, isSaving }: {
   set:                 SetResponse
   setNumber:           number
   sessionExercise:     SessionExerciseResponse
   workoutType:         string
   targetRepsOverride:  number | null
+  onEdit:              (patch: Partial<Record<SetMetric, number>>) => void
+  isSaving:            boolean
 }): React.JSX.Element {
   const effectiveTargetReps = targetRepsOverride ?? sessionExercise.targetReps
   const repsOk   = outcome(set.reps,     effectiveTargetReps)
@@ -458,6 +479,29 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
     if (relevant.some(o => o === 'hit'))       return 'hit'
     return 'none'
   })()
+
+  // ── Edit affordance ─────────────────────────────────────────────────────────
+  // A logged set stays editable while the session is live. Correcting an obvious
+  // mistype (an extra zero, 135→155) should not require deleting and re-logging.
+  // Split (L/R) sets are left read-only for now.
+  const metrics  = editableMetrics(set)
+  const isSplit  = set.repsLeft != null || set.repsRight != null
+  const canEdit  = !isSplit && metrics.length > 0
+
+  const [editing, setEditing] = useState(false)
+
+  if (editing) {
+    return (
+      <SetEditRow
+        set={set}
+        setNumber={setNumber}
+        metrics={metrics}
+        isSaving={isSaving}
+        onCancel={() => setEditing(false)}
+        onSave={(patch) => { onEdit(patch); setEditing(false) }}
+      />
+    )
+  }
 
   return (
     <div className="flex items-center gap-3 py-2">
@@ -513,6 +557,102 @@ function PastSetRow({ set, setNumber, sessionExercise, workoutType, targetRepsOv
           )}
         </span>
       )}
+
+      {/* Correct a mistyped value — live session only */}
+      {canEdit && (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          aria-label={`Edit set ${setNumber}`}
+          className="shrink-0 p-1.5 -mr-1 text-ink-faint hover:text-command-blue transition-colors"
+        >
+          <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+            <path d="M11 2.5l2.5 2.5L6 12.5 3 13l.5-3L11 2.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+          </svg>
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── Inline set editor ──────────────────────────────────────────────────────────
+// Renders a number input for each metric the set records. Save sends only the
+// metrics that actually changed; an emptied field is skipped (never nulled).
+
+function SetEditRow({ set, setNumber, metrics, isSaving, onCancel, onSave }: {
+  set:        SetResponse
+  setNumber:  number
+  metrics:    SetMetric[]
+  isSaving:   boolean
+  onCancel:   () => void
+  onSave:     (patch: Partial<Record<SetMetric, number>>) => void
+}): React.JSX.Element {
+  const [values, setValues] = useState<Record<SetMetric, string>>(() => {
+    const seed = {} as Record<SetMetric, string>
+    for (const m of metrics) seed[m] = String(set[m] ?? '')
+    return seed
+  })
+
+  const save = (): void => {
+    const patch: Partial<Record<SetMetric, number>> = {}
+    for (const m of metrics) {
+      const raw = values[m].trim()
+      if (!raw) continue                                  // emptied → leave unchanged
+      const num = m === 'weight' || m === 'distance' ? parseFloat(raw) : parseInt(raw, 10)
+      if (!Number.isFinite(num) || num < 0) continue
+      if (num !== set[m]) patch[m] = num                  // only send real changes
+    }
+    if (Object.keys(patch).length === 0) { onCancel(); return }
+    onSave(patch)
+  }
+
+  return (
+    <div className="flex items-start gap-3 py-2">
+      <div className="w-5 shrink-0" />
+      <span className="text-xs text-ink-faint font-mono w-5 shrink-0 pt-2">{setNumber}</span>
+
+      <div className="flex-1 flex flex-wrap items-end gap-2">
+        {metrics.map((m) => (
+          <label key={m} className="flex flex-col gap-0.5">
+            <span className="text-[9px] uppercase tracking-wider text-ink-subtle">{METRIC_LABEL[m]}</span>
+            <input
+              type="number"
+              inputMode={m === 'weight' || m === 'distance' ? 'decimal' : 'numeric'}
+              value={values[m]}
+              onChange={(e) => setValues((v) => ({ ...v, [m]: e.target.value }))}
+              onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') onCancel() }}
+              className={cn(
+                'w-16 text-center font-mono text-sm py-1.5 rounded-lg',
+                'bg-brand-primary border border-surface-border text-ink',
+                'focus:outline-none focus:border-command-blue',
+              )}
+            />
+          </label>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-1 shrink-0 pt-4">
+        <button
+          type="button"
+          onClick={save}
+          disabled={isSaving}
+          aria-label="Save set"
+          className={cn(
+            'px-2.5 py-1.5 rounded-lg text-xs font-medium bg-command-blue text-white',
+            'transition-opacity', isSaving && 'opacity-50',
+          )}
+        >
+          {isSaving ? '…' : 'Save'}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label="Cancel edit"
+          className="px-2 py-1.5 rounded-lg text-xs text-ink-faint hover:text-ink transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   )
 }
@@ -564,6 +704,7 @@ export function ExerciseBlock({
   sessionExercise, sessionId, workoutType, weightUnit, clientId, restDurationSeconds = 90, onSetLogged,
 }: ExerciseBlockProps): React.JSX.Element {
   const logSet         = useLogSet()
+  const editSet        = useEditSet()
   const deleteExercise = useDeleteSessionExercise()
   const updateExercise = useUpdateSessionExercise()
   const uploadMedia    = useUploadSessionExerciseMedia()
@@ -646,6 +787,14 @@ export function ExerciseBlock({
     )
   }
 
+  // Correct a logged set's recorded values (mistyped weight/reps, etc).
+  // Allowed only while the session is live — the backend 409s a completed
+  // session's set, so this affordance is a live-surface convenience over an
+  // enforced rule.
+  const handleEdit = (setId: string) => (patch: Partial<Record<SetMetric, number>>): void => {
+    editSet.mutate({ setId, sessionId, ...patch })
+  }
+
   return (
     <div className="relative">
       {/* Exercise header */}
@@ -724,6 +873,8 @@ export function ExerciseBlock({
             sessionExercise={sessionExercise}
             workoutType={workoutType}
             targetRepsOverride={getSetTargetReps(i)}
+            onEdit={handleEdit(set.id)}
+            isSaving={editSet.isPending}
           />
         ))}
 

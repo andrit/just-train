@@ -258,19 +258,25 @@ export function useLogSet(): UseMutationResult<SetResponse, Error, LogSetInput> 
 // ── Edit a set ────────────────────────────────────────────────────────────────
 
 export interface EditSetInput {
-  setId:     string
-  sessionId: string
-  reps?:     number
-  weight?:   number
-  rpe?:      number
-  notes?:    string
+  setId:            string
+  sessionId:        string
+  reps?:            number
+  weight?:          number
+  durationSeconds?: number
+  distance?:        number
+  intensityLevel?:  number
+  rpe?:             number
+  notes?:           string
 }
 
 export function useEditSet(): UseMutationResult<SetResponse, Error, EditSetInput> {
   const qc = useQueryClient()
   return useMutation({
+    // Offline-aware like useLogSet: a correction made mid-session survives a
+    // network blip and replays in enqueue order. Record chips (isLoadRecord /
+    // isVolumeRecord) are derived on read, so the session refetch re-derives them.
     mutationFn: ({ setId, sessionId: _sid, ...body }) =>
-      apiClient.patch<SetResponse>(`/sets/${setId}`, body),
+      offlineAwareApi.patch<SetResponse>(`/sets/${setId}`, body, `Edit set`),
     onSuccess: (_, { sessionId }) => {
       qc.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
     },

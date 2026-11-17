@@ -49,7 +49,7 @@ export async function ownedSessionExercise(id: string, trainerId: string) {
 export async function ownedSet(id: string, trainerId: string) {
   const row = await db.query.sets.findFirst({
     where: eq(sets.id, id),
-    with:  { sessionExercise: { with: { session: { columns: { trainerId: true } } } } },
+    with:  { sessionExercise: { with: { session: { columns: { trainerId: true, status: true } } } } },
   })
   return row && row.sessionExercise.session.trainerId === trainerId ? row : null
 }

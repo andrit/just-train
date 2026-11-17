@@ -43,6 +43,10 @@ For exercises trained one leg/arm at a time (Bulgarian split squat, single-arm r
 A circuit (an interwoven group — "Add Circuit" beside "Add Exercise") runs *round-major*: you do one set of each exercise, then loop. Logging the current set advances you to the **next exercise in the box**, not the next set of the same one; a progress grid (exercise × round) shows where you are. After the last exercise of a round, **rest fires once for the whole round** (not after each set), then round two begins. Bail whenever — unlogged sets just stay empty.
 *Where:* live session, inside a circuit · *Under the hood:* `CircuitBlock`
 
+**Fat-fingered a set? Tap the pencil → fix it in place.**
+A set you've already logged shows a small **pencil** on its row. Tap it and the recorded values (weight, reps — or time / distance / level, whatever that set holds) become little inputs; change the wrong one, tap **Save**, and the record is corrected — personal-best markers re-settle automatically. This only works **while the session is live**: once you end the session its sets are frozen, since they've already fed your volume, PRs and reports. (Left/right split sets aren't editable yet.)
+*Where:* live session, any logged set · *Under the hood:* `ExerciseBlock` (`SetEditRow`), gated server-side to `in_progress` sessions
+
 ### Lists & builders
 
 **Swipe an exercise right → add it.**

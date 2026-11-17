@@ -7,6 +7,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased] — Weight Ramp + Library Additions
 
+### Fix — "All types" in Add Exercise now shows the whole library (2026-11-17)
+- The Add-Exercise search list capped the no-search view at the alphabetically-first **30** exercises
+  (`exercises.name` order). With the default flipped to "All types" (2026-11-13), that truncation hid
+  most of the catalogue — the later-alphabet resistance staples (Squat, Deadlift, RDL, Overhead Press…)
+  looked like they'd been excluded. Removed the cap on the empty-search branch, so both "All types" and
+  the single-type view list everything on open; search still narrows. `AddExerciseSheet` — `slice(0,30)`
+  → full list (ponytail: virtualise if the library grows past a few hundred).
+
 ### Edit a logged set in a live session (2026-11-17)
 - **Correct a mistyped set without deleting it.** A logged set in the live spine now shows a pencil;
   tapping it turns its recorded values into inputs (weight + reps for resistance; time / distance /

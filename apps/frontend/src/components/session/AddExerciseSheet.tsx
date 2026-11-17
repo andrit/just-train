@@ -456,7 +456,13 @@ export function AddExerciseSheet({
     const typeFiltered = showAllTypes
       ? exercises
       : exercises.filter(e => e.workoutType === workoutType)
-    if (!q) return typeFiltered.slice(0, 30)
+    // Show the whole (name-sorted) set on open — an earlier slice(0,30) silently
+    // truncated the catalogue, so "All types" hid most of the library (its
+    // alphabetically-later resistance staples looked missing). The list is a
+    // scrollable sheet and the search box narrows it.
+    // ponytail: renders the full library (~110–140 rows, collapsed). ceiling: a
+    // few hundred. upgrade: virtualise the row list if the catalogue grows.
+    if (!q) return typeFiltered
     return typeFiltered.filter(e =>
       e.name.toLowerCase().includes(q) ||
       (e.bodyPart?.name ?? '').toLowerCase().includes(q)

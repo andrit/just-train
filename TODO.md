@@ -1,6 +1,6 @@
 # TODO — Trainer (Just Train) · Phase 19 Go Live
 
-_Resume pointer. Updated 2026-11-03. Full handover is in the `self:session-close` memory (read via `session_start`)._
+_Resume pointer. Updated 2026-11-17. Full handover is in the `self:session-close` memory (read via `session_start`)._
 
 ## Load first on resume
 - `session_start` (Mode B — mandatory), then this file.
@@ -9,6 +9,14 @@ _Resume pointer. Updated 2026-11-03. Full handover is in the `self:session-close
 - **Idea inbox:** `discussions/offline-task-idea-inbox/` — designer's out-of-session drop-box; triage
   new files, respond in-file. See its `README.md`.
 - **Business-plan docs are GITIGNORED** at `docs/product-development/business-plan/`.
+
+## ⚠ First on resume — two on-device visual verifies owed (code shipped + CI green)
+From 2026-11-17 (both committed, CI green — glance only, no code pending):
+1. **Edit a logged set:** in a live session, log a set → tap the pencil on its row → correct the weight →
+   confirm it saves and the PR (Load/Vol) chip re-settles; then **end** the session and confirm the
+   pencil is gone (edit frozen). Server already 409s a completed session's set.
+2. **Add Exercise "All types":** open Add Exercise → "All types" → confirm late-alphabet resistance
+   staples (Squat, Deadlift, RDL, Overhead Press) now appear (the 30-item cap is gone).
 
 ## ▶ NEXT — three near-term priorities (the emphasis)
 1. **FINISH THE PRODUCT STORIES (#27).** Writer's **final-draft pass** across the 4 committed reports
@@ -24,17 +32,27 @@ _Resume pointer. Updated 2026-11-03. Full handover is in the `self:session-close
    the non-composable gap is modality-aware PRs (plyo = best jump/distance). **Standing offer:** run
    the dataviz validator to test whether a CVD-safe 6th type-hue even exists before the type-vs-sub-mode call.
 
-## Done this session (2026-11-02/03) — all committed
-- **4 product-design reports** via the oracle rig → `docs/design-reports/` (`e9a14e8`). Each: frozen
-  compost dump + machinima reaction + gardening-vet Afterward (`story/compost-heap/`) + a garden cluster.
-- **Body-map heat → ABSOLUTE 5-tier** (was relative 3-tier): shipped `1e2e0bf`, docs `ecf961a`.
-- **Calisthenics recolor:** tested gold, **KEPT fuchsia** (gold == reserved reward-amber). No code change.
-- **Rig mounted + gardens reorganized to Victory Gardens**, backlog, CLAUDE.md mount, TODO (`85c0989`).
+## Done this session (2026-11-17) — all committed, CI green
+- **Edit a logged set during a live session** (`bd77ec7`). Pencil on each logged spine row → inline
+  `SetEditRow` over the metrics the set records (resistance weight+reps; other types time/distance/
+  level/reps). `useEditSet` wired in for the first time + widened + offline-aware. **Freeze enforced
+  server-side:** `PATCH`/`DELETE /sets/:id` 409 unless session `in_progress` (`ownedSet` now carries
+  status; 404-before-409 so nothing leaks). PR chips re-derive on read. Out of scope: circuit sets,
+  L/R split sets, delete-UI. Tests + release note `docs/release-notes/edit-logged-set.md`.
+- **Add Exercise "All types" now shows the whole library** (`196e86c`). The no-search view capped at
+  the alphabetically-first 30 (`exercises.name` order) → hid late-alphabet resistance staples. Dropped
+  `slice(0,30)` on the empty-search branch (ponytail: virtualise past a few hundred rows).
+
+## Prior session (2026-11-02/03) — committed (context, not pending)
+- 4 product-design reports via the oracle rig → `docs/design-reports/` (`e9a14e8`); body-map heat →
+  absolute 5-tier (`1e2e0bf`); calisthenics kept fuchsia; rig mounted + Victory Gardens (`85c0989`).
 
 ## Later — open but NOT the current emphasis
 - **#1 type-aware `ExerciseForm`** (library thread, last of 3→2→1): fields by workout type + BW
   max-reps catch. `discussions/offline-task-idea-inbox/custom-exercise-improvements.md`.
-- **edit-logged-set** (`.../edit-logged-set.md`): no edit/delete path once a set is submitted.
+- **edit-logged-set** — ✅ BUILT 2026-11-17 (see Done above). Remaining for a later pass: delete-set
+  UI (endpoint already gated), circuit-set + L/R-split editing, and an optional **optimistic offline
+  update** so an edited value shows immediately while offline (today it shows the old value until sync).
 - **#23 account-audit** (`docs/paid-user-account-audit.md`): ✅ D1 `COOKIE_SECRET` guard, D2 Resend/Redis
   email+queue go-live, D3 consent capture — all done 2026-11-13, **committed + pushed, CI + verify green**.
   Prod consent columns applied + backfill COMMITted (1 post-terms account stamped) + drizzle snapshot in

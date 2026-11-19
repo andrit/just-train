@@ -1,6 +1,6 @@
 # TODO — Trainer (Just Train) · Phase 19 Go Live
 
-_Resume pointer. Updated 2026-11-17. Full handover is in the `self:session-close` memory (read via `session_start`)._
+_Resume pointer. Updated 2026-11-19. Full handover is in the `self:session-close` memory (read via `session_start`)._
 
 ## Load first on resume
 - `session_start` (Mode B — mandatory), then this file.
@@ -19,10 +19,19 @@ From 2026-11-17 (both committed, CI green — glance only, no code pending):
    staples (Squat, Deadlift, RDL, Overhead Press) now appear (the 30-item cap is gone).
 
 ## ▶ NEXT — three near-term priorities (the emphasis)
-1. **FINISH THE PRODUCT STORIES (#27).** Writer's **final-draft pass** across the 4 committed reports
-   in `docs/design-reports/` (`body-map`, `exercise-type-coding`, `circuits`, `set-targets-input`) →
-   fold edits → commit. Per-piece garden: `story/garden/<section>/`; gardening vets:
-   `story/compost-heap/<N>-*-machinima.md` `## Afterward`. This is the main thread to close.
+1. **FINISH THE PRODUCT STORIES (#27) — AWAITING WRITER CONFIRM.** Final-draft pass across the 4
+   committed reports in `docs/design-reports/` (`body-map`, `exercise-type-coding`, `circuits`,
+   `set-targets-input`). **Done 2026-11-19:** factual pass — reports verified clean vs source (all
+   identifiers + heat buckets); two set-level editorial calls surfaced (NOT applied, companion):
+   **(A)** the 4 closers disagree on the through-line's stance (settle vs "offered as a thread, not a
+   law") — rec = settle/drop the hedge; **(B)** unify the 4 `Status:` lines. **Review note + confirm
+   checklist:** `.workbench/designer/current/design-reports-final-pass-note.md`.
+   **On resume:** check the note for the writer's confirm → if yes, apply exactly those edits to the 4
+   files, stage, commit `docs(design-reports): final-pass — unify through-line + status lines`. Then
+   the thread is closed. Per-piece garden: `story/garden/<section>/`; vets:
+   `story/compost-heap/<N>-*-machinima.md` `## Afterward`.
+   **Parked idea (cross-project):** add the 4 reports to the arisme Just Train study at `/work/just-train`
+   — happens in the arisme repo, logged in the arisme memory + the review note.
 2. **DISCUSS CONTENT MARKETING + STRATEGIES (#28).** Unscoped — channels / format / audience / cadence.
    The 4 design reports are natural **feedstock** (their aesthetics/affordance/product-story angles);
    can run companion-first through the rig. Decide direction with the designer.
